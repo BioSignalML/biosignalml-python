@@ -1,0 +1,258 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix tl:   <http://purl.org/NET/c4dm/timeline.owl#> .
+@prefix evt:  <http://purl.org/NET/c4dm/event.owl#> .
+## The following needs updating if we change ontology name...
+@prefix bsml: <http://www.biosignalml.org/ontologies/2011/04/biosignalml#> .
+@prefix map:  <http://www.biosignalml.org/ontologies/2011/02/mapping#> .
+@prefix :     <http://www.biosignalml.org/mappings/> .
+
+#:ExternalMaps
+#  a map:MapModule ;
+#  map:prefix "xxx" ;
+#  dcterms:source  "codefile.py"
+#  .
+
+# map:mapped-by "xxx.function"
+
+#:version
+#  a map:Mapping ;
+#  rdfs:label "version" ;
+#  map:property rdfs:comment ;
+#  map:mapped-by "lambda v: 'Version: %s' % v" ;
+#  map:reverse-map "lambda v: str(v)[9:] if str(v).startswith('Version: ') else v"
+#  .
+
+
+#########################################
+#
+# Generic metadata:
+#
+
+:label
+  a map:Mapping ;
+  rdfs:label "label" ;
+  map:property rdfs:label
+  .
+
+:comment
+  a map:Mapping ;
+  rdfs:comment "comment" ;
+  map:property rdfs:comment
+  .
+
+:description
+  a map:Mapping ;
+  rdfs:label "description" ;
+  map:property dcterms:description
+  .
+
+:source
+  a map:Mapping ;
+  rdfs:label "source" ;
+  map:property dcterms:source
+  .
+
+:dateSubmitted
+  a map:Mapping ;
+  rdfs:label "dateSubmitted" ;
+  map:property dcterms:dateSubmitted ;
+  map:object xsd:dateTime ;
+  map:mapped-by "datetime_to_isoformat" ;
+  map:reverse-map "isoformat_to_datetime"
+  .
+
+
+#########################################
+#
+# Recording specific metadata:
+#
+
+:recording_format
+  a map:Mapping ;
+  map:class bsml:Recording ;
+  rdfs:label "format" ;
+  map:property dcterms:format
+  .
+
+:recording_investigation
+  a map:Mapping ;
+  map:class bsml:Recording ;
+  rdfs:label "investigation" ;
+  map:property dcterms:subject
+  .
+
+:recording_start
+  a map:Mapping ;
+  map:class bsml:Recording ;
+  rdfs:label "starttime" ;
+  map:property dcterms:created ;
+  map:object xsd:dateTime ;
+  map:mapped-by "datetime_to_isoformat" ;
+  map:reverse-map "isoformat_to_datetime"
+  .
+
+:recording_duration
+  a map:Mapping ;
+  map:class bsml:Recording ;
+  rdfs:label "duration" ;
+  map:property dcterms:extent ;
+  map:object xsd:duration ;
+  map:mapped-by "seconds_to_isoduration" ;
+  map:reverse-map "isoduration_to_seconds"
+  .
+
+:recording_digest
+  a map:Mapping ;
+  map:class bsml:Recording ;
+  rdfs:label "digest" ;
+  map:property bsml:digest
+  .
+
+#########################################
+#
+# Timing specific metadata:
+#
+
+:timeline
+  a map:Mapping ;
+  rdfs:label "timeline" ;
+  map:property tl:timeline ;
+  map:mapped-by "get_uri" ;
+  .
+
+:instant_at
+  a map:Mapping ;
+  map:class tl:RelativeInstant ;
+  rdfs:label "at" ;
+  map:property tl:atDuration ;
+  map:object xsd:duration ;
+  map:mapped-by "seconds_to_isoduration" ;
+  map:reverse-map "isoduration_to_seconds"
+  .
+
+:interval_start
+  a map:Mapping ;
+  map:class tl:RelativeInterval ;
+  rdfs:label "start" ;
+  map:property tl:beginsAtDuration ;
+  map:object xsd:duration ;
+  map:mapped-by "seconds_to_isoduration" ;
+  map:reverse-map "isoduration_to_seconds"
+  .
+
+:interval_duration
+  a map:Mapping ;
+  map:class tl:RelativeInterval ;
+  rdfs:label "duration" ;
+  map:property tl:durationXSD ;
+  map:object xsd:duration ;
+  map:mapped-by "seconds_to_isoduration" ;
+  map:reverse-map "isoduration_to_seconds"
+  .
+
+
+#########################################
+#
+# Event specific metadata:
+#
+
+:event_time
+  a map:Mapping ;
+  map:class evt:Event ;
+  rdfs:label "time" ;
+  map:property tl:time
+  .
+
+:event_factor
+  a map:Mapping ;
+  map:class evt:Event ;
+  rdfs:label "factor" ;
+  map:property evt:factor
+  .
+
+
+#########################################
+#
+# Signal specific metadata:
+#
+
+
+:signal_recording
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "recording" ;
+  map:property bsml:recording ;
+  map:mapped-by "get_uri" ;
+  .
+
+:signal_units
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "units" ;
+  map:property bsml:units
+  .
+
+:signal_transducer
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "transducer" ;
+  map:property bsml:transducer
+  .
+
+:signal_filter
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "filter" ;
+  map:property bsml:filter
+  .
+
+:signal_rate
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "rate" ;
+  map:object xsd:double ;
+  map:property bsml:rate
+  .
+
+:signal_clock
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "clock" ;
+  map:property bsml:sampleClock ;
+  map:mapped-by "get_uri" ;
+  .
+
+:signal_minFrequency
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "minFrequency" ;
+  map:object xsd:double ;
+  map:property bsml:minFrequency
+  .
+
+:signal_maxFrequency
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "maxFrequency" ;
+  map:object xsd:double ;
+  map:property bsml:maxFrequency
+  .
+
+:signal_minValue
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "minValue" ;
+  map:object xsd:double ;
+  map:property bsml:minValue
+  .
+
+:signal_maxValue
+  a map:Mapping ;
+  map:class bsml:Signal ;
+  rdfs:label "maxValue" ;
+  map:object xsd:double ;
+  map:property bsml:maxValue
+  .
