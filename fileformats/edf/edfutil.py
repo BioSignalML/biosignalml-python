@@ -20,6 +20,16 @@
 
 
 '''
+######################################################
+#
+#  BioSignalML Management in Python
+#
+#  Copyright (c) 2010  David Brooks
+#
+#  $ID$
+#
+######################################################
+
 
 import math
 import fractions

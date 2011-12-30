@@ -1,3 +1,13 @@
+######################################################
+#
+#  BioSignalML Management in Python
+#
+#  Copyright (c) 2010  David Brooks
+#
+#  $ID$
+#
+######################################################
+
 """
 
 At user API level, request a stream (= several channels) at a certain rate.

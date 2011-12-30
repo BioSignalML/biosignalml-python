@@ -1,3 +1,13 @@
+######################################################
+#
+#  BioSignalML Management in Python
+#
+#  Copyright (c) 2010  David Brooks
+#
+#  $ID$
+#
+######################################################
+
 from pyparsing import *
 from optparse import OptionParser
 
