@@ -29,10 +29,11 @@ An abstract model for BioSignalML.
 import uuid
 import logging
 
-from bsml import BSML
-from metadata import NAMESPACES
-from metadata import RDF, TL, EVT
-from rdfmodel import Uri, Statement, Graph
+from biosignalml.bsml import BSML
+from biosignalml.metadata import NAMESPACES
+from biosignalml.metadata import RDF, TL, EVT
+from biosignalml.rdfmodel import Uri, Statement, Graph
+
 from mapping import bsml_mapping
 from data import TimeSeries
 

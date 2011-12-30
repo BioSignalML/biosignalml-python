@@ -13,8 +13,9 @@ import os
 import logging
 import math
 
-from model.data import TimeSeries
-from fileformats import BSMLSignal
+from biosignalml.model.data import TimeSeries
+from biosignalml.fileformats import BSMLSignal
+
 from edffile import EDF
 
 

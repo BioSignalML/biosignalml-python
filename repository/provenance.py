@@ -11,8 +11,8 @@
 
 from datetime import datetime
 
-from rdfmodel import Graph, Statement
-from metadata import DCTERMS
+from biosignalml.rdfmodel import Graph, Statement
+from biosignalml.metadata import DCTERMS
 
 
 class Provenance(Graph):

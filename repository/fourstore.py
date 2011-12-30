@@ -13,8 +13,9 @@ import httplib2
 import json
 import logging
 
+from biosignalml.bsml import BSML
+
 from triplestore import TripleStore
-from bsml import BSML
 
 
 class FourStore(TripleStore):

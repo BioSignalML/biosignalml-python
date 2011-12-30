@@ -18,7 +18,7 @@ Provide access to BioSignalML model.
 
 # Our own namespace:  (put into metadata package...)
 
-from rdfmodel import Uri, Resource, NS as Namespace
+from biosignalml.rdfmodel import Uri, Resource, NS as Namespace
 
 class BSML(object):
   uri = Uri('http://www.biosignalml.org/ontologies/2011/04/biosignalml#')

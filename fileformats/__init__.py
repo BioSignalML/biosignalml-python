@@ -9,9 +9,12 @@
 ######################################################
 
 
-import model
-from bsml import BSML
-from utils import file_uri
+__docformat__ = 'restructuredtext'
+
+import biosignalml.model as model
+from biosignalml.bsml import BSML
+from biosignalml.model.data import TimeSeries
+from biosignalml.utils import file_uri
 
 
 def not_implemented(instance, method):

@@ -12,7 +12,7 @@
 import math
 import copy
 
-from fileformats.edf import EDF, EDFFile
+from biosignalml.fileformats.edf import EDF, EDFFile
 
 
 class Annotation(object):

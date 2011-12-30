@@ -15,7 +15,7 @@ import importlib  # Python 2.7 onwards...
 from datetime import datetime, timedelta
 from isodate  import isoduration
 
-from rdfmodel import Graph, Node, Uri, Statement
+from biosignalml.rdfmodel import Graph, Node, Uri, Statement
 
 
 BSML_MAP_URI = 'file://' + os.path.dirname(os.path.abspath(__file__)) + '/mapping.ttl'

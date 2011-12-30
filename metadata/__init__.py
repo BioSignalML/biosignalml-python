@@ -10,7 +10,7 @@
 
 
 import sys
-from rdfmodel import NS
+from biosignalml.rdfmodel import NS
 
 """
 # Directly use classes from RDF package

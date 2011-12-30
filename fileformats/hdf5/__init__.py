@@ -51,9 +51,9 @@ from numbers import Number
 import logging
 
 
-import model
-from bsml import BSML
-from fileformats import BSMLRecording, BSMLSignal
+import biosignalml.model as model
+from biosignalml.bsml import BSML
+from biosignalml.fileformats import BSMLRecording, BSMLSignal
 
 VERSION   = "1.0"
 

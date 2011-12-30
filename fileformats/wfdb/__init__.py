@@ -17,12 +17,12 @@ import dateutil.parser
 import logging
 
 
-import model
-from model.data import TimeSeries
-from bsml import BSML
-from utils import file_uri
+import biosignalml.model as model
+from biosignalml.model.data import TimeSeries
+from biosignalml.bsml import BSML
+from biosignalml.utils import file_uri
 
-from fileformats import BSMLRecording, BSMLSignal
+from biosignalml.fileformats import BSMLRecording, BSMLSignal
 
 
 

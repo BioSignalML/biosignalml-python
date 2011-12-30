@@ -15,14 +15,14 @@ import logging
 import RDF as librdf
 import json
 
-from bsml import BSML
-from model import Recording, Signal
-from utils import xmlescape
+from biosignalml.bsml import BSML
+from biosignalml.model import Recording, Signal
+from biosignalml.utils import xmlescape
 
-from model.mapping import bsml_mapping
+from biosignalml.model.mapping import bsml_mapping
 
-from metadata import RDF, DCTERMS
-from rdfmodel import Uri, Node, Resource, BlankNode, Graph, Statement
+from biosignalml.metadata import RDF, DCTERMS
+from biosignalml.rdfmodel import Uri, Node, Resource, BlankNode, Graph, Statement
 
 from fourstore  import FourStore as TripleStore
 from provenance import Provenance
