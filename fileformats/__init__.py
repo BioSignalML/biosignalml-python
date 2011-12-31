@@ -49,8 +49,8 @@ class BSMLRecording(model.Recording):
   #---------------
     pass
 
-  def save_metadata(self, format='turtle', prefixes={}):
-  #-----------------------------------------------------
+  def rdf_metadata(self, format='turtle', prefixes={}):
+  #----------------------------------------------------
     not_implemented(self, 'save_metadata')
 
 
