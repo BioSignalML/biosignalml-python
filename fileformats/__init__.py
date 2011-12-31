@@ -61,11 +61,11 @@ class BSMLSignal(model.Signal):
   #------------------------------------
     super(BSMLSignal, self).__init__(uri, metadata=metadata)
 
-  def read(self, interval=None, segment=None, duration=None, points=0):
-  #--------------------------------------------------------------------
     """
     :return: A :class:TimeSeries containing signal data covering the interval.
     """
+  def read(self, interval=None):
+  #-----------------------------
     not_implemented(self, 'read')
 
   def append(self, timeseries):
