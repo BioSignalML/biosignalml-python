@@ -29,8 +29,8 @@ class BSMLRecording(model.Recording):
 
   """
 
-  def __init__(self, fname=None, uri=None, metadata={}):
-  #-----------------------------------------------------
+  def __init__(self, fname=None, uri=None, mode='r', metadata={}):
+  #---------------------------------------------------------------
     if fname:
       if 'source' not in metadata: metadata['source'] = file_uri(fname)
       if not uri: uri = metadata['source']
@@ -41,9 +41,14 @@ class BSMLRecording(model.Recording):
     if metadata.get('digest'): self.metadata['digest'] = metadata['digest']
 
   @classmethod
-  def open(cls, fname, uri=None):
-  #------------------------------
-    return cls(fname, uri=uri)
+  def open(cls, fname, uri=None, mode='r', **kwds):
+  #------------------------------------------------
+    return cls(fname, uri=uri, mode=mode, **kwds)
+
+  @classmethod
+  def create(cls, fname, uri=None, **kwds):
+  #----------------------------------------
+    return cls.open(fname, uri=uri, mode='w', **kwds)
 
   def close(self):
   #---------------
