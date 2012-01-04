@@ -1,3 +1,6 @@
+'''
+Abstract BioSignalML objects.
+'''
 ######################################################
 #
 #  BioSignalML Management in Python
@@ -21,11 +24,6 @@
 ######################################################
 
 
-"""
-An abstract model for BioSignalML.
-
-"""
-
 import uuid
 import logging
 
@@ -38,28 +36,55 @@ from mapping import bsml_mapping
 from data import TimeSeries
 
 
-class Metadata(object):
-#======================
+class AbstractObject(object):
+#============================
+  '''
+  A general abstract resource with metadata.
+
+  :param uri: URI of the resource,
+  :type uri: str
+  :param metadata: Dictionary containing metadata values for the resource.
+  :type metadata: dict
+
+  Resource properties with names in the :attr:`attributes` list are stored as attributes
+  of the class instance; other elements are stored in the :attr:`metadata` dictionary.
+  '''
 
   metaclass = None
+  '''Class in BioSignalML Ontology as a :class:`biosignalml.rdfmodel.Resource`'''
 
   attributes = [ 'uri', 'description' ]
+  '''List of generic attributes all resources have.'''
+
+  metadata = { }
+  '''Dictionary of property values with names not in :attr:`attributes` list.'''
 
   def __init__(self, uri, metadata={}):
   #----------------------------------
-    self.metadata = { }
-    self.set_metavars(metadata)
+    self.set_attributes(metadata)
     self.uri = Uri(uri)
 
-  def set_metavars(self, meta):
-  #----------------------------
+  def set_attributes(self, values):
+  #--------------------------------
+    '''
+    Set attribute if `key` exists in an :attr:`attributes` list of any class in hierarchy.
+
+    :param meta: Dictionary of `{ key: value }` pairs to set as attributes.
+    :type meta: dict
+    '''
     for cls in self.__class__.__mro__:
       if 'attributes' in cls.__dict__:
         for attr in cls.__dict__['attributes']:
-          setattr(self, attr, meta.get(attr, None))
+          setattr(self, attr, values.get(attr, None))
 
-  def get_metavars(self):
-  #----------------------
+  def get_attributes(self):
+  #------------------------
+    '''
+    Get values of attributes if defined in :attr:`attributes` list of class hierarchy.
+
+    :return: Dictionary of { key: value } pairs of attribute values.
+    :rtype: dict
+    '''
     metadata = { }
     for cls in self.__class__.__mro__:
       if 'attributes' in cls.__dict__:
@@ -68,8 +93,17 @@ class Metadata(object):
           if value is not None: metadata[attr] = value
     return metadata
 
-  def makeuri(self, sibling=False):
-  #--------------------------------
+  def make_uri(self, sibling=False):
+  #---------------------------------
+    '''
+    Generate a unique URI that starts with the resource's URI.
+
+    :param sibling: When set, replace the last component of our URI with unique text.
+      The default is to append unique text to our URI.
+    :type: bool
+    :return: A unique URI.
+    :rtype: str
+    '''
     u = str(self.uri)
     if   u.endswith(('/', '#')): return '%s%s'  % (u, uuid.uuid1())
     elif sibling:
@@ -79,8 +113,12 @@ class Metadata(object):
       else:                      return '%s/%s' % (u.rsplit('/', 1)[0], uuid.uuid1())
     else:                        return '%s/%s' % (u, uuid.uuid1())
 
-  def map_to_graph(self, graph, rdfmap=None):
-  #------------------------------------------
+  def save_to_graph(self, graph, rdfmap=None):
+  #-------------------------------------------
+    '''
+    Add RDF statements about ourselves to a graph.
+
+    '''
     if rdfmap is None: rdfmap = bsml_mapping()
     if (self.metaclass):
       graph.append(Statement(self.uri, RDF.type, self.metaclass))
@@ -92,11 +130,21 @@ class Metadata(object):
     else:                     self.metadata[attr] = value
 
   @classmethod
-  def create_from_repository(cls, uri, repo, rdfmap=None, **kwds):
-  #---------------------------------------------------------------
+  def create_from_store(cls, uri, store, rdfmap=None, **kwds):
+  #-----------------------------------------------------------
+    '''
+    Create a new instance of a resource, setting attributes from RDF triples in a triple store.
+
+    :param uri: The URI for the resource.
+    :param store: A RDF triple store.
+    :type store: :class:`biosignalml.repostory.Repository`
+    :param rdfmap: How to map properties to attributes.
+    :type rdfmap: :class:`biosignalml.model.Mapping`
+    :rtype: :class:`AbstractObject`
+    '''
     if rdfmap is None: rdfmap = bsml_mapping()
     self = cls(uri, **kwds)
-    statements = repo.statements('<%(uri)s> ?p ?o',
+    statements = store.statements('<%(uri)s> ?p ?o',
                                   '<%(uri)s> a  <%(type)s> . <%(uri)s> ?p ?o',
                                   { 'uri': str(uri), 'type': str(self.metaclass) })
     for stmt in statements:
@@ -107,32 +155,49 @@ class Metadata(object):
 
   def set_from_graph(self, attr, graph, rdfmap=None):
   #--------------------------------------------------
+    '''
+    Set an attribute from RDF statement in the form `(uri, attr, value)`.
+
+
+    '''
     if rdfmap is None: rdfmap = bsml_mapping()
     v = rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
 
 
-class Recording(Metadata):
-#=========================
+class Recording(AbstractObject):
+#===============================
+  '''
+  An abstract BioSignalML Recording.
+  '''
 
   metaclass = BSML.Recording
 
   attributes = [ 'label', 'source', 'format', 'comment', 'investigation',
                  'starttime', 'duration',
                ]
+  '''Generic attributes of a Recording.'''
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
     super(Recording, self).__init__(uri, metadata=metadata)
-    self.timeline = RelativeTimeLine(str(uri) + '/timeline')
+    self.timeline = TimeLine(str(uri) + '/timeline')
     self._signals = { }
     self._signal_uris = [ ]
     self._events = { }
 
-  def load_signals_from_repository(self, repo, rdfmap=None):
-  #---------------------------------------------------------
-    for sig in repo.get_subjects(BSML.recording, self.uri):
-      self.add_signal(Signal.create_from_repository(sig, repo, rdfmap))
+  def load_signals_from_store(self, store, rdfmap=None):
+  #-----------------------------------------------------
+    '''
+    Retrieve the recording's signals from a triple store.
+
+    :param store: A RDF triple store.
+    :type store: :class:`biosignalml.repostory.Repository`
+    :param rdfmap: How to map properties to attributes.
+    :type rdfmap: :class:`biosignalml.model.Mapping`
+    '''
+    for sig in store.get_subjects(BSML.recording, self.uri):
+      self.add_signal(Signal.create_from_store(sig, store, rdfmap))
 
   def signals(self):
   #-----------------
@@ -140,12 +205,13 @@ class Recording(Metadata):
 
   def add_signal(self, signal):
   #----------------------------
-    """Add a :class:`Signal` to a Recording.
+    '''
+    Add a :class:`Signal` to a Recording.
 
     :param signal: The signal to add to the recording.
     :type signal: :class:`Signal`
-    :return: The 1-origin index of the signal in the recording.
-    """
+    :return: The 0-origin index of the signal in the recording.
+    '''
     logging.debug("Adding signal: %s", signal.uri)
     if signal.uri in self._signal_uris:
       raise Exception, "Signal '%s' already in recording" % signal.uri
@@ -156,15 +222,17 @@ class Recording(Metadata):
     self._signals[str(signal.uri)] = signal
     return len(self._signal_uris) - 1         # 0-origin index of newly added signal uri
 
-  def get_signal(self, uri=None, index=0):
-  #---------------------------------------
-    """Retrieve a :class:`Signal` from a Recording.
+  def get_signal(self, uri=None, index=None):
+  #-----------------------------------------
+    '''
+    Retrieve a :class:`Signal` from a Recording.
 
     :param uri: The uri of the signal to get.
-    :param index: The 1-origin index of the signal to get.
+    :param index: The 0-origin index of the signal to get.
+    :type index: int
     :return: A signal in the recording.
     :rtype: :class:`Signal`
-    """
+    '''
     if uri is None: uri = self._signal_uris[index]
     return self._signals[str(uri)]
 
@@ -199,8 +267,8 @@ class Recording(Metadata):
   def map_to_graph(self, rdfmap=None):
   #-----------------------------------
     graph = Graph(self.uri)
-    Metadata.map_to_graph(self, graph, rdfmap)
-    Metadata.map_to_graph(self.timeline, graph, rdfmap)
+    AbstractObject.map_to_graph(self, graph, rdfmap)
+    AbstractObject.map_to_graph(self.timeline, graph, rdfmap)
     for s in self.signals(): s.map_to_graph(graph, rdfmap)
     for e in self._events.itervalues(): e.map_to_graph(graph, rdfmap)
     return graph
@@ -214,14 +282,18 @@ class Recording(Metadata):
     return self.map_to_graph().serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
 
 
-class Signal(Metadata):
-#======================
+class Signal(AbstractObject):
+#============================
+  '''
+  An abstract BioSignalML Signal.
+  '''
 
   metaclass = BSML.Signal
 
   attributes = ['label', 'units', 'transducer', 'filter', 'rate',  'clock',
                 'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
                ]
+  '''Generic attributes of a Signal.'''
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
@@ -231,9 +303,9 @@ class Signal(Metadata):
   ### Are the following really methods on a SignalData class (or RawSignal, cf RawRecording)??
   def read(self, interval):
   #------------------------
-    """
+    '''
     :return: A :class:TimeSeries containing signal data covering the interval.
-    """
+    '''
     raise NotImplementedError, 'Signal.read()'
 
   def append(self, timeseries):
@@ -254,64 +326,78 @@ class Signal(Metadata):
 
 
 
-class RelativeTimeLine(Metadata):
-#================================
+class TimeLine(AbstractObject):
+#==============================
+
+  '''
+  An abstract BioSignalML TimeLine.
+  '''
 
   metaclass = TL.RelativeTimeLine
 
-  def __init__(self, uri):
-  #----------------------
-    super(RelativeTimeLine, self).__init__(uri)
+  def __init__(self, uri, metadata={}):
+  #------------------------------------
+    super(TimeLine, self).__init__(uri, metadata=metadata)
 
   def instant(self, when):
   #----------------------
-    return RelativeInstant(self.makeuri(), when, self)
+    return RelativeInstant(self.make_uri(), when, self)
 
   def interval(self, start, duration):
   #----------------------------------
     if duration == 0.0: return self.instant(start)
-    else:               return RelativeInterval(self.makeuri(), start, duration, self)
+    else:               return RelativeInterval(self.make_uri(), start, duration, self)
 
 
-class RelativeInstant(Metadata):
-#===============================
+class Instant(AbstractObject):
+#=============================
+  '''
+  An abstract BioSignalML Instant.
+  '''
 
   metaclass = TL.RelativeInstant
 
-  def __init__(self, uri, when, timeline):
-  #---------------------------------------
-    super(RelativeInstant, self).__init__(uri)
+  def __init__(self, uri, when, timeline, metadata={}):
+  #----------------------------------------------------
+    super(Instant, self).__init__(uri, metadata=metadata)
     self.at = when
     self.timeline = timeline
 
   def __add__(self, increment):
   #----------------------------
-    return RelativeInstant(self.makeuri(True), self.at + increment, self.timeline)
+    return Instant(self.make_uri(True), self.at + increment, self.timeline)
 
 
-class RelativeInterval(Metadata):
-#================================
+class RelativeInterval(AbstractObject):
+#======================================
+  '''
+  An abstract BioSignalML Interval.
+  '''
 
   metaclass = TL.RelativeInterval
 
-  def __init__(self, uri, start, duration, timeline):
-  #--------------------------------------------------
-    super(RelativeInterval, self).__init__(uri)
+  def __init__(self, uri, start, duration, timeline, metadata={}):
+  #---------------------------------------------------------------
+    super(Interval, self).__init__(uri, metadata=metadata)
     self.start = start
     self.duration = duration
     self.timeline = timeline
 
   def __add__(self, increment):
   #----------------------------
-    return RelativeInterval(self.makeuri(True), self.start + increment, self.duration, self.timeline)
+    return Interval(self.make_uri(True), self.start + increment, self.duration, self.timeline)
 
 
-class Event(Metadata):
-#=====================
+class Event(AbstractObject):
+#===========================
+  '''
+  An abstract BioSignalML Event.
+  '''
 
   metaclass = EVT.Event
 
   attributes = [ 'description', 'factor', 'time', ]
+  '''Generic attributes of an Event.'''
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
@@ -320,5 +406,5 @@ class Event(Metadata):
 
   def map_to_graph(self, graph, rdfmap):
   #-------------------------------------
-    Metadata.map_to_graph(self, graph, rdfmap)
-    Metadata.map_to_graph(self.time, graph, rdfmap)
+    AbstractObject.map_to_graph(self, graph, rdfmap)
+    AbstractObject.map_to_graph(self.time, graph, rdfmap)
