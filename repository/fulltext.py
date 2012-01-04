@@ -1,8 +1,8 @@
 import apsw
 import logging
 
-from metadata import rdf
-from bsml import BSML
+from biosignalml.metadata import rdf
+from biosignalml.bsml import BSML
 
 
 _db = None
