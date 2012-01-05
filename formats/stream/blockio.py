@@ -1,3 +1,16 @@
+"""
+Send and receive blocks of binary data over a file-like object.
+
+A block consists of:
+
+* a start byte (0x7E).
+* a byte containg the block type.
+* a sequence number field (one to four bytes).
+* a length field, with the content's length (one to four bytes).
+* the block's content.
+* an end byte (0x0A).
+"""
+
 ######################################################
 #
 #  BioSignalML Management in Python
@@ -8,17 +21,6 @@
 #
 ######################################################
 
-"""
-Send and receive blocks of binary data over a file-like object.
-
-A block consists of:
-* a start byte (0x7E).
-* a byte containg the block type.
-* a sequence number field (one to four bytes).
-* a length field, with the content's length (one to four bytes).
-* the block's content.
-* an end byte (0x0A).
-"""
 
 import threading, Queue
 import logging
@@ -49,6 +51,7 @@ def pack_number(n):
 #=================
   """
   Variable length integer encoding.
+
   * An integer is sent encoded into 1, 2 or 4 bytes.
   * If the number is less than 128 then it is sent as a single byte.
   * If the number is between 128 and 16383 (= 2^14 - 1) inclusive it is sent
