@@ -8,9 +8,24 @@
 #
 ######################################################
 
+import sys
+import logging
 
 import RDF as librdf
-import logging
+
+
+# Define generic namespaces:
+NAMESPACES = {
+  'xsd':  'http://www.w3.org/2001/XMLSchema#',
+  'rdf':  'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+  'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+  'owl':  'http://www.w3.org/2002/07/owl#',
+  'dcterms': 'http://purl.org/dc/terms/',
+  'evt':  'http://purl.org/NET/c4dm/event.owl#',
+  'tl':   'http://purl.org/NET/c4dm/timeline.owl#',
+  }
+for prefix, name in NAMESPACES.iteritems():
+  setattr(sys.modules[__name__], prefix.upper(), NS(name))
 
 
 class NS(librdf.NS):
