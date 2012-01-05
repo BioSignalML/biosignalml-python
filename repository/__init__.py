@@ -23,8 +23,8 @@ from biosignalml.model.mapping import bsml_mapping
 
 from biosignalml.rdf import RDF, DCTERMS
 from biosignalml.rdf import Uri, Node, Resource, BlankNode, Graph, Statement
+from biosignalml.rdf.fourstore import FourStore as TripleStore
 
-from fourstore  import FourStore as TripleStore
 from provenance import Provenance
 
 
