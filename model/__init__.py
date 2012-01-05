@@ -27,13 +27,14 @@ Abstract BioSignalML objects.
 import uuid
 import logging
 
-from biosignalml.bsml import BSML
 from biosignalml.metadata import NAMESPACES
 from biosignalml.metadata import RDF, TL, EVT
 from biosignalml.rdfmodel import Uri, Statement, Graph
 
+from ontology import BSML
+from data     import TimeSeries
+
 from mapping import bsml_mapping
-from data import TimeSeries
 
 
 class AbstractObject(object):

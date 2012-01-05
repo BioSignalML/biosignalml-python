@@ -16,7 +16,7 @@ import math
 import numpy as np
 
 import biosignalml.model as  model
-from biosignalml.bsml import BSML
+from biosignalml.model       import BSML
 from biosignalml.fileformats import BSMLRecording #, BSMLSignal
 
 from edffile import EDF, EDFFile, InvalidSignalId

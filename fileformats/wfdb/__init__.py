@@ -18,8 +18,7 @@ import logging
 
 
 import biosignalml.model as model
-from biosignalml.model.data import TimeSeries
-from biosignalml.bsml import BSML
+from biosignalml.model import BSML, TimeSeries
 from biosignalml.utils import file_uri
 
 from biosignalml.fileformats import BSMLRecording, BSMLSignal

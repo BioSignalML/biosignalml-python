@@ -22,10 +22,8 @@ import metadata
 from rdfmodel import RDFModel, Uri
 
 from metadata import rdf, rdfs, dc
-from bsml import BSML
 
-from model import Recording
-from model.data import TimeSeries
+from biosignalml.model import BSML, Recording, TimeSeries
 
 import blockio
 from blockio import BLOCK_INFO, BLOCK_DATA, BLOCK_META, BLOCK_EVENT

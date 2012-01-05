@@ -24,8 +24,7 @@ Read and write physical Recordings and Signals.
 ######################################################
 
 import biosignalml.model as model
-from biosignalml.bsml import BSML
-from biosignalml.model.data import TimeSeries
+from biosignalml.model import BSML, TimeSeries
 from biosignalml.utils import file_uri
 
 
