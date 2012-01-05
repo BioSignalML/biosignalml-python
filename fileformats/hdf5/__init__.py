@@ -99,8 +99,8 @@ def _set_attribute(obj, hdf5, attr, value):
 class HDF5Recording(BSMLRecording):
 #==================================
 
-  def __init__(self, fname, mode, uri=None, metadata={}):
-  #------------------------------------------------------
+  def __init__(self, fname, uri=None, mode='r', metadata={}):
+  #----------------------------------------------------------
     metadata['format'] = BSML.HDF5
     super(HDF5Recording, self).__init__(fname, uri=uri, metadata=metadata)
     self._file = h5py.File(fname, mode)  # Do we allow an existing file to be extended?
@@ -120,28 +120,29 @@ class HDF5Recording(BSMLRecording):
     self._file.close()
 
   @classmethod
-  def open(cls, fname, mode='r', uri=None):
-  #----------------------------------------
+  def open(cls, fname, uri=None, mode='r', **kwds):
+  #------------------------------------------------
+    return BSMLRecording.open(cls, fnane, uri=uri, mode=mode, **kwds)
     # If multiple recordings per file then can we add extra recordings?
     # With no extension of existing recordings??
-
     # read/parse metadata and add to self._graph (self._model ??)
-    self = cls(fname, mode, uri=uri) ## , metadata=
-
     # and then add all Signals to Recording...
+    # return self
 
 
   @classmethod
-  def create(cls, fname, mode='w-', uri=None, metadata={}):
-  #--------------------------------------------------------
+  def create(cls, fname, uri=None, **kwds):
+  #----------------------------------------
     # check filename extension and add '.h5' or '.hdf5'
-    return cls(fname, mode, uri=uri, metadata=metadata)
+    return cls.open(fname, uri=uri, mode='w', **kwds)
+
 
   ## create_from_recording sets source to recording.uri? or recording.source??
   @classmethod
-  def create_from_recording(cls, recording, fname, mode='w-'):
-  #-----------------------------------------------------------
-    return cls.create(fname, mode, uri=recording.uri, metadata=recording.get_metavars())
+  def create_from_recording(cls, recording, fname):
+  #------------------------------------------------
+    return cls.create(fname, uri=recording.uri, metadata=recording.get_metavars())
+
 
   def save_metadata(self, format='turtle', prefixes={}):
   #-----------------------------------------------------
