@@ -13,7 +13,7 @@ import httplib2
 import json
 import logging
 
-from biosignalml.bsml import BSML
+from biosignalml.model import BSML
 
 from triplestore import TripleStore
 

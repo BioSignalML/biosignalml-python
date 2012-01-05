@@ -15,8 +15,8 @@ import logging
 import RDF as librdf
 import json
 
-from biosignalml.bsml import BSML
-from biosignalml.model import Recording, Signal
+from biosignalml.model import BSML, Recording, Signal
+
 from biosignalml.utils import xmlescape
 
 from biosignalml.model.mapping import bsml_mapping
