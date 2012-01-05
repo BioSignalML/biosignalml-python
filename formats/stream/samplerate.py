@@ -14,7 +14,7 @@ import math
 from ctypes import *
 import logging
 
-from model import TimeSeries
+from biosignalml.model import TimeSeries
 
 
 SINC_BEST_QUALITY   = 0

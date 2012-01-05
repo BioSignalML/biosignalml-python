@@ -17,12 +17,8 @@ import numpy as np
 import math
 from time import sleep
 
-import metadata
 
-from rdfmodel import RDFModel, Uri
-
-from metadata import rdf, rdfs, dc
-
+from biosignalml.rdf   import RDF, DCTERMS, Graph, Uri
 from biosignalml.model import BSML, Recording, TimeSeries
 
 import blockio
@@ -57,7 +53,7 @@ class Stream(object):
   def __init__(self, uri=None):
   #----------------------------
     self.uri = uri
-    self._infoStore = RDFModel()
+    self._infoGraph = Graph()
     self._rdfFormat = FORMAT_TURTLE
     self._sig_uri_to_num = { }
     self._sig_num_to_uri = { }
@@ -70,17 +66,17 @@ class Stream(object):
 
   def init_metadata(self, info, include=[], exclude=[]):
   #-----------------------------------------------------
-    self._infoStore.parse_string(info, FORMAT_TURTLE, base=Uri('stream'))
+    self._infoGraph.parse_string(info, FORMAT_TURTLE, base=Uri('stream'))
     ## logging.debug('INFO: %s', self._info.serialise('turtle'))  ?????
     if self.uri == None:
-      self.uri = self._infoStore.get_property(Uri('stream'), BSML.recording).uri
-      self._rdfFormat = self._infoStore.get_literal_string(Uri('stream/metadata'), dc.format)
+      self.uri = self._infoGraph.get_property(Uri('stream'), BSML.recording).uri
+      self._rdfFormat = self._infoGraph.get_literal_string(Uri('stream/metadata'), DCTERMS.format)
       ## ****** Does having a sigcount make sense, as number of signals
       ## ****** can change...
-      #?? self._sigcount = self._infoStore.get_literal_integer(Uri('stream'), BSML.signalcount)
+      #?? self._sigcount = self._infoGraph.get_literal_integer(Uri('stream'), BSML.signalcount)
 #     Info has statements such as:
 #      </signal/1>  bsml:signal  <full_URI_of_signal_in_say_a_repository>
-      for stmt in self._infoStore.find_statements((None, BSML.signal, None)):
+      for stmt in self._infoGraph.find_statements((None, BSML.signal, None)):
         if str(stmt.subject.uri).startswith('stream/signal/'):
           try:
             signo = int(str(stmt.subject.uri)[14:])
@@ -103,7 +99,7 @@ class Stream(object):
 
   def signal_uri(self, number):      # 1-origin number
   #----------------------------
-    return self._infoStore.get_resource(Uri('/signal/%d' % number), BSML.signal).uri
+    return self._infoGraph.get_resource(Uri('/signal/%d' % number), BSML.signal).uri
 
   def signalno(self, uri):           # 1-origin number
   #----------------------
@@ -177,7 +173,7 @@ class StreamSource(Stream, threading.Thread):
     self._blocksource.start()
     self._runstate = 0
     self._seenmeta = False
-    self._triplestore = RDFModel()
+    self._graph = Graph()
     self.start()
     while not self._seenmeta: sleep(0.1)
 
@@ -241,8 +237,8 @@ class StreamSource(Stream, threading.Thread):
 ####      for stmt in parser.%parse_string_as_stream(
         nbr = self._sig_uri_to_num.get(stmt.subject.uri, None)
         if nbr is None or self.accept_signal(nbr):
-          self._triplestore.add_statement(stmt, context=self._signalset)
-      self._triplestore.sync()
+          self._graph.add_statement(stmt, context=self._signalset)
+      self._graph.sync()
     else:
       raise StreamError("Stream's metadata store has not been initialised")
     self._seenmeta = True
@@ -347,7 +343,7 @@ class StreamSource(Stream, threading.Thread):
     ## In fact we now need a new URI (and updated in uri->num
     ## as well as in signalset.signals...
 
-    for stmt in self._triplestore.as_stream(context=self._signalset):
+    for stmt in self._graph.as_stream(context=self._signalset):
     ## store --> triplestore
       olduri = stmt.subject.uri
       if olduri in changedrates:
@@ -366,7 +362,7 @@ class StreamSource(Stream, threading.Thread):
         ##  ????????????????????????      del triplestore[stmt, self._signalset] ########
         if stmt.predicate not in [BSML.recording, BSML.sampleRate]:
           stmt.subject = Resource(newuri)
-          self._triplestore.add_statement(stmt, context=self._signalset)
+          self._graph.add_statement(stmt, context=self._signalset)
     triplestore.sync()
 
 
@@ -446,16 +442,16 @@ class StreamSink(Stream):
   #-----------------------------------------------------------------
     Stream.__init__(self, recordingURI)
     self._blocksink = blockio.BlockSink(sink)
-    ##self._infoStore.append((Uri('/stream'),   dc.version, '1.0')) ## ????????????
-    self._infoStore.append((Uri('stream'),   rdf.type,       BSML.SignalStream))
-    self._infoStore.append((Uri('stream'),   BSML.recording, Uri(recordingURI)))
-    self._infoStore.append((Uri('stream/metadata'), dc.format,     self._rdfFormat))
-##?     self._infoStore.append_integer((Uri('stream'), BSML.signalcount, len(signalURIs)))
+    ##self._infoGraph.append((Uri('/stream'),   DCTERMS.version, '1.0')) ## ????????????
+    self._infoGraph.append((Uri('stream'),   RDF.type,       BSML.SignalStream))
+    self._infoGraph.append((Uri('stream'),   BSML.recording, Uri(recordingURI)))
+    self._infoGraph.append((Uri('stream/metadata'), DCTERMS.format,     self._rdfFormat))
+##?     self._infoGraph.append_integer((Uri('stream'), BSML.signalcount, len(signalURIs)))
 
     #info = ['@prefix xsd: <http://www.w3.org/2001/XMLSchema-datatypes#> .',
     #        '<#stream> a <%s> .'      % (str(BSML.SignalStream.uri)),
     #        '<#stream> <%s> <%s> .'   % (str(BSML.recording.uri), str()),
-    #        '<#metadata> <%s> "%s" .' % (str(dc.format.uri), self._rdfFormat),
+    #        '<#metadata> <%s> "%s" .' % (str(DCTERMS.format.uri), self._rdfFormat),
     #        '<#stream> <%s> "%d"^^xsd:int .' % (str(BSML.signalcount.uri), len(signalURIs)),
     #       ]
 ## Does sending signal count and signal URIs make sense, given the
@@ -467,11 +463,11 @@ class StreamSink(Stream):
 ##   YES, and this is how we map signal id to URI
 ##   So we should check signal id is in range when sending data...
       #info.append('</signal/%d> <%s> <%s> .' % (n+1, str(BSML.signal.uri), str(Uri(s))))
-      self._infoStore.append((Uri('stream/signal/%d' % (n+1)), BSML.signal, Uri(s)))
+      self._infoGraph.append((Uri('stream/signal/%d' % (n+1)), BSML.signal, Uri(s)))
       self._sig_num_to_uri[n] = s
       self._sig_uri_to_num[s] = n
 
-    self._blocksink.write(BLOCK_INFO, self._infoStore.serialise(format = FORMAT_TURTLE,
+    self._blocksink.write(BLOCK_INFO, self._infoGraph.serialise(format = FORMAT_TURTLE,
 ##                                                                base   = Uri(str(recordingURI) + '/'),
                                                                 namespaces = {'bsml': BSML.uri}))
     self._blockstart = 0
