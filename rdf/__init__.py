@@ -14,6 +14,11 @@ import logging
 import RDF as librdf
 
 
+class NS(librdf.NS):
+#===================
+  pass
+
+
 # Define generic namespaces:
 NAMESPACES = {
   'xsd':  'http://www.w3.org/2001/XMLSchema#',
@@ -26,11 +31,6 @@ NAMESPACES = {
   }
 for prefix, name in NAMESPACES.iteritems():
   setattr(sys.modules[__name__], prefix.upper(), NS(name))
-
-
-class NS(librdf.NS):
-#===================
-  pass
 
 
 class Uri(librdf.Uri):
