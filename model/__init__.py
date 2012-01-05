@@ -27,9 +27,8 @@ Abstract BioSignalML objects.
 import uuid
 import logging
 
-from biosignalml.metadata import NAMESPACES
-from biosignalml.metadata import RDF, TL, EVT
-from biosignalml.rdfmodel import Uri, Statement, Graph
+from biosignalml.rdf import NAMESPACES, RDF, TL, EVT
+from biosignalml.rdf import Uri, Statement, Graph
 
 from ontology import BSML
 from data     import TimeSeries
@@ -52,7 +51,7 @@ class AbstractObject(object):
   '''
 
   metaclass = None
-  '''Class in BioSignalML Ontology as a :class:`biosignalml.rdfmodel.Resource`'''
+  '''Class in BioSignalML Ontology as a :class:`biosignalml.rdf.Resource`'''
 
   attributes = [ 'uri', 'description' ]
   '''List of generic attributes all resources have.'''

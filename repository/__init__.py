@@ -21,8 +21,8 @@ from biosignalml.utils import xmlescape
 
 from biosignalml.model.mapping import bsml_mapping
 
-from biosignalml.metadata import RDF, DCTERMS
-from biosignalml.rdfmodel import Uri, Node, Resource, BlankNode, Graph, Statement
+from biosignalml.rdf import RDF, DCTERMS
+from biosignalml.rdf import Uri, Node, Resource, BlankNode, Graph, Statement
 
 from fourstore  import FourStore as TripleStore
 from provenance import Provenance

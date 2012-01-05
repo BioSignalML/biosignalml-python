@@ -1,8 +1,8 @@
 import apsw
 import logging
 
-from biosignalml.metadata import rdf
-from biosignalml.bsml import BSML
+from biosignalml.rdf   import RDF
+from biosignalml.model import BSML
 
 
 _db = None
@@ -29,7 +29,7 @@ def initialise(options):
     raise Exception('Full text search only implemented for SQLite') 
   _db = apsw.Connection(options['database'])
 
-  RDF_TYPE_URI = _uricode(str(rdf.type))
+  RDF_TYPE_URI = _uricode(str(RDF.type))
 
   #
   #select id from uris where uri in (
