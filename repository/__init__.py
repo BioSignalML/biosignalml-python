@@ -131,12 +131,12 @@ class Repository(object):
     #logging.debug('Getting: %s', uri)
     if self.get_type(uri) != BSML.Recording: uri = self.get_object(uri, BSML.recording)
     #logging.debug('Recording: %s', uri)
-    return Recording.create_from_repository(str(uri), self, bsml_mapping()) if uri else None
+    return Recording.create_from_store(str(uri), self, bsml_mapping()) if uri else None
 
   def get_recording_signals(self, uri):
   #------------------------------------
     rec = self.get_recording(uri)
-    if rec: rec.load_signals_from_repository(self, bsml_mapping())
+    if rec: rec.load_signals_from_store(self, bsml_mapping())
     return rec
 
 #  def signal_recording(self, uri):
@@ -145,7 +145,7 @@ class Repository(object):
 
   def get_signal(self, uri):
   #-------------------------
-    return Signal.create_from_repository(uri, self, bsml_mapping())
+    return Signal.create_from_store(uri, self, bsml_mapping())
 
   def signal(self, sig, properties):              # In context of signal's recording...
   #---------------------------------
