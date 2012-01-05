@@ -13,8 +13,8 @@ import os
 from datetime import datetime
 
 import biosignalml.model as model
-from biosignalml.mode        import BSML
-from biosignalml.fileformats import BSMLRecording
+from biosignalml.mode    import BSML
+from biosignalml.formats import BSMLRecording
 
 from sdffile import ControlFile, DataFile, EventFile
 

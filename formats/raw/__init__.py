@@ -9,9 +9,9 @@
 ######################################################
 
 
-from biosignalml.model       import BSML
-from biosignalml.fileformats import BSMLRecording
-from biosignalml.utils       import file_uri
+from biosignalml.model   import BSML
+from biosignalml.formats import BSMLRecording
+from biosignalml.utils   import file_uri
 
 
 class RAWRecording(BSMLRecording):

@@ -52,8 +52,8 @@ import logging
 
 
 import biosignalml.model as model
-from biosignalml.model       import BSML
-from biosignalml.fileformats import BSMLRecording, BSMLSignal
+from biosignalml.model   import BSML
+from biosignalml.formats import BSMLRecording, BSMLSignal
 
 VERSION   = "1.0"
 

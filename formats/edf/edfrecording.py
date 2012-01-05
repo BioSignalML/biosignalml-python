@@ -15,9 +15,9 @@ import logging
 import math
 import numpy as np
 
-import biosignalml.model as  model
-from biosignalml.model       import BSML
-from biosignalml.fileformats import BSMLRecording #, BSMLSignal
+import biosignalml.model as model
+from biosignalml.model   import BSML
+from biosignalml.formats import BSMLRecording #, BSMLSignal
 
 from edffile import EDF, EDFFile, InvalidSignalId
 from edffile import PATIENTFIELDS, RECORDINGFIELDS
