@@ -13,8 +13,6 @@ import httplib2
 import json
 import logging
 
-from biosignalml.model import BSML
-
 from triplestore import TripleStore
 
 
@@ -149,15 +147,11 @@ class FourStore(TripleStore):
         @prefix dc:   <http://purl.org/dc/elements/1.1/> .
         @prefix dcterms: <http://purl.org/dc/terms/> .
         @prefix text: <http://4store.org/fulltext#> .
-        @prefix bsml: <%s> .
 
         rdfs:label      text:index text:stem .
         rdfs:comment    text:index text:stem .
         dc:description  text:index text:stem .
-        dcterms:description text:index text:stem .""" % BSML.uri)
-        # bsml:units      text:index text:stem .
-        # bsml:transducer text:index text:stem .
-        # bsml:filter     text:index text:stem .
+        dcterms:description text:index text:stem .""")
 
 
 if __name__ == '__main__':
