@@ -157,7 +157,7 @@ class Graph(librdf.Model):
 
 
   @staticmethod
-  def make_literal(node, default):
+  def _make_literal(node, default):
   #-------------------------------
     return (node.literal_value['string'] if node and node.is_literal()
       else default if default is not None    ### ?????
