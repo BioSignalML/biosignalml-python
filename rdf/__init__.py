@@ -126,8 +126,8 @@ class Graph(librdf.Model):
     except Exception, msg:
       raise Exception(msg)
 
-  def serialise(self, format='turtle', base=None, prefixes={}):
-  #------------------------------------------------------------
+  def serialise(self, format=Format.TURTLE, base=None, prefixes={}):
+  #-----------------------------------------------------------------
     serialiser = librdf.Serializer(format)
     for prefix, uri in prefixes.iteritems():
       serialiser.set_namespace(prefix, Uri(uri))
