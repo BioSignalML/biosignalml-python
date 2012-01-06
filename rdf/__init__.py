@@ -91,6 +91,11 @@ class Statement(librdf.Statement):
   pass
 
 
+class QueryResults(librdf.QueryResults):
+#=======================================
+  pass
+
+
 class Graph(librdf.Model):
 #=========================
 
@@ -183,7 +188,9 @@ class Graph(librdf.Model):
   def query(self, sparql):
   #-----------------------
     try:
-      return librdf.Query(sparql, query_language='sparql11-query').execute(self)
+      results = librdf.Query(sparql, query_language='sparql11-query').execute(self)
+      results.__class__ = QueryResults
+      return results
     except Exception, msg:
       logging.error('Graph query: %s', msg)
     return [ ]
