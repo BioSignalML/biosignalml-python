@@ -158,8 +158,8 @@ class Graph(librdf.Model):
       else default if default is not None    ### ?????
       else node)                             ### what about str(node) ??
 
-  def get_property(self, s, p):
-  #----------------------------
+  def get_object(self, s, p):
+  #--------------------------
 ##    node = self.get_target(source, property)
 ##    return (Node(Uri(node.literal_value['string'])) if node and node.is_literal() else node)
     if s and not isinstance(s, Node) and not isinstance(s, Uri): s = Uri(s)
@@ -168,18 +168,17 @@ class Graph(librdf.Model):
 
   def get_literal(self, s, p):
   #----------------------------
-    return self.make_literal(self.get_property(s, p), None)
+    return self._make_literal(self.get_object(s, p), None)
 
-
-  def get_properties(self, s, p):
-  #------------------------------
+  def get_objects(self, s, p):
+  #---------------------------
     if s and not isinstance(s, Node) and not isinstance(s, Uri): s = Uri(s)
     if p and not isinstance(p, Node) and not isinstance(p, Uri): s = Uri(p)
     for v, g in self.get_targets_context(s, p): yield (v, g)
 
   def get_literals(self, s, p):
   #------------------------------
-    for v, g in self.get_properties(s, p): yield (self.make_literal(v, None), g)
+    for v, g in self.get_objects(s, p): yield (self._make_literal(v, None), g)
 
   def query(self, sparql):
   #-----------------------
