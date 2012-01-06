@@ -1,3 +1,12 @@
+'''
+A generic interface to a RDF library.
+
+We use the Redland RDF Libraries and their Python bindings,
+available from http://librdf.org/.
+
+'''
+
+
 ######################################################
 #
 #  BioSignalML Management in Python
@@ -18,6 +27,11 @@ from formats import Format
 
 class NS(librdf.NS):
 #===================
+  '''
+  Redland Namespace Utility Class.
+
+  See http://librdf.org/docs/pydoc/RDF.html#NS.
+  '''
   pass
 
 
@@ -37,20 +51,42 @@ for prefix, name in NAMESPACES.iteritems():
 
 class Uri(librdf.Uri):
 #=====================
+  '''
+  Extends Redland URI Class.
+
+  See http://librdf.org/docs/pydoc/RDF.html#Uri.
+  '''
 
   def __add__(self, s):
   #--------------------
+    '''
+    Append a string to a URI.
+
+    :rtype: :class:`Uri`
+    '''
     return Uri(str(self) + s)
 
 
 class Node(librdf.Node):
 #=======================
+  '''
+  Redland Node (RDF Resource, Property, Literal) Class.
+
+  See http://librdf.org/docs/pydoc/RDF.html#Node.
+  '''
   pass
 
 
 class Literal(Node):
 #===================
+  '''
+  Create a Literal node.
 
+  :param value: The value of the literal.
+  :param datatype: The literal's datatype.
+  :param language: The literal's language.
+  :type language: str
+  '''
   def __init__(self, value, datatype=None, language=None):
   #-------------------------------------------------------
     super(Literal, self).__init__(literal=str(value), datatype=Uri(datatype), language=language)
@@ -65,7 +101,12 @@ class Literal(Node):
 
 class BlankNode(Node):
 #=====================
+  '''
+  Create a Blank node.
 
+  :param blank: Blank node identifier.
+  :type blank: str
+  '''
   def __init__(self, blank=None):
   #------------------------------
     super(BlankNode, self).__init__(blank=blank)
@@ -77,7 +118,11 @@ class BlankNode(Node):
 
 class Resource(Node):
 #====================
+  '''
+  Create a Resource node.
 
+  :param uri: The URI of the resource.
+  '''
   def __init__(self, uri):
   #-----------------------
     if isinstance(uri, librdf.Node) and uri.is_resource():
@@ -88,17 +133,87 @@ class Resource(Node):
 
 class Statement(librdf.Statement):
 #=================================
+  '''
+  Redland Statement (triple) class.  The main means of manipulating
+  statements is by the `subject`, `predicate` and `object` properties.
+
+  See http://librdf.org/docs/pydoc/RDF.html#Statement.
+  '''
   pass
 
 
 class QueryResults(librdf.QueryResults):
 #=======================================
+  '''
+  Redland Query results class.
+
+  The following has been obtained via `pydoc` as the class is not documented
+  at http://librdf.org/docs/pydoc/RDF.html.
+
+  .. py:method:: as_stream()
+
+     Return the query results as a stream of triples (RDF.Statement)
+
+  .. py:method:: finished()
+
+     Test if reached the last variable binding result
+
+  .. py:method:: get_binding_name(offset)
+
+     Get the name of a variable binding by offset
+
+  .. py:method:: get_binding_value(offset)
+
+     Get the value of a variable binding by offset
+
+  .. py:method:: get_binding_value_by_name(name)
+
+     Get the value of a variable binding by variable name
+
+  .. py:method:: get_bindings_count()
+
+     Get the number of variable bindings in the query result
+
+  .. py:method:: get_boolean()
+
+     Get the boolean query result
+
+  .. py:method:: is_bindings()
+
+     Test if the query results format is variable bindings
+
+  .. py:method:: is_boolean()
+
+     Test if the query results format is a boolean
+
+  .. py:method:: is_graph()
+
+     Test if the query results format is an RDF graph
+
+  .. py:method:: make_results_hash()
+
+  .. py:method:: next()
+
+     Get the next variable binding result
+
+  .. py:method:: to_file(name, format_uri=None, base_uri=None)
+
+     Serialize to filename name in syntax format_uri using the optional base URI.
+
+  .. py:method:: to_string(format_uri=None, base_uri=None)
+
+     Serialize to a string syntax format_uri using the optional base URI.
+  '''
   pass
 
 
 class Graph(librdf.Model):
 #=========================
+  '''
+  Extends Redland Graph class.
 
+  See http://librdf.org/docs/pydoc/RDF.html#Model.
+  '''
   def __init__(self, uri=None):
   #----------------------------
     if uri and not isinstance(uri, Node) and not isinstance(uri, Uri):
@@ -113,26 +228,52 @@ class Graph(librdf.Model):
 
   def parse(self, uri, format, base=None):
   #---------------------------------------
+    '''
+    Add statements to the graph from a resource.
+
+    :param uri: The URI of RDF content to parse and add.
+    :param format: The content's RDF format.
+    :param base: An optional base URI of the content.
+    '''
     parser = librdf.Parser(name=str(format))
     try:
       statements = parser.parse_as_stream(uri, base)
       if statements: self.add_statements(statements)
-      else:          raise Exception('Error parsing librdf')
+      else:          raise Exception('RDF parsing error')
     except Exception, msg:
       raise Exception(msg)
 
   def parse_string(self, string, format, base):
   #--------------------------------------------
+    '''
+    Add statements to the graph from a string.
+
+    :param string: The RDF to parse and add.
+    :type string: str
+    :param format: The string's RDF format.
+    :param base: The base URI of the content.
+    '''
     parser = librdf.Parser(name=str(format))
     try:
       statements = parser.parse_string_as_stream(string, base)
       if statements: self.add_statements(statements)
-      else:          raise Exception('Error parsing librdf')
+      else:          raise Exception('RDF parsing error')
     except Exception, msg:
       raise Exception(msg)
 
   def serialise(self, format=Format.TURTLE, base=None, prefixes={}):
   #-----------------------------------------------------------------
+    '''
+    Serialise the graph as a string of RDF statements.
+
+    :param format: The RDF format to return.
+    :param base: An optional base URI.
+    :param prefixes: A dictionary of { 'prefix': 'namespace_uri' } abbreviations
+      to use in the resulting serialiasation.
+    :type prefixes: dict
+    :return: The graph serialised as a string.
+    :rtype: str
+    '''
     serialiser = librdf.Serializer(format)
     for prefix, uri in prefixes.iteritems():
       serialiser.set_namespace(prefix, Uri(uri))
@@ -140,21 +281,42 @@ class Graph(librdf.Model):
 
 #  def __iter__(self):
 #  #------------------
-#    return self.as_stream(self._defaulkt_graph).__iter__()
-
+#    return self.as_stream(self._default_graph).__iter__()
 
   def add_statements(self, statements):
   #------------------------------------
+    '''
+    Add statements to the graph.
+
+    :param statements: A sequence of :class:`Statement`\s to add.
+    :type statements: iterator
+    '''
     for s in statements: self.append(s)
 
   def contains(self, statement):
   #-----------------------------
+    '''
+    Test if a statement is in the graph.
+
+    :param statement: The statement to check. Some or all of the `subject`,
+      `predicate` or `object` attributes can be `None`, meaning they match any value.
+    :type statement: :class:`Statement`
+    :return: True if the graph contains `statement`.
+    :rtype: bool
+    '''
     return super(Graph, self).contains_statement(statement)
 
   def get_statements(self, statement):
   #-----------------------------------
-    return super(Graph, self).find_statements(statement)
+    '''
+    Get all matching statements in the graph.
 
+    :param statement: The statement to find. Some or all of the `subject`,
+      `predicate` or `object` attributes can be `None`, meaning they match any value.
+    :type statement: :class:`Statement`
+    :return: A sequence of :class:`Statement`\s.
+    '''
+    return super(Graph, self).find_statements(statement)
 
   @staticmethod
   def _make_literal(node, default):
@@ -165,6 +327,16 @@ class Graph(librdf.Model):
 
   def get_object(self, s, p):
   #--------------------------
+    '''
+    Get the object of a (`subject`, `predicate`) pair. One or both of `subject`
+    and `predicate` may be `None`, meaning they match any value.
+
+    :param s: The `subject` of the statement.
+    :param p: The `predicate` of the statement.
+    :return: The `object` node if the statement (`subject`, `predicate`, `object`) is
+      in the graph, otherwise `None`.
+    :rtype: :class:`Node`
+    '''
 ##    node = self.get_target(source, property)
 ##    return (Node(Uri(node.literal_value['string'])) if node and node.is_literal() else node)
     if s and not isinstance(s, Node) and not isinstance(s, Uri): s = Uri(s)
@@ -173,20 +345,60 @@ class Graph(librdf.Model):
 
   def get_literal(self, s, p):
   #----------------------------
+    '''
+    Get the object of a (`subject`, `predicate`) pair as a string if it is a
+    :class:`Literal`. One or both of `subject` and `predicate` may be `None`,
+    meaning they match any value.
+
+    :param s: The `subject` of the statement to lookup.
+    :param p: The `predicate` of the statement to lookup.
+    :return: The `object` as a string if the statement (`subject`, `predicate`, `object`)
+      is in the graph and `object` is a :class:`Literal`; as a :class:`Node` if it
+      exists and is not a Literal; otherwise `None`.
+    '''
     return self._make_literal(self.get_object(s, p), None)
 
   def get_objects(self, s, p):
   #---------------------------
+    '''
+    Get a sequence of objects matching the pair (`subject`, `predicate`). One or
+    both of `subject` and `predicate` may be `None`, meaning they match any value.
+
+    :param s: The `subject` of the statement to lookup.
+    :param p: The `predicate` of the statement to lookup.
+    :return: An iterator yielding a sequence of `object` nodes with
+      (`subject`, `predicate`, `object`) statements in the graph.
+    :rtype: iterator
+    '''
     if s and not isinstance(s, Node) and not isinstance(s, Uri): s = Uri(s)
     if p and not isinstance(p, Node) and not isinstance(p, Uri): s = Uri(p)
     for v, g in self.get_targets_context(s, p): yield (v, g)
 
   def get_literals(self, s, p):
   #------------------------------
+    '''
+    Get a sequence of objects matching the pair (`subject`, `predicate`), with the
+    `object` as a string if it is a :class:`Literal`. One or both of `subject`
+    and `predicate` may be `None`, meaning they match any value.
+
+    :param s: The `subject` of the statement to lookup.
+    :param p: The `predicate` of the statement to lookup.
+    :return: An iterator yielding a sequence of strings and non-Literal :class:`Node`\s
+       for `object`\s with (`subject`, `predicate`, `object`) statements in the graph.
+    :rtype: iterator
+    '''
     for v, g in self.get_objects(s, p): yield (self._make_literal(v, None), g)
 
   def query(self, sparql):
   #-----------------------
+    '''
+    Perform a SPARQL query against RDF statements in the graph.
+
+    :param sparql:
+    :type: str
+    :return: An iterator of the result of the query.
+    :rtype: :class:`QueryResults`
+    '''
     try:
       results = librdf.Query(sparql, query_language='sparql11-query').execute(self)
       results.__class__ = QueryResults
