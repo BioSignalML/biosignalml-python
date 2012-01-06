@@ -23,6 +23,8 @@ from biosignalml.model.mapping import bsml_mapping
 
 from biosignalml.rdf import RDF, DCTERMS
 from biosignalml.rdf import Uri, Node, Resource, BlankNode, Graph, Statement
+from biosignalml.rdf import Format
+
 from biosignalml.rdf.fourstore import FourStore as TripleStore
 
 from provenance import Provenance
@@ -75,13 +77,13 @@ class Repository(object):
     return QueryResults(self, sparql, header, html, abbreviate)
 
 
-  def construct(self, graph, where, params = { }, format='application/rdf+xml'):
-  #-----------------------------------------------------------------------------
+  def construct(self, graph, where, params = { }, format=Format.RDFXML):
+  #---------------------------------------------------------------------
     return self.triplestore.construct(graph, where, params, format)
 
 
-  def describe(self, uri, format='application/rdf+xml'):
-  #-----------------------------------------------------
+  def describe(self, uri, format=Format.RDFXML):
+  #---------------------------------------------
     return self.triplestore.describe(uri, format)
 
 
@@ -105,7 +107,7 @@ class Repository(object):
 
   def statements(self, graph, where, params = { }):
   #------------------------------------------------
-    ttl = self.construct(graph, where, params, 'text/turtle')
+    ttl = self.construct(graph, where, params, Format.TURTLE)
     ##logging.debug("Statements: %s", ttl)  ###
     parser = librdf.Parser('turtle')
     return parser.parse_string_as_stream(ttl, Uri(self.base))
@@ -199,7 +201,7 @@ class QueryResults(object):
     self._abbreviate = abbreviate
     #logging.debug('SPARQL: %s', sparql)
     try:
-      self._results = json.loads(repo.triplestore.query(sparql, 'application/json'))
+      self._results = json.loads(repo.triplestore.query(sparql, Format.JSON))
     except Exception, msg:
       self._results = { 'error': str(msg) }
 

@@ -13,6 +13,8 @@ import logging
 
 import RDF as librdf
 
+from formats import Format
+
 
 class NS(librdf.NS):
 #===================

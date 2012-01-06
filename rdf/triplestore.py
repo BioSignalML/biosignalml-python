@@ -9,6 +9,9 @@
 ######################################################
 
 
+from formats import Format
+
+
 class TripleStore(object):
 #=========================
 
@@ -16,8 +19,8 @@ class TripleStore(object):
   #------------------------
     self._href = href
 
-  def query(self, sparql, accept='application/xml'):
-  #-------------------------------------------------
+  def query(self, sparql, format=Format.RDFXML):
+  #---------------------------------------------
     pass
 
   def ask(self, where):
@@ -28,24 +31,24 @@ class TripleStore(object):
   #-----------------------------------------------------------
     pass
 
-  def construct(self, graph, where, params = { }, format='text/turtle'):
+  def construct(self, graph, where, params = { }, format=Format.RDFXML):
   #---------------------------------------------------------------------
     pass
 
-  def describe(self, uri, format='application/xml'):
-  #-------------------------------------------------
+  def describe(self, uri, format=Format.RDFXML):
+  #-----------------------------------------------
     pass
 
   def insert(self, graph, triples):
   #--------------------------------
     pass
 
-  def extend_graph(self, graph, turtle):
-  #-------------------------------------
+  def extend_graph(self, graph, rdfdata, format=Format.RDFXML):
+  #------------------------------------------------------------
     pass
 
-  def replace_graph(self, graph, rdf, format='application/x-turtle'):
-  #------------------------------------------------------------------
+  def replace_graph(self, graph, rdf, format=Format.RDFXML):
+  #---------------------------------------------------------
     pass
 
   def delete_graph(self, graph):

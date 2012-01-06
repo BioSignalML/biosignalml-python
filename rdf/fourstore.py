@@ -14,6 +14,7 @@ import json
 import logging
 
 from triplestore import TripleStore
+from formats     import Format
 
 
 class FourStore(TripleStore):
@@ -34,22 +35,22 @@ class FourStore(TripleStore):
     if response.status not in [200, 201]: raise Exception(content)
     return content
 
-  def query(self, sparql, accept='application/rdf+xml'):
-  #-----------------------------------------------------
-    #logging.debug('4s %s: %s', accept, sparql)
+  def query(self, sparql, format=Format.RDFXML):
+  #---------------------------------------------
+    #logging.debug('4s %s: %s', format, sparql)
     try:
       return self._request('/sparql/', 'POST',
                            body=urllib.urlencode({'query': sparql}),
                            headers={'Content-type': 'application/x-www-form-urlencoded',
-                                    'Accept': accept} )
+                                    'Accept': Format.mimetype(format)} )
     except Exception, msg:
       logging.error('4store: %s, %s', msg, sparql)
 
 
   def ask(self, where):
   #--------------------
-    return json.loads(self.query('ask where { %(where)s }' % { 'where': where },
-                                 'application/json'))['boolean']
+    return json.loads(self.query('ask where { %(where)s }' % { 'where': where }, Format.mimetype(Format.JSON))
+                     )['boolean']
 
   def select(self, fields, where, distinct=False, limit=None):
   #-----------------------------------------------------------
@@ -59,7 +60,7 @@ class FourStore(TripleStore):
                                       'where': where,
                                       'limit': (' limit %s' % limit) if limit else '',
                                     },
-                                 'application/json')).get('results', {}).get('bindings', [])
+                                 Format.mimetype(Format.JSON))).get('results', {}).get('bindings', [])
     """
     for result in results['results']['bindings']:
       for f in fields:
@@ -97,14 +98,14 @@ class FourStore(TripleStore):
      ]"""
 
 
-  def construct(self, graph, where, params = { }, format='text/turtle'):
-  #---------------------------------------------------------------------
+  def construct(self, graph, where, params = { }, format=Format.RDFXML):
+  #-----------------------------------------------------------------------
     return self.query('construct { %(graph)s } where { %(where)s }'
                         % { 'graph': graph % params,'where': where % params },
                       format)
 
-  def describe(self, uri, format='application/rdf+xml'):
-  #-----------------------------------------------------
+  def describe(self, uri, format=Format.RDFXML):
+  #-----------------------------------------------
     return self.query('describe <%(uri)s>' % { 'uri': uri }, format)
 
 
@@ -119,20 +120,20 @@ class FourStore(TripleStore):
     if 'error' in content: raise Exception(content)
 
 
-  def extend_graph(self, graph, turtle):
-  #-------------------------------------
-    #logging.debug('Extend <%s>: %s', graph, turtle)
+  def extend_graph(self, graph, rdfdata, format=Format.RDFXML):
+  #--------------------------------------------------------------
+    #logging.debug('Extend <%s>: %s', graph, rdfdata)
     self._request('/data/', 'POST',
-                  body=urllib.urlencode({'data': turtle,
+                  body=urllib.urlencode({'data': rdfdata,
                                          'graph': str(graph),
-                                         'mime-type': 'text/turtle',
+                                         'mime-type': Format.mimetype(format),
                                         }),
                   headers={'Content-type': 'application/x-www-form-urlencoded'})
 
-  def replace_graph(self, graph, rdf, format='text/turtle'):
-  #---------------------------------------------------------
+  def replace_graph(self, graph, rdf, format=Format.RDFXML):
+  #-----------------------------------------------------------
     #logging.debug('Replace <%s>: %s', graph, rdf)
-    self._request('/data/' + str(graph), 'PUT', body=rdf, headers={'Content-type': format})
+    self._request('/data/' + str(graph), 'PUT', body=rdf, headers={'Content-type': Format.mimetype(format)})
 
   def delete_graph(self, graph):
   #-----------------------------
