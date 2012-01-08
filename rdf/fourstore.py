@@ -46,11 +46,9 @@ class FourStore(TripleStore):
     except Exception, msg:
       logging.error('4store: %s, %s', msg, sparql)
 
-
   def ask(self, where):
   #--------------------
-    return json.loads(self.query('ask where { %(where)s }' % { 'where': where }, Format.mimetype(Format.JSON))
-                     )['boolean']
+    return json.loads(self.query('ask where { %(where)s }' % { 'where': where }, Format.JSON))['boolean']
 
   def select(self, fields, where, distinct=False, limit=None):
   #-----------------------------------------------------------
@@ -59,8 +57,9 @@ class FourStore(TripleStore):
                                       'fields': fields,
                                       'where': where,
                                       'limit': (' limit %s' % limit) if limit else '',
-                                    },
-                                 Format.mimetype(Format.JSON))).get('results', {}).get('bindings', [])
+                                    }, Format.JSON
+                                )
+                     ).get('results', {}).get('bindings', [])
     """
     for result in results['results']['bindings']:
       for f in fields:
