@@ -30,4 +30,4 @@ class Format(object):
     :param format: A RDF representation.
     :rtype: str
     '''
-    return mimetypes[format]
+    return Format.mimetypes[format]
