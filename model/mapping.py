@@ -131,8 +131,8 @@ class ReverseEntry(object):
 def _load_mapping(mapfile):
 #==========================
   mapping = { }
-  maps = Graph()
-  maps.parse(mapfile if _uri_protocol(mapfile) else 'file://' + os.path.abspath(mapfile), 'turtle')
+  maps = Graph.create_from_resource(mapfile if _uri_protocol(mapfile) else
+                                    'file://' + os.path.abspath(mapfile), 'turtle')
   for s in maps.query(_modules):
     try:
       module = str(s['mod'])
