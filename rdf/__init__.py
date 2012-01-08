@@ -235,14 +235,46 @@ class Graph(librdf.Model):
       uri = Uri(uri)
     self.uri = uri
     super(Graph, self).__init__(storage=librdf.Storage(name='triples',
-                                                    storage_name='hashes',
-                                                    options_string="hash-type='memory'"))
+                                                       storage_name='hashes',
+                                                       options_string="hash-type='memory'"))
+
+  @classmethod
+  def create_from_resource(cls, uri, format, base=None):
+  #-----------------------------------------------------
+    '''
+    Create a new Graph from RDF statements in a resource.
+
+    :param uri: The URI of RDF content to parse and add.
+    :param format: The content's RDF format.
+    :param base: An optional base URI of the content.
+    :rtype: A :class:`Graph`
+    '''
+    self = cls()
+    self.parse_resource(uri, format, base)
+    return self
+
+  @classmethod
+  def create_from_string(cls, string, format, base):
+  #-------------------------------------------------
+    '''
+    Create a new Graph from RDF statements in a string.
+
+    :param string: The RDF to parse and add.
+    :type string: str
+    :param format: The string's RDF format.
+    :param base: The base URI of the content.
+    :rtype: A :class:`Graph`
+    '''
+    self = cls()
+    self.parse_string(string, format, base)
+    return self
+
   def __str__(self):
   #-----------------
     return str(self.uri)
 
-  def parse(self, uri, format, base=None):
-  #---------------------------------------
+  def parse_resource(self, uri, format, base=None):
+  #------------------------------------------------
     '''
     Add statements to the graph from a resource.
 
