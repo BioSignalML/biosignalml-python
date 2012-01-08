@@ -193,10 +193,6 @@ class QueryResults(librdf.QueryResults):
 
   .. py:method:: make_results_hash()
 
-  .. py:method:: next()
-
-     Get the next variable binding result
-
   .. py:method:: to_file(name, format_uri=None, base_uri=None)
 
      Serialize to filename name in syntax format_uri using the optional base URI.
@@ -205,7 +201,22 @@ class QueryResults(librdf.QueryResults):
 
      Serialize to a string syntax format_uri using the optional base URI.
   '''
-  pass
+
+  def next(self):
+  #--------------
+    '''
+    Get the next variable binding result.
+
+    We force the resulting Nodes to be an appropriate sub-class.
+    '''
+    r = super(QueryResults, self).next()
+    if isinstance(r, dict):
+      for n, v in r.iteritems():
+        if   v is None:       pass
+        elif v.is_resource(): r[n].__class__ = Resource
+        elif v.is_literal():  r[n].__class__ = Literal
+        elif v.is_blank():    r[n].__class__ = BlankNode
+    return r
 
 
 class Graph(librdf.Model):
