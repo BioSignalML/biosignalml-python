@@ -1,5 +1,5 @@
 '''
-A generic interface to a RDF library.
+A generic interface to some RDF library.
 
 We use the Redland RDF Libraries and their Python bindings,
 available from http://librdf.org/.
@@ -28,9 +28,7 @@ from formats import Format
 class NS(librdf.NS):
 #===================
   '''
-  Redland Namespace Utility Class.
-
-  See http://librdf.org/docs/pydoc/RDF.html#NS.
+  Wrapper for Redland Namespace utility class --- see http://librdf.org/docs/pydoc/RDF.html#NS.
   '''
   pass
 
@@ -52,9 +50,10 @@ for prefix, name in NAMESPACES.iteritems():
 class Uri(librdf.Uri):
 #=====================
   '''
-  Extends Redland URI Class.
+  Wrapper for Redland URI class --- see http://librdf.org/docs/pydoc/RDF.html#Uri.
 
-  See http://librdf.org/docs/pydoc/RDF.html#Uri.
+  We extend the class with an `__add__()` method to allow a new URI to be formed
+  be appending a string to an existing one.
   '''
 
   def __add__(self, s):
@@ -70,9 +69,8 @@ class Uri(librdf.Uri):
 class Node(librdf.Node):
 #=======================
   '''
-  Redland Node (RDF Resource, Property, Literal) Class.
-
-  See http://librdf.org/docs/pydoc/RDF.html#Node.
+  Wrapper for Redland Node (RDF Resource, Property, Literal)
+  class --- see http://librdf.org/docs/pydoc/RDF.html#Node.
   '''
   pass
 
@@ -104,7 +102,7 @@ class BlankNode(Node):
   '''
   Create a Blank node.
 
-  :param blank: Blank node identifier.
+  :param blank: Blank self identifier.
   :type blank: str
   '''
   def __init__(self, blank=None):
@@ -134,10 +132,9 @@ class Resource(Node):
 class Statement(librdf.Statement):
 #=================================
   '''
-  Redland Statement (triple) class.  The main means of manipulating
-  statements is by the `subject`, `predicate` and `object` properties.
+  Wrapper for Redland Statement (triple) class --- see http://librdf.org/docs/pydoc/RDF.html#Statement.
 
-  See http://librdf.org/docs/pydoc/RDF.html#Statement.
+  The main means of manipulating statements is by the `subject`, `predicate` and `object` properties.
   '''
   pass
 
@@ -145,7 +142,7 @@ class Statement(librdf.Statement):
 class QueryResults(librdf.QueryResults):
 #=======================================
   '''
-  Redland Query results class.
+  Wrapper for Redland QueryResults class.
 
   The following has been obtained via `pydoc` as the class is not documented
   at http://librdf.org/docs/pydoc/RDF.html.
@@ -210,9 +207,9 @@ class QueryResults(librdf.QueryResults):
 class Graph(librdf.Model):
 #=========================
   '''
-  Extends Redland Graph class.
+  Extends Redland Graph class --- see http://librdf.org/docs/pydoc/RDF.html#Model.
 
-  See http://librdf.org/docs/pydoc/RDF.html#Model.
+  We always store graphs in memory using a hash index.
   '''
   def __init__(self, uri=None):
   #----------------------------
@@ -394,9 +391,9 @@ class Graph(librdf.Model):
     '''
     Perform a SPARQL query against RDF statements in the graph.
 
-    :param sparql:
+    :param sparql: The SPARQL query.
     :type: str
-    :return: An iterator of the result of the query.
+    :return: An iterator of the results from the query.
     :rtype: :class:`QueryResults`
     '''
     try:
