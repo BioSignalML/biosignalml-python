@@ -53,7 +53,7 @@ class Uri(librdf.Uri):
   Wrapper for Redland URI class --- see http://librdf.org/docs/pydoc/RDF.html#Uri.
 
   We extend the class with an `__add__()` method to allow a new URI to be formed
-  be appending a string to an existing one.
+  by appending a string to an existing one.
   '''
 
   def __add__(self, s):
