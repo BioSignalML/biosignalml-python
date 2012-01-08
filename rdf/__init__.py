@@ -93,11 +93,14 @@ class Literal(Node):
   #-------------------------------------------------------
     super(Literal, self).__init__(literal=str(value), datatype=Uri(datatype), language=language)
 
-  def __str__(self):
-  #-----------------
-    l = ['"""' + self._literal[0] + '"""']
-    if   self._literal[1]: l.append('@' + self._literal[1])
-    elif self._literal[2]: l.append('^^' + self._literal[2])
+  def as_string(self):
+  #-------------------
+    '''
+    Return the literal as a quoted string with language and datatype attributes.
+    '''
+    l = ['"""' + self.literal[0] + '"""']
+    if   self.literal[1]: l.append('@' + self.literal[1])
+    elif self.literal[2]: l.append('^^' + self.literal[2])
     return ''.join(l)
 
 
