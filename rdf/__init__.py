@@ -72,7 +72,11 @@ class Node(librdf.Node):
   Wrapper for Redland Node (RDF Resource, Property, Literal)
   class --- see http://librdf.org/docs/pydoc/RDF.html#Node.
   '''
-  pass
+
+  def as_string(self):
+  #-------------------
+    return (self.literal_value['string'] if self.is_literal()
+      else str(self))            ## Add <...> around str(resource) selfs ??
 
 
 class Literal(Node):
@@ -315,13 +319,6 @@ class Graph(librdf.Model):
     '''
     return super(Graph, self).find_statements(statement)
 
-  @staticmethod
-  def _make_literal(node, default):
-  #-------------------------------
-    return (node.literal_value['string'] if node and node.is_literal()
-      else default if default is not None    ### ?????
-      else node)                             ### what about str(node) ??
-
   def get_object(self, s, p):
   #--------------------------
     '''
@@ -353,7 +350,8 @@ class Graph(librdf.Model):
       is in the graph and `object` is a :class:`Literal`; as a :class:`Node` if it
       exists and is not a Literal; otherwise `None`.
     '''
-    return self._make_literal(self.get_object(s, p), None)
+    l = self.get_object(s, p)
+    return l.as_string() if l else None
 
   def get_objects(self, s, p):
   #---------------------------
@@ -384,7 +382,7 @@ class Graph(librdf.Model):
        for `object`\s with (`subject`, `predicate`, `object`) statements in the graph.
     :rtype: iterator
     '''
-    for v, g in self.get_objects(s, p): yield (self._make_literal(v, None), g)
+    for v, g in self.get_objects(s, p): yield (v.as_string(), g)
 
   def query(self, sparql):
   #-----------------------
