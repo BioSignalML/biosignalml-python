@@ -1,1 +1,1 @@
-../../../ontologies/ontology.py
+../../../ontologies/bsml/ontology.py
