@@ -264,13 +264,13 @@ class Recording(AbstractObject):
     return self.timeline.interval(start, duration)
 
 
-  def map_to_graph(self, rdfmap=None):
-  #-----------------------------------
+  def save_to_graph(self, rdfmap=None):
+  #------------------------------------
     graph = Graph(self.uri)
-    AbstractObject.map_to_graph(self, graph, rdfmap)
-    AbstractObject.map_to_graph(self.timeline, graph, rdfmap)
-    for s in self.signals(): s.map_to_graph(graph, rdfmap)
-    for e in self._events.itervalues(): e.map_to_graph(graph, rdfmap)
+    AbstractObject.save_to_graph(self, graph, rdfmap)
+    AbstractObject.save_to_graph(self.timeline, graph, rdfmap)
+    for s in self.signals(): s.save_to_graph(graph, rdfmap)
+    for e in self._events.itervalues(): e.save_to_graph(graph, rdfmap)
     return graph
 
 
@@ -279,7 +279,7 @@ class Recording(AbstractObject):
     namespaces = { 'bsml': BSML.uri }
     namespaces.update(NAMESPACES)
     namespaces.update(prefixes)
-    return self.map_to_graph().serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
+    return self.save_to_graph().serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
 
 
 class Signal(AbstractObject):
@@ -341,12 +341,12 @@ class TimeLine(AbstractObject):
 
   def instant(self, when):
   #----------------------
-    return RelativeInstant(self.make_uri(), when, self)
+    return Instant(self.make_uri(), when, self)
 
   def interval(self, start, duration):
   #----------------------------------
     if duration == 0.0: return self.instant(start)
-    else:               return RelativeInterval(self.make_uri(), start, duration, self)
+    else:               return Interval(self.make_uri(), start, duration, self)
 
 
 class Instant(AbstractObject):
@@ -368,8 +368,8 @@ class Instant(AbstractObject):
     return Instant(self.make_uri(True), self.at + increment, self.timeline)
 
 
-class RelativeInterval(AbstractObject):
-#======================================
+class Interval(AbstractObject):
+#==============================
   '''
   An abstract BioSignalML Interval.
   '''
@@ -404,7 +404,7 @@ class Event(AbstractObject):
     ##logging.debug('Event: %s (%s)', uri, repr(uri))
     super(Event, self).__init__(uri, metadata=metadata)
 
-  def map_to_graph(self, graph, rdfmap):
-  #-------------------------------------
-    AbstractObject.map_to_graph(self, graph, rdfmap)
-    AbstractObject.map_to_graph(self.time, graph, rdfmap)
+  def save_to_graph(self, graph, rdfmap):
+  #--------------------------------------
+    AbstractObject.save_to_graph(self, graph, rdfmap)
+    AbstractObject.save_to_graph(self.time, graph, rdfmap)
