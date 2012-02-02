@@ -11,6 +11,8 @@
 __docformat__ = 'restructuredtext'
 
 import numpy as np
+from collections import namedtuple
+
 import logging
 
 
@@ -18,6 +20,11 @@ class DataError(Exception):
 #==========================
   pass
 
+'''
+A tuple containg data along with its starting time.
+'''
+DataSegment = namedtuple('DataSegment', 'starttime, dataseries')
+#==========
 
 class Clock(object):
 #===================
