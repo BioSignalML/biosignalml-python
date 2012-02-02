@@ -28,3 +28,38 @@ from timeline    import *
 from data        import *
 from ontology    import BSML
 
+
+
+class Recording(AbstractRecording):
+#==================================
+  pass
+
+
+class Signal(AbstractSignal, TimeSeries):
+#========================================
+
+  ##def __init__(self, 
+
+  def read(self, interval):
+  #------------------------
+    '''
+    :return: A :class:TimeSeries containing signal data covering the interval.
+    '''
+    raise NotImplementedError, 'Signal.read()'
+
+
+
+
+  def __len__(self):
+  #----------------
+    return 0
+
+
+class UniformSignal(Signal, UniformTimeSeries):
+#==============================================
+  pass
+
+
+class Event(AbstractEvent):
+#==========================
+  pass
