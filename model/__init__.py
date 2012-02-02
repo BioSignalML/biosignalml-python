@@ -31,7 +31,7 @@ from biosignalml.rdf import NAMESPACES, RDF, TL, EVT
 from biosignalml.rdf import Uri, Statement, Graph
 
 from ontology import BSML
-from data     import TimeSeries
+from data     import *
 
 from mapping import bsml_mapping
 
@@ -188,14 +188,14 @@ class Recording(AbstractObject):
 
   def load_signals_from_store(self, store, rdfmap=None):
   #-----------------------------------------------------
-    '''
+    """
     Retrieve the recording's signals from a triple store.
 
     :param store: A RDF triple store.
     :type store: :class:`biosignalml.repostory.Repository`
     :param rdfmap: How to map properties to attributes.
     :type rdfmap: :class:`biosignalml.model.Mapping`
-    '''
+    """
     for sig in store.get_subjects(BSML.recording, self.uri):
       self.add_signal(Signal.create_from_store(sig, store, rdfmap))
 
