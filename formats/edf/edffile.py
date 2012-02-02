@@ -16,6 +16,7 @@ import numpy as np
 import urllib
 import logging
 from datetime import datetime
+from collections iport namedtuple
 
 
 class FormatError(Exception):
@@ -64,6 +65,22 @@ RECORDINGFIELDS = [ 'recording_date',
                     'recording_investigator',
                     'recording_equipment',
                   ]
+
+
+'''
+A tuple containg data from an EDF record.
+'''
+RecordData = namedtuple('RecordData', 'channel, starttime, rate, data')
+
+'''
+A tuple containg data for a signal.
+'''
+SignalData = namedtuple('SignalData', 'startpos, length, data')
+
+'''
+A tuple for scaling.
+'''
+Scaling = namedtuple('Scaling', 'scale, offset')
 
 
 class EDF(object):
@@ -168,7 +185,6 @@ class EDFFile(object):
     if self._hdrsize != 256*(self._nsignals + 1):
       self._error('Header size mismatch -- expected %d, have %d bytes'
                   % (self._hdrsize, 256*(self._nsignals + 1)))
-
     self.start_datetime = datetime.strptime(self.startdate + self.starttime, '%d.%m.%y%H.%M.%S')
     if self.start_datetime.year < 1985:       # EDF century start is 1985
       self.start_datetime = self.start_datetime.replace(self.start_datetime.year + 100)
@@ -194,7 +210,7 @@ class EDFFile(object):
       else:
         try:
           scale = float(self._physmax[n] - self._physmin[n]) / float(self._digmax[n] - self._digmin[n])
-          self.scaling.append( (scale, float(self._physmin[n]) - scale * float(self._digmin[n])) )
+          self.scaling.append( Scaling(scale, float(self._physmin[n]) - scale * float(self._digmin[n])) )
         except ZeroDivisionError:
           self._error('Physical max equal to minimum for signal %d: %s' % (n, self.label[n]))
           self.scaling.append(None)
@@ -436,7 +452,7 @@ class EDFFile(object):
           else:
             (scale, offset) = self.scaling[signo]
           data = scale * raw.astype(dtype) + offset
-          yield (chan, sigstart, self.rate[signo], data)
+          yield RecordData(chan, sigstart, self.rate[signo], data)
       recno += 1
       startratio = 0.0
 
@@ -472,7 +488,7 @@ class EDFFile(object):
       pos += n
       recno += 1
       offset = 0
-    return (startpos, count, data)
+    return SignalData(startpos, count, data)
 
   def normalised_signal(self, signum, posn, length, smin=-1.0, smax=1.0):
   #=====================================================================
@@ -480,12 +496,12 @@ class EDFFile(object):
     dmax = self._digmax[signum]
     scale = float((smax - smin))/float(dmax - dmin)
     raw = self.raw_signal(signum, posn, length)
-    return (raw[0], raw[1], smin + scale*(raw[2] - dmin))
+    return SignalData(raw.startpos, raw.length, smin + scale*raw.data - dmin))
 
   def physical_signal(self, signum, posn, length):
   #==============================================
     raw = self.raw_signal(signum, posn, length)
-    return (raw[0], raw[1], self.scaling[signum][0]*raw[2] + self.scaling[signum][1])
+    return SignalData(raw.startpos, raw.length, self.scaling[signum].scale*raw.data + self.scaling[signum].offset)
 
 
 """
