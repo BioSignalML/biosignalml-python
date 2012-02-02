@@ -31,8 +31,6 @@ from biosignalml.rdf import NAMESPACES, RDF, TL, EVT
 from biosignalml.rdf import Uri, Statement, Graph
 
 from ontology import BSML
-from data     import *
-
 from mapping import bsml_mapping
 
 
