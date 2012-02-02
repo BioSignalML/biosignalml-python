@@ -163,8 +163,8 @@ class AbstractObject(object):
     if v: self._assign(attr, v)
 
 
-class Recording(AbstractObject):
-#===============================
+class AbstractRecording(AbstractObject):
+#======================================
   '''
   An abstract BioSignalML Recording.
   '''
@@ -178,7 +178,7 @@ class Recording(AbstractObject):
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
-    super(Recording, self).__init__(uri, metadata=metadata)
+    AbstractObject.__init__(self, uri, metadata=metadata)
     self.timeline = TimeLine(str(uri) + '/timeline')
     self._signals = { }
     self._signal_uris = [ ]
@@ -195,7 +195,7 @@ class Recording(AbstractObject):
     :type rdfmap: :class:`biosignalml.model.Mapping`
     """
     for sig in store.get_subjects(BSML.recording, self.uri):
-      self.add_signal(Signal.create_from_store(sig, store, rdfmap))
+      self.add_signal(AbstractSignal.create_from_store(sig, store, rdfmap))
 
   def signals(self):
   #-----------------
@@ -280,8 +280,8 @@ class Recording(AbstractObject):
     return self.save_to_graph().serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
 
 
-class Signal(AbstractObject):
-#============================
+class AbstractSignal(AbstractObject):
+#====================================
   '''
   An abstract BioSignalML Signal.
   '''
@@ -295,7 +295,7 @@ class Signal(AbstractObject):
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
-    super(Signal, self).__init__(uri, metadata=metadata)
+    AbstractObject.__init__(self, uri, metadata=metadata)
     self.recording = None
 
   ### Are the following really methods on a SignalData class (or RawSignal, cf RawRecording)??
@@ -386,8 +386,8 @@ class Interval(AbstractObject):
     return Interval(self.make_uri(True), self.start + increment, self.duration, self.timeline)
 
 
-class Event(AbstractObject):
-#===========================
+class AbstractEvent(AbstractObject):
+#===================================
   '''
   An abstract BioSignalML Event.
   '''
@@ -400,7 +400,7 @@ class Event(AbstractObject):
   def __init__(self, uri, metadata={}):
   #------------------------------------
     ##logging.debug('Event: %s (%s)', uri, repr(uri))
-    super(Event, self).__init__(uri, metadata=metadata)
+    AbstractObject.__init__(self, uri, metadata=metadata)
 
   def save_to_graph(self, graph, rdfmap):
   #--------------------------------------
