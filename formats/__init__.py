@@ -105,7 +105,7 @@ class BSMLRecording(model.Recording):
 
   def rdf_metadata(self, format='turtle', prefixes={}):
   #----------------------------------------------------
-    '''
+    """
     Get a Recording's metadata as RDF.
 
     :param format: The RDF format with which to serialise metadata. Options are 'turtle'
@@ -113,7 +113,7 @@ class BSMLRecording(model.Recording):
     :type format: str
     :return: The RDF as a string.
     :rtype: str
-    '''
+    """
     not_implemented(self, 'save_metadata')
 
 
