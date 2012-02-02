@@ -27,11 +27,12 @@ Abstract BioSignalML objects.
 import uuid
 import logging
 
-from biosignalml.rdf import NAMESPACES, RDF, TL, EVT
+from biosignalml.rdf import NAMESPACES, RDF, EVT
 from biosignalml.rdf import Uri, Statement, Graph
 
 from ontology import BSML
 from mapping import bsml_mapping
+from timeline import TimeLine
 
 
 class AbstractObject(object):
@@ -321,69 +322,6 @@ class AbstractSignal(AbstractObject):
   def __len__(self):
   #----------------
     return 0
-
-
-
-class TimeLine(AbstractObject):
-#==============================
-
-  '''
-  An abstract BioSignalML TimeLine.
-  '''
-
-  metaclass = TL.RelativeTimeLine
-
-  def __init__(self, uri, metadata={}):
-  #------------------------------------
-    super(TimeLine, self).__init__(uri, metadata=metadata)
-
-  def instant(self, when):
-  #----------------------
-    return Instant(self.make_uri(), when, self)
-
-  def interval(self, start, duration):
-  #----------------------------------
-    if duration == 0.0: return self.instant(start)
-    else:               return Interval(self.make_uri(), start, duration, self)
-
-
-class Instant(AbstractObject):
-#=============================
-  '''
-  An abstract BioSignalML Instant.
-  '''
-
-  metaclass = TL.RelativeInstant
-
-  def __init__(self, uri, when, timeline, metadata={}):
-  #----------------------------------------------------
-    super(Instant, self).__init__(uri, metadata=metadata)
-    self.at = when
-    self.timeline = timeline
-
-  def __add__(self, increment):
-  #----------------------------
-    return Instant(self.make_uri(True), self.at + increment, self.timeline)
-
-
-class Interval(AbstractObject):
-#==============================
-  '''
-  An abstract BioSignalML Interval.
-  '''
-
-  metaclass = TL.RelativeInterval
-
-  def __init__(self, uri, start, duration, timeline, metadata={}):
-  #---------------------------------------------------------------
-    super(Interval, self).__init__(uri, metadata=metadata)
-    self.start = start
-    self.duration = duration
-    self.timeline = timeline
-
-  def __add__(self, increment):
-  #----------------------------
-    return Interval(self.make_uri(True), self.start + increment, self.duration, self.timeline)
 
 
 class AbstractEvent(AbstractObject):
