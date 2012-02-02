@@ -66,9 +66,11 @@ class UniformClock(Clock):
   #------------------------
     self._rate = float(rate)
 
+  '''
+  The time of a single sample, or the array of times of a slice.
+  '''
   def __getitem__(self, key):
   #--------------------------
-    print key, self._rate
     if isinstance(key, slice):
       if key.stop is None: raise TypeError
       return np.arange(key.start if key.start is not None else 0,
@@ -115,22 +117,31 @@ class TimeSeries(object):
   def __len__(self):
   #-----------------
     return len(self.data)
-     
+   
   def __str__(self):
   #-----------------
     return '<Time Series:\n times=%s\n data=%s>' % (self.times, self.data)
 
+  '''
+  A single value as a (time, data( tuple, or a slice as a 2D array of (time, data) points.
+  '''
   def __getitem__(self, key):
   #--------------------------
     if isinstance(key, slice): return np.column_stack((self.time[key], self.data[key]))
     elif isinstance(key, int): return (self.time[key], self.data[k])
     else:                      raise TypeError
 
+  '''
+  The array of sample times.
+  '''
   @property
   def times(self):
   #---------------
     return self.time[:len(self)]
 
+  '''
+  All the (time, data) points as a 2D array.
+  '''
   @property
   def points(self):
   #----------------
