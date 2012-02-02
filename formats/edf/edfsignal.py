@@ -109,6 +109,6 @@ class EDFSignal(BSMLSignal):
       if points > length: points = length
       sigdata = self.recording._edffile.physical_signal(self.index, startpos, points)
       if sigdata.length <= 0: break
-      yield DataSegment(float(sigdata.startpos)/self.rate), UniformTimeSeries(sigdata.data, self.rate))
+      yield DataSegment(float(sigdata.startpos)/self.rate, UniformTimeSeries(sigdata.data, self.rate))
       startpos += sigdata[1]
       length -= sigdata[1]

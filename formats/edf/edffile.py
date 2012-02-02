@@ -16,7 +16,7 @@ import numpy as np
 import urllib
 import logging
 from datetime import datetime
-from collections iport namedtuple
+from collections import namedtuple
 
 
 class FormatError(Exception):
@@ -67,20 +67,14 @@ RECORDINGFIELDS = [ 'recording_date',
                   ]
 
 
-'''
-A tuple containg data from an EDF record.
-'''
 RecordData = namedtuple('RecordData', 'channel, starttime, rate, data')
+'''A tuple containg data from an EDF record.'''
 
-'''
-A tuple containg data for a signal.
-'''
 SignalData = namedtuple('SignalData', 'startpos, length, data')
+'''A tuple containg data for a signal.'''
 
-'''
-A tuple for scaling.
-'''
 Scaling = namedtuple('Scaling', 'scale, offset')
+'''A tuple for scaling.'''
 
 
 class EDF(object):
@@ -496,7 +490,7 @@ class EDFFile(object):
     dmax = self._digmax[signum]
     scale = float((smax - smin))/float(dmax - dmin)
     raw = self.raw_signal(signum, posn, length)
-    return SignalData(raw.startpos, raw.length, smin + scale*raw.data - dmin))
+    return SignalData(raw.startpos, raw.length, smin + scale*raw.data - dmin)
 
   def physical_signal(self, signum, posn, length):
   #==============================================
