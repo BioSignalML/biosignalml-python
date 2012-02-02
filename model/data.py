@@ -20,18 +20,16 @@ class DataError(Exception):
 #==========================
   pass
 
-'''
-A tuple containg data along with its starting time.
-'''
 DataSegment = namedtuple('DataSegment', 'starttime, dataseries')
-#==========
+'''A tuple containg data along with its starting time.'''
+
 
 class Clock(object):
 #===================
   """
   The sample times of a :class:`TimeSeries`.
 
-  :param np.array times: :class:`np.array` of sample times, in seconds.
+  :param np.array times: Array of sample times, in seconds.
   """
   def __init__(self, times):
   #-------------------------
@@ -48,7 +46,7 @@ class Clock(object):
   """
   Add times to a clock.
 
-  :param np.array times: :class:`np.array` of sample times, in seconds.
+  :param np.array times: Array of sample times, in seconds.
   """
   def extend(self, times):
   #-----------------------
@@ -100,8 +98,8 @@ class TimeSeries(object):
   """
   A series of data values with times.
 
-  :param np.array times: :class:`np.array` of sample times, in seconds or a :class:`Clock` with times.
-  :param np.array data: :class:`np.array` of data values.
+  :param np.array times: Array of sample times, in seconds or a :class:`Clock` with times.
+  :param np.array data: Array of data values.
 
   append(self, data, clock=None)
   extend(self, timeseries)
@@ -141,8 +139,8 @@ class TimeSeries(object):
   """
   Extend a time series.
 
-  :param np.array data: :class:`np.array` of data values.
-  :param np.array times: :class:`np.array` of sample times, in seconds
+  :param np.array data: Array of data values.
+  :param np.array times: Array of sample times, in seconds
     or a :class:`Clock` with times for the entire, extended, time series.
   """
   def extend(self, times, data):
@@ -183,7 +181,7 @@ class UniformTimeSeries(TimeSeries):
   """
   A series of uniformly spaced data values.
 
-  :param np.array data: :class:`np.array` of data values.
+  :param np.array data: Array of data values.
   :param float rate: The sample rate, in Hertz.
   :param float period: The sampling period, in seconds, can be specified instead of `rate`,
   """
@@ -204,7 +202,7 @@ class UniformTimeSeries(TimeSeries):
   """
   Extend a uniform time series.
 
-  :param np.array data: :class:`np.array` of data values.
+  :param np.array data: Array of data values.
   """
   def extend(self, data):
   #----------------------
