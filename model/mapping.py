@@ -12,13 +12,13 @@
 import os
 import logging
 import importlib  # Python 2.7 onwards...
+from collections import namedtuple
 from datetime import datetime, timedelta
 from isodate  import isoduration
 
-from biosignalml.rdf import Graph, Node, Uri, Statement
-
-
-BSML_MAP_URI = 'file://' + os.path.dirname(os.path.abspath(__file__)) + '/mapping.ttl'
+from biosignalml.model.ontology import BSML
+from biosignalml.rdf import Node, Uri, Statement
+from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
 
 _datatypes = { 'xsd:float':              float,  # Needs to be full uri...
 ##                                                 XSD.float.uri etc...
@@ -41,6 +41,9 @@ _datatypes = { 'xsd:float':              float,  # Needs to be full uri...
 
 def get_uri(v):
 #==============
+  '''
+  Get the `uri` attribute if it exists, otherwise the object as a string.
+  '''
   return v.uri if getattr(v, 'uri', None) else str(v)
 
 def datetime_to_isoformat(dt):
@@ -73,85 +76,73 @@ def isoduration_to_seconds(d):
   return 0
 
 
-_modules = """
-prefix dcterms: <http://purl.org/dc/terms/>
-prefix map:     <http://www.biosignalml.org/ontologies/2011/02/mapping#>
+class AttributeMap(object):
+#==========================
 
-select ?mod ?source
-  where {
-    ?m a map:MapModule .
-    ?m map:prefix ?mod .
-    ?m dcterms:source ?source .
-    }
-"""
+  def __init__(self, attribute, property, metaclass=None, datatype=None, to_rdf=None, from_rdf=None):
+  #--------------------------------------------------------------------------------------------------
+    self.attribute = attribute
+    self.property = property
+    self.metaclass = metaclass
+    self.datatype = datatype
+    self.to_rdf = to_rdf
+    self.from_rdf = from_rdf
 
-_map_query = """
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix map:  <http://www.biosignalml.org/ontologies/2011/02/mapping#>
 
-select ?lbl ?prop ?class ?otype ?map ?rmap
-  where {
-    ?m a map:Mapping .
-    ?m rdfs:label ?lbl .
-    ?m map:property ?prop .
-    optional { ?m map:class ?class }
-    optional { ?m map:object ?otype }
-    optional { ?m map:mapped-by ?map }
-    optional { ?m map:reverse-map ?rmap }
-    }
-"""
+ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf')
+
+
+_BSML_MAPS = [
+# Generic metadata:
+  AttributeMap('label',           RDFS.label),
+  AttributeMap('comment',         RDFS.comment),
+  AttributeMap('description',     DCTERMS.description),
+  AttributeMap('dateSubmitted" ', DCTERMS.dateSubmitted,
+    None, XSD.dateTime, datetime_to_isoformat, isoformat_to_datetime),
+
+# Recording specific metadata:
+  AttributeMap('format',        DCTERMS.format,  BSML.Recording),
+  AttributeMap('investigation', DCTERMS.subject, BSML.Recording),
+  AttributeMap('starttime',     DCTERMS.created, BSML.Recording, XSD.dateTime, datetime_to_isoformat, isoformat_to_datetime),
+  AttributeMap('duration',      DCTERMS.extent,  BSML.Recording, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+##  AttributeMap('digest',        BSML.digest,     BSML.Recording),
+
+# Timing specific metadata:
+  AttributeMap('timeline', TL.timeline,                              to_rdf=get_uri),
+  AttributeMap('at',       TL.atDuration,       TL.RelativeInstant,  XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+  AttributeMap('start',    TL.beginsAtDuration, TL.RelativeInterval, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+  AttributeMap('duration', TL.durationXSD,      TL.RelativeInterval, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+
+# Event specific metadata:
+  AttributeMap('time',   TL.time,    EVT.Event),
+  AttributeMap('factor', EVT.factor, EVT.Event),
+
+# Signal specific metadata:
+  AttributeMap('recording',    BSML.recording,    BSML.Signal, to_rdf=get_uri),
+  AttributeMap('units',        BSML.units,        BSML.Signal),
+##  AttributeMap('transducer',   BSML.transducer,   BSML.Signal),
+  AttributeMap('filter',       BSML.preFilter,    BSML.Signal),
+  AttributeMap('rate',         BSML.rate,         BSML.Signal, XSD.double),
+##  AttributeMap('clock',        BSML.sampleClock,  BSML.Signal, to_rdf=get_uri),
+  AttributeMap('minFrequency', BSML.minFrequency, BSML.Signal, XSD.double),
+  AttributeMap('maxFrequency', BSML.maxFrequency, BSML.Signal, XSD.double),
+  AttributeMap('minValue',     BSML.minValue,     BSML.Signal, XSD.double),
+  AttributeMap('maxValue',     BSML.maxValue,     BSML.Signal, XSD.double),
+  ]
+
+
 
 def _uri_protocol(u):
 #====================
   return u.startswith('file:') or u.startswith('http:')
 
 
-class MapEntry(object):
-#======================
-
-  def __init__(self, label, cls, prop, dtype, mapfn, rmapfn):
-  #----------------------------------------------------------
-    self.label = label
-    self.cls = cls
-    self.prop = prop
-    self.dtype = dtype
-    self.mapfn = mapfn
-    self.rmapfn = rmapfn
-
-class ReverseEntry(object):
-#==========================
-
-  def __init__(self, label, dtype, mapfn):
-  #---------------------------------------
-    self.label = label
-    self.dtype = dtype
-    self.mapfn = mapfn
-
-
-def _load_mapping(mapfile):
+def _load_mapping(maplist):
 #==========================
   mapping = { }
-  maps = Graph.create_from_resource(mapfile if _uri_protocol(mapfile) else
-                                    'file://' + os.path.abspath(mapfile), 'turtle')
-  for s in maps.query(_modules):
-    try:
-      module = str(s['mod'])
-      if globals().get(module) is None:
-        fpath = os.path.split(os.path.abspath(mapfile))[0]
-        fname = os.path.split(os.path.abspath(str(s['source'])))[1]
-        globals()[module] = importlib.import_module(os.path.splitext(fname)[0], fpath)
-    except Exception, msg:
-      logging.error("Error loading mapping '%s':", str(s['source']), msg)
-      pass
-  for s in maps.query(_map_query):
-    label = str(s['lbl'])
-    cls = str(s['class'].uri) if s['class'] else None
-    key = label + (cls if cls else '')
-    mapping[key] = MapEntry(label, cls,
-                     s['prop'].uri,
-                     s['otype'].uri if s['otype'] else None,
-                     str(s['map'])  if s['map']   else None,
-                     str(s['rmap']) if s['rmap']  else None)
+  for m in maplist:
+    key = m.attribute + (str(m.metaclass) if m.metaclass else '')
+    mapping[key] = m
   return mapping
 
 # Generic (BSML) mapping; format specific overrides.
@@ -167,16 +158,16 @@ def bsml_mapping():
 class Mapping(object):
 #=====================
 
-  def __init__(self, mapfile=None):
+  def __init__(self, maplist=None):
   #--------------------------------
     self._mapping = _bsml_maps.copy()
-    if mapfile:
-      if isinstance(mapfile, list):
-        for mf in mapfile: self._mapping.update(_load_mapping(mf))
+    if maplist:
+      if isinstance(maplist, tuple):
+        for ml in maplist: self._mapping.update(_load_mapping(ml))
       else:
-        self._mapping.update(_load_mapping(mapfile))
-    self._reverse = { (str(m.prop) + (m.cls if m.cls else '')):
-       ReverseEntry(m.label, m.dtype, m.rmapfn) for m in self._mapping.itervalues() }
+        self._mapping.update(_load_mapping(maplist))
+    self._reverse = { (str(m.property) + (str(m.metaclass) if m.metaclass else '')):
+      ReverseEntry(m.attribute, m.datatype, m.from_rdf) for m in self._mapping.itervalues() }
 
   @staticmethod
   def _makenode(v, dtype, mapfn):
@@ -196,7 +187,7 @@ class Mapping(object):
         return Node(Uri(v))
       else:
         result = { 'literal': v }
-        if dtype: result['datatype'] = dtype
+        if dtype: result['datatype'] = dtype.uri
         return Node(**result)
 
   def statement(self, s, attr, v):
@@ -208,19 +199,19 @@ class Mapping(object):
   #------------------------------------
     if getattr(metadata, 'uri', None):
       subject = metadata.uri
-      metaclasses = [ str(cls.metaclass) for cls in metadata.__class__.__mro__
+      metaclasses = [ cls.metaclass for cls in metadata.__class__.__mro__
                       if cls.__dict__.get('metaclass') ]
       metadict = getattr(metadata, 'metadata', { })
       for attr, m in self._mapping.iteritems():
-        if m.cls is None or m.cls in metaclasses:  ## Or do we need str() before lookup ??
-          if getattr(metadata, m.label, None) not in [None, '']:
-            yield Statement(subject, m.prop, self._makenode(getattr(metadata, m.label), m.dtype, m.mapfn))
-          if metadict.get(m.label, None) not in [None, '']:
-            yield Statement(subject, m.prop, self._makenode(metadict.get(m.label), m.dtype, m.mapfn))
+        if m.metaclass is None or m.metaclass in metaclasses:  ## Or do we need str() before lookup ??
+          if getattr(metadata, m.attribute, None) not in [None, '']:
+            yield Statement(subject, m.property, self._makenode(getattr(metadata, m.attribute), m.datatype, m.to_rdf))
+          if metadict.get(m.attribute, None) not in [None, '']:
+            yield Statement(subject, m.property, self._makenode(metadict.get(m.attribute), m.datatype, m.to_rdf))
 
 
   @staticmethod
-  def _makevalue(node, dtype, rmapfn):
+  def _makevalue(node, dtype, from_rdf):
   #-----------------------------------
     if   not node: return None
     elif node.is_resource(): v = node.uri
@@ -228,25 +219,25 @@ class Mapping(object):
     else:
       v = node.literal[0]
       if dtype: v = _datatypes.get(dtype, str)(v) 
-    return eval(rmapfn)(v) if rmapfn else v
+    return eval(from_rdf)(v) if from_rdf else v
 
   def metadata(self, statement, cls):
   #----------------------------------
     m = self._reverse.get(str(statement.predicate.uri) + (str(cls) if cls else ''), None)
     if m is None: m = self._reverse.get(str(statement.predicate.uri), ReverseEntry(None, None, None))
-    return (statement.subject.uri, m.label, self._makevalue(statement.object, m.dtype, m.mapfn))
+    return (statement.subject.uri, m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf))
 
   def get_value_from_graph(self, source, attr, graph):
   #---------------------------------------------------
     m = self._mapping[attr]
-    return self._makevalue(graph.get_property(source, m.label), m.prop, m.dtype)
+    return self._makevalue(graph.get_property(source, m.attribute), m.property, m.datatype)
 
 
 def initialise():
 #================
   global _bsml_maps, _bsml_mapping
   if _bsml_maps is None:
-    _bsml_maps = _load_mapping(BSML_MAP_URI)
+    _bsml_maps = _load_mapping(_BSML_MAPS)
     _bsml_mapping = Mapping()   # Standard model
 
 
@@ -266,6 +257,8 @@ initialise()
 
 if __name__ == '__main__':
 #=========================
+
+  from biosignalml.rdf import Graph
 
   class C(object):
     def __init__(self):
