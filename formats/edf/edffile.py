@@ -123,9 +123,12 @@ class EDFFile(object):
   @classmethod
   def open(cls, fname):
   #--------------------
-    self = cls()
-    self._open(urllib.urlopen(fname).fp)
-    return self
+    try:
+      self = cls()
+      self._open(urllib.urlopen(fname).fp)
+      return self
+    except Exception:
+      return None
 
   @classmethod
   def fp_open(cls, fp):
