@@ -24,6 +24,8 @@ TimeLine, Instant and Interval objects.
 ######################################################
 
 
+from biosignalml.rdf import TL
+
 from abstraction import AbstractObject
 
 
@@ -34,7 +36,7 @@ class TimeLine(AbstractObject):
   An abstract BioSignalML TimeLine.
   '''
 
-  metaclass = TL.RelativeTimeLine
+  metaclass = TL.RelativeTimeLine  #: :attr:`.TL.RelativeTimeLine`
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
@@ -56,7 +58,7 @@ class Instant(AbstractObject):
   An abstract BioSignalML Instant.
   '''
 
-  metaclass = TL.RelativeInstant
+  metaclass = TL.RelativeInstant   #: :attr:`.TL.RelativeInstant`
 
   def __init__(self, uri, when, timeline, metadata={}):
   #----------------------------------------------------
@@ -75,7 +77,7 @@ class Interval(AbstractObject):
   An abstract BioSignalML Interval.
   '''
 
-  metaclass = TL.RelativeInterval
+  metaclass = TL.RelativeInterval  #: :attr:`.TL.RelativeInterval`
 
   def __init__(self, uri, start, duration, timeline, metadata={}):
   #---------------------------------------------------------------
