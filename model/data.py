@@ -183,8 +183,8 @@ class TimeSeries(object):
     #                    np.concatenate((self.data, series.data)))
     if self.time[-1] >= series.time[0]:
       raise DataError('Times must be increasing')
-      return TimeSeries(np.concatenate((self.times, series.times)),
-                        np.concatenate((self.data, series.data)))
+    return TimeSeries(np.concatenate((self.times, series.times)),
+                      np.concatenate((self.data, series.data)))
 
 
 class UniformTimeSeries(TimeSeries):
