@@ -13,7 +13,7 @@ import os
 import logging
 import math
 
-from biosignalml.model   import TimeSeries
+from biosignalml.model   import DataSegment, UniformTimeSeries
 from biosignalml.formats import BSMLSignal
 
 from edffile import EDF
@@ -108,7 +108,7 @@ class EDFSignal(BSMLSignal):
     while length > 0:
       if points > length: points = length
       sigdata = self.recording._edffile.physical_signal(self.index, startpos, points)
-      if sigdata[1] <= 0: break
-      yield TimeSeries(sigdata[2], rate = self.rate, starttime = float(sigdata[0])/self.rate)
+      if sigdata.length <= 0: break
+      yield DataSegment(float(sigdata.startpos)/self.rate), UniformTimeSeries(sigdata.data, self.rate))
       startpos += sigdata[1]
       length -= sigdata[1]
