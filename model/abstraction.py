@@ -32,7 +32,6 @@ from biosignalml.rdf import Uri, Statement, Graph
 
 from ontology import BSML
 from mapping import bsml_mapping
-from timeline import TimeLine
 
 
 class AbstractObject(object):
@@ -170,7 +169,7 @@ class AbstractRecording(AbstractObject):
   An abstract BioSignalML Recording.
   '''
 
-  metaclass = BSML.Recording
+  metaclass = BSML.Recording  #: :attr:`.BSML.Recording`
 
   attributes = [ 'label', 'source', 'format', 'comment', 'investigation',
                  'starttime', 'duration',
@@ -180,7 +179,7 @@ class AbstractRecording(AbstractObject):
   def __init__(self, uri, metadata={}):
   #------------------------------------
     AbstractObject.__init__(self, uri, metadata=metadata)
-    self.timeline = TimeLine(str(uri) + '/timeline')
+    self.timeline = TimeLine(str(uri) + '/timeline')  ## Only if Recording doesn't have one ??
     self._signals = { }
     self._signal_uris = [ ]
     self._events = { }
@@ -200,6 +199,9 @@ class AbstractRecording(AbstractObject):
 
   def signals(self):
   #-----------------
+    """
+    The recording's signals as a list.
+    """
     return [ self._signals[s] for s in sorted(self._signal_uris) ]
 
   def add_signal(self, signal):
@@ -253,13 +255,18 @@ class AbstractRecording(AbstractObject):
   #------------------------
     return self._events[uri]
 
-
   def instant(self, when):
   #----------------------
+    """
+    Create an :class:`.Instant` on the recording's timeline.
+    """
     return self.timeline.instant(when)
 
   def interval(self, start, duration):
   #-----------------------------------
+    """
+    Create an :class:`.Interval` on the recording's timeline.
+    """
     return self.timeline.interval(start, duration)
 
 
@@ -287,7 +294,7 @@ class AbstractSignal(AbstractObject):
   An abstract BioSignalML Signal.
   '''
 
-  metaclass = BSML.Signal
+  metaclass = BSML.Signal     #: :attr:`.BSML.Signal`
 
   attributes = ['label', 'units', 'transducer', 'filter', 'rate',  'clock',
                 'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
@@ -299,30 +306,6 @@ class AbstractSignal(AbstractObject):
     AbstractObject.__init__(self, uri, metadata=metadata)
     self.recording = None
 
-  ### Are the following really methods on a SignalData class (or RawSignal, cf RawRecording)??
-  def read(self, interval):
-  #------------------------
-    '''
-    :return: A :class:TimeSeries containing signal data covering the interval.
-    '''
-    raise NotImplementedError, 'Signal.read()'
-
-  def append(self, timeseries):
-  #----------------------------
-    raise NotImplementedError, 'Signal.append()'
-
-  def data(self, n):
-  #----------------
-    raise NotImplementedError, 'Signal.data()'
-
-  def time(self, n):
-  #----------------
-    raise NotImplementedError, 'Signal.time()'
-
-  def __len__(self):
-  #----------------
-    return 0
-
 
 class AbstractEvent(AbstractObject):
 #===================================
@@ -330,7 +313,7 @@ class AbstractEvent(AbstractObject):
   An abstract BioSignalML Event.
   '''
 
-  metaclass = EVT.Event
+  metaclass = EVT.Event       #: :attr:`.BSML.Event`
 
   attributes = [ 'description', 'factor', 'time', ]
   '''Generic attributes of an Event.'''
