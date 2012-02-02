@@ -20,9 +20,6 @@ class DataError(Exception):
 #==========================
   pass
 
-DataSegment = namedtuple('DataSegment', 'starttime, dataseries')
-'''A tuple containg data along with its starting time.'''
-
 
 class Clock(object):
 #===================
@@ -181,7 +178,7 @@ class TimeSeries(object):
     #if isinstance(series, UniformTimeSeries):
     #  return TimeSeries(np.concatenate((self.times, series.times + self.time[-1] + 1.0/series.rate)),
     #                    np.concatenate((self.data, series.data)))
-    if self.time[-1] >= series.time[0]:
+    if self.time[-1] >= series.times[0]:  # Using 'times' allows a DataSeries to be added
       raise DataError('Times must be increasing')
     return TimeSeries(np.concatenate((self.times, series.times)),
                       np.concatenate((self.data, series.data)))
@@ -234,6 +231,45 @@ class UniformTimeSeries(TimeSeries):
     return UniformTimeSeries(np.concatenate((self.data, series.data)), self.rate)
 
 
+class DataSegment(object):
+#=========================
+  '''
+  Keep the start time of a time series,
+
+  :param float starttime: The starting time of the time series.
+  :param TimeSeries dataseries: A time series.
+  '''
+  def __init__(self, starttime, dataseries):
+  #-----------------------------------------
+    self.starttime = starttime
+    self.dataseries = dataseries
+
+  def __str__(self):
+  #-----------------
+    return 'Start: %s, Series: %s' % (self.starttime, self.dataseries)
+
+  def __getitem__(self, key):
+  #--------------------------
+    s = self.dataseries[key]
+    if isinstance(key, slice): return s + (self.starttime, 0)
+    else:                      return (s[0] + self.starttime, s[1])
+
+  @property
+  def data(self):
+  #--------------
+    return self.dataseries.data
+
+  @property
+  def times(self):
+  #---------------
+    return self.dataseries.times + self.starttime
+
+  @property
+  def points(self):
+  #----------------
+    return self.dataseries.points + (self.starttime, 0)
+
+
 if __name__ == '__main__':
 #-------------------------
 
@@ -248,17 +284,30 @@ if __name__ == '__main__':
   np.set_printoptions(threshold=50, edgeitems=5, suppress=True)
 
   print sw
+  print ''
   print uts
+  print ''
   print uts.points
+  print ''
 
-  sw.extend(uts.times + sw.time[-1] + 1.0/uts.rate, uts.data)
+  dsu = DataSegment(sw.time[-1] + 1.0/uts.rate, uts)
+  print dsu
+  print ''
 
-  j = sw
+#  sw.extend(uts.times + sw.time[-1] + 1.0/uts.rate, uts.data)
+
+  j = sw + dsu
 
   print j
+  print ''
   print j.points
+  print ''
 
   print j[95:106]
+  print ''
+
+  ds = DataSegment(100.0, j)
+  print ds[95:106]
 
 
 #  import pylab
