@@ -241,14 +241,14 @@ class Graph(librdf.Model):
   @classmethod
   def create_from_resource(cls, uri, format, base=None):
   #-----------------------------------------------------
-    '''
+    """
     Create a new Graph from RDF statements in a resource.
 
     :param uri: The URI of RDF content to parse and add.
     :param format: The content's RDF format.
     :param base: An optional base URI of the content.
     :rtype: A :class:`Graph`
-    '''
+    """
     self = cls()
     self.parse_resource(uri, format, base)
     return self
@@ -256,7 +256,7 @@ class Graph(librdf.Model):
   @classmethod
   def create_from_string(cls, string, format, base):
   #-------------------------------------------------
-    '''
+    """
     Create a new Graph from RDF statements in a string.
 
     :param string: The RDF to parse and add.
@@ -264,7 +264,7 @@ class Graph(librdf.Model):
     :param format: The string's RDF format.
     :param base: The base URI of the content.
     :rtype: A :class:`Graph`
-    '''
+    """
     self = cls()
     self.parse_string(string, format, base)
     return self
@@ -275,13 +275,13 @@ class Graph(librdf.Model):
 
   def parse_resource(self, uri, format, base=None):
   #------------------------------------------------
-    '''
+    """
     Add statements to the graph from a resource.
 
     :param uri: The URI of RDF content to parse and add.
     :param format: The content's RDF format.
     :param base: An optional base URI of the content.
-    '''
+    """
     parser = librdf.Parser(name=str(format))
     try:
       statements = parser.parse_as_stream(uri, base)
@@ -292,14 +292,14 @@ class Graph(librdf.Model):
 
   def parse_string(self, string, format, base):
   #--------------------------------------------
-    '''
+    """
     Add statements to the graph from a string.
 
     :param string: The RDF to parse and add.
     :type string: str
     :param format: The string's RDF format.
     :param base: The base URI of the content.
-    '''
+    """
     parser = librdf.Parser(name=str(format))
     try:
       statements = parser.parse_string_as_stream(string, base)
