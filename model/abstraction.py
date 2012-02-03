@@ -54,11 +54,10 @@ class AbstractObject(object):
   attributes = [ 'uri', 'description' ]
   '''List of generic attributes all resources have.'''
 
-  metadata = { }
-  '''Dictionary of property values with names not in :attr:`attributes` list.'''
-
   def __init__(self, uri, metadata={}):
-  #----------------------------------
+  #------------------------------------
+    self.metadata = { }
+    '''Dictionary of property values with names not in :attr:`attributes` list.'''
     self.set_attributes(metadata)
     self.uri = Uri(uri)
 
@@ -70,10 +69,14 @@ class AbstractObject(object):
     :param meta: Dictionary of `{ key: value }` pairs to set as attributes.
     :type meta: dict
     '''
+    assigned = [ ]
     for cls in self.__class__.__mro__:
       if 'attributes' in cls.__dict__:
         for attr in cls.__dict__['attributes']:
           setattr(self, attr, values.get(attr, None))
+          assigned.append(attr)
+    for attr, value in values.iteritems():
+      if attr not in assigned: self.metadata[attr] = value
 
   def get_attributes(self):
   #------------------------
