@@ -159,6 +159,27 @@ class AbstractObject(object):
       self._assign(attr, v)
     return self
 
+  def load_from_graph(self, graph, rdfmap=None, **kwds):
+  #-----------------------------------------------------
+    """
+    Set attributes from RDF triples in a graph.
+
+    :param uri: The URI for the resource.
+    :param graph: A graph of RDF statements.
+    :type graph: :class:`biosignalml.rdf.Graph`
+    :param rdfmap: How to map properties to attributes.
+    :type rdfmap: :class:`biosignalml.model.Mapping`
+    :rtype: :class:`AbstractObject`
+    """
+    import biosignalml.model.mapping as mapping
+    if rdfmap is None: rdfmap = mapping.bsml_mapping()
+    if graph.contains(Statement(self.uri, RDF.type, self.metaclass)):
+      for stmt in graph.get_statements(Statement(self.uri, None, None)):
+        s, attr, v = rdfmap.metadata(stmt, self.metaclass)
+        logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
+        self._assign(attr, v)
+    return self
+
   def set_from_graph(self, attr, graph, rdfmap=None):
   #--------------------------------------------------
     '''
@@ -299,6 +320,31 @@ class AbstractRecording(AbstractObject):
       self.add_signal(AbstractSignal.create_from_repository(sig, repository, rdfmap))
 
 
+  @classmethod
+  def create_from_string(cls, uri, string, format='turtle', rdfmap=None, **kwds):
+  #------------------------------------------------------------------------------
+    """
+    Create a new instance of a resource, setting attributes from RDF statements in a string.
+
+    :param uri: The URI for the resource.
+    :param string: The RDF to parse and add.
+    :type string: str
+    :param format: The string's RDF format.
+    :param rdfmap: How to map properties to attributes.
+    :type rdfmap: :class:`biosignalml.model.Mapping`
+    :rtype: :class:`AbstractObject`
+    """
+    graph = Graph.create_from_string(string, format, uri)
+    self = cls(uri, **kwds)
+#    self = cls(uri, timeline=graph.get_object(uri, TL.timeline).uri, **kwds)
+    self.load_from_graph(graph, rdfmap, **kwds)
+    for s in graph.get_subjects(BSML.recording, self.uri):
+      if graph.contains(Statement(s, RDF.type, BSML.Signal)):  ## UniformSignal ?? get rdf:type ??
+        sig = AbstractSignal(s.uri)
+        sig.load_from_graph(graph, rdfmap)
+        self.add_signal(sig)
+
+    return self
 class AbstractSignal(AbstractObject):
 #====================================
   '''
