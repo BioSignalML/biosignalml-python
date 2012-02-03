@@ -31,7 +31,6 @@ from biosignalml.rdf import NAMESPACES, RDF, EVT
 from biosignalml.rdf import Uri, Statement, Graph
 
 from ontology import BSML
-from mapping import bsml_mapping
 
 
 class AbstractObject(object):
@@ -124,7 +123,8 @@ class AbstractObject(object):
     Add RDF statements about ourselves to a graph.
 
     '''
-    if rdfmap is None: rdfmap = bsml_mapping()
+    import biosignalml.model.mapping as mapping
+    if rdfmap is None: rdfmap = mapping.bsml_mapping()
     if (self.metaclass):
       graph.append(Statement(self.uri, RDF.type, self.metaclass))
       graph.add_statements(rdfmap.statement_stream(self))
@@ -147,7 +147,8 @@ class AbstractObject(object):
     :type rdfmap: :class:`biosignalml.model.Mapping`
     :rtype: :class:`AbstractObject`
     '''
-    if rdfmap is None: rdfmap = bsml_mapping()
+    import biosignalml.model.mapping as mapping
+    if rdfmap is None: rdfmap = mapping.bsml_mapping()
     self = cls(uri, **kwds)
     statements = store.statements('<%(uri)s> ?p ?o',
                                   '<%(uri)s> a  <%(type)s> . <%(uri)s> ?p ?o',
@@ -165,7 +166,8 @@ class AbstractObject(object):
 
 
     '''
-    if rdfmap is None: rdfmap = bsml_mapping()
+    import biosignalml.model.mapping as mapping
+    if rdfmap is None: rdfmap = mapping.bsml_mapping()
     v = rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
 
@@ -185,6 +187,7 @@ class AbstractRecording(AbstractObject):
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
+    from biosignalml.model.timeline import TimeLine   ## Otherwise circular import...
     AbstractObject.__init__(self, uri, metadata=metadata)
     self.timeline = TimeLine(str(uri) + '/timeline')  ## Only if Recording doesn't have one ??
     self._signals = { }
