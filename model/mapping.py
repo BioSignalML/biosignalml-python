@@ -20,6 +20,9 @@ from biosignalml.model.ontology import BSML
 from biosignalml.rdf import Node, Uri, Statement
 from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
 
+from biosignalml.model.timeline import TimeLine
+
+
 _datatypes = { 'xsd:float':              float,  # Needs to be full uri...
 ##                                                 XSD.float.uri etc...
                'xsd:double':             float,
@@ -108,7 +111,7 @@ _BSML_MAPS = [
 ##  AttributeMap('digest',        BSML.digest,     BSML.Recording),
 
 # Timing specific metadata:
-  AttributeMap('timeline', TL.timeline,                              to_rdf=get_uri),
+  AttributeMap('timeline', TL.timeline,                              to_rdf=get_uri, from_rdf='TimeLine'),
   AttributeMap('at',       TL.atDuration,       TL.RelativeInstant,  XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
   AttributeMap('start',    TL.beginsAtDuration, TL.RelativeInterval, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
   AttributeMap('duration', TL.durationXSD,      TL.RelativeInterval, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
