@@ -399,6 +399,21 @@ class Graph(librdf.Model):
     l = self.get_object(s, p)
     return l.as_string() if l else None
 
+  def get_subjects(self, p, o):
+  #----------------------------
+    '''
+    Get a sequence of subjects matching the pair (`predicate`, `object`). One or
+    both of `predicate` and `object` may be `None`, meaning they match any value.
+
+    :param p: The `predicate` of the statement to lookup.
+    :param o: The `object` of the statement to lookup.
+    :return: An iterator yielding a sequence of `subject` nodes with
+      (`subject`, `predicate`, `object`) statements in the graph.
+    :rtype: iterator
+    '''
+    if p and not isinstance(p, Node) and not isinstance(p, Uri): s = Uri(p)
+    for s in self.get_sources(p, o): yield s
+
   def get_objects(self, s, p):
   #---------------------------
     '''
