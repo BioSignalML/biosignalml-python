@@ -38,10 +38,6 @@ class TimeLine(AbstractObject):
 
   metaclass = TL.RelativeTimeLine  #: :attr:`.TL.RelativeTimeLine`
 
-  def __init__(self, uri, metadata={}):
-  #------------------------------------
-    AbstractObject.__init__(self, uri, metadata=metadata)
-
   def instant(self, when):
   #----------------------
     return Instant(self.make_uri(), when, self)
