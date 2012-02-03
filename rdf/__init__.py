@@ -413,7 +413,7 @@ class Graph(librdf.Model):
     '''
     if s and not isinstance(s, Node) and not isinstance(s, Uri): s = Uri(s)
     if p and not isinstance(p, Node) and not isinstance(p, Uri): s = Uri(p)
-    for v, g in self.get_targets_context(s, p): yield (v, g)
+    for o in self.get_targets(s, p): yield o
 
   def get_literals(self, s, p):
   #------------------------------
@@ -428,7 +428,7 @@ class Graph(librdf.Model):
        for `object`\s with (`subject`, `predicate`, `object`) statements in the graph.
     :rtype: iterator
     '''
-    for v, g in self.get_objects(s, p): yield (v.as_string(), g)
+    for v in self.get_objects(s, p): yield v.as_string()
 
   def query(self, sparql):
   #-----------------------
