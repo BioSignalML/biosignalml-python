@@ -210,7 +210,7 @@ class AbstractRecording(AbstractObject):
   #------------------------------------
     from biosignalml.model.timeline import TimeLine   ## Otherwise circular import...
     AbstractObject.__init__(self, uri, metadata=metadata)
-    self.timeline = TimeLine(str(uri) + '/timeline')  ## Only if Recording doesn't have one ??
+    self.timeline = TimeLine(str(uri) + '/timeline')
     self._signals = { }
     self._signal_uris = [ ]
     self._events = { }
