@@ -135,14 +135,14 @@ class AbstractObject(object):
     else:                     self.metadata[attr] = value
 
   @classmethod
-  def create_from_store(cls, uri, store, rdfmap=None, **kwds):
-  #-----------------------------------------------------------
+  def create_from_repository(cls, uri, repository, rdfmap=None, **kwds):
+  #---------------------------------------------------------------------
     '''
-    Create a new instance of a resource, setting attributes from RDF triples in a triple store.
+    Create a new instance of a resource, setting attributes from RDF triples in a repository.
 
     :param uri: The URI for the resource.
-    :param store: A RDF triple store.
-    :type store: :class:`biosignalml.repostory.Repository`
+    :param repository: A RDF repository.
+    :type repository: :class:`biosignalml.repostory.Repository`
     :param rdfmap: How to map properties to attributes.
     :type rdfmap: :class:`biosignalml.model.Mapping`
     :rtype: :class:`AbstractObject`
@@ -193,19 +193,6 @@ class AbstractRecording(AbstractObject):
     self._signals = { }
     self._signal_uris = [ ]
     self._events = { }
-
-  def load_signals_from_store(self, store, rdfmap=None):
-  #-----------------------------------------------------
-    """
-    Retrieve the recording's signals from a triple store.
-
-    :param store: A RDF triple store.
-    :type store: :class:`biosignalml.repostory.Repository`
-    :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`biosignalml.model.Mapping`
-    """
-    for sig in store.get_subjects(BSML.recording, self.uri):
-      self.add_signal(AbstractSignal.create_from_store(sig, store, rdfmap))
 
   def signals(self):
   #-----------------
@@ -296,6 +283,20 @@ class AbstractRecording(AbstractObject):
     namespaces.update(NAMESPACES)
     namespaces.update(prefixes)
     return self.save_to_graph(rdfmap=rdfmap).serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
+
+
+  def load_signals_from_repository(self, repository, rdfmap=None):
+  #--------------------------------------------------------------
+    """
+    Retrieve the recording's signals from a repository.
+
+    :param repository: A RDF repository.
+    :type repository: :class:`biosignalml.repostory.Repository`
+    :param rdfmap: How to map properties to attributes.
+    :type rdfmap: :class:`biosignalml.model.Mapping`
+    """
+    for sig in repository.get_subjects(BSML.recording, self.uri):
+      self.add_signal(AbstractSignal.create_from_repository(sig, repository, rdfmap))
 
 
 class AbstractSignal(AbstractObject):

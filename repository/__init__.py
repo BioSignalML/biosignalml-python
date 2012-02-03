@@ -133,7 +133,7 @@ class Repository(object):
     #logging.debug('Getting: %s', uri)
     if self.get_type(uri) != BSML.Recording: uri = self.get_object(uri, BSML.recording)
     #logging.debug('Recording: %s', uri)
-    return Recording.create_from_store(str(uri), self, bsml_mapping()) if uri else None
+    return Recording.create_from_repository(str(uri), self, bsml_mapping()) if uri else None
 
   def get_recording_signals(self, uri):
   #------------------------------------
@@ -147,7 +147,6 @@ class Repository(object):
 
   def get_signal(self, uri):
   #-------------------------
-    return Signal.create_from_store(uri, self, bsml_mapping())
 
   def signal(self, sig, properties):              # In context of signal's recording...
   #---------------------------------
@@ -156,6 +155,7 @@ class Repository(object):
       r.sort()
       return r
     else: return None
+    return Signal.create_from_repository(uri, self, bsml_mapping())
 
 
 class SparqlHead(object):
