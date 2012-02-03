@@ -30,7 +30,7 @@ import logging
 from biosignalml.rdf import NAMESPACES, RDF, EVT
 from biosignalml.rdf import Uri, Statement, Graph
 
-from ontology import BSML
+from biosignalml.model.ontology import BSML
 
 
 class AbstractObject(object):
@@ -150,9 +150,9 @@ class AbstractObject(object):
     import biosignalml.model.mapping as mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     self = cls(uri, **kwds)
-    statements = store.statements('<%(uri)s> ?p ?o',
-                                  '<%(uri)s> a  <%(type)s> . <%(uri)s> ?p ?o',
-                                  { 'uri': str(uri), 'type': str(self.metaclass) })
+    statements = repository.statements('<%(uri)s> ?p ?o',
+                                       '<%(uri)s> a  <%(type)s> . <%(uri)s> ?p ?o',
+                                        { 'uri': str(uri), 'type': str(self.metaclass) })
     for stmt in statements:
       s, attr, v = rdfmap.metadata(stmt, self.metaclass)
       ##logging.debug("%s='%s'", attr, v)
@@ -184,8 +184,6 @@ class AbstractObject(object):
   #--------------------------------------------------
     '''
     Set an attribute from RDF statement in the form `(uri, attr, value)`.
-
-
     '''
     import biosignalml.model.mapping as mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
