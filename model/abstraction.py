@@ -280,12 +280,12 @@ class AbstractRecording(AbstractObject):
     return graph
 
 
-  def metadata_as_string(self, format='turtle', prefixes={ }):
-  #-----------------------------------------------------------
+  def metadata_as_string(self, format='turtle', prefixes={ }, rdfmap=None):
+  #------------------------------------------------------------------------
     namespaces = { 'bsml': BSML.uri }
     namespaces.update(NAMESPACES)
     namespaces.update(prefixes)
-    return self.save_to_graph().serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
+    return self.save_to_graph(rdfmap=rdfmap).serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
 
 
 class AbstractSignal(AbstractObject):
