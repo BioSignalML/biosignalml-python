@@ -61,6 +61,10 @@ class AbstractObject(object):
     self.set_attributes(metadata)
     self.uri = Uri(uri)
 
+  def __str__(self):
+  #-----------------
+    return '[%s: %s]' % (self.__class__, self.uri)
+
   def set_attributes(self, values):
   #--------------------------------
     '''
