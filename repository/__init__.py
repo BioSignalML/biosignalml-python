@@ -147,6 +147,7 @@ class Repository(object):
 
   def get_signal(self, uri):
   #-------------------------
+    pass
 
   def signal(self, sig, properties):              # In context of signal's recording...
   #---------------------------------
