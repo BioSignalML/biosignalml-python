@@ -59,8 +59,8 @@ class WebSocketReadStream(ws4py.client.threadedclient.WebSocketClient):
 
 
 
-class WebStreamReader(stream.SimpleStreamReader):
-#================================================
+class WebStreamReader(stream.BlockStreamReader):
+#===============================================
   """
   An `iterator` yielding :class:`StreamData` objects from a data stream server via Web Sockets.
 
@@ -76,13 +76,13 @@ class WebStreamReader(stream.SimpleStreamReader):
   """
   def __init__(self, endpoint, uri, start, duration):
   #--------------------------------------------------
-    stream.SimpleStreamReader.__init__(self, endpoint, uri, start, duration)
+    stream.BlockStreamReader.__init__(self, endpoint, uri, start, duration)
     try:
       self._ws = WebSocketReadStream(endpoint, self._request, self._receiveQ, protocols=['biosignalml-ssf'])
       self._ws.connect()
     except Exception, msg:
       logging.error('Unable to connect to WebSocket: %s', msg)
-      raise IOError('Cannot open StreamDataReader')
+      raise stream.StreamException('Cannot open WebStreamReader')
 
   def close(self):
   #---------------
