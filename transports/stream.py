@@ -546,3 +546,30 @@ class BlockStreamReader(object):
       sd = block.signaldata()
       if sd: yield sd
 
+
+class TestBlock(StreamBlock):
+#============================
+
+  @classmethod
+  def block(cls, uri, start, duration):
+    pass
+
+
+if __name__ == '__main__':
+#-------------------------
+
+  logging.getLogger().setLevel(logging.DEBUG)
+
+  nd = SignalData('', 10, np.ones(1),                                rate=100)
+  sd = SignalData('', 10, np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), rate=100)
+
+  print sd
+  print sd.streamblock().signaldata()
+
+
+  print nd
+  testQ = Queue.Queue()
+  bp = BlockParser(testQ, Checksum.STRICT)
+  bp.process(nd.streamblock().bytes(Checksum.STRICT))
+
+  print testQ.get(True, 10).signaldata()
