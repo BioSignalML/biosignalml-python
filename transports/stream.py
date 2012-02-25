@@ -45,6 +45,7 @@ are specific to each block type.
 
 """
 
+VERSION = 1    #: Initial version of Block Stream protocol.
 
 
 import logging
@@ -243,7 +244,7 @@ class StreamBlock(object):
 class BlockParser(object):
 #=========================
   """
-  Simple Stream Format data parser.
+  Block Stream data parser.
 
   :param receiveQ: A queue on which to put complete `StreamBlock`'s
   :type receiveQ: :class:`Queue.Queue`
@@ -251,25 +252,27 @@ class BlockParser(object):
   :type check: :class:`Checksum`
   """
   # Parser states.
-  RESET      =  0
-  TYPE       =  1
-  HDRLEN     =  2
-  HEADER     =  3
-  HDREND     =  4
-  CONTENT    =  5
-  TRAILER    =  6
-  CHECKSUM   =  7
-  CHECKDATA  =  8
-  BLOCKEND   =  9
+  _RESET      =  0
+  _TYPE       =  1
+  _VERNUM     =  2
+  _VERFLAG    =  3
+  _HDRLEN     =  4
+  _HEADER     =  5
+  _DATALEN    =  6
+  _HDREND     =  7
+  _CONTENT    =  8
+  _TRAILER    =  9
+  _CHECKSUM   = 10
+  _CHECKDATA  = 11
+  _BLOCKEND   = 12
 
   def __init__(self, receiveQ, check=Checksum.CHECK):
   #--------------------------------------------------
     self._receiveQ = receiveQ
     self._check = check
     self._blockno = -1
-    self._state = BlockParser.RESET    #: The parser's state.
-    ''' The block currently being received '''
-    self._error = Error.NONE     #: Set when there is an error
+    self._state = BlockParser._RESET
+    self._error = Error.NONE
 
   def process(self, data):
   #-----------------------
@@ -286,30 +289,52 @@ class BlockParser(object):
 
     while datalen > 0:
 
-      if   self._state == BlockParser.RESET:                   # Looking for a block
+      if   self._state == BlockParser._RESET:                   # Looking for a block
         next = data[pos:].find('#')
         if next >= 0:
           pos += (next + 1)
           datalen -= (next + 1)
           self._checksum = hashlib.md5()
           self._checksum.update('#')
-          self._state = BlockParser.TYPE
+          self._state = BlockParser._TYPE
         else:
           datalen = 0
 
-      elif self._state == BlockParser.TYPE:                    # Getting block type
+      elif self._state == BlockParser._TYPE:                    # Getting block type
         self._type = chr(data[pos])
         pos += 1
         datalen -= 1
         if self._type != '#':
           self._checksum.update(self._type)
           self._blockno += 1
-          self._length = 0
-          self._state = BlockParser.HDRLEN
+          self._version = 0
+          self._state = BlockParser._VERNUM
         else:
           self._error = Error.UNEXPECTED_TRAILER
 
-      elif self._state == BlockParser.HDRLEN:                  # Getting header length
+      elif self._state == BlockParser._VERNUM:                  # Version number
+        while datalen > 0 and chr(data[pos]).isdigit():
+          self._version = 10*self._version + int(chr(data[pos]))
+          self._checksum.update(chr(data[pos]))
+          pos += 1
+          datalen -= 1
+        if datalen > 0:
+          self._state = BlockParser._VERFLAG
+
+      elif self._state == BlockParser._VERFLAG:                 #
+        if chr(data[pos]) == 'V':
+          if self._version != VERSION:
+            self._error = Error.VERSION_MISATCH
+          else:
+            self._checksum.update('V')
+            pos += 1
+            datalen -= 1
+            self._length = 0
+            self._state = BlockParser._HDRLEN
+        else:
+          self._error = Error.MISSING_VERSION_FLAG
+
+      elif self._state == BlockParser._HDRLEN:                  # Getting header length
         while datalen > 0 and chr(data[pos]).isdigit():
           self._length = 10*self._length + int(chr(data[pos]))
           self._checksum.update(chr(data[pos]))
@@ -317,9 +342,9 @@ class BlockParser(object):
           datalen -= 1
         if datalen > 0:
           self._jsonhdr = [ ]
-          self._state = BlockParser.HEADER
+          self._state = BlockParser._HEADER
 
-      elif self._state == BlockParser.HEADER:                  # Getting header JSON
+      elif self._state == BlockParser._HEADER:                  # Getting header JSON
         while datalen > 0 and self._length > 0:
           self._jsonhdr.append(str(data[pos:pos+self._length]))
           self._checksum.update(str(data[pos:pos+self._length]))
@@ -328,22 +353,35 @@ class BlockParser(object):
           datalen -= delta
           self._length -= delta
         if self._length == 0:
-          self._header = json.loads(''.join(self._jsonhdr)) if len(self._jsonhdr) else { }
-          self._state = BlockParser.HDREND
+          try:
+            self._header = json.loads(''.join(self._jsonhdr)) if len(self._jsonhdr) else { }
+            self._length = 0
+            self._state = BlockParser._DATALEN
+          except ValueError:
+            self._error = Error.BAD_JSON_HEADER
+            logging.debug('JSON: %s', ''.join(self._jsonhdr))
 
-      elif self._state == BlockParser.HDREND:                  # Checking header LF
+      elif self._state == BlockParser._DATALEN:                 # Getting content length
+        while datalen > 0 and chr(data[pos]).isdigit():
+          self._length = 10*self._length + int(chr(data[pos]))
+          self._checksum.update(chr(data[pos]))
+          pos += 1
+          datalen -= 1
+        if datalen > 0:
+          self._state = BlockParser._HDREND
+
+      elif self._state == BlockParser._HDREND:                  # Checking header LF
         if chr(data[pos]) == '\n':
           pos += 1
           datalen -= 1
           self._checksum.update('\n')
-          self._length = self._header.pop('length', 0)
           self._content = bytearray(self._length)
           self._chunkpos = 0
-          self._state = BlockParser.CONTENT
+          self._state = BlockParser._CONTENT
         else:
           self._error = Error.MISSING_HEADER_LF
 
-      elif self._state == BlockParser.CONTENT:                 # Getting content
+      elif self._state == BlockParser._CONTENT:                 # Getting content
         while datalen > 0 and self._length > 0:
           delta = min(self._length, datalen)
           self._content[self._chunkpos:self._chunkpos+delta] = data[pos:pos+delta]
@@ -353,55 +391,58 @@ class BlockParser(object):
           datalen -= delta
           self._length -= delta
         if self._length == 0:
-          self._length = 2
-          self._state = BlockParser.TRAILER
+          self._length = 2      # Two '#' after content
+          self._state = BlockParser._TRAILER
 
-      elif self._state == BlockParser.TRAILER:                 # Getting trailer
+      elif self._state == BlockParser._TRAILER:                 # Getting trailer
         if chr(data[pos]) == '#':
+          self._checksum.update('#')
           pos += 1
           datalen -= 1
           self._length -= 1
-          if self._length == 0: self._state = BlockParser.CHECKSUM
+          if self._length == 0: self._state = BlockParser._CHECKSUM
         else:
           self._error = Error.MISSING_TRAILER
 
-      elif self._state == BlockParser.CHECKSUM:                # Checking for checksum
+      elif self._state == BlockParser._CHECKSUM:                # Checking for checksum
         if chr(data[pos]) != '\n' and self._check != Checksum.NONE:
-          self._length = 32
-          self._state = BlockParser.CHECKDATA
+          self._length = 32     # 32 checksum characters (hex digest)
+          self._state = BlockParser._CHECKDATA
         else:
-          self._state = BlockParser.BLOCKEND
+          self._state = BlockParser._BLOCKEND
         self._checks = [ ]
 
-      elif self._state == BlockParser.CHECKDATA:               # Getting checksum
+      elif self._state == BlockParser._CHECKDATA:               # Getting checksum
         while datalen > 0 and self._length > 0:
           self._checks.append(str(data[pos:pos+self._length]))
           delta = min(self._length, datalen)
           pos += delta
           datalen -= delta
           self._length -= delta
-        if self._length == 0: self._state = BlockParser.BLOCKEND
+        if self._length == 0: self._state = BlockParser._BLOCKEND
 
-      elif self._state == BlockParser.BLOCKEND:                # Checking for final LF
+      elif self._state == BlockParser._BLOCKEND:                # Checking for final LF
         if ((self._check == Checksum.STRICT
           or self._check == Checksum.CHECK and len(self._checks))
          and ''.join(self._checks) != self._checksum.hexdigest()):
           self._error = Error.INVALID_CHECKSUM
+          logging.debug('RECV: %s', ''.join(self._checks))
+          logging.debug('CALC: %s', self._checksum.hexdigest())
         elif chr(data[pos]) == '\n':
           pos += 1
           datalen -= 1
           self._receiveQ.put(StreamBlock(self._blockno, self._type, self._header, self._content))
-          self._state = BlockParser.RESET
+          self._state = BlockParser._RESET
         else:
           self._error = Error.MISSING_TRAILER_LF
 
       else:                                             # Unknown state...
-        self._state = BlockParser.RESET
+        self._state = BlockParser._RESET
 
       if self._error != Error.NONE:
         logging.error('Stream parse error: %s', Error.text(self._error))
         self._error = Error.NONE
-        self._state = BlockParser.RESET
+        self._state = BlockParser._RESET
 
 
 class StreamData(object):
