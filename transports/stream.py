@@ -489,8 +489,6 @@ class SignalData(object):
   #-----------------
     return len(self.data)
 
-class SimpleStreamReader(object):
-#================================
   def __str__(self):
   #-----------------
     return ("SignalData %s: start=%f, rate=%f\n  clock=%s\n  data=%s"
@@ -515,6 +513,8 @@ class SimpleStreamReader(object):
 
 
 
+class BlockStreamReader(object):
+#===============================
   """
   An `iterator` yielding :class:`StreamData` objects from a data stream server.
 
@@ -531,7 +531,7 @@ class SimpleStreamReader(object):
   def __init__(self, endpoint, uri, start, duration):
   #--------------------------------------------------
     self._endpoint = endpoint
-    self._request = "{'uri': '%s', 'start': %f, 'duration': %f}" % (uri, start, duration)
+    self._request = json.dumps({'uri': uri, 'start': start, 'duration': duration})
     self._receiveQ = Queue.Queue()
 
   def close(self):
@@ -540,10 +540,9 @@ class SimpleStreamReader(object):
 
   def __iter__(self):
   #------------------
-    block = self._receiveQ.get()
-    if block is not None and block.type == BlockType.DATA:
-      # Use header fields to get start, duration, rate
-      # Use header clock/data kind fields to create np.arrays for clock and data
-      yield 'block %d: %c %s (%d bytes)' % (block.number, block.type, str(block.header), len(block.content))
-      #yield stream.StreamData(...)
+    while (True):
+      block = self._receiveQ.get()
+      if block is None: break
+      sd = block.signaldata()
+      if sd: yield sd
 
