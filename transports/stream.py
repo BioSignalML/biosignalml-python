@@ -9,10 +9,42 @@
 ######################################################
 
 
-'''
-A generic stream in Simple Stream Format.
+"""
+A generic Block Stream.
 
-'''
+
+A *Block Stream* is a transport for blocks of data. Each block is of some *type*; it contains
+both an information *header* and actual data *content*.
+
+Blocks are sent and received as a sequence of 8-bit bytes. Using EBNF and regular
+expression notation, a block is defined as::
+
+  <block>    ::= '#' <type> <version> <header> <length> <LF> <content> '##' <checksum>? <LF>
+
+  <type>     ::= [a-zA-Z]             /* A single, case-significant letter.        */
+
+  <version>  ::= <INTEGER> 'V'        /* The version of the protocol.              */
+
+  <header>   ::= <jsonlen> <json>
+  <jsonlen>  ::= <INTEGER>            /* The number of bytes of JSON that follow.  */
+  <json>     ::= '{' ... '}'          /* A well-formed JSON object.                */
+
+  <length>   ::= <INTEGER>            /* The length of the content part.           */
+  <content>  ::= [#x00-#xFF]*         /* A sequence of bytes.                      */
+
+  <checksum> ::= [0-9a-fA-F]{32}      /* An optional, 32 character MD5 hex digest. */
+                                      /* Includes opening '#' and closing '##'.    */
+  <INTEGER> ::= [0-9]+
+  <LF>      ::= #x0A
+
+Supported block types are defined in the :class:`BlockType` class.
+
+A block's header is a set of '(name, value)' pairs, which is sent formatted as JSON, and in
+Python kept as a ``{ name: value }`` dictionary. Valid 'names' and 'values'
+are specific to each block type.
+
+"""
+
 
 
 import logging
@@ -28,8 +60,64 @@ class BlockType(object):
 #=======================
   '''
   Stream block types.
+
+  Currently only a signal data block is defined.
   '''
-  DATA = 'D'                #: Data block
+
+  DATA = 'D'
+  """
+  A signal data block.
+
+  The content is a segment of some signal, as an array of sample values
+  optionally preceeded by an array of sample times. Sample values are either all
+  a scalars or all a 1-D arrays each with the same bounds.
+
+  The block's header has the following fields:
+
+  **uri** (*str*)
+    The URI of the signal whose data is in the block.
+
+    REQUIRED.
+
+  **start** (*float*)
+    The time, in seconds, from the start of the signal of the first
+    sample value.
+
+    REQUIRED.
+
+  **count** (*integer*)
+    The number of sample values in the data block.
+
+    REQUIRED
+
+  **dims** (*integer, default 1*)
+    The number of data points in a single sample value.
+
+    OPTIONAL.
+
+  **dtype** (*str*)
+    The numeric type of a single data point in a sample value, in the form
+    '<f4' and as defined and used by numpy's array interface.
+
+    REQUIRED.
+
+  **rate** (*double*)
+    The rate, in Hertz, of sample values.
+
+    REQUIRED if no 'ctype' is given, otherwise MUST NOT be given.
+
+  **ctype** (*str*)
+    The numeric type of a sample time, in the form '<f4' and as defined and used
+    by numpy's array interface.
+
+    REQUIRED if no 'rate' is given, otherwise MUST NOT be given.
+
+  The block's content consists of 'count' binary numbers of type 'ctype' (when
+  'ctype' is specified), followed by 'count\*dims' binary numbers of type 'dtype'.
+
+  """
+
+
 
 
 class Error(object):
