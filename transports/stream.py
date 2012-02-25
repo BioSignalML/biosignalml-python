@@ -50,7 +50,6 @@ are specific to each block type.
 import logging
 import hashlib
 import Queue
-from collections import namedtuple
 
 import numpy as np
 import json
@@ -160,8 +159,79 @@ class Checksum(object):
   NONE    =  4     #: Blocks don't have checksums
 
 
-StreamBlock = namedtuple('StreamBlock', 'number, type, header, content')
-''' A block exchanged using Simple Stream Format. '''
+class StreamBlock(object):
+#=========================
+  """
+  A block exchanged using the Block Stream format.
+
+  :type number: int
+  :type type: :class:`BlockType`
+  :type header: dict
+  :type content: bytearray
+  """
+
+  def __init__(self, number, type, header, content):
+  #-------------------------------------------------
+    self.number = number
+    self.type = type
+    self.header = header
+    self.content = content
+
+  def signaldata(self):
+  #--------------------
+    ''' Return a :class:`SignalData` representation of ourself. '''
+    if self.type != BlockType.DATA: return None
+    uri = self.header.get('uri', '')
+    start = self.header.get('start', 0)
+    count = self.header.get('count', 0)
+    dims = self.header.get('dims', 1)
+    dtype = self.header.get('dtype', None)
+    rate = self.header.get('rate', None)
+    ctype = self.header.get('ctype', None)
+    dt = np.dtype(dtype)
+    if rate is not None:
+      if ctype is not None:
+        raise StreamException("Received data stream has both a rate and clock")
+      if len(self.content) != count*dims*dt.itemsize:
+        raise StreamException("Received data is wrong size")
+      clock = None
+      if dims == 1:
+        data = np.frombuffer(self.content, dtype=dt)
+      else:
+        data = np.reshape(np.frombuffer(self.content, dtype=dt), (count, dims))
+    else:
+      if ctype is None:
+        raise StreamException("Received data block has no timing")
+      ct = np.dtype(ctype)
+      if len(self.content) != count*(ct.itemsize + dims*dt.itemsize):
+        raise StreamException("Received clock and/or data is wrong size")
+      datastart = count*ct.itemsize
+      clock = np.frombuffer(self.content[:datastart], dtype=ct)
+      if dims == 1:
+        data = np.frombuffer(self.content[datastart:], dtype=dt)
+      else:
+        data = np.reshape(np.frombuffer(self.content[datastart:], dtype=dt), (count, dims))
+    return SignalData(uri, start, data, rate, clock)
+
+  def bytes(self, check=Checksum.NONE):
+  #------------------------------------
+    '''
+    Return a serialisation in Block Stream format.
+
+    :param check: Include a checksum if equal to `Checksum.STRICT`.
+    :type check: :class:`Checksum`
+    '''
+    j = json.dumps(self.header)
+    b = bytearray('#%c%dV%d%s%d\n' % (self.type, VERSION, len(j), j, len(self.content)))
+    b.extend(self.content)
+    b.extend('##')
+    if check != Checksum.NONE:
+      checksum = hashlib.md5()
+      checksum.update(b)
+      b.extend(checksum.hexdigest())
+    b.extend('\n')
+    return b
+
 
 
 class BlockParser(object):
