@@ -448,11 +448,13 @@ class BlockParser(object):
         self._state = BlockParser._RESET
 
 
-class StreamData(object):
+class SignalData(object):
 #========================
   '''
-  A segment of a :class:`biosignalml.model.data.TimeSeries` sent or received on a :class:`SimpleStream`.
+  A segment of a :class:`biosignalml.model.data.TimeSeries` sent or received on a :class:`BlockStream`.
 
+  :param uri: The URI of the :class:`biosignalml.model.Signal` which the segment is from.
+  :type uri: str
   :param start: The start time of the segment, in seconds.
   :type start: double
   :param duration: The duration of the segment, in seconds.
@@ -460,31 +462,59 @@ class StreamData(object):
   :param data: An one or two dimensional array of data points.
   :type data: :class:`np.array`
   :param rate: The rate, in Hertz, at which the first dimension of the data array varies.
-               A value of 0 signifies that sampling times are in the `clock` array.
+               A value of None signifies that sampling times are in the `clock` array.
   :type rate: double
   :param clock: An one dimensional array of time points, in seconds.
   :type clock: :class:`np.array` or None
   '''
-  def __init__(self, start, duration, data, rate=0, clock=None):
-  #-------------------------------------------------------------
-    if rate == 0 and clock is None:
+  def __init__(self, uri, start, data, rate=None, clock=None):
+  #-----------------------------------------------------------
+    if rate is None and clock is None:
       raise StreamException('Data must have either a rate or a clock')
-    elif rate != 0 and clock is not None:
+    elif rate is not None and clock is not None:
       raise StreamException('Data cannot have both a rate and a clock')
+    if data.ndim not in [1, 2]:
+      raise StreamException('Sample points must be scalar or a 1-D array')
+    if clock and clock.ndim:
+      raise StreamException('Clock must be a 1-D array')
+    if clock and len(clock) != len(data):
+      raise StreamException('Clock and data have different lengths')
+    self.uri = uri
     self.start = start
-    self.duration = duration
     self.data = data
     self.rate = rate
     self.clock = clock
 
-  def __str__(self):
+  def __len__(self):
   #-----------------
-    return ("StreamData: start=%f, duration=%f, rate=%f\n  clock=%s\n  data=%s"
-           % (self.start, self.duration, self.rate, str(self.clock), str(self.data)) )
-
+    return len(self.data)
 
 class SimpleStreamReader(object):
 #================================
+  def __str__(self):
+  #-----------------
+    return ("SignalData %s: start=%f, rate=%f\n  clock=%s\n  data=%s"
+           % (self.uri, self.start, self.rate, str(self.clock), str(self.data)) )
+
+  def streamblock(self):
+  #---------------------
+    ''' Return a :class:`StreamBlock` representation of the signal segment. '''
+    content = bytearray()
+    header = { 'uri': self.uri,
+               'start': self.start,
+               'count': len(self.data),
+               'dtype': self.data.dtype.descr[0][1]
+             }
+    if self.data.ndim > 1: header['dims'] = self.data.shape[1]
+    if self.rate: header['rate'] = self.rate
+    if self.clock:
+      header['ctype'] = self.clock.dtype.descr[0][1]
+      content.extend(bytearray(self.clock))
+    content.extend(bytearray(self.data))
+    return StreamBlock(0, BlockType.DATA, header, content)
+
+
+
   """
   An `iterator` yielding :class:`StreamData` objects from a data stream server.
 
