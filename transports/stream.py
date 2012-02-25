@@ -118,6 +118,9 @@ class BlockType(object):
   """
 
 
+class StreamException(Exception):
+#================================
+  ''' Exceptions we can raise. '''
 
 
 class Error(object):
