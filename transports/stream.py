@@ -670,10 +670,11 @@ class SignalDataStream(BlockStream):
 
 class TestBlock(StreamBlock):
 #============================
-
+  ''' For testing purposes... '''
   @classmethod
   def block(cls, uri, start, duration):
-    pass
+    logging.debug("TEST: %s %f - %f", uri, start, duration)
+    return None
 
 
 if __name__ == '__main__':
@@ -685,6 +686,7 @@ if __name__ == '__main__':
   sd = SignalData('', 10, np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), rate=100)
 
   print sd
+  print sd.streamblock()
   print sd.streamblock().signaldata()
 
 
