@@ -538,25 +538,21 @@ class SignalData(object):
 
 
 
-class BlockStreamReader(object):
-#===============================
+class BlockStream(object):
+#=========================
   """
-  An `iterator` yielding :class:`StreamData` objects from a data stream server.
+  An `iterator` yielding :class:`SignalData` objects from a Block Stream data server.
+
+  This class is intended to be sub-classed by a class that will establish a connection to
+  the end point and then send some request.
 
   :param endpoint: The URL of the data stream server's endpoint.
   :type endpoint: str
-  :param uri: The URI of a :class:`biosignalml.model.Recording` or :class:`biosignalml.model.Signal`
-    from which to get :class:`biosignalml.model.data.TimeSeries` data,
-  :type uri: str
-  :param start: The time, in seconds, that the first data point will be at or immediately after,
-  :type start: float
-  :param duration: The maximum duration, in seconds, of the :class:`TimeSeries` returned.
-  :type duration: float
   """
-  def __init__(self, endpoint, uri, start, duration):
-  #--------------------------------------------------
+  def __init__(self, endpoint):
+  #----------------------------
     self._endpoint = endpoint
-    self._request = json.dumps({'uri': uri, 'start': start, 'duration': duration})
+    self._request = StreamBlock(0, None, { }, '')
     self._receiveQ = Queue.Queue()
 
   def close(self):
@@ -568,8 +564,45 @@ class BlockStreamReader(object):
     while (True):
       block = self._receiveQ.get()
       if block is None: break
-      sd = block.signaldata()
-      if sd: yield sd
+      if block.type == BlockType.ERROR:
+        raise StreamError(block.content)
+      yield block
+
+
+class SignalDataStream(BlockStream):
+#===================================
+  """
+  An `iterator` yielding :class:`SignalData` objects from a Block Stream data server.
+
+  This class is intended to be sub-classed by a class that will establish a connection to
+  the end point and then send a :attr:`~BlockType.DATA_REQ` request.
+
+  :param endpoint: The URL of the data stream server's endpoint.
+  :type endpoint: str
+  :param uri: The URI of a :class:`~biosignalml.model.Recording` or of one or more
+    :class:`~biosignalml.model.Signal`\s from which to get
+    :class:`~biosignalml.model.data.TimeSeries` data,
+  :type uri: str or list[str]
+  :param start: The time, in seconds from the start of the signal's recording,
+    that the first sample point will be at or immediately after,
+  :type start: float or None
+  :param offset: The index of the first data point. An `offset` can only be given when data from a
+    single signal is requested, and cannot be specified along with `start`.
+  :type offset: integer or None
+  :param duration: The duration, in seconds, of signal data to return. A value
+    of -1 means to get all sample points, from the starting position, of the signal(s).
+  :type duration: float
+  """
+  def __init__(self, endpoint, uri, start=None, offset=None, duration=-1):
+  #-----------------------------------------------------------------------
+    BlockStream.__init__(self, endpoint)
+    self._request = StreamBlock(0, BlockType.DATA_REQ, {'uri': uri, 'start': start, 'duration': duration}, '')
+
+  def __iter__(self):
+  #------------------
+    for block in BlockStream.__iter__(self):
+      if block.type == BlockType.DATA: yield block.signaldata()
+      else:                            logging.debug('RECVD: %s', block)
 
 
 class TestBlock(StreamBlock):
