@@ -534,7 +534,7 @@ class SignalData(object):
       header['ctype'] = self.clock.dtype.descr[0][1]
       content.extend(bytearray(self.clock))
     content.extend(bytearray(self.data))
-    return StreamBlock(0, BlockType.DATA, header, content)
+    return StreamDataBlock(0, header, content)
 
 
 
