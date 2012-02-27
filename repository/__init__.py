@@ -32,6 +32,12 @@ from provenance import Provenance
 
 class Repository(object):
 #========================
+  '''
+  An RDF repository.
+
+  :param base_uri:
+  :param store_uri:
+  '''
 
 ## First param is a base URI, used when generating Turtle and to check that
 ## results belong to us. Better to drop it, and pass it directly to the methods
@@ -45,7 +51,7 @@ class Repository(object):
 
   def __del__(self):
   #-----------------
-    logging.debug('Triplestore shutdown')
+    logging.debug('Repository shutdown')
     del self.provenance
     del self.triplestore
 
@@ -121,15 +127,42 @@ class Repository(object):
     return self.triplestore.ask('<%s> a <%s>' % (str(uri), str(type)))
 
 
-  ## Following should be in a sub-class -- BSMLRepository
+class BSMLRepository(Repository):
+#================================
+  '''
+  An RDF repository containing BioSignalML metadata.
+  '''
+
+  def is_recording(self, uri):
+  #---------------------------
+    ''' Check a URI refers to a Recording. '''
+    return self.check_type(uri, BSML.Recording)
+
+  def is_signal(self, uri):
+  #------------------------
+    ''' Check a URI refers to a Signal. '''
+    return self.check_type(uri, BSML.Signal)
 
   def recordings(self):
   #--------------------
+    '''
+    Return a list of all the Recordings in the repository.
+
+    :rtype: list[Recording]
+    '''
     return [ Recording(r['r']['value'])
                for r in self.triplestore.select('?r', 'graph ?r { ?r a <%s> }' % BSML.Recording) ]
 
+  def get_recording_uri(self, uri):
+  #--------------------------------
+    ''' Get the URI of the Recording that the object is part of. '''
+    for r in self.triplestore.select('?g', 'graph ?g { ?g a <%s> . <%s> a ?t }' % (BSML.Recording, uri)):
+      return Uri(r['g']['value'])
+    return None
+
   def get_recording(self, uri):
   #----------------------------
+    ''' Get the Recording that the URI is part of. '''
     #logging.debug('Getting: %s', uri)
     if self.get_type(uri) != BSML.Recording: uri = self.get_object(uri, BSML.recording)
     #logging.debug('Recording: %s', uri)
@@ -137,6 +170,12 @@ class Repository(object):
 
   def get_recording_signals(self, uri):
   #------------------------------------
+    '''
+    Get a list of all Signals in a Recording.
+
+    :param uri: The URI of a Recording.
+    :rtype: list[Signal]
+    '''
     rec = self.get_recording(uri)
     if rec: rec.load_signals_from_store(self, bsml_mapping())
     return rec
@@ -147,16 +186,20 @@ class Repository(object):
 
   def get_signal(self, uri):
   #-------------------------
-    pass
+    '''
+    Get a Signal from the repository.
 
-  def signal(self, sig, properties):              # In context of signal's recording...
-  #---------------------------------
-    if self.check_type(sig, BSML.Signal):
-      r = [ [ Graph.make_literal(t, '') for t in self.get_objects(sig, p) ] for p in properties ]
-      r.sort()
-      return r
-    else: return None
+    :param uri: The URI of a Signal.
+    '''
     return Signal.create_from_repository(uri, self, bsml_mapping())
+
+#  def signal(self, sig, properties):              # In context of signal's recording...
+#  #---------------------------------
+#    if self.check_type(sig, BSML.Signal):
+#      r = [ [ Graph.make_literal(t, '') for t in self.get_objects(sig, p) ] for p in properties ]
+#      r.sort()
+#      return r
+#    else: return None
 
 
 class SparqlHead(object):
