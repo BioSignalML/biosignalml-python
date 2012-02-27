@@ -95,7 +95,7 @@ class AttributeMap(object):
 ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf')
 
 
-_BSML_MAPS = [
+BSML_MAP = [
 # Generic metadata:
   AttributeMap('label',           RDFS.label),
   AttributeMap('comment',         RDFS.comment),
@@ -106,12 +106,12 @@ _BSML_MAPS = [
 # Recording specific metadata:
   AttributeMap('format',        DCTERMS.format,  BSML.Recording),
   AttributeMap('investigation', DCTERMS.subject, BSML.Recording),
-  AttributeMap('starttime',     DCTERMS.created, BSML.Recording, XSD.dateTime, datetime_to_isoformat, isoformat_to_datetime),
+  AttributeMap('starttime',     DCTERMS.created, BSML.Recording, XSD.dateTime, datetime_to_isoformat,  isoformat_to_datetime),
   AttributeMap('duration',      DCTERMS.extent,  BSML.Recording, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
 ##  AttributeMap('digest',        BSML.digest,     BSML.Recording),
 
 # Timing specific metadata:
-  AttributeMap('timeline', TL.timeline,                              to_rdf=get_uri, from_rdf='TimeLine'),
+  AttributeMap('timeline', TL.timeline, to_rdf=get_uri, from_rdf=TimeLine),
   AttributeMap('at',       TL.atDuration,       TL.RelativeInstant,  XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
   AttributeMap('start',    TL.beginsAtDuration, TL.RelativeInterval, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
   AttributeMap('duration', TL.durationXSD,      TL.RelativeInterval, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
@@ -182,7 +182,7 @@ class Mapping(object):
       else:                       return Node(Uri(v.uri))
     else:
       if mapfn:
-        try: v = eval(mapfn)(v)
+        try: v = mapfn(v)
         except Exception, msg:
           logging.error("Exception mapping literal with '%s': %s", str(mapfn), msg)
       v = unicode(v)
@@ -222,7 +222,7 @@ class Mapping(object):
     else:
       v = node.literal[0]
       if dtype: v = _datatypes.get(dtype, str)(v) 
-    return eval(from_rdf)(v) if from_rdf else v
+    return from_rdf(v) if from_rdf else v
 
   def metadata(self, statement, cls):
   #----------------------------------
@@ -240,7 +240,7 @@ def initialise():
 #================
   global _bsml_maps, _bsml_mapping
   if _bsml_maps is None:
-    _bsml_maps = _load_mapping(_BSML_MAPS)
+    _bsml_maps = _load_mapping(BSML_MAP)
     _bsml_mapping = Mapping()   # Standard model
 
 
