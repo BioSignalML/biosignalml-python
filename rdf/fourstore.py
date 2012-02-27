@@ -45,6 +45,7 @@ class FourStore(TripleStore):
                                     'Accept': Format.mimetype(format)} )
     except Exception, msg:
       logging.error('4store: %s, %s', msg, sparql)
+      raise
 
   def ask(self, where):
   #--------------------
