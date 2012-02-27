@@ -64,6 +64,52 @@ class BlockType(object):
   Currently only a signal data block is defined.
   '''
 
+  DATA_REQ = 'd'
+  """
+  Request time series data from signals that is returned in :class:`SignalData` blocks.
+
+  A data request block has no content and a header with the following fields:
+
+    **uri** (*string*) or (*list[string]*)
+      The URI of the recording or signal(s).
+
+      A single URI can be that of a recording or signal; all URIs in a list must refer to
+      signals. If the URI is of a recording then data for all signals in the recording is
+      returned. Several SignalData blocks may be generated to span the requested duration;
+      when the request is for multiple signals or for a recording, each signal's data will be
+      in one or more separate blocks.
+
+      REQUIRED.
+
+    **start** (*float*)
+      The time, in seconds from the start of the signal's recording, that the the first sample
+      point will be at or immediately after,
+
+      REQUIRED when multiple signals or if no *offset* is given.
+
+    **duration** (*float*)
+      The duration, in seconds, of time series data to get. A value of -1 means to get all
+      starting points from the start position until the end of the time series.
+
+      REQUIRED when multiple signals or if no *count* is given.
+
+    **offset** (*integer*)
+      The index in the signal's time series of the first sample point in the result.
+
+      Only when requesting data from a single signal, and cannot be ussed if *start* is given.
+
+    **count** (*integer*)
+      The number of sample points to return in the result. A value of -1 means to get all
+      starting points from the start position until the end of the time series.
+
+      Only when requesting data from a single signal, and cannot be used if *duration* is given.
+
+  The time of the first sample point in the resulting time series will not be before *start*; that
+  of the last sample point will be before *start + duration*. If the signal's data finishes before
+  the requested duration a shortened time series will be returned; if the period spanned in a signal
+  contains discontinuous segments they will be returned in separate blocks.
+  """
+
   DATA = 'D'
   """
   A signal data block.
@@ -114,7 +160,18 @@ class BlockType(object):
 
   The block's content consists of 'count' binary numbers of type 'ctype' (when
   'ctype' is specified), followed by 'count\*dims' binary numbers of type 'dtype'.
+  """
 
+  ERROR = 'E'
+  """
+  An error response.
+
+  The block's content contains an error message as text; it's header will contain the field:
+
+    **type** (*character*)
+      The type of the request block which has resulted in an error.
+
+  along with all fields from the original request.
   """
 
 
