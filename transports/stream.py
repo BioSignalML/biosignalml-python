@@ -112,51 +112,56 @@ class BlockType(object):
 
   DATA = 'D'
   """
-  A signal data block.
+  Time series data.
 
   The content is a segment of some signal, as an array of sample values
   optionally preceeded by an array of sample times. Sample values are either all
   a scalars or all a 1-D arrays each with the same bounds.
 
-  The block's header has the following fields:
+  A data block's header has the following fields:
 
-  **uri** (*str*)
-    The URI of the signal whose data is in the block.
+    **uri** (*string*)
+      The URI of the signal whose data is in the block.
 
-    REQUIRED.
+      REQUIRED.
 
-  **start** (*float*)
-    The time, in seconds, from the start of the signal of the first
-    sample value.
+    **start** (*float*)
+      The time, in seconds, from the start of the signal's recording, of the first
+      sample value.
 
-    REQUIRED.
+      REQUIRED.
 
-  **count** (*integer*)
-    The number of sample values in the data block.
+    **offset** (*integer*)
+      The index of the first sample value in the signal's time series.
 
-    REQUIRED
+      REQUIRED.
 
-  **dims** (*integer, default 1*)
-    The number of data points in a single sample value.
+    **count** (*integer*)
+      The number of sample values in the data block.
 
-    OPTIONAL.
+      REQUIRED.
 
-  **dtype** (*str*)
-    The numeric type of a single data point in a sample value, in the form
-    '<f4' and as defined and used by numpy's array interface.
+    **dims** (*integer, default 1*)
+      The number of data points in a single sample value.
 
-    REQUIRED.
+      OPTIONAL.
 
-  **rate** (*double*)
-    The rate, in Hertz, of sample values.
+    **dtype** (*string*)
+      The numeric type of a single data point in a sample value, in the form
+      '<f4' and as defined and used by numpy's array interface.
 
-    REQUIRED if no 'ctype' is given, otherwise MUST NOT be given.
+      REQUIRED.
 
-  **ctype** (*str*)
-    The numeric type of a sample time, in the form '<f4' and as defined and used
-    by numpy's array interface.
+    **rate** (*double*)
+      The rate, in Hertz, of sample values.
 
-    REQUIRED if no 'rate' is given, otherwise MUST NOT be given.
+      REQUIRED if no 'ctype' is given, otherwise MUST NOT be given.
+
+    **ctype** (*string*)
+      The numeric type of a sample time, in the form '<f4' and as defined and used
+      by numpy's array interface.
+
+      REQUIRED if no 'rate' is given, otherwise MUST NOT be given.
 
   The block's content consists of 'count' binary numbers of type 'ctype' (when
   'ctype' is specified), followed by 'count\*dims' binary numbers of type 'dtype'.
