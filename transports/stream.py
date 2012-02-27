@@ -253,7 +253,7 @@ class StreamBlock(object):
   def makeblock(cls, number, type, header, content):
   #-------------------------------------------------
     if type == BlockType.DATA:
-      self = StreamDataBlock(number, header, content)
+      self = SignalDataBlock(number, header, content)
     else:
       self = cls(number, type, header, content)
     return self
@@ -282,7 +282,7 @@ class StreamBlock(object):
     return b
 
 
-class StreamDataBlock(StreamBlock):
+class SignalDataBlock(StreamBlock):
 #==================================
   """
   A data block exchanged using the Block Stream format.
@@ -597,7 +597,7 @@ class SignalData(object):
       header['ctype'] = self.clock.dtype.descr[0][1]
       content.extend(bytearray(self.clock))
     content.extend(bytearray(self.data))
-    return StreamDataBlock(0, header, content)
+    return SignalDataBlock(0, header, content)
 
 
 
