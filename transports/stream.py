@@ -187,10 +187,55 @@ class StreamBlock(object):
     self.header = header
     self.content = content
 
+  @classmethod
+  def makeblock(cls, number, type, header, content):
+  #-------------------------------------------------
+    if type == BlockType.DATA:
+      self = StreamDataBlock(number, header, content)
+    else:
+      self = cls(number, type, header, content)
+    return self
+
+  def __str__(self):
+  #-----------------
+    return "Block %d '%c' (%d): %s" % (self.number, self.type, len(self.content), str(self.header))
+
+  def bytes(self, check=Checksum.NONE):
+  #------------------------------------
+    '''
+    Return a serialisation in Block Stream format.
+
+    :param check: Include a checksum if equal to `Checksum.STRICT`.
+    :type check: :class:`Checksum`
+    '''
+    j = json.dumps(self.header)
+    b = bytearray('#%c%dV%d%s%d\n' % (self.type, VERSION, len(j), j, len(self.content)))
+    b.extend(self.content)
+    b.extend('##')
+    if check != Checksum.NONE:
+      checksum = hashlib.md5()
+      checksum.update(b)
+      b.extend(checksum.hexdigest())
+    b.extend('\n')
+    return b
+
+
+class StreamDataBlock(StreamBlock):
+#==================================
+  """
+  A data block exchanged using the Block Stream format.
+
+  :type number: int
+  :type header: dict
+  :type content: bytearray
+  """
+  def __init__(self, number, header, content):
+  #-------------------------------------------
+    StreamBlock.__init__(self, number, BlockType.DATA, header, content)
+
   def signaldata(self):
   #--------------------
     ''' Return a :class:`SignalData` representation of ourself. '''
-    if self.type != BlockType.DATA: return None
     uri = self.header.get('uri', '')
     start = self.header.get('start', 0)
     count = self.header.get('count', 0)
@@ -222,26 +267,6 @@ class StreamBlock(object):
       else:
         data = np.reshape(np.frombuffer(self.content[datastart:], dtype=dt), (count, dims))
     return SignalData(uri, start, data, rate, clock)
-
-  def bytes(self, check=Checksum.NONE):
-  #------------------------------------
-    '''
-    Return a serialisation in Block Stream format.
-
-    :param check: Include a checksum if equal to `Checksum.STRICT`.
-    :type check: :class:`Checksum`
-    '''
-    j = json.dumps(self.header)
-    b = bytearray('#%c%dV%d%s%d\n' % (self.type, VERSION, len(j), j, len(self.content)))
-    b.extend(self.content)
-    b.extend('##')
-    if check != Checksum.NONE:
-      checksum = hashlib.md5()
-      checksum.update(b)
-      b.extend(checksum.hexdigest())
-    b.extend('\n')
-    return b
-
 
 
 class BlockParser(object):
