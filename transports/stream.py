@@ -10,7 +10,7 @@
 
 
 """
-A generic Block Stream.
+This module defines classes that implement a **Block Stream** transport layer.
 
 
 A *Block Stream* is a transport for blocks of data. Each block is of some *type*; it contains
@@ -61,7 +61,7 @@ class BlockType(object):
   '''
   Stream block types.
 
-  Currently only a signal data block is defined.
+  The following block types are defined:
   '''
 
   DATA_REQ = 'd'
@@ -539,9 +539,9 @@ class BlockParser(object):
 class SignalData(object):
 #========================
   '''
-  A segment of a :class:`biosignalml.model.data.TimeSeries` sent or received on a :class:`BlockStream`.
+  A segment of a :class:`~biosignalml.model.data.TimeSeries` sent or received on a :class:`BlockStream`.
 
-  :param uri: The URI of the :class:`biosignalml.model.Signal` which the segment is from.
+  :param uri: The URI of the :class:`~biosignalml.model.Signal` which the segment is from.
   :type uri: str
   :param start: The start time of the segment, in seconds.
   :type start: double
