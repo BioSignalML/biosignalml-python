@@ -66,11 +66,11 @@ class BlockType(object):
 
   DATA_REQ = 'd'
   """
-  Request time series data from signals that is returned in :class:`SignalData` blocks.
+  Request time series data from signals. Data is returned in :class:`SignalData` blocks.
 
   A data request block has no content and a header with the following fields:
 
-    **uri** (*string*) or (*list[string]*)
+    **uri** (*string* or *list[string]*)
       The URI of the recording or signal(s).
 
       A single URI can be that of a recording or signal; all URIs in a list must refer to
@@ -96,13 +96,21 @@ class BlockType(object):
     **offset** (*integer*)
       The index in the signal's time series of the first sample point in the result.
 
-      Only when requesting data from a single signal, and cannot be ussed if *start* is given.
+      REQUIRED when *start* is not specified; can only be used when requesting data
+      from a single signal.
 
     **count** (*integer*)
       The number of sample points to return in the result. A value of -1 means to get all
       starting points from the start position until the end of the time series.
 
-      Only when requesting data from a single signal, and cannot be used if *duration* is given.
+      REQUIRED when *duration* is not specified; can only be used when requesting data
+      from a single signal.
+
+    **maxsize** (*integer*)
+      The maximum number of sample values to return in a data block.
+
+      OPTIONAL. If unspecified the data server will determine the maximum. If *maxsize* is given,
+      the data server may elect to impose a smaller value.
 
   The time of the first sample point in the resulting time series will not be before *start*; that
   of the last sample point will be before *start + duration*. If the signal's data finishes before
@@ -141,7 +149,7 @@ class BlockType(object):
 
       REQUIRED.
 
-    **dims** (*integer, default 1*)
+    **dims** (*integer*), default = 1
       The number of data points in a single sample value.
 
       OPTIONAL.
@@ -176,7 +184,8 @@ class BlockType(object):
     **type** (*character*)
       The type of the request block which has resulted in an error.
 
-  along with all fields from the original request.
+  along with all fields from the original request. Receipt of an error block causes a
+  :class:`StreamException` to be raised.
   """
 
 
