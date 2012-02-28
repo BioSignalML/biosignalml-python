@@ -26,7 +26,7 @@ BioSignalML data model.
 
 from ontology    import BSML
 
-import time
+import data
 import model
 
 class Recording(model.AbstractRecording):
@@ -34,7 +34,7 @@ class Recording(model.AbstractRecording):
   pass
 
 
-class Signal(model.AbstractSignal, time.TimeSeries):
+class Signal(model.AbstractSignal, data.TimeSeries):
 #===================================================
 
   ##def __init__(self, 
@@ -51,8 +51,8 @@ class Signal(model.AbstractSignal, time.TimeSeries):
     return 0
 
 
-class UniformSignal(model.Signal, time.UniformTimeSeries):
-#=========================================================
+class UniformSignal(Signal, data.UniformTimeSeries):
+#===================================================
   pass
 
 
