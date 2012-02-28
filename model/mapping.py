@@ -20,7 +20,7 @@ from biosignalml.ontology import BSML
 from biosignalml.rdf import Node, Uri, Statement
 from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
 
-from biosignalml.time import TimeLine
+from biosignalml.timeline import TimeLine
 
 
 _datatypes = { 'xsd:float':              float,  # Needs to be full uri...

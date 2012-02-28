@@ -206,7 +206,7 @@ class AbstractRecording(AbstractObject):
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
-    from biosignalml.time import TimeLine   ## Otherwise circular import...
+    from biosignalml.timeline import TimeLine   ## Otherwise circular import...
     AbstractObject.__init__(self, uri, metadata=metadata)
     self.timeline = TimeLine(str(uri) + '/timeline')
     self._signals = { }
