@@ -12,15 +12,14 @@
 import os
 from datetime import datetime
 
-import biosignalml.model as model
-from biosignalml.model   import BSML
-from biosignalml.formats import BSMLRecording
+from biosignalml import BSML
+from biosignalml.formats import BSMLRecording, BSMLSignal
 
 from sdffile import ControlFile, DataFile, EventFile
 
 
-class SDFSignal(model.Signal):
-#=============================
+class SDFSignal(BSMLSignal):
+#===========================
 
   def __init__(self, uri, fname, label):
   #-------------------------------------
@@ -49,7 +48,7 @@ class SDFSignal(model.Signal):
 #Data -offset 0.000000
 
 
-class SDFEvent(model.Event):
+class SDFEvent(biosignalml.Event):
 #===========================
 
   def __init__(self, uri, fname, label):

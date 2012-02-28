@@ -30,7 +30,9 @@ import logging
 from biosignalml.rdf import NAMESPACES, RDF, EVT
 from biosignalml.rdf import Uri, Statement, Graph
 
-from biosignalml.model.ontology import BSML
+from biosignalml.ontology import BSML
+
+import mapping
 
 
 class AbstractObject(object):
@@ -123,7 +125,7 @@ class AbstractObject(object):
     Add RDF statements about ourselves to a graph.
 
     '''
-    import biosignalml.model.mapping as mapping
+    #import biosignalml.model.mapping as mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     if (self.metaclass):
       graph.append(Statement(self.uri, RDF.type, self.metaclass))
@@ -135,28 +137,26 @@ class AbstractObject(object):
     else:                     self.metadata[attr] = value
 
   @classmethod
-  def create_from_repository(cls, uri, repository, rdfmap=None, **kwds):
-  #---------------------------------------------------------------------
+  def create_from_graph(cls, uri, graph, rdfmap=None, **kwds):
+  #-----------------------------------------------------------
     '''
-    Create a new instance of a resource, setting attributes from RDF triples in a repository.
+    Create a new instance of a resource, setting attributes from RDF triples in a graph.
 
     :param uri: The URI for the resource.
-    :param repository: A RDF repository.
-    :type repository: :class:`biosignalml.repostory.Repository`
+    :param graph: A RDF graph.
+    :type graph: :class:`~biosignalml.rdf.Graph`
     :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`biosignalml.model.Mapping`
+    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     :rtype: :class:`AbstractObject`
     '''
-    import biosignalml.model.mapping as mapping
+    #import biosignalml.model.mapping as mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     self = cls(uri, **kwds)
-    statements = repository.statements('<%(uri)s> ?p ?o',
-                                       '<%(uri)s> a  <%(type)s> . <%(uri)s> ?p ?o',
-                                        { 'uri': str(uri), 'type': str(self.metaclass) })
-    for stmt in statements:
-      s, attr, v = rdfmap.metadata(stmt, self.metaclass)
-      ##logging.debug("%s='%s'", attr, v)
-      self._assign(attr, v)
+    if graph.contains(Statement(Uri(uri), RDF.type, self.metaclass)):
+      for stmt in graph.get_statements(Statement(Uri(uri), None, None)):
+        s, attr, v = rdfmap.metadata(stmt, self.metaclass)
+        ##logging.debug("%s='%s'", attr, v)
+        self._assign(attr, v)
     return self
 
   def load_from_graph(self, graph, rdfmap=None, **kwds):
@@ -168,10 +168,10 @@ class AbstractObject(object):
     :param graph: A graph of RDF statements.
     :type graph: :class:`biosignalml.rdf.Graph`
     :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`biosignalml.model.Mapping`
+    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     :rtype: :class:`AbstractObject`
     """
-    import biosignalml.model.mapping as mapping
+    #import biosignalml.model.mapping as mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     if graph.contains(Statement(self.uri, RDF.type, self.metaclass)):
       for stmt in graph.get_statements(Statement(self.uri, None, None)):
@@ -185,7 +185,7 @@ class AbstractObject(object):
     '''
     Set an attribute from RDF statement in the form `(uri, attr, value)`.
     '''
-    import biosignalml.model.mapping as mapping
+    #import biosignalml.model.mapping as mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     v = rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
@@ -206,7 +206,7 @@ class AbstractRecording(AbstractObject):
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
-    from biosignalml.model.timeline import TimeLine   ## Otherwise circular import...
+    from biosignalml.time import TimeLine   ## Otherwise circular import...
     AbstractObject.__init__(self, uri, metadata=metadata)
     self.timeline = TimeLine(str(uri) + '/timeline')
     self._signals = { }
@@ -304,18 +304,18 @@ class AbstractRecording(AbstractObject):
     return self.save_to_graph(rdfmap=rdfmap).serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
 
 
-  def load_signals_from_repository(self, repository, rdfmap=None):
-  #--------------------------------------------------------------
+  def load_signals_from_graph(self, graph, rdfmap=None):
+  #-----------------------------------------------------
     """
-    Retrieve the recording's signals from a repository.
+    Retrieve the recording's signals from a RDF graph.
 
-    :param repository: A RDF repository.
-    :type repository: :class:`biosignalml.repostory.Repository`
+    :param graph: A RDF graph.
+    :type graph: :class:`~biosignalml.rdf.Graph`
     :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`biosignalml.model.Mapping`
+    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     """
-    for sig in repository.get_subjects(BSML.recording, self.uri):
-      self.add_signal(AbstractSignal.create_from_repository(sig, repository, rdfmap))
+    for sig in graph.get_subjects(BSML.recording, self.uri):
+      self.add_signal(AbstractSignal.create_from_graph(sig, graph, rdfmap))
 
 
   @classmethod
@@ -329,7 +329,7 @@ class AbstractRecording(AbstractObject):
     :type string: str
     :param format: The string's RDF format.
     :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`biosignalml.model.Mapping`
+    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     :rtype: :class:`AbstractObject`
     """
     graph = Graph.create_from_string(string, format, uri)

@@ -15,8 +15,8 @@ import logging
 import math
 import numpy as np
 
-import biosignalml.model as model
-from biosignalml.model   import BSML
+import biosignalml
+from biosignalml import BSML
 from biosignalml.formats import BSMLRecording #, BSMLSignal
 
 from edffile import EDF, EDFFile, InvalidSignalId
@@ -62,7 +62,7 @@ class EDFRecording(BSMLRecording):
       for m, text in enumerate(a.annotations):
         if text:
           if tm is None: tm = self.interval(a.onset, a.duration)
-          self.add_event(model.Event(self.uri + '/annotation/tal_%d_%d' % (n, m),
+          self.add_event(biosignalml.Event(self.uri + '/annotation/tal_%d_%d' % (n, m),
             metadata = {'description': text, 'time': tm}))
 
     # Now found common errors...
@@ -88,7 +88,7 @@ class EDFRecording(BSMLRecording):
       return self
 
 
-  * From a model.Recording instance that has Signals
+  * From a biosignalml.Recording instance that has Signals
 
     @classmethod
     def create_from_recording(cls, recording):

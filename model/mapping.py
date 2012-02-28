@@ -16,11 +16,11 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 from isodate  import isoduration
 
-from biosignalml.model.ontology import BSML
+from biosignalml.ontology import BSML
 from biosignalml.rdf import Node, Uri, Statement
 from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
 
-from biosignalml.model.timeline import TimeLine
+from biosignalml.time import TimeLine
 
 
 _datatypes = { 'xsd:float':              float,  # Needs to be full uri...

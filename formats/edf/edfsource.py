@@ -12,7 +12,7 @@
 import urllib
 import logging
 
-from biosignalml.model import TimeSeries
+from biosignalml.time import TimeSeries
 from edffile import EDFFile
 
 

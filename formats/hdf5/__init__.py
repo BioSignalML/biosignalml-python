@@ -51,8 +51,8 @@ from numbers import Number
 import logging
 
 
-import biosignalml.model as model
-from biosignalml.model   import BSML
+from biosignalml import BSML
+from biosignalml.data import TimeSeries
 from biosignalml.formats import BSMLRecording, BSMLSignal
 
 VERSION   = "1.0"
@@ -267,7 +267,7 @@ class HDF5Signal(BSMLSignal):
     if self._index is None:
       end = len(self._dset)
       self._dset.resize(end + len(data), 0)
-      if isinstance(data, model.TimeSeries): self._dset[end:] = data.data
+      if isinstance(data, TimeSeries): self._dset[end:] = data.data
       else:                                  self._dset[end:] = data
     else: raise Exception, "Cannot append to individual signals in a group"
 

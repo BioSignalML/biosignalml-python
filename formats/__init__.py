@@ -23,8 +23,8 @@ Read and write physical Recordings and Signals.
 #
 ######################################################
 
-import biosignalml.model as model
-from biosignalml.model import BSML, TimeSeries
+import biosignalml
+from biosignalml import BSML
 from biosignalml.utils import file_uri
 
 
@@ -36,8 +36,8 @@ def not_implemented(instance, method):
   raise NotImplementedError('%s.%s()' % (instance.__class__.__name__, method))
 
 
-class BSMLRecording(model.Recording):
-#====================================
+class BSMLRecording(biosignalml.Recording):
+#==========================================
   '''
   A generic biosignal Recording as a physical object.
 
@@ -117,8 +117,8 @@ class BSMLRecording(model.Recording):
     not_implemented(self, 'save_metadata')
 
 
-class BSMLSignal(model.Signal):
-#==============================
+class BSMLSignal(biosignalml.Signal):
+#====================================
   '''
   A generic biosignal Signal as a physical object.
 
@@ -139,7 +139,7 @@ class BSMLSignal(model.Signal):
 
     :param interval: The portion of the signal to read.
     :return: A TimeSeries containing signal data covering the interval.
-    :rtype: :class:`TimeSeries`
+    :rtype: :class:`~biosignalml.data.TimeSeries`
 
     The `interval` to be read can be given as either a temporal interval or as data indices.
     '''
@@ -151,7 +151,7 @@ class BSMLSignal(model.Signal):
     Append data to a Signal.
 
     :param timeseries: The data points (and times) to append.
-    :type timeseries: :class:`TimeSeries`
+    :type timeseries: :class:`~biosignalml.data.TimeSeries`
     '''
     not_implemented(self, 'append')
 

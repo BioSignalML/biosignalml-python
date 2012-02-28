@@ -23,20 +23,19 @@ BioSignalML data model.
 #
 ######################################################
 
-from abstraction import *
-from timeline    import *
-from data        import *
+
 from ontology    import BSML
 
+import time
+import model
 
-
-class Recording(AbstractRecording):
-#==================================
+class Recording(model.AbstractRecording):
+#========================================
   pass
 
 
-class Signal(AbstractSignal, TimeSeries):
-#========================================
+class Signal(model.AbstractSignal, time.TimeSeries):
+#===================================================
 
   ##def __init__(self, 
 
@@ -47,19 +46,16 @@ class Signal(AbstractSignal, TimeSeries):
     '''
     raise NotImplementedError, 'Signal.read()'
 
-
-
-
   def __len__(self):
   #----------------
     return 0
 
 
-class UniformSignal(Signal, UniformTimeSeries):
-#==============================================
+class UniformSignal(model.Signal, time.UniformTimeSeries):
+#=========================================================
   pass
 
 
-class Event(AbstractEvent):
-#==========================
+class Event(model.AbstractEvent):
+#================================
   pass

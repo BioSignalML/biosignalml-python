@@ -9,7 +9,7 @@
 ######################################################
 
 
-from biosignalml.model   import BSML
+from biosignalml         import BSML
 from biosignalml.formats import BSMLRecording
 from biosignalml.utils   import file_uri
 

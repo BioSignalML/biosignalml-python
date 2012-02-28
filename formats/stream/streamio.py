@@ -18,8 +18,9 @@ import math
 from time import sleep
 
 
-from biosignalml.rdf   import RDF, DCTERMS, Graph, Uri
-from biosignalml.model import BSML, Recording, TimeSeries
+from biosignalml.rdf  import RDF, DCTERMS, Graph, Uri
+from biosignalml      import BSML, Recording
+from biosignalml.data import TimeSeries
 
 import blockio
 from blockio import BLOCK_INFO, BLOCK_DATA, BLOCK_META, BLOCK_EVENT

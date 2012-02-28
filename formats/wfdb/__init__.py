@@ -17,8 +17,8 @@ import dateutil.parser
 import logging
 
 
-import biosignalml.model as model
-from biosignalml.model import BSML, TimeSeries
+from biosignalml import BSML
+from biosignalml.data import TimeSeries
 from biosignalml.utils import file_uri
 
 from biosignalml.formats import BSMLRecording, BSMLSignal
@@ -177,7 +177,7 @@ class WFDBSignal(BSMLSignal):
   def read(self, interval=None, segment=None, duration=None, points=0):
   #--------------------------------------------------------------------
     """
-    :return: A :class:TimeSeries containing signal data covering the interval.
+    :return: A :class:~biosignalml.data.TimeSeries containing signal data covering the interval.
     """
 
     """
