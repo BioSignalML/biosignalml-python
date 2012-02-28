@@ -22,7 +22,29 @@ import logging
 
 import RDF as librdf
 
-from formats import Format
+
+class Format(object):
+#====================
+  '''Different RDF representation formats.'''
+  RDFXML = 'rdfxml'
+  TURTLE = 'turtle'
+  JSON   = 'json'
+
+  mimetypes = { RDFXML: 'application/rdf+xml',
+                TURTLE: 'text/turtle',
+                JSON:   'application/json',
+              }
+
+  @staticmethod
+  def mimetype(format):
+  #--------------------
+    '''
+    Get the MIME type of a RDF representation.
+
+    :param format: A RDF representation.
+    :rtype: str
+    '''
+    return Format.mimetypes[format]
 
 
 class NS(librdf.NS):
