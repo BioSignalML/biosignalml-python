@@ -32,8 +32,6 @@ from biosignalml.rdf import Uri, Statement, Graph
 
 from biosignalml.ontology import BSML
 
-import mapping
-
 
 class AbstractObject(object):
 #============================
@@ -125,7 +123,7 @@ class AbstractObject(object):
     Add RDF statements about ourselves to a graph.
 
     '''
-    #import biosignalml.model.mapping as mapping
+    import mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     if (self.metaclass):
       graph.append(Statement(self.uri, RDF.type, self.metaclass))
@@ -149,7 +147,7 @@ class AbstractObject(object):
     :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     :rtype: :class:`AbstractObject`
     '''
-    #import biosignalml.model.mapping as mapping
+    import mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     self = cls(uri, **kwds)
     if graph.contains(Statement(Uri(uri), RDF.type, self.metaclass)):
@@ -171,7 +169,7 @@ class AbstractObject(object):
     :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     :rtype: :class:`AbstractObject`
     """
-    #import biosignalml.model.mapping as mapping
+    import mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     if graph.contains(Statement(self.uri, RDF.type, self.metaclass)):
       for stmt in graph.get_statements(Statement(self.uri, None, None)):
@@ -185,7 +183,7 @@ class AbstractObject(object):
     '''
     Set an attribute from RDF statement in the form `(uri, attr, value)`.
     '''
-    #import biosignalml.model.mapping as mapping
+    import mapping
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     v = rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
