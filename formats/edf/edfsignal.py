@@ -99,23 +99,25 @@ class EDFSignal(BSMLSignal):
     # We need to be consistent as to what an interval is....
     # Use model.Interval ??
     if interval is not None:
+      #logging.debug('Interval: (%s, %s)', interval.start, interval.duration)
       start = self.rate*interval.start if interval.start else 0
-      segment = (start, (self.rate*(start+interval.duration) - 1) if interval.duration is not None
-                    else len(self))
+      segment = (start, self.rate*interval.duration if interval.duration is not None
+                   else len(self))
+    #logging.debug('Segment: %s', segment)
 
     if segment is None:
       startpos = 0
       length = len(self)
     else:
-      if segment[0] <= segment[1]: seg = segment
-      else:                        seg = (segment[1], segment[0])
-      startpos = max(0, int(math.floor(seg[0])))
-      length = min(len(self), int(math.ceil(seg[1])) - startpos + 1)
+      startpos = max(0, int(math.floor(segment[0])))
+      length = min(len(self)-startpos, int(math.ceil(segment[1])))
+      #logging.debug('Startpos: %d, len: %d, pts: %d', startpos, length, points)
 
     while length > 0:
       if points > length: points = length
       sigdata = self.recording._edffile.physical_signal(self.index, startpos, points)
+      #logging.debug('READ %d at %d, got %d', points, startpos, sigdata.length)
       if sigdata.length <= 0: break
       yield DataSegment(float(sigdata.startpos)/self.rate, UniformTimeSeries(sigdata.data, self.rate))
-      startpos += sigdata[1]
-      length -= sigdata[1]
+      startpos += sigdata.length
+      length -= sigdata.length
