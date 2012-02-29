@@ -58,7 +58,7 @@ class Instant(model.AbstractObject):
 
   def __init__(self, uri, when, timeline, metadata={}):
   #----------------------------------------------------
-    AbstractObject.__init__(self, uri, metadata=metadata)
+    model.AbstractObject.__init__(self, uri, metadata=metadata)
     self.at = when
     self.timeline = timeline
 
@@ -77,7 +77,7 @@ class Interval(model.AbstractObject):
 
   def __init__(self, uri, start, duration, timeline, metadata={}):
   #---------------------------------------------------------------
-    AbstractObject.__init__(self, uri, metadata=metadata)
+    model.AbstractObject.__init__(self, uri, metadata=metadata)
     self.start = start
     self.duration = duration
     self.timeline = timeline
