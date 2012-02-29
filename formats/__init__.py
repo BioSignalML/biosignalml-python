@@ -63,8 +63,8 @@ class BSMLRecording(biosignalml.Recording):
     elif 'source' not in metadata:
       metadata['source'] = uri
     if 'format' not in metadata: metadata['format'] = BSML.RAW
-    super(BSMLRecording, self).__init__(uri, metadata=metadata)
     if metadata.get('digest'): self.metadata['digest'] = metadata['digest']
+    model.Recording.__init__(self, uri, metadata=metadata)
 
   @classmethod
   def open(cls, fname, uri=None, mode='r', **kwds):
@@ -130,7 +130,7 @@ class BSMLSignal(biosignalml.Signal):
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
-    super(BSMLSignal, self).__init__(uri, metadata=metadata)
+    model.Signal.__init__(self, uri, metadata=metadata)
 
   def read(self, interval=None):
   #-----------------------------
