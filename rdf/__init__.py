@@ -253,12 +253,12 @@ class Graph(librdf.Model):
   '''
   def __init__(self, uri=None):
   #----------------------------
+    librdf.Model.__init__(self, storage=librdf.Storage(name='triples',
+                                                       storage_name='hashes',
+                                                       options_string="hash-type='memory'"))
     if uri and not isinstance(uri, Node) and not isinstance(uri, Uri):
       uri = Uri(uri)
     self.uri = uri
-    super(Graph, self).__init__(storage=librdf.Storage(name='triples',
-                                                       storage_name='hashes',
-                                                       options_string="hash-type='memory'"))
 
   @classmethod
   def create_from_resource(cls, uri, format, base=None):
