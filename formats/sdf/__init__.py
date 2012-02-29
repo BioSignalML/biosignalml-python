@@ -12,6 +12,7 @@
 import os
 from datetime import datetime
 
+import biosignalml
 from biosignalml import BSML
 from biosignalml.formats import BSMLRecording, BSMLSignal
 
