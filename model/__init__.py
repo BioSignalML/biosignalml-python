@@ -62,7 +62,7 @@ class AbstractObject(object):
 
   def __str__(self):
   #-----------------
-    return '[%s: %s]' % (self.__class__, self.uri)
+    return '%s: %s' % (self.__class__, self.uri)
 
   def initialise(self, *args):
   #---------------------------
@@ -245,7 +245,7 @@ class AbstractRecording(AbstractObject):
     if signal.uri in self._signal_uris:
       raise Exception, "Signal '%s' already in recording" % signal.uri
     if signal.recording and str(signal.recording) != str(self.uri):  ## Set from RDF mapping...
-      raise Exception, "Signal '%s' is in Recording '%s'" % (signal.uri, signal.recording)
+      raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, signal.uri, signal.recording)
     signal.recording = self
     self._signal_uris.append(str(signal.uri))
     self._signals[str(signal.uri)] = signal
