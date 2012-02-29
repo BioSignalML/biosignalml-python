@@ -26,7 +26,7 @@ class EDFSignal(BSMLSignal):
 
   def __init__(self, signum, edf):
   #-------------------------------
-    super(EDFSignal, self).__init__(str(edf.uri) + '/signal/%d' % signum,
+    BSMLSignal.__init__(self, str(edf.uri) + '/signal/%d' % signum,
       metadata = { 'label': edf._edffile.label[signum],
                    'units': edf._edffile.units[signum],
                    'transducer': edf._edffile.transducer[signum],
@@ -36,8 +36,13 @@ class EDFSignal(BSMLSignal):
                    'minValue': edf._edffile._physmin[signum],
                    'maxValue': edf._edffile._physmax[signum],
                  } )
+    self.initialise(signum, edf)
+
+
+  def initialise(self, signum, rec):
+  #---------------------------------
     self.index = signum
-    self._rec_count = edf._edffile.nsamples[signum]
+    self._rec_count = rec._edffile.nsamples[signum]
 
     ##if edf._edffile.edf_type == EDF.EDF:
     ##  filter = edf._edffile.prefilter[signum]
@@ -69,7 +74,7 @@ class EDFSignal(BSMLSignal):
   def read(self, interval=None, segment=None, duration=None, points=0):
   #--------------------------------------------------------------------
     """
-    :return: A :class:TimeSeries containing signal data covering the interval.
+    :return: A :class:DataSegment containing signal data covering the interval.
     """
 
     """
