@@ -18,7 +18,7 @@ import logging
 
 
 from biosignalml import BSML
-from biosignalml.data import TimeSeries
+from biosignalml.data import DataSegment, UniformTimeSeries
 from biosignalml.utils import file_uri
 
 from biosignalml.formats import BSMLRecording, BSMLSignal
@@ -177,7 +177,9 @@ class WFDBSignal(BSMLSignal):
   def read(self, interval=None, segment=None, duration=None, points=0):
   #--------------------------------------------------------------------
     """
-    :return: A :class:~biosignalml.data.TimeSeries containing signal data covering the interval.
+    An `iterator` returning segments of the signal data.
+
+    :return: A :class:~biosignalml.data.DataSegment containing signal data covering the interval.
     """
 
     """
@@ -232,7 +234,7 @@ class WFDBSignal(BSMLSignal):
                            for i in xrange(points)
                              if wfdb.getvec(v.cast()) >= 0 ]) - self._baseline)/self._gain
       if len(data) <= 0: break
-      yield TimeSeries(data, rate = self.rate, starttime = float(startpos)/self.rate)
+      yield DataSegment(float(startpos)/self.rate, UniformTimeSeries(data, self.rate))
       startpos += len(data)
       length -= len(data)
 
@@ -274,7 +276,7 @@ if __name__ == '__main__':
 
     wf.close()
 
-  testrec('mghdb/mgh001')
+  testrec('mghdb/mgh002')
   #testrec('100s')
   #testrec('sinewave.edf')
   #testrec('Calib5.edf')
