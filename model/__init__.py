@@ -227,7 +227,7 @@ class AbstractRecording(AbstractObject):
     :type signal: :class:`Signal`
     :return: The 0-origin index of the signal in the recording.
     '''
-    logging.debug("Adding signal: %s", signal.uri)
+    #logging.debug("Adding signal: %s", signal.uri)
     if signal.uri in self._signal_uris:
       raise Exception, "Signal '%s' already in recording" % signal.uri
     if signal.recording and str(signal.recording) != str(self.uri):  ## Set from RDF mapping...
@@ -325,8 +325,9 @@ class AbstractRecording(AbstractObject):
         sig = AbstractSignal(s.uri)
         sig.load_from_graph(graph, rdfmap)
         self.add_signal(sig)
-
     return self
+
+
 class AbstractSignal(AbstractObject):
 #====================================
   '''
