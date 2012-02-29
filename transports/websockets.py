@@ -66,6 +66,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
     :param check: Set to :attr:`~biosignalml.transports.stream.Checksum.STRICT`
       to append a MD5 checksum to the block.
     '''
+    logging.debug('SEND: %s', block)
     self.send(block.bytes(), True)
 
 
