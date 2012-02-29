@@ -183,6 +183,6 @@ class BSMLSignal(biosignalml.Signal):
 
 from raw  import RAWRecording
 from edf  import EDFRecording
-from sdf  import SDFRecording
+##from sdf  import SDFRecording
 from wfdb import WFDBRecording
 from hdf5 import HDF5Recording
