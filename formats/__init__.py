@@ -135,14 +135,14 @@ class BSMLSignal(biosignalml.Signal):
   #------------------------------------
     biosignalml.Signal.__init__(self, uri, metadata=metadata)
 
-  def read(self, interval=None):
-  #-----------------------------
+  def read(self, interval=None, segment=None, duration=None, points=0):
+  #--------------------------------------------------------------------
     '''
     Read data from a Signal.
 
     :param interval: The portion of the signal to read.
-    :return: A TimeSeries containing signal data covering the interval.
-    :rtype: :class:`~biosignalml.data.TimeSeries`
+    :return: A DataSegment containing signal data covering the interval.
+    :rtype: :class:`~biosignalml.data.DataSegment`
 
     The `interval` to be read can be given as either a temporal interval or as data indices.
     '''
@@ -186,3 +186,7 @@ from edf  import EDFRecording
 ##from sdf  import SDFRecording
 from wfdb import WFDBRecording
 from hdf5 import HDF5Recording
+
+CLASSES = { str(BSML.EDF):  EDFRecording,
+            str(BSML.WFDB): WFDBRecording,
+          }
