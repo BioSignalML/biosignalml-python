@@ -302,20 +302,6 @@ class AbstractRecording(AbstractObject):
     return self.save_to_graph(rdfmap=rdfmap).serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
 
 
-  def load_signals_from_graph(self, graph, rdfmap=None):
-  #-----------------------------------------------------
-    """
-    Retrieve the recording's signals from a RDF graph.
-
-    :param graph: A RDF graph.
-    :type graph: :class:`~biosignalml.rdf.Graph`
-    :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
-    """
-    for sig in graph.get_subjects(BSML.recording, self.uri):
-      self.add_signal(AbstractSignal.create_from_graph(sig, graph, rdfmap))
-
-
   @classmethod
   def create_from_string(cls, uri, string, format='turtle', rdfmap=None, **kwds):
   #------------------------------------------------------------------------------
