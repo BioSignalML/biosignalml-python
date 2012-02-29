@@ -704,14 +704,14 @@ class SignalDataStream(BlockStream):
       raise StreamException("Requested data stream cannot have both 'duration' and 'count'")
     elif duration >= 0:      header['duration'] = duration
     elif count is not None:  header['count'] = count
-    elif maxsize > 0:        header['maxsize'] = maxsize
+    if maxsize > 0:          header['maxsize'] = maxsize
     self._request = StreamBlock(0, BlockType.DATA_REQ, header, '')
 
   def __iter__(self):
   #------------------
     for block in BlockStream.__iter__(self):
+      logging.debug('RECV: %s', block)
       if block.type == BlockType.DATA: yield block.signaldata()
-      else:                            logging.debug('RECVD: %s', block)
 
 
 class TestBlock(StreamBlock):
