@@ -105,6 +105,7 @@ BSML_MAP = [
 
 # Recording specific metadata:
   AttributeMap('format',        DCTERMS.format,  BSML.Recording),
+  AttributeMap('source',        DCTERMS.source,  BSML.Recording),
   AttributeMap('investigation', DCTERMS.subject, BSML.Recording),
   AttributeMap('starttime',     DCTERMS.created, BSML.Recording, XSD.dateTime, datetime_to_isoformat,  isoformat_to_datetime),
   AttributeMap('duration',      DCTERMS.extent,  BSML.Recording, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
