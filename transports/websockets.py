@@ -20,10 +20,10 @@ import ws4py.client.threadedclient
 import stream
 
 
-class WebSocketReadStream(ws4py.client.threadedclient.WebSocketClient):
-#======================================================================
+class StreamClient(ws4py.client.threadedclient.WebSocketClient):
+#================================================================
   """
-  A web socket connection.
+  A connection to a web socket server.
   
   We send a data request when the connection is established and then then parse received data.
   Received Stream Blocks found are put to `receiveQ`.
@@ -47,7 +47,7 @@ class WebSocketReadStream(ws4py.client.threadedclient.WebSocketClient):
 
   def opened(self):
   #----------------
-    self.send(self._request.bytes(), True)
+    self.send_block(self._request)
 
   def closed(self, code, reason=None):
   #-----------------------------------
@@ -57,6 +57,16 @@ class WebSocketReadStream(ws4py.client.threadedclient.WebSocketClient):
   #--------------------------------
     self._parser.process(msg.data)
 
+  def send_block(self, block, check=stream.Checksum.STRICT):
+  #---------------------------------------------------------
+    '''
+    Send a :class:`~biosignalml.transports.stream.StreamBlock` over a web socket.
+
+    :param block: The block to send.
+    :param check: Set to :attr:`~biosignalml.transports.stream.Checksum.STRICT`
+      to append a MD5 checksum to the block.
+    '''
+    self.send(block.bytes(), True)
 
 
 class WebStreamReader(stream.SignalDataStream):
@@ -84,7 +94,7 @@ class WebStreamReader(stream.SignalDataStream):
   #-----------------------------------------------------------------------
     stream.SignalDataStream.__init__(self, endpoint, uri, start, offset, duration)
     try:
-      self._ws = WebSocketReadStream(endpoint, self._request, self._receiveQ, protocols=['biosignalml-ssf'])
+      self._ws = StreamClient(endpoint, self._request, self._receiveQ, protocols=['biosignalml-ssf'])
       self._ws.connect()
     except Exception, msg:
       logging.error('Unable to connect to WebSocket: %s', msg)
