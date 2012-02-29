@@ -651,7 +651,7 @@ class BlockStream(object):
       block = self._receiveQ.get()
       if block is None: break
       if block.type == BlockType.ERROR:
-        raise StreamError(block.content)
+        raise StreamException(block.content)
       yield block
 
 
@@ -698,15 +698,15 @@ class SignalDataStream(BlockStream):
     BlockStream.__init__(self, endpoint)
     header = {'uri': uri }
     if start is not None and offset is not None:
-      raise StreamError("Requested data stream cannot have both 'start' and 'offset'")
+      raise StreamException("Requested data stream cannot have both 'start' and 'offset'")
     elif start is not None:  header['start'] = start
     elif offset is not None: header['offset'] = offset
     if duration >= 0 and offset is not None:
-      raise StreamError("Requested data stream cannot have both 'duration' and 'count'")
+      raise StreamException("Requested data stream cannot have both 'duration' and 'count'")
     elif duration >= 0:      header['duration'] = duration
     elif count is not None:  header['count'] = count
     elif maxsize > 0:        header['maxsize'] = maxsize
-    self._request = StreamBlock(0, BlockType.DATA_REQ, header)
+    self._request = StreamBlock(0, BlockType.DATA_REQ, header, '')
 
   def __iter__(self):
   #------------------
