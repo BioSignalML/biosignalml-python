@@ -99,7 +99,9 @@ class EDFSignal(BSMLSignal):
     # We need to be consistent as to what an interval is....
     # Use model.Interval ??
     if interval is not None:
-      segment = (self.rate*interval.start, self.rate*(interval.start+interval.duration) - 1)
+      start = self.rate*interval.start if interval.start else 0
+      segment = (start, (self.rate*(start+interval.duration) - 1) if interval.duration is not None
+                    else len(self))
 
     if segment is None:
       startpos = 0
