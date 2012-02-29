@@ -28,8 +28,8 @@ from biosignalml.formats import BSMLRecording, BSMLSignal
 class WFDBRecording(BSMLRecording):
 #==================================
 
-  def __init__(self, fname, uri=None, metadata=None):
-  #-------------------------------------------------
+  def __init__(self, uri=None, fname=None, metadata=None):
+  #-------------------------------------------------------
 
     wfdb.setgvmode(wfdb.WFDB_HIGHRES)
     ## http: url needs .hea extension??
@@ -53,7 +53,7 @@ class WFDBRecording(BSMLRecording):
     metadata['format'] = BSML.WFDB
     metadata['source'] = source
 
-    BSMLRecording.__init__(self, uri=uri, metadata = metadata)
+    BSMLRecording.__init__(self, uri=uri, fname=fname, metadata=metadata)
 
     self._framerate = wfdb.sampfreq(None)/wfdb.getspf()
 
@@ -107,7 +107,7 @@ class WFDBRecording(BSMLRecording):
   @classmethod
   def open(cls, fname, uri=None):
   #------------------------------
-    return cls(fname, uri=uri)               ## This is the same as BSML superclass
+    return cls(uri=uri, fname=fname)               ## This is the same as BSML superclass
 
 
     """

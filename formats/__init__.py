@@ -58,7 +58,7 @@ class BSMLRecording(biosignalml.Recording):
 
   attributes = biosignalml.Recording.attributes + [ 'digest' ]
 
-  def __init__(self, fname=None, uri=None, mode='r', metadata=None):
+  def __init__(self, uri=None, fname=None, mode='r', metadata=None):
   #-----------------------------------------------------------------
     if metadata is None: metadata = { }
     if fname:
@@ -83,7 +83,7 @@ class BSMLRecording(biosignalml.Recording):
     :type mode: str
     :return: a biosignal Recording.
     '''
-    return cls(fname, uri=uri, mode=mode, **kwds)
+    return cls(uri=uri, fname=fname, mode=mode, **kwds)
 
   @classmethod
   def create(cls, fname, uri=None, **kwds):
@@ -97,7 +97,7 @@ class BSMLRecording(biosignalml.Recording):
     :type uri: str
     :return: a new biosignal Recording (with no Signals).
     '''
-    return cls.open(fname, uri=uri, mode='w', **kwds)
+    return cls.open(uri=uri, fname=fname, mode='w', **kwds)
 
   def close(self):
   #---------------

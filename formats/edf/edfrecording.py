@@ -31,9 +31,9 @@ MAXBUFFERS = 100   ## Has to allow for short output data records and long signal
 class EDFRecording(BSMLRecording):
 #=================================
 
-  def __init__(self, fname, uri=None):
-  #-----------------------------------
-    BSMLRecording.__init__(self, fname, uri=uri)
+  def __init__(self, uri=None, fname=None):
+  #----------------------------------------
+    BSMLRecording.__init__(self, uri=uri, fname=fname)
     self._edffile = None
 
   def initialise(self, fname):
@@ -73,7 +73,7 @@ class EDFRecording(BSMLRecording):
   @classmethod
   def open(cls, fname, uri=None):
   #------------------------------
-    self = cls(fname, uri=uri)
+    self = cls(uri=uri, fname=fname)
     self.initialise(fname)
     self._set_attributes
     return self
