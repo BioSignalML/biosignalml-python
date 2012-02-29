@@ -64,6 +64,20 @@ class AbstractObject(object):
   #-----------------
     return '[%s: %s]' % (self.__class__, self.uri)
 
+  def initialise(self, *args):
+  #---------------------------
+    pass
+
+  @classmethod
+  def changeclass(cls, obj, *args):
+  #--------------------------------
+    if   obj.__class__ == cls: return obj
+    elif obj.__class__ not in cls.__mro__:
+      raise TypeError('Object not in superclasses')
+    obj.__class__ = cls
+    cls.initialise(obj, *args)
+    return obj
+
   def set_attributes(self, values):
   #--------------------------------
     '''
