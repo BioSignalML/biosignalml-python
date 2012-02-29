@@ -31,48 +31,57 @@ MAXBUFFERS = 100   ## Has to allow for short output data records and long signal
 class EDFRecording(BSMLRecording):
 #=================================
 
-  def __init__(self, fname, edffile, uri=None, metadata={}):
-  #---------------------------------------------------------
-    super(EDFRecording, self).__init__(fname, uri=uri, metadata=metadata)
-    self._edffile = edffile
+  def __init__(self, fname, uri=None):
+  #-----------------------------------
+    BSMLRecording.__init__(self, fname, uri=uri)
+    self._edffile = None
 
-
-  @classmethod
-  def open(cls, fname, uri=None):
-  #------------------------------
+  def initialise(self, fname):
+  #---------------------------
     edffile = EDFFile.open(fname)
-    self = cls(fname, edffile, uri=uri,
-      metadata = { 'format': BSML.EDF,   ## EDF+ as well...   #### look at self.edf_type
-                   'starttime': edffile.start_datetime,
-                   'duration': edffile.duration,
-                   'investigation': edffile.patient,
-                   'description': edffile.recording,
-                 } )
-##    'version': edffile.version,    ## Or a comment field ??
+    if edffile is None:
+      raise IOError("Cannot open '%f'", fname)
+    self._edffile = edffile
+    for s in self._signals:
+      EDFSignal.changeclass(self._signals[s], int(str(s).rsplit('/', 1)[-1]), self)
 
-    if edffile.edf_type != EDF.EDF:
-      for k in PATIENTFIELDS: self.metadata[k] = getattr(edffile, k, None)
-      for k in RECORDINGFIELDS: self.metadata[k] = getattr(edffile, k, None)
-
-    for n in edffile.data_signals:      # Add EDFSignal objects
+  def _set_attributes(self):
+  #-------------------------
+    if self._edffile is None: return
+    self.metadata.update({'format': BSML.EDF,   ## EDF+ as well...   #### look at self.edf_type
+                          'starttime': self._edffile.start_datetime,
+                          'duration': self._edffile.duration,
+                          'investigation': self._edffile.patient,
+                          'description': self._edffile.recording,
+##                        'version': self._edffile.version,    ## Or a comment field ??
+                         })
+    if self._edffile.edf_type != EDF.EDF:
+      for k in PATIENTFIELDS: self.metadata[k] = getattr(self._edffile, k, None)
+      for k in RECORDINGFIELDS: self.metadata[k] = getattr(self._edffile, k, None)
+    for n in self._edffile.data_signals:      # Add EDFSignal objects
       self.add_signal(EDFSignal(n, self))
-
-    for n, a in enumerate(edffile.annotations()):
+    for n, a in enumerate(self._edffile.annotations()):
       tm = None
       for m, text in enumerate(a.annotations):
         if text:
           if tm is None: tm = self.interval(a.onset, a.duration)
           self.add_event(biosignalml.Event(self.uri + '/annotation/tal_%d_%d' % (n, m),
             metadata = {'description': text, 'time': tm}))
-
     # Now found common errors...
-    self.comment = '\n'.join(edffile.errors)
-    return self
+    self.comment = '\n'.join(self._edffile.errors)
 
+  @classmethod
+  def open(cls, fname, uri=None):
+  #------------------------------
+    self = cls(fname, uri=uri)
+    self.initialise(fname)
+    self._set_attributes
+    return self
 
   def close(self):
   #---------------
-    self._edffile.close()
+    if self._edffile:
+      self._edffile.close()
 
 
 
