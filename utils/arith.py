@@ -26,39 +26,18 @@ If downsample and new rate will be < 2*maxBW than set maxBW of result = newRate/
 import fractions
 
 
-def _gcd(a, b):
-#--------------
-  while b: a, b = b, a % b
-  return a
-
-def _lcm(a, b):
-#--------------
-  return (a*b)/_gcd(a,b)    #### fractions.gcd(g, n)
-
+def lcm(l):
+#==========
+  return reduce(lambda x, y: (x*y)/fractions.gcd(x,y), l)
 
 def gcd(l):
 #==========
-  if len(l) == 1: g = l[0]
-  else:
-    g = _gcd(l[0], l[1])
-    for n in l[2:]:
-      if g == 1: break
-      g = _gcd(g, n)        #### fractions.gcd(g, n)
-  return g
-
-def lcm(l):
-#==========
-  if len(l) == 1: r = l[0]
-  else:
-    r = _lcm(l[0], l[1])
-    for n in l[2:]: r = _lcm(r, n)
-  return r
+  return reduce(fractions.gcd, l)
 
 def ratios(l):
 #=============
   m = lcm(l)
   return [m/n for n in l]
-
 
 """
 ratios([edf.nsamples[n] for n in edf.dataSignals])
