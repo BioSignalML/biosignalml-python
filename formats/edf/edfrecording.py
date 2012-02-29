@@ -119,7 +119,7 @@ class EDFRecording(BSMLRecording):
     ## Check recording.get_format == BSML.EDF   ????
     ## Set self._reserved to 'EDF+C' or 'EDF+D' for EDF+ (also BDF ???)
 
-    self.version = 0 
+    self.version = 0
     if type == EDF.EDF:
       self.patient = recording.get_investigation()   ## EDF+ fields...
       self.signalset = recording.get_description()   ## EDF+ fields...
@@ -176,7 +176,7 @@ class EDFRecording(BSMLRecording):
     except ValueError: raise Exception('Unknown output signal: %s' % str(signal.uri))
     if signal.rate and signal.rate != self.rate[n]:
       raise Exception("Signal's rate has changed...")
-    elif signal.times is not None: 
+    elif signal.times is not None:
       raise Exception("EDF doesn't support non-uniform sampling")
     elif signal.start != self._recbuffers.next_start(n, self.rate[n]):
       raise Exception("Discontinuous signals are currently not supported")
@@ -283,17 +283,34 @@ class SignalBuffer(object):
 if __name__ == '__main__':
 #=========================
 
-  r = RecordBuffers(0.0, [3, 2], [None, EDFScaler(-1, 1)])
-  r.put_data(0, -np.ones(3))
-  r.put_data(1,  np.ones(4))
-  r.put_data(1,  np.ones(2))
-  print r.in_use()
-  r.put_data(0, -np.ones(6))
-  print r.in_use()
-  r.put_data(0,  np.ones(3))
-  r.put_data(1, -np.ones(4))
-  r.put_data(1, -np.ones(2))
-  print r.in_use()
-  r.put_data(0,  np.ones(6))
-  print r.in_use()
+  #import rpdb2; rpdb2.start_embedded_debugger('test')
+
+
+  fname = '../../../../testdata/sinewave.edf'
+  edf = EDFRecording.open(fname, uri='http://recordings.biosignalml.org/testdata/sinewave')
+  if edf is None:
+    raise Exception('Missing file: %s' % fname)
+
+  if edf._edffile.errors:   ## Do this automatically ??
+    edf.signalset.comment = "Source file had header errors"
+
+
+  for s in edf.signals():
+    print s
+
+
+  #window = edf.interval(0.0, 1.0)   # 10 second wide window
+  ## Hmm, recording.duration could be a RelativeInterval...
+  #while window.start < edf.duration:
+  #  for e, h in sigs.iteritems():
+  #    for d in e.read(window): h.append(d)
+  #  window += 1.0
+
+  for e in edf.events():
+    print e
+
+
+  print edf.metadata_as_string()
+
+  edf.close()
 
