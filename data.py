@@ -117,7 +117,7 @@ class TimeSeries(object):
    
   def __str__(self):
   #-----------------
-    return '<Time Series:\n times=%s\n data=%s>' % (self.times, self.data)
+    return '<Time Series: len=%d, times=\n%s\n data=\n%s>' % (len(self), self.times, self.data)
 
   '''
   A single value as a (time, data( tuple, or a slice as a 2D array of (time, data) points.
@@ -205,7 +205,7 @@ class UniformTimeSeries(TimeSeries):
 
   def __str__(self):
   #-----------------
-    return '<Time Series, rate=%s: %s>' % (self.rate, self.data)
+    return '<Time Series, len=%d, rate=%s:\n%s>' % (len(self), self.rate, self.data)
 
   """
   Extend a uniform time series.
@@ -247,6 +247,10 @@ class DataSegment(object):
   def __str__(self):
   #-----------------
     return 'Start: %s, Series: %s' % (self.starttime, self.dataseries)
+
+  def __len__(self):
+  #-----------------
+    return len(self.data)
 
   def __getitem__(self, key):
   #--------------------------
