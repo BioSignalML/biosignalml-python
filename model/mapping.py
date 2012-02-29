@@ -23,22 +23,21 @@ from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
 from biosignalml.timeline import TimeLine
 
 
-_datatypes = { 'xsd:float':              float,  # Needs to be full uri...
-##                                                 XSD.float.uri etc...
-               'xsd:double':             float,
-               'xsd:integer':            long,
-               'xsd:long':               long,
-               'xsd:int':                int,
-               'xsd:short':              int,
-               'xsd:byte':               int,
-               'xsd:nonPostiveInteger':  long,
-               'xsd:nonNegativeInteger': long,
-               'xsd:positiveInteger':    long,
-               'xsd:negativeInteger':    long,
-               'xsd:unsignedLong':       long,
-               'xsd:unsignedInt':        long,
-               'xsd:unsignedShort':      int,
-               'xsd:unsignedByte':       int,
+_datatypes = { XSD.float:              float,
+               XSD.double:             float,
+               XSD.integer:            long,
+               XSD.long:               long,
+               XSD.int:                int,
+               XSD.short:              int,
+               XSD.byte:               int,
+               XSD.nonPostiveInteger:  long,
+               XSD.nonNegativeInteger: long,
+               XSD.positiveInteger:    long,
+               XSD.negativeInteger:    long,
+               XSD.unsignedLong:       long,
+               XSD.unsignedInt:        long,
+               XSD.unsignedShort:      int,
+               XSD.unsignedByte:       int,
              }
 
 
