@@ -279,6 +279,7 @@ class StreamBlock(object):
     :param check: Include a checksum if equal to `Checksum.STRICT`.
     :type check: :class:`Checksum`
     '''
+    #logging.debug('HDR: %s', self.header)
     j = json.dumps(self.header)
     b = bytearray('#%c%dV%d%s%d\n' % (self.type, VERSION, len(j), j, len(self.content)))
     b.extend(self.content)
@@ -398,9 +399,7 @@ class BlockParser(object):
     '''
     pos = 0
     size = datalen = len(data)
-
-    logging.debug('Process %d bytes', datalen)
-
+    #logging.debug('Process %d bytes', datalen)
     while datalen > 0:
 
       if   self._state == BlockParser._RESET:                   # Looking for a block
