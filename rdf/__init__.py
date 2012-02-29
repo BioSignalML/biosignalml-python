@@ -343,6 +343,7 @@ class Graph(librdf.Model):
     :return: The graph serialised as a string.
     :rtype: str
     '''
+    if base is None: base = self.uri
     serialiser = librdf.Serializer(format)
     for prefix, uri in prefixes.iteritems():
       serialiser.set_namespace(prefix, Uri(uri))
