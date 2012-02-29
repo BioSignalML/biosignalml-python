@@ -56,7 +56,7 @@ class BSMLRecording(biosignalml.Recording):
   If no `fname` and no `metadata['source']` then `source` is set to `uri`.
   '''
 
-  attributes = model.Recording.attributes + [ 'digest' ]
+  attributes = biosignalml.Recording.attributes + [ 'digest' ]
 
   def __init__(self, fname=None, uri=None, mode='r', metadata=None):
   #-----------------------------------------------------------------
@@ -67,7 +67,7 @@ class BSMLRecording(biosignalml.Recording):
     elif 'source' not in metadata:
       metadata['source'] = uri
     if 'format' not in metadata: metadata['format'] = BSML.RAW
-    model.Recording.__init__(self, uri, metadata=metadata)
+    biosignalml.Recording.__init__(self, uri, metadata=metadata)
 
   @classmethod
   def open(cls, fname, uri=None, mode='r', **kwds):
@@ -133,7 +133,7 @@ class BSMLSignal(biosignalml.Signal):
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
-    model.Signal.__init__(self, uri, metadata=metadata)
+    biosignalml.Signal.__init__(self, uri, metadata=metadata)
 
   def read(self, interval=None):
   #-----------------------------
