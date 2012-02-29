@@ -52,7 +52,9 @@ class WFDBRecording(BSMLRecording):
     if metadata is None: metadata = { }
     metadata['format'] = BSML.WFDB
     metadata['source'] = source
-    super(WFDBRecording, self).__init__(uri=uri, metadata = metadata)
+
+    BSMLRecording.__init__(self, uri=uri, metadata = metadata)
+
     self._framerate = wfdb.sampfreq(None)/wfdb.getspf()
 
     start = wfdb.mstimstr(0)
@@ -93,6 +95,14 @@ class WFDBRecording(BSMLRecording):
 
 
   ## Some of the above will belong to open() when we have a create()
+
+
+  def initialise(self, fname):
+  #---------------------------
+    pass
+    #for s in self._signals:
+    #  EDFSignal.changeclass(self._signals[s], int(str(s).rsplit('/', 1)[-1]), self)
+
 
   @classmethod
   def open(cls, fname, uri=None):
@@ -157,9 +167,13 @@ class WFDBSignal(BSMLSignal):
 ##                   'minValue': edf._edffile._physmin[signum],
 ##                   'maxValue': edf._edffile._physmax[signum],
 ##                 }
+    self.initialise(signum, rec)
+
+
+  def initialise(self, signum, rec):
+  #---------------------------------
     self._record = rec
     self._signum = signum
-
     info = rec._siginfo[signum]
     self._length = info.spf*info.nsamp
     self._gain = info.gain if info.gain != 0 else wfdb.WFDB_DEFGAIN
