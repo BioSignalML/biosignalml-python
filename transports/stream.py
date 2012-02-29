@@ -665,24 +665,48 @@ class SignalDataStream(BlockStream):
 
   :param endpoint: The URL of the data stream server's endpoint.
   :type endpoint: str
+
   :param uri: The URI of a :class:`~biosignalml.model.Recording` or of one or more
     :class:`~biosignalml.model.Signal`\s from which to get
     :class:`~biosignalml.model.data.TimeSeries` data,
   :type uri: str or list[str]
+
   :param start: The time, in seconds from the start of the signal's recording,
     that the first sample point will be at or immediately after,
   :type start: float or None
-  :param offset: The index of the first data point. An `offset` can only be given when data from a
+
+  :param offset: The index of the first data point. Can only be given when data from a
     single signal is requested, and cannot be specified along with `start`.
   :type offset: integer or None
+
   :param duration: The duration, in seconds, of signal data to return. A value
     of -1 means to get all sample points, from the starting position, of the signal(s).
   :type duration: float
+
+  :param count: The number of sample points to return in the result. A value of -1 means
+    to get all starting points from the start position until the end of the time series.
+
+    Can only be given when data from a single signal is requested, and cannot be specified
+    along with `duration`.
+  :type count: integer
+
+  :param maxsize: The maximum number of sample values to return in a data block.
+  :type maxsize: integer
   """
-  def __init__(self, endpoint, uri, start=None, offset=None, duration=-1):
-  #-----------------------------------------------------------------------
+  def __init__(self, endpoint, uri, start=None, offset=None, duration=-1, count=None, maxsize=-1):
+  #------------------------------------------------------------------------------------------------
     BlockStream.__init__(self, endpoint)
-    self._request = StreamBlock(0, BlockType.DATA_REQ, {'uri': uri, 'start': start, 'duration': duration}, '')
+    header = {'uri': uri }
+    if start is not None and offset is not None:
+      raise StreamError("Requested data stream cannot have both 'start' and 'offset'")
+    elif start is not None:  header['start'] = start
+    elif offset is not None: header['offset'] = offset
+    if duration >= 0 and offset is not None:
+      raise StreamError("Requested data stream cannot have both 'duration' and 'count'")
+    elif duration >= 0:      header['duration'] = duration
+    elif count is not None:  header['count'] = count
+    elif maxsize > 0:        header['maxsize'] = maxsize
+    self._request = StreamBlock(0, BlockType.DATA_REQ, header)
 
   def __iter__(self):
   #------------------
