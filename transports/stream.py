@@ -291,6 +291,20 @@ class StreamBlock(object):
     return b
 
 
+class ErrorBlock(StreamBlock):
+#=============================
+  """
+  An error message block.
+
+  .. todo:: Document parameters.
+  """
+  def __init__(self, number, errblock, msg):
+  #-------------------------------------------
+    header = errblock.header.copy()
+    header['type'] = errblock.type
+    StreamBlock.__init__(self, number, BlockType.ERROR, header, bytearray(msg))
+
+
 class SignalDataBlock(StreamBlock):
 #==================================
   """
