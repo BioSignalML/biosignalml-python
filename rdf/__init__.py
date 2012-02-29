@@ -271,7 +271,7 @@ class Graph(librdf.Model):
     :param base: An optional base URI of the content.
     :rtype: A :class:`Graph`
     """
-    self = cls()
+    self = cls(uri)
     self.parse_resource(uri, format, base)
     return self
 
@@ -433,7 +433,7 @@ class Graph(librdf.Model):
       (`subject`, `predicate`, `object`) statements in the graph.
     :rtype: iterator
     '''
-    if p and not isinstance(p, Node) and not isinstance(p, Uri): s = Uri(p)
+    if p and not isinstance(p, Node) and not isinstance(p, Uri): p = Uri(p)
     for s in self.get_sources(p, o): yield s
 
   def get_objects(self, s, p):
@@ -449,7 +449,7 @@ class Graph(librdf.Model):
     :rtype: iterator
     '''
     if s and not isinstance(s, Node) and not isinstance(s, Uri): s = Uri(s)
-    if p and not isinstance(p, Node) and not isinstance(p, Uri): s = Uri(p)
+    if p and not isinstance(p, Node) and not isinstance(p, Uri): p = Uri(p)
     for o in self.get_targets(s, p): yield o
 
   def get_literals(self, s, p):
