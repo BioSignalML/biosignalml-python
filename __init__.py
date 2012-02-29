@@ -26,8 +26,8 @@ BioSignalML data model.
 
 from ontology    import BSML
 
-import data
-import model
+import biosignalml.data  as data
+import biosignalml.model as model
 
 class Recording(model.AbstractRecording):
 #========================================
