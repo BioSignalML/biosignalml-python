@@ -73,8 +73,8 @@ class Repository(object):
   def get_recording_with_signals(self, uri, **kwds):
   #-------------------------------------------------
     rec = self.get_recording(uri, **kwds)
-    if rec:
-      for sig in graph.get_subjects(BSML.recording, rdf.Uri(uri)):
+    if rec is not None:
+      for sig in rec.graph.get_subjects(BSML.recording, rdf.Uri(uri)):
         rec.add_signal(Signal.create_from_graph(sig.uri, self.get_metadata(sig.uri), repository=self))
     return rec
 

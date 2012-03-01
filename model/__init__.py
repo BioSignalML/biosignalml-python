@@ -59,6 +59,7 @@ class AbstractObject(object):
     '''Dictionary of property values with names not in :attr:`attributes` list.'''
     self.set_attributes(metadata)
     self.uri = Uri(uri)
+    self.graph = None
 
   def __str__(self):
   #-----------------
@@ -191,6 +192,7 @@ class AbstractObject(object):
         s, attr, v = rdfmap.metadata(stmt, self.metaclass)
         logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
         self._assign(attr, v)
+    self.graph = graph
     return self
 
   def set_from_graph(self, attr, graph, rdfmap=None):
