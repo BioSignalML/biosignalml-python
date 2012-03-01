@@ -94,6 +94,8 @@ class AbstractObject(object):
           if value is not None:
             setattr(self, attr, value)
             assigned.append(attr)
+          elif attr not in self.__dict__:
+            setattr(self, attr, None)    # So it's able to be _assign()ed to
     for attr, value in values.iteritems():
       if attr not in assigned: self.metadata[attr] = value
 
