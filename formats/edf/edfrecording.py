@@ -46,7 +46,7 @@ class EDFRecording(BSMLRecording):
       raise IOError("Cannot open '%f'", fname)
     self._edffile = edffile
     for s in self._signals:
-      EDFSignal.changeclass(self._signals[s], int(str(s).rsplit('/', 1)[-1]), self)
+      EDFSignal.initialise_class(self._signals[s], int(str(s).rsplit('/', 1)[-1]), self)
 
   def _set_attributes(self):
   #-------------------------

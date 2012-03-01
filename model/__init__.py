@@ -69,10 +69,9 @@ class AbstractObject(object):
     pass
 
   @classmethod
-  def changeclass(cls, obj, *args):
-  #--------------------------------
-    if   obj.__class__ == cls: return obj
-    elif obj.__class__ not in cls.__mro__:
+  def initialise_class(cls, obj, *args):
+  #-------------------------------------
+    if obj.__class__ not in cls.__mro__:
       raise TypeError('Object not in superclasses')
     obj.__class__ = cls
     cls.initialise(obj, *args)

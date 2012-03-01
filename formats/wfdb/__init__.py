@@ -104,7 +104,7 @@ class WFDBRecording(BSMLRecording):
   #---------------------------
     pass
     #for s in self._signals:
-    #  EDFSignal.changeclass(self._signals[s], int(str(s).rsplit('/', 1)[-1]), self)
+    #  WFDBSignal.initialise_class(self._signals[s], int(str(s).rsplit('/', 1)[-1]), self)
 
 
   @classmethod
