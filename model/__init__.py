@@ -152,6 +152,24 @@ class AbstractObject(object):
     if attr in self.__dict__: setattr(self, attr, value)
     else:                     self.metadata[attr] = value
 
+  def load_from_graph(self, graph, rdfmap=None):
+  #---------------------------------------------
+    """
+    Set attributes from RDF triples in a graph.
+
+    :param graph: A graph of RDF statements.
+    :type graph: :class:`biosignalml.rdf.Graph`
+    :param rdfmap: How to map properties to attributes.
+    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
+    """
+    import mapping
+    if rdfmap is None: rdfmap = mapping.bsml_mapping()
+    if graph.contains(Statement(self.uri, RDF.type, self.metaclass)):
+      for stmt in graph.get_statements(Statement(self.uri, None, None)):
+        s, attr, v = rdfmap.metadata(stmt, self.metaclass) # Need to go up __mro__
+        ##logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
+        self._assign(attr, v)
+
   @classmethod
   def create_from_graph(cls, uri, graph, rdfmap=None, **kwds):
   #-----------------------------------------------------------
@@ -165,36 +183,9 @@ class AbstractObject(object):
     :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     :rtype: :class:`AbstractObject`
     '''
-    import mapping
-    if rdfmap is None: rdfmap = mapping.bsml_mapping()
     self = cls(uri, **kwds)
-    if graph.contains(Statement(Uri(uri), RDF.type, self.metaclass)):
-      for stmt in graph.get_statements(Statement(Uri(uri), None, None)):
-        s, attr, v = rdfmap.metadata(stmt, self.metaclass)
-        ##logging.debug("%s='%s'", attr, v)  ## Go down mro ???
-        self._assign(attr, v)
-    return self
-
-  def load_from_graph(self, graph, rdfmap=None, **kwds):
-  #-----------------------------------------------------
-    """
-    Set attributes from RDF triples in a graph.
-
-    :param uri: The URI for the resource.
-    :param graph: A graph of RDF statements.
-    :type graph: :class:`biosignalml.rdf.Graph`
-    :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
-    :rtype: :class:`AbstractObject`
-    """
-    import mapping
-    if rdfmap is None: rdfmap = mapping.bsml_mapping()
-    if graph.contains(Statement(self.uri, RDF.type, self.metaclass)):
-      for stmt in graph.get_statements(Statement(self.uri, None, None)):
-        s, attr, v = rdfmap.metadata(stmt, self.metaclass)
-        logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
-        self._assign(attr, v)
     self.graph = graph
+    self.load_from_graph(graph, rdfmap)
     return self
 
   def set_from_graph(self, attr, graph, rdfmap=None):
