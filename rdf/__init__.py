@@ -165,7 +165,11 @@ class Statement(librdf.Statement):
 
   The main means of manipulating statements is by the `subject`, `predicate` and `object` properties.
   '''
-  pass
+  def __init__(self, s=None, p=None, o=None, **kwds):
+  #--------------------------------------------------
+    if s and not isinstance(s, librdf.Node) and not isinstance(s, librdf.Uri): s = Uri(s)
+    if p and not isinstance(p, librdf.Node) and not isinstance(p, librdf.Uri): p = Uri(p)
+    librdf.Statement.__init__(self, subject=s, predicate=p, object=o, **kwds)
 
 
 class QueryResults(librdf.QueryResults):
@@ -402,8 +406,8 @@ class Graph(librdf.Model):
     '''
 ##    node = self.get_target(source, property)
 ##    return (Node(Uri(node.literal_value['string'])) if node and node.is_literal() else node)
-    if s and not isinstance(s, Node) and not isinstance(s, Uri): s = Uri(s)
-    if p and not isinstance(p, Node) and not isinstance(p, Uri): s = Uri(p)
+    if s and not isinstance(s, librdf.Node) and not isinstance(s, librdf.Uri): s = Uri(s)
+    if p and not isinstance(p, librdf.Node) and not isinstance(p, librdf.Uri): p = Uri(p)
     return self.get_target(s, p)
 
   def get_literal(self, s, p):
@@ -434,7 +438,7 @@ class Graph(librdf.Model):
       (`subject`, `predicate`, `object`) statements in the graph.
     :rtype: iterator
     '''
-    if p and not isinstance(p, Node) and not isinstance(p, Uri): p = Uri(p)
+    if p and not isinstance(p, librdf.Node) and not isinstance(p, librdf.Uri): p = Uri(p)
     for s in self.get_sources(p, o): yield s
 
   def get_objects(self, s, p):
@@ -449,8 +453,8 @@ class Graph(librdf.Model):
       (`subject`, `predicate`, `object`) statements in the graph.
     :rtype: iterator
     '''
-    if s and not isinstance(s, Node) and not isinstance(s, Uri): s = Uri(s)
-    if p and not isinstance(p, Node) and not isinstance(p, Uri): p = Uri(p)
+    if s and not isinstance(s, librdf.Node) and not isinstance(s, librdf.Uri): s = Uri(s)
+    if p and not isinstance(p, librdf.Node) and not isinstance(p, librdf.Uri): p = Uri(p)
     for o in self.get_targets(s, p): yield o
 
   def get_literals(self, s, p):
