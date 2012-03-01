@@ -68,10 +68,23 @@ class Repository(object):
   #------------------------------------
     graph = self.get_metadata(uri)
     if graph.contains(rdf.Statement(uri, rdf.RDF.type, BSML.Recording)):
-      rec = Recording.create_from_graph(uri, graph, **kwds)
+      return Recording.create_from_graph(uri, graph, **kwds)
+
+  def get_recording_with_signals(self, uri, **kwds):
+  #-------------------------------------------------
+    rec = self.get_recording(uri, **kwds)
+    if rec:
       for sig in graph.get_subjects(BSML.recording, rdf.Uri(uri)):
         rec.add_signal(Signal.create_from_graph(sig.uri, self.get_metadata(sig.uri), repository=self))
-      return rec
+    return rec
+
+  def get_signal(self, uri, **kwds):
+  #---------------------------------
+    graph = self.get_metadata(uri)
+    if graph.contains(rdf.Statement(uri, rdf.RDF.type, BSML.Signal)):
+      sig = Signal.create_from_graph(uri, self.get_metadata(uri), repository=self)
+      sig.recording = self.get_recording(sig.recording)
+      return sig
 
   def get_data(self, uri, **kwds):
   #-------------------------------
