@@ -28,6 +28,9 @@ from biosignalml.formats import BSMLRecording, BSMLSignal
 class WFDBRecording(BSMLRecording):
 #==================================
 
+  FORMAT = BSML.WFDB
+  MIMETYPE = 'application/x-wfdb'
+
   def __init__(self, uri=None, fname=None, metadata=None):
   #-------------------------------------------------------
 
