@@ -31,6 +31,9 @@ MAXBUFFERS = 100   ## Has to allow for short output data records and long signal
 class EDFRecording(BSMLRecording):
 #=================================
 
+  FORMAT = BSML.EDF
+  MIMETYPE = 'application/x-edf'
+
   def __init__(self, uri=None, fname=None):
   #----------------------------------------
     BSMLRecording.__init__(self, uri=uri, fname=fname)
@@ -48,13 +51,13 @@ class EDFRecording(BSMLRecording):
   def _set_attributes(self):
   #-------------------------
     if self._edffile is None: return
-    self.metadata.update({'format': BSML.EDF,   ## EDF+ as well...   #### look at self.edf_type
-                          'starttime': self._edffile.start_datetime,
-                          'duration': self._edffile.duration,
-                          'investigation': self._edffile.patient,
-                          'description': self._edffile.recording,
-##                        'version': self._edffile.version,    ## Or a comment field ??
-                         })
+    self.set_attributes({'format': BSML.EDF,   ## EDF+ as well...   #### look at self.edf_type
+                         'starttime': self._edffile.start_datetime,
+                         'duration': self._edffile.duration,
+                         'investigation': self._edffile.patient,
+                         'description': self._edffile.recording,
+##                       'version': self._edffile.version,    ## Or a comment field ??
+                        })
     if self._edffile.edf_type != EDF.EDF:
       for k in PATIENTFIELDS: self.metadata[k] = getattr(self._edffile, k, None)
       for k in RECORDINGFIELDS: self.metadata[k] = getattr(self._edffile, k, None)
@@ -75,14 +78,13 @@ class EDFRecording(BSMLRecording):
   #------------------------------
     self = cls(uri=uri, fname=fname)
     self.initialise(fname)
-    self._set_attributes
+    self._set_attributes()
     return self
 
   def close(self):
   #---------------
     if self._edffile:
       self._edffile.close()
-
 
 
   """
