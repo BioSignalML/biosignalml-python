@@ -90,8 +90,10 @@ class AbstractObject(object):
     for cls in self.__class__.__mro__:
       if 'attributes' in cls.__dict__:
         for attr in cls.__dict__['attributes']:
-          setattr(self, attr, values.get(attr, None))
-          assigned.append(attr)
+          value = values.get(attr)
+          if value is not None:
+            setattr(self, attr, value)
+            assigned.append(attr)
     for attr, value in values.iteritems():
       if attr not in assigned: self.metadata[attr] = value
 
@@ -167,7 +169,7 @@ class AbstractObject(object):
     if graph.contains(Statement(Uri(uri), RDF.type, self.metaclass)):
       for stmt in graph.get_statements(Statement(Uri(uri), None, None)):
         s, attr, v = rdfmap.metadata(stmt, self.metaclass)
-        ##logging.debug("%s='%s'", attr, v)
+        ##logging.debug("%s='%s'", attr, v)  ## Go down mro ???
         self._assign(attr, v)
     return self
 
