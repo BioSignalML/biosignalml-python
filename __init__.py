@@ -50,6 +50,10 @@ class Signal(model.AbstractSignal, data.TimeSeries):
   #----------------
     return 0
 
+  def __nonzero__(self):
+  #---------------------
+    return True  # Otherwise bool(sig) is False, because we have __len__()
+
 
 class UniformSignal(Signal, data.UniformTimeSeries):
 #===================================================
