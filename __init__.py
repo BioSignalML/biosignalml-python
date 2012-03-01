@@ -24,7 +24,7 @@ BioSignalML data model.
 ######################################################
 
 
-from ontology    import BSML
+from ontology import BSML
 
 import biosignalml.data  as data
 import biosignalml.model as model
@@ -59,3 +59,7 @@ class UniformSignal(Signal, data.UniformTimeSeries):
 class Event(model.AbstractEvent):
 #================================
   pass
+
+
+from client import Repository
+
