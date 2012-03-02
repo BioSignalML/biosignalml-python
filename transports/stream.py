@@ -19,11 +19,14 @@ both an information *header* and actual data *content*.
 Blocks are sent and received as a sequence of 8-bit bytes. Using EBNF and regular
 expression notation, a block is defined as::
 
-  <block>    ::= '#' <type> <version> <header> <length> <LF> <content> '##' <checksum>? <LF>
+  <block>    ::= '#' <type> <version> <more> <header> <length> <LF> <content> '##' <checksum>? <LF>
 
   <type>     ::= [a-zA-Z]             /* A single, case-significant letter.        */
 
-  <version>  ::= <INTEGER> 'V'        /* The version of the protocol.              */
+  <version>  ::= <INTEGER>            /* The version of the protocol.              */
+
+  <more>     ::= 'C' | 'M'            /* Close transport after processing block    */
+                                      /* or keep it open for More.                 */
 
   <header>   ::= <jsonlen> <json>
   <jsonlen>  ::= <INTEGER>            /* The number of bytes of JSON that follow.  */
@@ -32,8 +35,8 @@ expression notation, a block is defined as::
   <length>   ::= <INTEGER>            /* The length of the content part.           */
   <content>  ::= [#x00-#xFF]*         /* A sequence of bytes.                      */
 
-  <checksum> ::= [0-9a-fA-F]{32}      /* An optional, 32 character MD5 hex digest. */
-                                      /* Includes opening '#' and closing '##'.    */
+  <checksum> ::= [0-9a-fA-F]{32}      /* An optional, 32 character MD5 hex digest of the */
+                                      /* block, including opening '#' and closing '##'.  */
   <INTEGER> ::= [0-9]+
   <LF>      ::= #x0A
 
@@ -51,9 +54,12 @@ VERSION = 1    #: Initial version of Block Stream protocol.
 import logging
 import hashlib
 import Queue
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 import numpy as np
-import json
 
 
 class BlockType(object):
@@ -208,7 +214,7 @@ class Error(object):
   HASH_RESERVED        =  6    #: Block type of '#' is reserved
   WRITE_EOF            =  7    #: Unexpected error when writing
   VERSION_MISMATCH     =  8    #: Block Stream has wring version
-  MISSING_VERSION_FLAG =  9    #: No version delimiter
+  INVALID_MORE_FLAG    =  9    #: Invalid value for 'more' flag
   BAD_JSON_HEADER      = 10    #: Incorrectly formatted JSON header
 
   @staticmethod
@@ -224,7 +230,7 @@ class Error(object):
              Error.HASH_RESERVED:        "Block type of '#' is reserved",
              Error.WRITE_EOF:            'Unexpected error when writing',
              Error.VERSION_MISMATCH:     'Block Stream has wring version',
-             Error.MISSING_VERSION_FLAG: 'No version delimiter',
+             Error.INVALID_MORE_FLAG:    "Invalid value for 'more' flag",
              Error.BAD_JSON_HEADER:      'Incorrectly formatted JSON header',
              }.get(code, '')
 
@@ -247,24 +253,26 @@ class StreamBlock(object):
 
   :type number: int
   :type type: :class:`BlockType`
+  :type more: char
   :type header: dict
   :type content: bytearray
   """
 
-  def __init__(self, number, type, header, content):
-  #-------------------------------------------------
+  def __init__(self, number, type, more, header, content):
+  #-------------------------------------------------------
     self.number = number
     self.type = type
+    self.more = more
     self.header = header
     self.content = content
 
   @classmethod
-  def makeblock(cls, number, type, header, content):
-  #-------------------------------------------------
+  def makeblock(cls, number, type, more, header, content):
+  #-------------------------------------------------------
     if type == BlockType.DATA:
       self = SignalDataBlock(number, header, content)
     else:
-      self = cls(number, type, header, content)
+      self = cls(number, type, more, header, content)
     return self
 
   def __str__(self):
@@ -281,7 +289,7 @@ class StreamBlock(object):
     '''
     #logging.debug('HDR: %s', self.header)
     j = json.dumps(self.header)
-    b = bytearray('#%c%dV%d%s%d\n' % (self.type, VERSION, len(j), j, len(self.content)))
+    b = bytearray('#%c%d%c%d%s%d\n' % (self.type, VERSION, self.more, len(j), j, len(self.content)))
     b.extend(self.content)
     b.extend('##')
     if check != Checksum.NONE:
@@ -303,7 +311,7 @@ class ErrorBlock(StreamBlock):
   #-------------------------------------------
     header = errblock.header.copy()
     header['type'] = errblock.type
-    StreamBlock.__init__(self, number, BlockType.ERROR, header, bytearray(msg))
+    StreamBlock.__init__(self, number, BlockType.ERROR, 'C', header, bytearray(msg))
 
 
 class SignalDataBlock(StreamBlock):
@@ -317,7 +325,7 @@ class SignalDataBlock(StreamBlock):
   """
   def __init__(self, number, header, content):
   #-------------------------------------------
-    StreamBlock.__init__(self, number, BlockType.DATA, header, content)
+    StreamBlock.__init__(self, number, BlockType.DATA, 'M', header, content)
 
   def signaldata(self):
   #--------------------
@@ -370,7 +378,7 @@ class BlockParser(object):
   _RESET      =  0
   _TYPE       =  1
   _VERNUM     =  2
-  _VERFLAG    =  3
+  _MORE       =  3
   _HDRLEN     =  4
   _HEADER     =  5
   _DATALEN    =  6
@@ -432,20 +440,21 @@ class BlockParser(object):
           pos += 1
           datalen -= 1
         if datalen > 0:
-          self._state = BlockParser._VERFLAG
+          self._state = BlockParser._MORE
 
-      elif self._state == BlockParser._VERFLAG:                 #
-        if chr(data[pos]) == 'V':
-          if self._version != VERSION:
-            self._error = Error.VERSION_MISATCH
-          else:
-            self._checksum.update('V')
+      elif self._state == BlockParser._MORE:                   # 'C' or 'M'
+        if self._version != VERSION:
+          self._error = Error.VERSION_MISATCH
+        else:
+          self._more = chr(data[pos])
+          if self._more in ['C', 'M']:
+            self._checksum.update(self._more)
             pos += 1
             datalen -= 1
             self._length = 0
             self._state = BlockParser._HDRLEN
-        else:
-          self._error = Error.MISSING_VERSION_FLAG
+          else:
+            self._error = Error.INVALID_MORE_FLAG
 
       elif self._state == BlockParser._HDRLEN:                  # Getting header length
         while datalen > 0 and chr(data[pos]).isdigit():
@@ -544,7 +553,7 @@ class BlockParser(object):
         elif chr(data[pos]) == '\n':
           pos += 1
           datalen -= 1
-          self._process(StreamBlock.makeblock(self._blockno, self._type, self._header, self._content))
+          self._process(StreamBlock.makeblock(self._blockno, self._type, self._more, self._header, self._content))
           self._state = BlockParser._RESET
         else:
           self._error = Error.MISSING_TRAILER_LF
@@ -637,7 +646,7 @@ class BlockStream(object):
   def __init__(self, endpoint):
   #----------------------------
     self._endpoint = endpoint
-    self._request = StreamBlock(0, None, { }, '')
+    self._request = StreamBlock(0, None, 'C', { }, '')
     self._receiveQ = Queue.Queue()
 
   def close(self):
@@ -705,7 +714,7 @@ class SignalDataStream(BlockStream):
     elif duration >= 0:      header['duration'] = duration
     elif count is not None:  header['count'] = count
     if maxsize > 0:          header['maxsize'] = maxsize
-    self._request = StreamBlock(0, BlockType.DATA_REQ, header, '')
+    self._request = StreamBlock(0, BlockType.DATA_REQ, 'C', header, '')
 
   def __iter__(self):
   #------------------
