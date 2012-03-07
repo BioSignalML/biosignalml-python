@@ -70,6 +70,19 @@ class AbstractObject(object):
   #-------------------------------------
     if obj.__class__ not in cls.__mro__:
       raise TypeError('Object not in superclasses')
+    ## Need to go from cls to obj.class in __mro__ and set
+    ## any C.attributes from obj.graph (using C.mapping if defined)
+    if getattr(obj, 'graph', None):
+      import mapping
+      rdfmap = mapping.bsml_mapping()
+      pos = cls.__mro__.index(obj.__class__) - 1
+      while pos >= 0:
+        for attr in cls.__mro__[pos].__dict__.get('attributes', []):
+          v = rdfmap.get_value_from_graph(obj, attr, obj.graph)
+          if v is not None:
+            setattr(obj, attr, None)    # So it's able to be _assign()ed to
+            obj._assign(attr, v)
+        pos -= 1
     obj.__class__ = cls
     cls.initialise(obj, *args)
     return obj
@@ -84,14 +97,13 @@ class AbstractObject(object):
     '''
     assigned = [ ]
     for cls in self.__class__.__mro__:
-      if 'attributes' in cls.__dict__:
-        for attr in cls.__dict__['attributes']:
-          value = values.get(attr)
-          if value is not None:
-            setattr(self, attr, value)
-            assigned.append(attr)
-          elif attr not in self.__dict__:
-            setattr(self, attr, None)    # So it's able to be _assign()ed to
+      for attr in cls.__dict__.get('attributes', []):
+        value = values.get(attr)
+        if value is not None:
+          setattr(self, attr, value)
+          assigned.append(attr)
+        elif attr not in self.__dict__:
+          setattr(self, attr, None)    # So it's able to be _assign()ed to
     for attr, value in values.iteritems():
       if attr not in assigned: self.metadata[attr] = value
 
@@ -182,7 +194,7 @@ class AbstractObject(object):
     if rdfmap is None: rdfmap = mapping.bsml_mapping()
     if graph.contains(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
-        s, attr, v = rdfmap.metadata(stmt, self.metaclass) # Need to go up __mro__
+        s, attr, v = rdfmap.metadata(stmt, self.metaclass) # Need to go up __mro__ from AbstractObject
         ##logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
         self._assign(attr, v)
 
