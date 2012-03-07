@@ -122,3 +122,5 @@ Measurement units would normally be entities in a specialised units of measure o
   '''The physical units that are represented by a signal's data values.
 
 Specification of units allows for consistency checking and automatic conversion.'''
+  index          = Resource(NS.index)
+  '''The 0-origin position of a signal in a physical recording.'''

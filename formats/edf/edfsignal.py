@@ -22,7 +22,9 @@ from edffile import EDF
 class EDFSignal(BSMLSignal):
 #===========================
 
-  MAXPOINTS = 4096
+  attributes = [ 'index' ]
+
+  MAXPOINTS = 4096     #: Maximum number of sample points returned by a single :math:`read`.
 
   def __init__(self, signum, edf):
   #-------------------------------
@@ -35,14 +37,14 @@ class EDFSignal(BSMLSignal):
                    'maxFrequency': edf._edffile.rate[signum]/2.0,
                    'minValue': edf._edffile._physmin[signum],
                    'maxValue': edf._edffile._physmax[signum],
+                   'index': signum,
                  } )
-    self.initialise(signum, edf)
+    self.initialise(edf)
 
 
-  def initialise(self, signum, rec):
+  def initialise(self, rec):
   #---------------------------------
-    self.index = signum
-    self._rec_count = rec._edffile.nsamples[signum]
+    self._rec_count = rec._edffile.nsamples[self.index]
 
     ##if edf._edffile.edf_type == EDF.EDF:
     ##  filter = edf._edffile.prefilter[signum]
