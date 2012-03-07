@@ -15,6 +15,7 @@ Send and receive BioSignalML data using Web Sockets.
 
 import logging
 import Queue
+from time import sleep
 
 import ws4py.client.threadedclient
 
@@ -45,10 +46,22 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
     self._request = request
     self._receiver = receiveQ.put if isinstance(receiveQ, Queue.Queue) else receiveQ
     self._parser = stream.BlockParser(self._receiver, check=check)
+    self._opened = False
 
   def opened(self):
   #----------------
-    self.send_block(self._request)
+    self._opened = True                   # Now have a connection
+    if self._request: self.send_block(self._request)
+
+  def handshake_ok(self):
+  #----------------------
+    self._th.start()                      # Start running the thread
+    if self._request: self._th.join()     # but only join if we will send a request
+
+  def close(self):
+  #---------------
+    ws4py.client.threadedclient.WebSocketClient.close(self)
+    if not self._request: self._th.join()
 
   def closed(self, code, reason=None):
   #-----------------------------------
@@ -67,7 +80,8 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
     :param check: Set to :attr:`~biosignalml.transports.stream.Checksum.STRICT`
       to append a MD5 checksum to the block.
     '''
-    logging.debug('SEND: %s', block)
+    while not self._opened: sleep(0.01)   # Wait until connected
+    ##logging.debug('SEND: %s', block)
     self.send(block.bytes(), True)
 
 
