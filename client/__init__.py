@@ -17,6 +17,7 @@ from biosignalml            import BSML
 from biosignalml.data       import TimeSeries, UniformTimeSeries, DataSegment
 from biosignalml.formats    import BSMLRecording, BSMLSignal
 from biosignalml.transports import WebStreamReader, StreamException
+import repository
 
 
 class Recording(BSMLRecording):
@@ -48,21 +49,9 @@ class Signal(BSMLSignal):
       else:                   yield DataSegment(sd.start, TimeSeries(sd.clock, sd.data))
 
 
-class Repository(object):
-#========================
 
-  def __init__(self, uri, md_endpoint='/metadata/', sd_endpoint='/stream/data/'):
-  #------------------------------------------------------------------------------
-    self.uri = uri
-    self._md_uri = uri + md_endpoint
-    self._sd_uri = uri + sd_endpoint
-    self.metadata = self.get_metadata('')
-
-  def get_metadata(self, uri):
-  #---------------------------
-    graph = rdf.Graph.create_from_resource(self._md_uri + str(uri), rdf.Format.RDFXML)
-    if uri: graph.uri = rdf.Uri(uri)
-    return graph
+class BSMLRepository(repository.Repository):
+#===========================================
 
   def get_recording(self, uri, **kwds):
   #------------------------------------
