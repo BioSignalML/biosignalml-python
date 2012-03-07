@@ -65,5 +65,5 @@ class Event(model.AbstractEvent):
   pass
 
 
-from client import Repository
+from client import BSMLRepository
 
