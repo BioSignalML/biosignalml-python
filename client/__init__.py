@@ -75,6 +75,3 @@ class BSMLRepository(repository.Repository):
       sig.recording = self.get_recording(sig.recording)
       return sig
 
-  def get_data(self, uri, **kwds):
-  #-------------------------------
-    return WebStreamReader(self._sd_uri, uri, **kwds)
