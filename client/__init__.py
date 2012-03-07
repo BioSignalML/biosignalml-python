@@ -40,8 +40,8 @@ class Signal(BSMLSignal):
       params['start'] = interval.start
       params['duration'] = interval.duration
     if segment:
-      params[offset] = segment[0]
-      params[count] = segment[1]
+      params['offset'] = segment[0]
+      params['count'] = segment[1]
     for sd in self.repository.get_data(str(self.uri), **params):
       if str(sd.uri) != str(self.uri):
         raise StreamExeception("Received signal '%s' different from requested '%s'" % (sd.uri, self.uri))
