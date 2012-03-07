@@ -33,12 +33,23 @@ from biosignalml.ontology import BSML
 from core import AbstractObject
 
 
+class AbstractSignal(AbstractObject):
+#====================================
+  '''
+  An abstract BioSignalML Signal.
   '''
 
+  metaclass = BSML.Signal     #: :attr:`.BSML.Signal`
 
+  attributes = ['label', 'units', 'transducer', 'filter', 'rate',  'clock',
+                'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
+               ]
+  '''Generic attributes of a Signal.'''
 
   def __init__(self, uri, metadata={}):
   #------------------------------------
+    AbstractObject.__init__(self, uri, metadata=metadata)
+    self.recording = None
 
 
 class AbstractRecording(AbstractObject):
@@ -180,23 +191,6 @@ class AbstractRecording(AbstractObject):
     return self
 
 
-class AbstractSignal(AbstractObject):
-#====================================
-  '''
-  An abstract BioSignalML Signal.
-  '''
-
-  metaclass = BSML.Signal     #: :attr:`.BSML.Signal`
-
-  attributes = ['label', 'units', 'transducer', 'filter', 'rate',  'clock',
-                'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
-               ]
-  '''Generic attributes of a Signal.'''
-
-  def __init__(self, uri, metadata={}):
-  #------------------------------------
-    AbstractObject.__init__(self, uri, metadata=metadata)
-    self.recording = None
 
 
 class AbstractEvent(AbstractObject):
