@@ -13,5 +13,5 @@
 Transports for BioSignalML data.
 '''
 
-from websockets import WebStreamReader
-from stream import StreamException
+from websockets import WebStreamReader, WebStreamWriter
+from stream     import SignalData, StreamException

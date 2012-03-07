@@ -26,7 +26,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
 #================================================================
   """
   A connection to a web socket server.
-  
+
   We send a data request when the connection is established and then then parse received data.
   Received Stream Blocks found are put to `receiveQ`.
 
@@ -66,7 +66,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   def closed(self, code, reason=None):
   #-----------------------------------
     self._receiver(None)
-      
+
   def received_message(self, msg):
   #--------------------------------
     self._parser.process(msg.data)
@@ -83,6 +83,13 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
     while not self._opened: sleep(0.01)   # Wait until connected
     ##logging.debug('SEND: %s', block)
     self.send(block.bytes(), True)
+
+
+  def handshake_headers_getter(self):
+  #----------------------------------
+    headers = ws4py.client.threadedclient.WebSocketClient.handshake_headers(self)
+    headers.append(('Cookies', 'chocolate??'))
+    return headers
 
 
 class WebStreamReader(stream.SignalDataStream):
@@ -119,6 +126,33 @@ class WebStreamReader(stream.SignalDataStream):
   def close(self):
   #---------------
     self._ws.close()
+
+
+class WebStreamWriter(object):
+#=============================
+
+  def __init__(self, endpoint):
+  #----------------------------
+    try:
+      self._ws = StreamClient(endpoint, None, self.got_response, protocols=['biosignalml-ssf'])
+      self._ws.connect()
+    except Exception, msg:
+      logging.error('Unable to connect to WebSocket: %s', msg)
+      raise stream.StreamException('Cannot open WebStreamWriter')
+
+  def close(self):
+  #---------------
+    self._ws.close()
+
+  def write_block(self, block):
+  #----------------------------
+    self._ws.send_block(block.streamblock())
+
+  @staticmethod
+  def got_response(block):
+  #-----------------------
+    if block and block.type == stream.BlockType.ERROR:
+      raise stream.StreamException(block.content)
 
 
 if __name__ == '__main__':
