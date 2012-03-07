@@ -14,6 +14,7 @@ Send and receive BioSignalML data using Web Sockets.
 
 
 import logging
+import Queue
 
 import ws4py.client.threadedclient
 
@@ -32,9 +33,9 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   :type endpoint: str
   :param request: Send to request a response.
   :type request:  :class:`~biosignalml.transports.stream.StreamBlock`
-  :param receiveQ: A queue on which to put complete `StreamBlock`'s. `None` is
-   sent when the stream has finished.
-  :type receiveQ: :class:`Queue.Queue`
+  :param receiveQ: Either a queue on which to put complete :class:`StreamBlock`\s
+    or a function to call, passing a complete `StreamBlock`.
+  :type receiveQ: :class:`Queue.Queue` or function
   :param check: How any checksum is treated. Default `Checksum.CHECK`
   :type check: :class:`~biosignalml.transports.stream.Checksum`
   """
@@ -42,8 +43,8 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   #------------------------------------------------------------------------------------
     ws4py.client.threadedclient.WebSocketClient.__init__(self, endpoint, **kwds)
     self._request = request
-    self._receiveQ = receiveQ
-    self._parser = stream.BlockParser(receiveQ, check=check)
+    self._receiver = receiveQ.put if isinstance(receiveQ, Queue.Queue) else receiveQ
+    self._parser = stream.BlockParser(self._receiver, check=check)
 
   def opened(self):
   #----------------
@@ -51,7 +52,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
 
   def closed(self, code, reason=None):
   #-----------------------------------
-    self._receiveQ.put(None)
+    self._receiver(None)
       
   def received_message(self, msg):
   #--------------------------------

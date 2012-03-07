@@ -368,9 +368,8 @@ class BlockParser(object):
   """
   Block Stream data parser.
 
-  :param receiveQ: Either a queue on which to put complete :class:`StreamBlock`\s
-    or a function to call, passing a complete `StreamBlock`.
-  :type receiveQ: :class:`Queue.Queue` or function
+  :param receiver: Function to call when a complete `StreamBlock`
+    has been received.
   :param check: How any checksun is treated. Default `Checksum.CHECK`
   :type check: :class:`Checksum`
   """
@@ -389,9 +388,9 @@ class BlockParser(object):
   _CHECKDATA  = 11
   _BLOCKEND   = 12
 
-  def __init__(self, receiveQ, check=Checksum.CHECK):
+  def __init__(self, receiver, check=Checksum.CHECK):
   #--------------------------------------------------
-    self._process = receiveQ.put if isinstance(receiveQ, Queue.Queue) else receiveQ
+    self._receiver = receiver
     self._check = check
     self._blockno = -1
     self._state = BlockParser._RESET
@@ -553,7 +552,7 @@ class BlockParser(object):
         elif chr(data[pos]) == '\n':
           pos += 1
           datalen -= 1
-          self._process(StreamBlock.makeblock(self._blockno, self._type, self._more, self._header, self._content))
+          self._receiver(StreamBlock.makeblock(self._blockno, self._type, self._more, self._header, self._content))
           self._state = BlockParser._RESET
         else:
           self._error = Error.MISSING_TRAILER_LF
