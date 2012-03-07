@@ -207,7 +207,7 @@ class AbstractEvent(AbstractObject):
   An abstract BioSignalML Event.
   '''
 
-  metaclass = EVT.Event       #: :attr:`.BSML.Event`
+  metaclass = BSML.Event       #: :attr:`.BSML.Event`
 
   attributes = [ 'description', 'factor', 'time', ]
   '''Generic attributes of an Event.'''
