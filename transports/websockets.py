@@ -58,9 +58,9 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
     self._th.start()                      # Start running the thread
     if self._request: self._th.join()     # but only join if we will send a request
 
-  def close(self):
-  #---------------
-    ws4py.client.threadedclient.WebSocketClient.close(self)
+  def close(self, *args):
+  #----------------------
+    ws4py.client.threadedclient.WebSocketClient.close(self, *args)
     if not self._request: self._th.join()
 
   def closed(self, code, reason=None):
