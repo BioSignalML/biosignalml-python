@@ -131,6 +131,7 @@ BSML_MAP = [
   AttributeMap('maxFrequency', BSML.maxFrequency, BSML.Signal, XSD.double),
   AttributeMap('minValue',     BSML.minValue,     BSML.Signal, XSD.double),
   AttributeMap('maxValue',     BSML.maxValue,     BSML.Signal, XSD.double),
+  AttributeMap('index',        BSML.index,        BSML.Signal, XSD.integer),
   ]
 
 
@@ -193,22 +194,33 @@ class Mapping(object):
         if dtype: result['datatype'] = dtype.uri
         return Node(**result)
 
-  def statement(self, s, attr, v):
-  #-------------------------------
-    m = self._mapping[attr]
-    return (s, m[0], self._makenode(v, m[1], m[2]))
+#  def statement(self, s, attr, v):
+#  #-------------------------------
+#    m = self._mapping[attr]
+#    return (s, m[0], self._makenode(v, m[1], m[2]))
 
-  def statement_stream(self, metadata):
+  def statement_stream(self, resource):
   #------------------------------------
-    if getattr(metadata, 'uri', None):
-      subject = metadata.uri
-      metaclasses = [ cls.metaclass for cls in metadata.__class__.__mro__
+    """
+    Generate :class:`Statement`\s from a resource's attributes and
+    elements in its `metadata` dictionary.
+
+    :param resource: An object with a `metaclass` attributes on
+      some of its classes.
+
+    All attributes defined in the mapping table are tested to see if they are defined for
+    the resource, and if so, their value in the resource is translated to an object node
+    in a RDF statement.
+    """
+    if getattr(resource, 'uri', None):
+      subject = resource.uri
+      metaclasses = [ cls.metaclass for cls in resource.__class__.__mro__
                       if cls.__dict__.get('metaclass') ]
-      metadict = getattr(metadata, 'metadata', { })
-      for attr, m in self._mapping.iteritems():
+      metadict = getattr(resource, 'metadata', { })
+      for m in self._mapping.itervalues():
         if m.metaclass is None or m.metaclass in metaclasses:  ## Or do we need str() before lookup ??
-          if getattr(metadata, m.attribute, None) not in [None, '']:
-            yield Statement(subject, m.property, self._makenode(getattr(metadata, m.attribute), m.datatype, m.to_rdf))
+          if getattr(resource, m.attribute, None) not in [None, '']:
+            yield Statement(subject, m.property, self._makenode(getattr(resource, m.attribute), m.datatype, m.to_rdf))
           if metadict.get(m.attribute, None) not in [None, '']:
             yield Statement(subject, m.property, self._makenode(metadict.get(m.attribute), m.datatype, m.to_rdf))
 
@@ -216,7 +228,7 @@ class Mapping(object):
   @staticmethod
   def _makevalue(node, dtype, from_rdf):
   #-----------------------------------
-    if   not node: return None
+    if node is None: return None
     elif node.is_resource(): v = node.uri
     elif node.is_blank(): v = node.blank
     else:
@@ -224,16 +236,28 @@ class Mapping(object):
       if dtype: v = _datatypes.get(dtype, str)(v) 
     return from_rdf(v) if from_rdf else v
 
-  def metadata(self, statement, cls):
-  #----------------------------------
-    m = self._reverse.get(str(statement.predicate.uri) + (str(cls) if cls else ''), None)
+  def metadata(self, statement, metaclass):
+  #----------------------------------------
+    """
+    Given a RDF statement and a metaclass, lookup the statement's predicate
+    in the reverse mapping table use its properties to translate the value of the
+    statement's object.
+    """
+    m = self._reverse.get(str(statement.predicate.uri) + str(metaclass), None)
     if m is None: m = self._reverse.get(str(statement.predicate.uri), ReverseEntry(None, None, None))
     return (statement.subject.uri, m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf))
 
-  def get_value_from_graph(self, source, attr, graph):
-  #---------------------------------------------------
-    m = self._mapping[attr]
-    return self._makevalue(graph.get_property(source, m.attribute), m.property, m.datatype)
+  def get_value_from_graph(self, resource, attr, graph):
+  #-----------------------------------------------------
+    """
+    Find the property corresponding to a resource's attribute and if a statement
+    about the resource using the property is in the graph, translate and return
+    its object's value.
+    """
+    m = self._mapping.get(attr + str(resource.metaclass), None)
+    if m is None: m = self._mapping.get(attr, None)
+    if m:
+      return self._makevalue(graph.get_object(resource.uri, m.property), m.datatype, m.from_rdf)
 
 
 def initialise():
