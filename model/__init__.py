@@ -1,6 +1,3 @@
-'''
-Abstract BioSignalML objects.
-'''
 ######################################################
 #
 #  BioSignalML Management in Python
@@ -22,7 +19,9 @@ Abstract BioSignalML objects.
 #  $ID: bbd3c04 on Wed Jun 8 16:47:09 2011 +1200 by Dave Brooks $
 #
 ######################################################
-
+'''
+Abstract BioSignalML objects.
+'''
 
 import uuid
 import logging
@@ -53,7 +52,7 @@ class AbstractSignal(AbstractObject):
 
 
 class AbstractRecording(AbstractObject):
-#======================================
+#=======================================
   '''
   An abstract BioSignalML Recording.
   '''
