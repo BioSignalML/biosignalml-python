@@ -161,23 +161,18 @@ class AbstractRecording(AbstractObject):
     return self.timeline.interval(start, duration)
 
 
-  def save_to_graph(self, rdfmap=None):
-  #------------------------------------
-    graph = Graph(self.uri)
-    AbstractObject.save_to_graph(self, graph, rdfmap)
-    AbstractObject.save_to_graph(self.timeline, graph, rdfmap)
+  def metadata_as_graph(self, rdfmap=None):
+  #----------------------------------------
+    """
+    Return a Recording's metadata in a RDF graph.
+    """
+    ## Associate mapping with recording ??
+    graph = rdf.Graph(self.uri)
+    self.save_to_graph(graph, rdfmap)
+    self.timeline.save_to_graph(graph, rdfmap)
     for s in self.signals(): s.save_to_graph(graph, rdfmap)
     for e in self._events.itervalues(): e.save_to_graph(graph, rdfmap)
     return graph
-
-
-  def metadata_as_string(self, format='turtle', prefixes={ }, rdfmap=None):
-  #------------------------------------------------------------------------
-    namespaces = { 'bsml': BSML.uri }
-    namespaces.update(NAMESPACES)
-    namespaces.update(prefixes)
-    return self.save_to_graph(rdfmap=rdfmap).serialise(base=str(self.uri) + '/', format=format, prefixes=namespaces)
-
 
   @classmethod
   def create_from_string(cls, uri, string, format='turtle', rdfmap=None, **kwds):
