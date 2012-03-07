@@ -120,12 +120,12 @@ class TimeSeries(object):
     return '<Time Series: len=%d, times=\n%s\n data=\n%s>' % (len(self), self.times, self.data)
 
   '''
-  A single value as a (time, data( tuple, or a slice as a 2D array of (time, data) points.
+  A single value as a (time, data) tuple, or a slice as a 2D array of (time, data) points.
   '''
   def __getitem__(self, key):
   #--------------------------
     if isinstance(key, slice): return np.column_stack((self.time[key], self.data[key]))
-    elif isinstance(key, int): return (self.time[key], self.data[k])
+    elif isinstance(key, int): return (self.time[key], self.data[key])
     else:                      raise TypeError
 
   '''
