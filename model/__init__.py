@@ -80,6 +80,28 @@ class AbstractRecording(AbstractObject):
     """
     return [ self._signals[s] for s in sorted(self._signal_uris) ]
 
+  def set_signal(self, signal):
+  #----------------------------
+    '''
+    Assign a :class:`Signal` to a Recording.
+
+    :param signal: The signal to add to the recording.
+    :type signal: :class:`Signal`
+    :return: The 0-origin index of the signal in the recording.
+    '''
+    sig_uri = str(signal.uri)
+    try:
+      index = self._signal_uris.index(sig_uri)
+    except ValueError:
+      raise Exception, "Signal '%s' not in recording" % signal.uri
+    if signal.recording and str(signal.recording) != str(self.uri):  ## Set from RDF mapping...
+      raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, sig_uri, signal.recording)
+    if self._signals.get(sig_uri, None):
+      raise Exception, "Recording already has signal added"
+    signal.recording = self
+    self._signals[sig_uri] = signal
+    return index
+
   def add_signal(self, signal):
   #----------------------------
     '''
@@ -90,14 +112,11 @@ class AbstractRecording(AbstractObject):
     :return: The 0-origin index of the signal in the recording.
     '''
     #logging.debug("Adding signal: %s", signal.uri)
-    if str(signal.uri) in self._signal_uris:
+    sig_uri = str(signal.uri)
+    if sig_uri in self._signal_uris:
       raise Exception, "Signal '%s' already in recording" % signal.uri
-    if signal.recording and str(signal.recording) != str(self.uri):  ## Set from RDF mapping...
-      raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, signal.uri, signal.recording)
-    signal.recording = self
-    self._signal_uris.append(str(signal.uri))
-    self._signals[str(signal.uri)] = signal
-    return len(self._signal_uris) - 1         # 0-origin index of newly added signal uri
+    self._signal_uris.append(sig_uri)
+    return self.set_signal(signal)          # 0-origin index of newly added signal uri
 
   def new_signal(self, uri, sigclass=AbstractSignal, **kwds):
   #----------------------------------------------------------
@@ -192,9 +211,7 @@ class AbstractRecording(AbstractObject):
     self.load_from_graph(graph, rdfmap)
     for s in graph.get_subjects(BSML.recording, self.uri):
       if graph.contains(rdf.Statement(s, rdf.RDF.type, BSML.Signal)):  ## UniformSignal ?? get rdf:type ??
-        sig = AbstractSignal(s.uri)
-        sig.load_from_graph(graph, rdfmap)
-        self.add_signal(sig)
+        self.add_signal(AbstractSignal.create_from_graph(str(s.uri), graph, rdfmap))
       else:
         self._signal_uris.append(str(s.uri))
     self.graph = graph

@@ -103,7 +103,7 @@ class BSMLRepository(repository.Repository):
     rec = self.get_recording(uri, **kwds)
     if rec is not None:
       for sig in rec.graph.get_subjects(BSML.recording, rdf.Uri(uri)):
-        rec.add_signal(Signal.create_from_graph(sig.uri, self.get_metadata(sig.uri), repository=self))
+        rec.set_signal(Signal.create_from_graph(sig.uri, self.get_metadata(sig.uri), repository=self))
     return rec
 
   def new_recording(self, uri, **kwds):
