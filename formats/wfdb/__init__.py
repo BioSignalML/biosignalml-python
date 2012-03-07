@@ -38,6 +38,9 @@ class WFDBRecording(BSMLRecording):
     ## http: url needs .hea extension??
 
     #logging.debug('Opening: %s (%s)', fname, uri)
+    if not fname:
+      BSMLRecording.__init__(self, uri=uri, metadata=metadata)
+      return
     self._siginfo = wfdb.isigopen(fname)
     if self._siginfo is None: raise IOError("Cannot open header for X '%s'" % fname)
     self._nsignals = self._siginfo.nsig
