@@ -99,6 +99,21 @@ class AbstractRecording(AbstractObject):
     self._signals[str(signal.uri)] = signal
     return len(self._signal_uris) - 1         # 0-origin index of newly added signal uri
 
+  def new_signal(self, uri, sigclass=AbstractSignal, **kwds):
+  #----------------------------------------------------------
+    '''
+    Create a new Signal and add it to the Recording.
+
+    :param uri: The URI for the signal.
+    :param sigclass: The class of Signal to create.
+    :return: A Signal of type `sigclass`.
+    '''
+    if uri in self._signal_uris:
+      raise Exception, "Signal '%s' already in recording" % uri
+    sig = sigclass(uri, **kwds)
+    self.add_signal(sig)
+    return sig
+
   def get_signal(self, uri=None, index=None):
   #-----------------------------------------
     '''
