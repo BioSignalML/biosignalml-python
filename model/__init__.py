@@ -27,9 +27,7 @@ Abstract BioSignalML objects.
 import uuid
 import logging
 
-from biosignalml.rdf import NAMESPACES, RDF, EVT
-from biosignalml.rdf import Uri, Statement, Graph
-
+import biosignalml.rdf as rdf
 from biosignalml.ontology import BSML
 
 from core import AbstractObject
