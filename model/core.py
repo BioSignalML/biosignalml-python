@@ -31,17 +31,21 @@ import biosignalml.rdf as rdf
 
 class AbstractObject(object):
 #============================
-  '''
+  """
   A general abstract resource with metadata.
 
   :param uri: URI of the resource,
   :type uri: str
   :param metadata: Dictionary containing metadata values for the resource.
   :type metadata: dict
+  :param kwds: Keyword/value pairs of metadata elements. These have precedence
+    over values in the `metadata` parameter for setting of attributes; values
+    in the `metadata` parameter take precedence for setting the object's
+    `metadata` dictionary.
 
   Resource properties with names in the :attr:`attributes` list are stored as attributes
   of the class instance; other elements are stored in the :attr:`metadata` dictionary.
-  '''
+  """
 
   metaclass = None
   '''Class in BioSignalML Ontology as a :class:`biosignalml.rdf.Resource`'''
@@ -49,11 +53,12 @@ class AbstractObject(object):
   attributes = [ 'uri', 'description' ]
   '''List of generic attributes all resources have.'''
 
-  def __init__(self, uri, metadata={}):
-  #------------------------------------
-    self.metadata = { }
+  def __init__(self, uri, metadata=None, **kwds):
+  #----------------------------------------------
+    self.metadata = AbstractObject._set_attributes(self, **kwds)
     '''Dictionary of property values with names not in :attr:`attributes` list.'''
-    self.set_attributes(metadata)
+    if metadata is not None:
+      self.metadata.update(AbstractObject._set_attributes(self, **metadata))
     self.uri = rdf.Uri(uri)
     self.graph = None
 
@@ -87,25 +92,27 @@ class AbstractObject(object):
     cls.initialise(obj, *args)
     return obj
 
-  def set_attributes(self, values):
-  #--------------------------------
+  def _set_attributes(self, **values):
+  #-----------------------------------
     '''
     Set attribute if `key` exists in an :attr:`attributes` list of any class in hierarchy.
 
-    :param meta: Dictionary of `{ key: value }` pairs to set as attributes.
-    :type meta: dict
+    :param values: Dictionary of `{ key: value }` pairs to set as attributes.
+    :type values: dict
+    :return: A dictionary containing key/value pairs that are not in attributes list.
     '''
-    assigned = [ ]
+    attribs = [ ]
     for cls in self.__class__.__mro__:
       for attr in cls.__dict__.get('attributes', []):
         value = values.get(attr)
         if value is not None:
-          setattr(self, attr, value)
-          assigned.append(attr)
+          if getattr(self, attr, None) is None:    # Only assign if not already set
+            setattr(self, attr, value)
         elif attr not in self.__dict__:
-          setattr(self, attr, None)    # So it's able to be _assign()ed to
-    for attr, value in values.iteritems():
-      if attr not in assigned: self.metadata[attr] = value
+          setattr(self, attr, None)                # So it's able to be _assign()ed to
+        attribs.append(attr)                      # Attributes that have been set
+    return { attr: value for attr, value in values.iteritems()
+                                         if not (value is None or attr in attribs) }
 
   def get_attributes(self):
   #------------------------

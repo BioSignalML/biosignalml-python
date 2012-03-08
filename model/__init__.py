@@ -46,9 +46,9 @@ class AbstractSignal(AbstractObject):
                ]
   '''Generic attributes of a Signal.'''
 
-  def __init__(self, uri, metadata={}):
-  #------------------------------------
-    AbstractObject.__init__(self, uri, metadata=metadata)
+  def __init__(self, uri, metadata=None, **kwds):
+  #----------------------------------------------
+    AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
     self.recording = None
 
 
@@ -65,10 +65,10 @@ class AbstractRecording(AbstractObject):
                ]
   '''Generic attributes of a Recording.'''
 
-  def __init__(self, uri, metadata={}):
-  #------------------------------------
+  def __init__(self, uri, metadata=None, **kwds):
+  #----------------------------------------------
     from biosignalml.timeline import TimeLine   ## Otherwise circular import...
-    AbstractObject.__init__(self, uri, metadata=metadata)
+    AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
     self.timeline = TimeLine(str(uri) + '/timeline')
     self._signals = { }
     self._signal_uris = [ ]
@@ -247,10 +247,10 @@ class AbstractEvent(AbstractObject):
   attributes = [ 'description', 'factor', 'time', ]
   '''Generic attributes of an Event.'''
 
-  def __init__(self, uri, metadata={}):
-  #------------------------------------
+  def __init__(self, uri, metadata=None, **kwds):
+  #-----------------------------------------------
     ##logging.debug('Event: %s (%s)', uri, repr(uri))
-    AbstractObject.__init__(self, uri, metadata=metadata)
+    AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
 
   def save_to_graph(self, graph, rdfmap):
   #--------------------------------------
