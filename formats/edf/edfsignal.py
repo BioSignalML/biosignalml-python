@@ -22,8 +22,6 @@ from edffile import EDF
 class EDFSignal(BSMLSignal):
 #===========================
 
-  attributes = [ 'index' ]
-
   MAXPOINTS = 4096     #: Maximum number of sample points returned by a single :math:`read`.
 
   def __init__(self, signum, edf):

@@ -42,6 +42,7 @@ class AbstractSignal(AbstractObject):
 
   attributes = ['label', 'units', 'transducer', 'filter', 'rate',  'clock',
                 'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
+                'index'
                ]
   '''Generic attributes of a Signal.'''
 
