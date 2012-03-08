@@ -90,7 +90,8 @@ Measurement units would normally be entities in a specialised units of measure o
 
 # owl:NamedIndividual resources:
   BP             = Resource(NS.BP)
-  BioSignalML    = Resource(NS.BioSignalML)
+  BSML_HDF5      = Resource(NS.BSML_HDF5)
+  '''A HDF5-based container for BioSignalML recordings.'''
   ECG            = Resource(NS.ECG)
   EDF            = Resource(NS.EDF)
   EDFplus        = Resource(NS.EDFplus)

@@ -101,8 +101,8 @@ class HDF5Recording(BSMLRecording):
 
   def __init__(self, fname, uri=None, mode='r', metadata={}):
   #----------------------------------------------------------
-    metadata['format'] = BSML.HDF5
     super(HDF5Recording, self).__init__(fname, uri=uri, metadata=metadata)
+    metadata['format'] = BSML.BSML_HDF5
     self._file = h5py.File(fname, mode)  # Do we allow an existing file to be extended?
     self._version = self._file.attrs.get('version')
     if self._version is None:
