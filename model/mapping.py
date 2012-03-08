@@ -122,7 +122,7 @@ BSML_MAP = [
 
 # Signal specific metadata:
   AttributeMap('recording',    BSML.recording,    BSML.Signal, to_rdf=get_uri),
-  AttributeMap('units',        BSML.units,        BSML.Signal),
+  AttributeMap('units',        BSML.units,        BSML.Signal, to_rdf=get_uri),
 ##  AttributeMap('transducer',   BSML.transducer,   BSML.Signal),
   AttributeMap('filter',       BSML.preFilter,    BSML.Signal),
   AttributeMap('rate',         BSML.rate,         BSML.Signal, XSD.double),
