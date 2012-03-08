@@ -1,11 +1,9 @@
 ##from biosignalml,owl import UOME
 
-class UOME(object):
-
+class UOME_Test(object):
   def __getattribute__(self, attr):
-    if attr == 'Millisecond': raise AttributeError(attr)
     return attr
-
+UOME = UOME_Test()
 
 
 _units_to_UOME = { }
@@ -25,12 +23,17 @@ _units = {
   'W':    'watt'
   }
 
-_powers = {
+_powers_prefix = {
   '2': 'Square',
   '3': 'Cubic',
   }
-           
-           
+
+_powers_suffix = {
+  '2': 'Squared',
+  '3': 'Cubed',
+  }
+
+
 _prefixes = { 'Y': 'Yotta', 'Z': 'Zetta', 'E': 'Exa',
               'P': 'Peta',  'T': 'Tera',  'G': 'Giga',
               'M': 'Mega',  'K': 'Kilo',  'H': 'Hecto',
@@ -39,6 +42,7 @@ _prefixes = { 'Y': 'Yotta', 'Z': 'Zetta', 'E': 'Exa',
               'u': 'Micro', 'n': 'Nano',  'p': 'Pico',
               'f': 'Femto', 'a': 'Atto',  'z': 'Zepto',
               'y': 'Yocto',
+              u'\u00b5': 'Micro',
             }
 
 
@@ -55,16 +59,24 @@ def _power(u):
 #-------------
   try:
     p = u.index('^')
-    return _powers[u[p+1:]] + _name(u[:p])
+    name = _name(u[:p])
+    if name.lower().endswith('second'):
+      return name + _powers_suffix[u[p+1:]]
+    else:
+      return _powers_prefix[u[p+1:]] + name
   except ValueError:
     return _name(u)
 
+def _mult(u):
+#------------
+  return ''.join([_power(v) for v in u.split('*')])
+
+
 def to_UOME(units):
 #==================
-  uom = UOME()  #####
   try:                   return _units_to_UOME[units]
   except KeyError:       pass
-  try:                   return getattr(uom, 'Per'.join([_power(u) for u in units.split('/', 1)]))
+  try:                   return getattr(UOME, 'Per'.join([_mult(u) for u in units.split('/')]))
   except AttributeError: raise KeyError, "Cannot map units of '%s'" % units
 
 if __name__ == '__main__':
@@ -78,6 +90,7 @@ if __name__ == '__main__':
 
 
   test('Km')
+  test('Kg*m/s^2/W*m')
   test('mm^2')
   test('Mm^3')
   test('ms')
@@ -88,5 +101,5 @@ if __name__ == '__main__':
   test('uV')
   test('mV')
   test('degC')
-
+  test(u'\u00b5V')
 
