@@ -35,9 +35,9 @@ class EDFRecording(BSMLRecording):
   MIMETYPE = 'application/x-edf'
   SignalClass = EDFSignal
 
-  def __init__(self, uri=None, fname=None):
-  #----------------------------------------
-    BSMLRecording.__init__(self, uri=uri, fname=fname)
+  def __init__(self, uri, fname=None, metadata=None, **kwds):
+  #----------------------------------------------------------
+    BSMLRecording.__init__(self, uri=uri, fname=fname, metadata=metadata, **kwds)
     self._edffile = None
 
   def initialise(self, fname):
@@ -75,9 +75,9 @@ class EDFRecording(BSMLRecording):
     self.comment = '\n'.join(self._edffile.errors)
 
   @classmethod
-  def open(cls, fname, uri=None):
-  #------------------------------
-    self = cls(uri=uri, fname=fname)
+  def open(cls, fname, uri=None, **kwds):
+  #--------------------------------------
+    self = cls(uri=uri, fname=fname, **kwds)
     self.initialise(fname)
     self._set_attributes()
     return self

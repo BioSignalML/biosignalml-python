@@ -58,9 +58,8 @@ class BSMLRecording(biosignalml.Recording):
 
   attributes = biosignalml.Recording.attributes + [ 'digest' ]
 
-  def __init__(self, uri=None, fname=None, mode='r', metadata=None):
-  #-----------------------------------------------------------------
-    if metadata is None: metadata = { }
+  def __init__(self, uri=None, fname=None, mode='r', metadata=None, **kwds):
+  #-------------------------------------------------------------------------
     if fname:
       if 'source' not in metadata: metadata['source'] = file_uri(fname)
       if not uri: uri = metadata['source']
@@ -131,9 +130,9 @@ class BSMLSignal(biosignalml.Signal):
   :type metadata: dict
   '''
 
-  def __init__(self, uri, metadata={}):
-  #------------------------------------
-    biosignalml.Signal.__init__(self, uri, metadata=metadata)
+  def __init__(self, uri, metadata=None, **kwds):
+  #----------------------------------------------
+    biosignalml.Signal.__init__(self, uri, metadata=metadata, **kwds)
 
   def read(self, interval=None, segment=None, duration=None, points=0):
   #--------------------------------------------------------------------
