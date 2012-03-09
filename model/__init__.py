@@ -122,8 +122,8 @@ class AbstractRecording(AbstractObject):
     self._signal_uris.append(sig_uri)
     return self.set_signal(signal)          # 0-origin index of newly added signal uri
 
-  def new_signal(self, uri, sigclass=AbstractSignal, **kwds):
-  #----------------------------------------------------------
+  def new_signal(self, uri=None, id=None, **kwds):
+  #-----------------------------------------------
     '''
     Create a new Signal and add it to the Recording.
 
@@ -131,6 +131,10 @@ class AbstractRecording(AbstractObject):
     :param sigclass: The class of Signal to create.
     :return: A Signal of type `sigclass`.
     '''
+    if uri is None and id is None:
+      raise Exception, "Signal must have 'uri' or 'id' specified"
+    if uri is None:
+      uri = str(self.uri) + '/signal/%s' % str(id)
     if uri in self._signal_uris:
       raise Exception, "Signal '%s' already in recording" % uri
     sig = self.SignalClass(uri, **kwds)
