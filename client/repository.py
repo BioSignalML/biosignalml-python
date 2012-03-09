@@ -44,7 +44,7 @@ class RemoteRepository(object):
 
   def _send_metadata(self, uri, graph, method='POST'):
   #--------------------------------------------------
-    format = rdf.Format.TURTLE ## RDFXML
+    format = rdf.Format.RDFXML
     try:
       response, content = self._http.request(self._md_uri + str(uri),
         method=method,
