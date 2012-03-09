@@ -15,8 +15,8 @@ import biosignalml.rdf as rdf
 from biosignalml.transports import WebStreamReader, SignalData, WebStreamWriter, StreamException
 
 
-class Repository(object):
-#========================
+class RemoteRepository(object):
+#==============================
   '''
   A connection to a repository for both metadata and data.
   '''

@@ -88,8 +88,8 @@ class Signal(BSMLSignal):
     return self.repository.put_data(str(self.uri), timeseries)
 
 
-class BSMLRepository(repository.Repository):
-#===========================================
+class Repository(repository.RemoteRepository):
+#=============================================
 
   def get_recording(self, uri, **kwds):
   #------------------------------------
