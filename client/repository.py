@@ -78,6 +78,7 @@ class RemoteRepository(object):
 
   def put_data(self, uri, timeseries):
   #-----------------------------------
+    stream = None
     try:
       stream = WebStreamWriter(self._sd_uri)
       MAXPOINTS = 50000   ##### TESTING    (200K bytes if double precision)
@@ -97,5 +98,5 @@ class RemoteRepository(object):
       logging.error('Error in stream: %s', msg)
       raise
     finally:
-      stream.close()
+      if stream: stream.close()
 
