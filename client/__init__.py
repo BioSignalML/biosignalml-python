@@ -21,39 +21,6 @@ from biosignalml.transports import StreamException
 import repository
 
 
-class Recording(BSMLRecording):
-#==============================
-
-  def __init__(self, *args, **kwds):
-  #---------------------------------
-    repository = kwds.pop('repository', None)
-    BSMLRecording.__init__(self, *args, **kwds)
-    self.repository = repository
-    # Format = HDF5 (BSML ??)
-
-  def close(self):
-  #---------------
-    # Ensure all metadata has been POSTed
-    pass
-
-  def new_signal(self, uri=None, id=None, **kwds):
-  #-----------------------------------------------
-    # And if signal uri is
-    # then when server processes PUT for a new signal of BSML Recording
-    # it will create an signal group in HDF5 container
-    try:
-      if uri is None: uri = self.uri + '/signal/' + id
-      sig = BSMLRecording.new_signal(self, uri, Signal, repository=self.repository, **kwds)
-      ## This should spot duplicates, even if we have done get_recording()
-      ## and not get_recording_with_signals()
-
-      logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
-      sig.repository.post_metadata(sig.uri, sig.metadata_as_graph())
-      return sig
-    except Exception, msg:
-      raise IOError("Cannot create Signal '%s' in repository" % uri)
-
-
 class Signal(BSMLSignal):
 #========================
 
@@ -86,6 +53,41 @@ class Signal(BSMLSignal):
   def append(self, timeseries):
   #----------------------------
     return self.repository.put_data(str(self.uri), timeseries)
+
+
+class Recording(BSMLRecording):
+#==============================
+
+  SignalClass = Signal
+  FORMAT = BSML.BSML_HDF5
+
+  def __init__(self, *args, **kwds):
+  #---------------------------------
+    repository = kwds.pop('repository', None)
+    BSMLRecording.__init__(self, *args, **kwds)
+    self.repository = repository
+
+  def close(self):
+  #---------------
+    # Ensure all metadata has been POSTed
+    pass
+
+  def new_signal(self, uri=None, id=None, **kwds):
+  #-----------------------------------------------
+    # And if signal uri is
+    # then when server processes PUT for a new signal of BSML Recording
+    # it will create an signal group in HDF5 container
+    try:
+      sig = BSMLRecording.new_signal(self, uri=uri, id=id, repository=self.repository, **kwds)
+      ## This should spot duplicates, even if we have done get_recording()
+      ## and not get_recording_with_signals()
+
+      logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
+      sig.repository.post_metadata(sig.uri, sig.metadata_as_graph())
+      return sig
+    except Exception, msg:
+      raise
+      raise IOError("Cannot create Signal '%s' in repository" % uri)
 
 
 class Repository(repository.RemoteRepository):
