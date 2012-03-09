@@ -35,9 +35,12 @@ class RemoteRepository(object):
 
   def get_metadata(self, uri):
   #---------------------------
-    graph = rdf.Graph.create_from_resource(self._md_uri + str(uri), rdf.Format.RDFXML)
-    if uri: graph.uri = rdf.Uri(uri)
-    return graph
+    try:
+      graph = rdf.Graph.create_from_resource(self._md_uri + str(uri), rdf.Format.RDFXML)
+      if uri: graph.uri = rdf.Uri(uri)
+      return graph
+    except Exception, msg:
+      raise Exception("Cannot get RDF for '%s'" % uri)
 
   def _send_metadata(self, uri, graph, method='POST'):
   #--------------------------------------------------
