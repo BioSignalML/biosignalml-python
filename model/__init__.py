@@ -65,6 +65,9 @@ class AbstractRecording(AbstractObject):
                ]
   '''Generic attributes of a Recording.'''
 
+  SignalClass = AbstractSignal
+
+
   def __init__(self, uri, metadata=None, **kwds):
   #----------------------------------------------
     from biosignalml.timeline import TimeLine   ## Otherwise circular import...
@@ -130,7 +133,7 @@ class AbstractRecording(AbstractObject):
     '''
     if uri in self._signal_uris:
       raise Exception, "Signal '%s' already in recording" % uri
-    sig = sigclass(uri, **kwds)
+    sig = self.SignalClass(uri, **kwds)
     self.add_signal(sig)
     return sig
 
