@@ -334,7 +334,7 @@ class Graph(librdf.Model):
     except Exception, msg:
       raise Exception(msg)
 
-  def serialise(self, format=Format.TURTLE, base=None, prefixes={}):
+  def serialise(self, format=Format.RDFXML, base=None, prefixes={}):
   #-----------------------------------------------------------------
     '''
     Serialise the graph as a string of RDF statements.
