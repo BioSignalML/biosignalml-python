@@ -443,7 +443,7 @@ class BlockParser(object):
 
       elif self._state == BlockParser._MORE:                   # 'C' or 'M'
         if self._version != VERSION:
-          self._error = Error.VERSION_MISATCH
+          self._error = Error.VERSION_MISMATCH
         else:
           self._more = chr(data[pos])
           if self._more in ['C', 'M']:
