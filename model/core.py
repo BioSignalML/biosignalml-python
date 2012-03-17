@@ -55,10 +55,10 @@ class AbstractObject(object):
 
   def __init__(self, uri, metadata=None, **kwds):
   #----------------------------------------------
-    self.metadata = AbstractObject._set_attributes(self, **kwds)
+    self.metadata = AbstractObject.set_attributes(self, **kwds)
     '''Dictionary of property values with names not in :attr:`attributes` list.'''
     if metadata is not None:
-      self.metadata.update(AbstractObject._set_attributes(self, **metadata))
+      self.metadata.update(AbstractObject.set_attributes(self, **metadata))
     self.uri = rdf.Uri(uri)
     self.graph = None
 
@@ -92,8 +92,8 @@ class AbstractObject(object):
     cls.initialise(obj, *args)
     return obj
 
-  def _set_attributes(self, **values):
-  #-----------------------------------
+  def set_attributes(self, **values):
+  #----------------------------------
     '''
     Set attribute if `key` exists in an :attr:`attributes` list of any class in hierarchy.
 
