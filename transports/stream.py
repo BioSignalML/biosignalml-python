@@ -376,7 +376,7 @@ class BlockParser(object):
   # Parser states.
   _RESET      =  0
   _TYPE       =  1
-  _VERNUM     =  2
+  _VERSION    =  2
   _MORE       =  3
   _HDRLEN     =  4
   _HEADER     =  5
@@ -428,11 +428,11 @@ class BlockParser(object):
           self._checksum.update(self._type)
           self._blockno += 1
           self._version = 0
-          self._state = BlockParser._VERNUM
+          self._state = BlockParser._VERSION
         else:
           self._error = Error.UNEXPECTED_TRAILER
 
-      elif self._state == BlockParser._VERNUM:                  # Version number
+      elif self._state == BlockParser._VERSION:                 # Version number
         while datalen > 0 and chr(data[pos]).isdigit():
           self._version = 10*self._version + int(chr(data[pos]))
           self._checksum.update(chr(data[pos]))
@@ -441,7 +441,7 @@ class BlockParser(object):
         if datalen > 0:
           self._state = BlockParser._MORE
 
-      elif self._state == BlockParser._MORE:                   # 'C' or 'M'
+      elif self._state == BlockParser._MORE:                    # 'C' or 'M'
         if self._version != VERSION:
           self._error = Error.VERSION_MISMATCH
         else:
