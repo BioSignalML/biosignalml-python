@@ -51,9 +51,11 @@ from numbers import Number
 import logging
 
 
-from biosignalml import BSML
-from biosignalml.data import TimeSeries
+from biosignalml import BSML, UniformSignal
+from biosignalml.data import TimeSeries, UniformTimeSeries
+
 from biosignalml.formats import BSMLRecording, BSMLSignal
+
 
 VERSION   = "1.0"
 
@@ -73,18 +75,6 @@ def _make_name(prefix, nm):
   return _normalise_name(nm)
 
 
-def _set_clock(hdf5, attr, value):
-#---------------------------------
-  if attr in ['clock', 'rate']:
-    if value: hdf5.attrs[attr] = value if isinstance(value, Number) else str(value)
-    elif attr in hdf5.attrs: del hdf5.attrs[attr]
-
-def _del_clock(hdf5, attr):
-#--------------------------
-  if attr in ['clock', 'rate'] and attr in hdf5.attrs:
-    del hdf5.attrs[attr]
-
-
 def _set_attribute(obj, hdf5, attr, value):
 #------------------------------------------
   if (value is not None and (value != ''
@@ -96,13 +86,109 @@ def _set_attribute(obj, hdf5, attr, value):
     del hdf5.attrs[attr]
 
 
+
+class HDF5Signal(BSMLSignal):
+#============================
+
+  def __init__(self, uri, metadata=None, **kwds):
+  #----------------------------------------------
+    BSMLSignal.__init__(self, uri, metadata=metadata, **kwds)
+    self._dsetname = None
+    self._dset = None
+    #if index is None: self._dset.attrs['uri'] = str(self.uri)
+    #_set_clock(self._dset, attr, value)
+    #_del_clock(self._dset, attr)
+
+
+  def _name(self):
+  #---------------
+    return _make_name(self.recording.uri, self.uri)
+
+  def open_dataset(self):
+  #----------------------
+    if self._dset is None:
+      self._dset = self.recording.get_dataset(self._name())
+      assert self._dset.attrs['uri'] == str(self.uri)
+    #try:
+    #  index = self.recording.get_dataset('uris').index(str(self.uri))
+    #except ValueError:
+    #  raise ValueError, 'Signal %s is not in Recording' % str(uri)
+
+  def create_dataset(self, data=None, dtype=np.dtype('f')):
+  #--------------------------------------------------------
+    if self._dset is None:
+      name = self._name()
+      try:
+        self.open_dataset()
+      except KeyError:
+        self._dset = self.recording.create_dataset(self._name(),
+                                                   data=data,
+                                                   dtype=None if data is not None else dtype,
+                                                   shape=None if data is not None else (0,),
+                                                   maxshape=(None,), chunks=(CHUNKSIZE,) )
+        self._dset.attrs['uri']  = str(self.uri)
+        self._dset.attrs['rate'] = self.rate   ## Or clock
+        #if attr in ['clock', 'rate']:
+        #  if value: hdf5.attrs[attr] = value if isinstance(value, Number) else str(value)
+    ## Set datatype by first append... In fact only create dataset then...
+
+  @classmethod
+  def create_from_signal(cls, recording, signal):
+  #----------------------------------------------
+    return cls.create(signal.uri, recording, metadata=signal.get_metavars())
+
+  def append(self, data):
+  #----------------------
+    """
+    :param data: Either an array or a TimeSeries of data points
+
+    """
+    if data is None or len(data) == 0: return
+    if isinstance(data, TimeSeries):
+      if isinstance(data, UniformTimeSeries):
+        if data.rate != self.rate: raise ValueError, "Data rate different from signal's"
+      #else:                                  ## check clock
+      data = data.data
+    if self._dset is None:
+      self.create_dataset(data)
+    else:
+      end = len(self._dset)
+      self._dset.resize(end + len(data), 0)
+      self._dset[end:] = data
+
+
+  def read(self, interval=None, segment=None, duration=None, points=0):
+  #--------------------------------------------------------------------
+    # Compute indices into dataset
+    # return self._dset[start:stop] ## But yield a sequence of TimeSeries??
+    self.open()
+    return self._dest[start:stop]
+    #if self._index is None: return self._dest[start:stop]
+    #else:                   return self._dset[self._index, start:stop]
+
+  def __getitem__(self, key):
+  #--------------------------
+    if self._index is None: return self._dest[key]
+    else:                   return self._dset[self._index, key]
+
+
+
 class HDF5Recording(BSMLRecording):
 #==================================
 
-  def __init__(self, fname, uri=None, mode='r', metadata={}):
+  FORMAT = BSML.BSML_HDF5
+  MIMETYPE = 'application/x-bsml'
+  SignalClass = HDF5Signal
+
+  def __init__(self, uri, fname=None, metadata=None, **kwds):
   #----------------------------------------------------------
-    super(HDF5Recording, self).__init__(fname, uri=uri, metadata=metadata)
-    metadata['format'] = BSML.BSML_HDF5
+    BSMLRecording.__init__(self, uri, fname, metadata=metadata, **kwds)
+    self._file = None
+    self._recording = None
+
+  def _openfile(self, fname, mode='r'):
+  #------------------------------------
+    # check filename extension and add '.h5' or '.hdf5'  ???
     self._file = h5py.File(fname, mode)  # Do we allow an existing file to be extended?
     self._version = self._file.attrs.get('version')
     if self._version is None:
@@ -113,36 +199,48 @@ class HDF5Recording(BSMLRecording):
     self._recording.attrs['channels'] = -1 ;
     self._sigdata = None
 
+
   def close(self):
   #---------------
     # if new file then self.save_metadata() ??
     # and have set_metadata_format/prefixes as separate call??
-    self._file.close()
+    if self._file is not None:
+      self._file.close()
+      self._file = None
+
 
   @classmethod
   def open(cls, fname, uri=None, mode='r', **kwds):
   #------------------------------------------------
-    return BSMLRecording.open(cls, fnane, uri=uri, mode=mode, **kwds)
+    self = cls(uri, fname=fname, **kwds)
+    self._openfile(fname, mode=mode)
+    return self
     # If multiple recordings per file then can we add extra recordings?
     # With no extension of existing recordings??
     # read/parse metadata and add to self._graph (self._model ??)
     # and then add all Signals to Recording...
-    # return self
 
 
   @classmethod
   def create(cls, fname, uri=None, **kwds):
   #----------------------------------------
-    # check filename extension and add '.h5' or '.hdf5'
     return cls.open(fname, uri=uri, mode='w', **kwds)
 
 
   ## create_from_recording sets source to recording.uri? or recording.source??
-  @classmethod
-  def create_from_recording(cls, recording, fname):
-  #------------------------------------------------
-    return cls.create(fname, uri=recording.uri, metadata=recording.get_metavars())
+##  @classmethod
+##  def create_from_recording(cls, recording, fname):
+##  #------------------------------------------------
+##    return cls.create(fname, uri=recording.uri, metadata=recording.get_metavars())
 
+
+  def create_dataset(self, name, **kwds):
+  #--------------------------------------
+    return self._recording.create_dataset(name, **kwds)
+
+  def get_dataset(self, name):
+  #---------------------------
+    return self._recording[name]
 
   def save_metadata(self, format='turtle', prefixes={}):
   #-----------------------------------------------------
@@ -172,8 +270,8 @@ class HDF5Recording(BSMLRecording):
     if data is not None and len(data.shape) > 1 and channels != data.shape[0]:
       raise Exception, "Number of Signal uris different from number of data columns"
     self._recording.attr['channels'] = channels # So we know type of HDF5 recording
-    self._recording.create_dataset('uris', data=[str(u) for u in uris], dtype=h5py.new_vlen(str))
-    dataset = self._recording.create_dataset('data', dtype=dtype,
+    self.create_dataset('uris', data=[str(u) for u in uris], dtype=h5py.new_vlen(str))
+    dataset = self.create_dataset('data', dtype=dtype,
                                              shape=(channels, 0), maxshape=(channels, None,),
                                              chunks=(channels, CHUNKSIZE,) ) # CHUNKSIZE/channels ??
     self._sigdata = dataset
@@ -200,103 +298,27 @@ class HDF5Recording(BSMLRecording):
       self._sigdata[..., end:] = data
 
 
-class HDF5Signal(BSMLSignal):
-#============================
-
-  def __init__(self, uri, recording, dataset, metadata={}, index=None):
-  #--------------------------------------------------------------------
-    object.__setattr__(self, '_dset', dataset)  # Used in __setattr__()
-    self._index = index
-    metadata.pop('uri', None)  # In case metadata contains a uri.
-    super(HDF5Signal, self).__init__(uri, metadata=metadata)
-    if index is None: self._dset.attrs['uri'] = str(self.uri)
-    recording.add_signal(self)
-
-  def __setattr__(self, attr, value):
-  #----------------------------------
-    _set_clock(self._dset, attr, value)
-    object.__setattr__(self, attr, value)
-
-  def __delattr__(self, attr):
-  #---------------------------
-    _del_clock(self._dset, attr)
-    object.__delattr__(self, attr)
-
-  @classmethod
-  def open(cls, recording, uri):
-  #-----------------------------
-    name = _make_name(recording.uri, uri)
-
-    dataset = recording._recording[name]
-
-    assert str(uri) == dataset.attrs['uri']
 
 
-    return cls(uri, recording, dataset) # , metadata= ## get from metadata block...
-                                                  ## via dataset.attrs['uri']
-
-    dataset = recording._recording['data']
-    try:
-      index = recording._recording['uris'].index(str(uri))
-    except ValueError:
-      raise ValueError, 'Signal %s is not in Recording' % str(uri)
+if __name__ == '__main__':
+#=========================
 
 
+  hdf5 = HDF5Recording.create('test.h5', 'http://example.org/test/bsml')
 
-  @classmethod
-  def create(cls, uri, recording, data=None, dtype=np.dtype('f'), metadata={}):
-  #----------------------------------------------------------------------------
-    dataset = recording._recording.create_dataset(_make_name(recording.uri, uri),
-                                                  data=data, dtype=dtype,
-                                                  shape=None if data is not None else (0,),
-                                                  maxshape=(None,),
-                                                  chunks=(CHUNKSIZE,) )
-    return cls(uri, recording, dataset, metadata=metadata)
+  #sig = hdf5.new_signal(UniformSignal, id='1', units='mV', rate=1000)
 
-  @classmethod
-  def create_from_signal(cls, recording, signal):
-  #----------------------------------------------
-    return cls.create(signal.uri, recording, metadata=signal.get_metavars())
+  sig = hdf5.new_signal(id='1', units='mV', rate=1000)
+  data = UniformTimeSeries(np.sin(np.linspace(0, 4*np.pi, 201)), rate=sig.rate)
+  sig.append(data)
+  sig.append(data.data[1:])
 
-  def append(self, data):
-  #----------------------
-    """
-    :param data: Either an array or a TimeSeries of data points
+  sig = hdf5.new_signal(id='2', units='mV', rate=100.0)
+  sig.append(UniformTimeSeries(np.arange(0, sig.rate+1, dtype=np.dtype('b')), rate=sig.rate))
 
-    """
-    if self._index is None:
-      end = len(self._dset)
-      self._dset.resize(end + len(data), 0)
-      if isinstance(data, TimeSeries): self._dset[end:] = data.data
-      else:                                  self._dset[end:] = data
-    else: raise Exception, "Cannot append to individual signals in a group"
-
-  def read(self, interval=None, segment=None, duration=None, points=0):
-  #--------------------------------------------------------------------
-    # Compute indices into dataset
-    # return self._dset[start:stop] ## But yield a sequence of TimeSeries??
-    if self._index is None: return self._dest[start:stop]
-    else:                   return self._dset[self._index, start:stop]
-
-  def __getitem__(self, key):
-  #--------------------------
-    if self._index is None: return self._dest[key]
-    else:                   return self._dset[self._index, key]
-
+  hdf5.close()
 
 """
-/**
- * General outline:
- *
- * Open existing file loads metadata block into store *as a named graph* (we could support
- * other formats besides RDF/XML -- need say a 'format' attribute on the dataset).
- *
- * Do we replace the metadata at file close? As an option? And what? All statements
- * in the named graph.
- *
- */
-
-
 
 
     // Check if we can append to the last dataset...
@@ -312,17 +334,12 @@ class HDF5Signal(BSMLSignal):
 // ***       val ticks = getDataSetInformation(clockid).getNumberOfElements()
 // ***       }
 
-
-
-
    Dataset will be called /signals/id/N    [0...)
 
    Dataset has rate attribute (int) and starttime (wrt. sig start) (usecs? nanosecs??)
    Or clock attribute (string) that has id of clock.
 
-
    /clocks/clockid is a dataset
    attribute of starttime (wrt. recording) (usecs? nanosecs??)
 
-  */
-  """
+"""
