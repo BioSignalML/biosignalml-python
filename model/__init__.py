@@ -34,9 +34,12 @@ from core import AbstractObject
 
 class AbstractSignal(AbstractObject):
 #====================================
-  '''
+  """
   An abstract BioSignalML Signal.
-  '''
+
+  :param uri: The URI of the signal.
+  :param units: The physical units of the signal's data.
+  """
 
   metaclass = BSML.Signal     #: :attr:`.BSML.Signal`
 
@@ -46,8 +49,9 @@ class AbstractSignal(AbstractObject):
                ]
   '''Generic attributes of a Signal.'''
 
-  def __init__(self, uri, metadata=None, **kwds):
-  #----------------------------------------------
+  def __init__(self, uri, units, metadata=None, **kwds):
+  #-----------------------------------------------------
+    kwds['units'] = units
     AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
     self.recording = None
 
@@ -56,6 +60,8 @@ class AbstractRecording(AbstractObject):
 #=======================================
   '''
   An abstract BioSignalML Recording.
+
+  :param uri: The URI of the recording.
   '''
 
   metaclass = BSML.Recording  #: :attr:`.BSML.Recording`
@@ -122,8 +128,8 @@ class AbstractRecording(AbstractObject):
     self._signal_uris.append(sig_uri)
     return self.set_signal(signal)          # 0-origin index of newly added signal uri
 
-  def new_signal(self, uri=None, id=None, **kwds):
-  #-----------------------------------------------
+  def new_signal(self, uri, units, id=None, **kwds):
+  #-------------------------------------------------
     '''
     Create a new Signal and add it to the Recording.
 
@@ -137,7 +143,7 @@ class AbstractRecording(AbstractObject):
       uri = str(self.uri) + '/signal/%s' % str(id)
     if uri in self._signal_uris:
       raise Exception, "Signal '%s' already in recording" % uri
-    sig = self.SignalClass(uri, **kwds)
+    sig = self.SignalClass(uri, units, **kwds)
     self.add_signal(sig)
     return sig
 

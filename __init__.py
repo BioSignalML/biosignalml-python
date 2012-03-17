@@ -57,7 +57,11 @@ class Signal(model.AbstractSignal, data.TimeSeries):
 
 class UniformSignal(Signal, data.UniformTimeSeries):
 #===================================================
-  pass
+
+  @classmethod
+  def create(cls, uri, units, rate):
+  #---------------------------------
+    self = cls(uri, units, rate=rate)
 
 
 class Event(model.AbstractEvent):
