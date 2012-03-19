@@ -7,6 +7,62 @@
 #  $ID$
 #
 ######################################################
+"""
+High level interfaces to a BioSignalML repository.
+
+This sub-package simplifies creating and reading signals in a repository
+by providing wrappers around connections to metadata and data endpoints.
+
+To create a new recording and signals::
+
+  # Connect to a repository (which is identified by a web address):
+  repository = Repository.connect("http://demo.biosignalml.org")
+
+  # Create a new recording in the repository, specifying a URI to identify it:
+  recording = repository.new_recording("http//example.org/recording/demo/1",
+                                       description="This is an example")
+  # Metadata attributes can be set either as keywords when the recording is created or
+  # by assignment:
+  recording.metadata.age = 59
+
+  # Create a new signal in the recording, specifying an identifier (that will be expanded
+  # to a full URI) and the physical units of its data:
+  signal1 = recording.new_signal(id="id1", UNITS.mV)
+  # Metadata attributes can also be assigned:
+  signal1.label = "ECG"
+  # Create a second signal:
+  signal2 = recording.new_signal("id2", UNITS.mbar, label="Pressure")
+
+  # Append time series data (timing information is part of a time series):
+  signal1.append(data1)
+  signal2.append(data2)
+  # Continue appending data...
+
+  # When all done ensure everything is stored:
+  recording.close()
+  repository.close()
+
+And to get back signal data::
+
+  repository = Repository.connect("http://demo.biosignalml.org")
+
+  # Retrieve the recording and all metadata about its signals:
+  recording = repository.get_recording_with_signals("http//example.org/recording/demo/1")
+
+  # Select a signal by its signal identifier (can also use a URI):
+  signal = recording.signal(id="id2")
+
+  # Print some information about the recording and signal:
+  print recording.description, signal.uri, signal.label, signal.units
+
+  # Retrieve and print time series data for the first second of the signal:
+  for data in sig.read(0.0, 1.0):
+    print data
+
+  # All done:
+  recording.close()
+  repository.close()
+"""
 
 import logging
 
