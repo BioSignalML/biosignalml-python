@@ -71,6 +71,7 @@ import biosignalml.rdf as rdf
 
 from biosignalml            import BSML
 from biosignalml.data       import TimeSeries, UniformTimeSeries, DataSegment
+from biosignalml.timeline   import Interval
 from biosignalml.formats    import BSMLRecording, BSMLSignal
 from biosignalml.transports import StreamException
 
@@ -91,16 +92,21 @@ class Signal(BSMLSignal):
     # Ensure all metadata has been POSTed
     pass
 
-  def read(self, interval=None, segment=None, duration=None, points=0):
-  #--------------------------------------------------------------------
-    params = { 'maxsize': points }
+  def read(self, interval=None, segment=None, maxpoints=0):
+  #--------------------------------------------------------
+    params = { }
     if interval:
-      params['start'] = interval.start
-      params['duration'] = interval.duration
+      if isinstance(interval, Interval):
+        params['start'] = interval.start
+        params['duration'] = interval.duration
+      else:
+        params['start'] = interval[0]
+        params['duration'] = interval[1]
     if segment:
       params['offset'] = segment[0]
       params['count'] = segment[1]
-    for sd in self.repository.get_data(str(self.uri), **params):
+    if maxpoints: params['maxsize'] = maxpoints
+    for sd in self.repository.a(str(self.uri), **params):
       if str(sd.uri) != str(self.uri):
         raise StreamExeception("Received signal '%s' different from requested '%s'" % (sd.uri, self.uri))
       if sd.rate is not None: yield DataSegment(sd.start, UniformTimeSeries(sd.data, sd.rate))
