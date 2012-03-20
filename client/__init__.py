@@ -10,7 +10,7 @@
 """
 High level interfaces to a BioSignalML repository.
 
-This sub-package simplifies creating and reading signals in a repository
+This package simplifies creating and reading signals in a repository
 by providing wrappers around connections to metadata and data endpoints.
 
 To create a new recording and signals::
@@ -27,11 +27,11 @@ To create a new recording and signals::
 
   # Create a new signal in the recording, specifying an identifier (that will be expanded
   # to a full URI) and the physical units of its data:
-  signal1 = recording.new_signal(id="id1", UNITS.mV)
+  signal1 = recording.new_signal(None, UNITS.mV, id="id1")
   # Metadata attributes can also be assigned:
   signal1.label = "ECG"
   # Create a second signal:
-  signal2 = recording.new_signal("id2", UNITS.mbar, label="Pressure")
+  signal2 = recording.new_signal(None, UNITS.mbar, id="id2", label="Pressure")
 
   # Append time series data (timing information is part of a time series):
   signal1.append(data1)
@@ -56,7 +56,7 @@ And to get back signal data::
   print recording.description, signal.uri, signal.label, signal.units
 
   # Retrieve and print time series data for the first second of the signal:
-  for data in sig.read(0.0, 1.0):
+  for data in sig.read((0.0, 1.0)):
     print data
 
   # All done:
@@ -120,8 +120,8 @@ class Signal(BSMLSignal):
 class Recording(BSMLRecording):
 #==============================
 
-  SignalClass = Signal
-  FORMAT = BSML.BSML_HDF5
+  SignalClass = Signal      #: The class of signals in the recording.
+  FORMAT = BSML.BSML_HDF5   #: Stored in :class:`~biosignalml.formats.hdf5.HDF5Recording` format.
 
   def __init__(self, *args, **kwds):
   #---------------------------------
