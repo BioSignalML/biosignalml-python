@@ -65,7 +65,7 @@ class RemoteRepository(object):
 
   def get_data(self, uri, **kwds):
   #-------------------------------
-    """ Gets :class:`~biosignalml.data.DataSegment'\s from the remote repository. """
+    """ Gets :class:`~biosignalml.data.DataSegment`\s from the remote repository. """
     '''
     maxsize
     start
