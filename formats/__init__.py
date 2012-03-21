@@ -131,9 +131,9 @@ class BSMLSignal(biosignalml.Signal):
   :type metadata: dict
   '''
 
-  def __init__(self, uri, metadata=None, **kwds):
-  #----------------------------------------------
-    biosignalml.Signal.__init__(self, uri, metadata=metadata, **kwds)
+  def __init__(self, uri, units, metadata=None, **kwds):
+  #-----------------------------------------------------
+    biosignalml.Signal.__init__(self, uri, units, metadata=metadata, **kwds)
 
   def read(self, interval=None, segment=None, duration=None, points=0):
   #--------------------------------------------------------------------
