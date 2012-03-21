@@ -189,4 +189,5 @@ from hdf5 import HDF5Recording
 
 CLASSES = { str(BSML.EDF):  EDFRecording,
             str(BSML.WFDB): WFDBRecording,
+            str(BSML.BSML_HDF5): HDF5Recording,
           }
