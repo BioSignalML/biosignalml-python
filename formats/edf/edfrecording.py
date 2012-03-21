@@ -44,7 +44,7 @@ class EDFRecording(BSMLRecording):
   #---------------------------
     edffile = EDFFile.open(fname)
     if edffile is None:
-      raise IOError("Cannot open '%f'", fname)
+      raise IOError("Cannot open '%s'", fname)
     self._edffile = edffile
     for s in self.signals():
       EDFSignal.initialise_class(s, self)
@@ -52,13 +52,13 @@ class EDFRecording(BSMLRecording):
   def _set_attributes(self):
   #-------------------------
     if self._edffile is None: return
-    self.set_attributes({'format': BSML.EDF,   ## EDF+ as well...   #### look at self.edf_type
-                         'starttime': self._edffile.start_datetime,
-                         'duration': self._edffile.duration,
-                         'investigation': self._edffile.patient,
-                         'description': self._edffile.recording,
-##                       'version': self._edffile.version,    ## Or a comment field ??
-                        })
+    self.set_attributes(format = BSML.EDF,   ## EDF+ as well...   #### look at self.edf_type
+                        starttime = self._edffile.start_datetime,
+                        duration = self._edffile.duration,
+                        investigation = self._edffile.patient,
+                        description = self._edffile.recording,
+##                      version = self._edffile.version,    ## Or a comment field ??
+                        )
     if self._edffile.edf_type != EDF.EDF:
       for k in PATIENTFIELDS: self.metadata[k] = getattr(self._edffile, k, None)
       for k in RECORDINGFIELDS: self.metadata[k] = getattr(self._edffile, k, None)
