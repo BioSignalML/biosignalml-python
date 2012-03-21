@@ -106,7 +106,7 @@ class Signal(BSMLSignal):
       params['offset'] = segment[0]
       params['count'] = segment[1]
     if maxpoints: params['maxsize'] = maxpoints
-    for sd in self.repository.a(str(self.uri), **params):
+    for sd in self.repository.get_data(str(self.uri), **params):
       if str(sd.uri) != str(self.uri):
         raise StreamExeception("Received signal '%s' different from requested '%s'" % (sd.uri, self.uri))
       if sd.rate is not None: yield DataSegment(sd.start, UniformTimeSeries(sd.data, sd.rate))
