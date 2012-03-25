@@ -27,6 +27,8 @@ import uuid
 import logging
 
 import biosignalml.rdf as rdf
+from biosignalml import BSML
+
 import mapping
 
 
