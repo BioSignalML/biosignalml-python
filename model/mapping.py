@@ -20,7 +20,6 @@ from biosignalml.ontology import BSML
 from biosignalml.rdf import Node, Uri, Statement
 from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
 
-from biosignalml.timeline import TimeLine
 URI_SCHEMES = [ 'http', 'file' ]
 
 datatypes = { XSD.float:              float,
@@ -47,6 +46,11 @@ def get_uri(v):
   Get the `uri` attribute if it exists, otherwise the object as a string.
   '''
   return v.uri if getattr(v, 'uri', None) else str(v)
+
+def make_timeline(uri):
+#======================
+  import biosignalml.timeline as timeline
+  return timeline.TimeLine(uri)
 
 def datetime_to_isoformat(dt):
 #=============================
