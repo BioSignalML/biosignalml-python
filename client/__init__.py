@@ -155,11 +155,13 @@ class Recording(BSMLRecording):
 class Repository(repository.RemoteRepository):
 #=============================================
 
+  RecordingClass = Recording      #: The class of recordings in the repository.
+
   def get_recording(self, uri, **kwds):
   #------------------------------------
     graph = self.get_metadata(uri)
     if graph.contains(rdf.Statement(uri, rdf.RDF.type, BSML.Recording)):
-      return Recording.create_from_graph(uri, graph, repository=self, **kwds)
+      return self.RecordingClass.create_from_graph(uri, graph, repository=self, **kwds)
 
 
   def get_recording_with_signals(self, uri, **kwds):
@@ -167,13 +169,15 @@ class Repository(repository.RemoteRepository):
     rec = self.get_recording(uri, **kwds)
     if rec is not None:
       for sig in rec.graph.get_subjects(BSML.recording, rdf.Uri(uri)):
-        rec.set_signal(Signal.create_from_graph(sig.uri, self.get_metadata(sig.uri), units=None, repository=self))
+        rec.set_signal(
+          self.RecordingClass.SignalClass.create_from_graph(
+            sig.uri, self.get_metadata(sig.uri), units=None, repository=self))
     return rec
 
   def new_recording(self, uri, **kwds):
   #------------------------------------
     try:
-      rec = Recording(uri, repository=self, **kwds)
+      rec = self.RecordingClass(uri, repository=self, **kwds)
       # Will have default metadata with attributes set from any metadata keyword dict
       self.put_metadata(rec.uri, rec.metadata_as_graph())
       # Format = HDF5 (BSML ??)
@@ -194,7 +198,7 @@ class Repository(repository.RemoteRepository):
   #---------------------------------
     graph = self.get_metadata(uri)
     if graph.contains(rdf.Statement(uri, rdf.RDF.type, BSML.Signal)):
-      sig = Signal.create_from_graph(uri, self.get_metadata(uri), repository=self)
+      sig = self.RecordingClass.SignalClass.create_from_graph(uri, self.get_metadata(uri), repository=self)
       sig.recording = self.get_recording(sig.recording)
       return sig
 
