@@ -194,35 +194,33 @@ class AbstractRecording(AbstractObject):
     return self.timeline.interval(start, duration)
 
 
-  def metadata_as_graph(self, rdfmap=None):
-  #----------------------------------------
+  def metadata_as_graph(self):
+  #---------------------------
     """
     Return a Recording's metadata in a RDF graph.
     """
     ## Associate mapping with recording ??
     graph = rdf.Graph(self.uri)
-    self.save_to_graph(graph, rdfmap)
-    self.timeline.save_to_graph(graph, rdfmap)
-    for s in self.signals(): s.save_to_graph(graph, rdfmap)
-    for e in self._events.itervalues(): e.save_to_graph(graph, rdfmap)
+    self.save_to_graph(graph)
+    self.timeline.save_to_graph(graph)
+    for s in self.signals(): s.save_to_graph(graph)
+    for e in self._events.itervalues(): e.save_to_graph(graph)
     return graph
 
   @classmethod
-  def create_from_graph(cls, uri, graph, rdfmap=None, **kwds):
-  #-----------------------------------------------------------
+  def create_from_graph(cls, uri, graph, **kwds):
+  #----------------------------------------------
     '''
     Create a new instance of a Recording, setting attributes from RDF triples in a graph.
 
     :param uri: The URI for the Recording.
     :param graph: A RDF graph.
     :type graph: :class:`~biosignalml.rdf.Graph`
-    :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     :rtype: :class:`Recording`
     '''
     self = cls(uri, **kwds)
 #    self = cls(uri, timeline=graph.get_object(uri, TL.timeline).uri, **kwds)
-    self.load_from_graph(graph, rdfmap)
+    self.load_from_graph(graph)
     for s in graph.get_subjects(BSML.recording, self.uri):
       if graph.contains(rdf.Statement(s, rdf.RDF.type, BSML.Signal)):  ## UniformSignal ?? get rdf:type ??
         self.add_signal(AbstractSignal.create_from_graph(str(s.uri), graph, rdfmap))
@@ -232,8 +230,8 @@ class AbstractRecording(AbstractObject):
     return self
 
   @classmethod
-  def create_from_string(cls, uri, string, format=rdf.Format.TURTLE, rdfmap=None, **kwds):
-  #---------------------------------------------------------------------------------------
+  def create_from_string(cls, uri, string, format=rdf.Format.TURTLE, **kwds):
+  #--------------------------------------------------------------------------
     """
     Create a new Recording, setting attributes from RDF statements in a string.
 
@@ -241,12 +239,9 @@ class AbstractRecording(AbstractObject):
     :param string: The RDF to parse and add.
     :type string: str
     :param format: The string's RDF format.
-    :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     :rtype: :class:`Recording`
     """
-    return cls.create_from_graph(uri, rdf.Graph.create_from_string(string, format, uri),
-                                                                           rdfmap=rdfmap, **kwds)
+    return cls.create_from_graph(uri, rdf.Graph.create_from_string(string, format, uri), **kwds)
 
 
 class AbstractEvent(AbstractObject):
@@ -265,7 +260,7 @@ class AbstractEvent(AbstractObject):
     ##logging.debug('Event: %s (%s)', uri, repr(uri))
     AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
 
-  def save_to_graph(self, graph, rdfmap):
-  #--------------------------------------
-    AbstractObject.save_to_graph(self, graph, rdfmap)
-    AbstractObject.save_to_graph(self.time, graph, rdfmap)
+  def save_to_graph(self, graph):
+  #------------------------------
+    core.AbstractObject.save_to_graph(self, graph)
+    core.AbstractObject.save_to_graph(self.time, graph)

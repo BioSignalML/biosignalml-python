@@ -21,24 +21,24 @@ from biosignalml.rdf import Node, Uri, Statement
 from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
 
 from biosignalml.timeline import TimeLine
+URI_SCHEMES = [ 'http', 'file' ]
 
-
-_datatypes = { XSD.float:              float,
-               XSD.double:             float,
-               XSD.integer:            long,
-               XSD.long:               long,
-               XSD.int:                int,
-               XSD.short:              int,
-               XSD.byte:               int,
-               XSD.nonPostiveInteger:  long,
-               XSD.nonNegativeInteger: long,
-               XSD.positiveInteger:    long,
-               XSD.negativeInteger:    long,
-               XSD.unsignedLong:       long,
-               XSD.unsignedInt:        long,
-               XSD.unsignedShort:      int,
-               XSD.unsignedByte:       int,
-             }
+datatypes = { XSD.float:              float,
+              XSD.double:             float,
+              XSD.integer:            long,
+              XSD.long:               long,
+              XSD.int:                int,
+              XSD.short:              int,
+              XSD.byte:               int,
+              XSD.nonPostiveInteger:  long,
+              XSD.nonNegativeInteger: long,
+              XSD.positiveInteger:    long,
+              XSD.negativeInteger:    long,
+              XSD.unsignedLong:       long,
+              XSD.unsignedInt:        long,
+              XSD.unsignedShort:      int,
+              XSD.unsignedByte:       int,
+            }
 
 
 def get_uri(v):
@@ -78,100 +78,78 @@ def isoduration_to_seconds(d):
   return 0
 
 
-class AttributeMap(object):
-#==========================
+class PropertyMap(object):
+#=========================
 
-  def __init__(self, attribute, property, metaclass=None, datatype=None, to_rdf=None, from_rdf=None):
-  #--------------------------------------------------------------------------------------------------
-    self.attribute = attribute
+  def __init__(self, property, datatype=None, to_rdf=None, from_rdf=None):
+  #-----------------------------------------------------------------------
     self.property = property
-    self.metaclass = metaclass
     self.datatype = datatype
     self.to_rdf = to_rdf
     self.from_rdf = from_rdf
 
 
-ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf')
-
-
-BSML_MAP = [
+DEFAULT_MAP = {
 # Generic metadata:
-  AttributeMap('label',           RDFS.label),
-  AttributeMap('comment',         RDFS.comment),
-  AttributeMap('description',     DCTERMS.description),
-  AttributeMap('dateSubmitted" ', DCTERMS.dateSubmitted,
-    None, XSD.dateTime, datetime_to_isoformat, isoformat_to_datetime),
+              ('label',           None): PropertyMap(RDFS.label),
+              ('comment',         None): PropertyMap(RDFS.comment),
+              ('description',     None): PropertyMap(DCTERMS.description),
+              ('dateSubmitted" ', None): PropertyMap(DCTERMS.dateSubmitted),
 
 # Recording specific metadata:
-  AttributeMap('format',        DCTERMS.format,  BSML.Recording),
-  AttributeMap('source',        DCTERMS.source,  BSML.Recording),
-  AttributeMap('investigation', DCTERMS.subject, BSML.Recording),
-  AttributeMap('starttime',     DCTERMS.created, BSML.Recording, XSD.dateTime, datetime_to_isoformat,  isoformat_to_datetime),
-  AttributeMap('duration',      DCTERMS.extent,  BSML.Recording, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
-##  AttributeMap('digest',        BSML.digest,     BSML.Recording),
+              ('format',        BSML.Recording): PropertyMap(DCTERMS.format),
+              ('source',        BSML.Recording): PropertyMap(DCTERMS.source),
+              ('investigation', BSML.Recording): PropertyMap(DCTERMS.subject),
+              ('starttime',     BSML.Recording): PropertyMap(DCTERMS.created,
+                                                   XSD.dateTime, datetime_to_isoformat,  isoformat_to_datetime),
+              ('duration',      BSML.Recording): PropertyMap(DCTERMS.extent,
+                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+##            ('digest',        BSML.Recording): PropertyMap(BSML.digest),
 
 # Timing specific metadata:
-  AttributeMap('timeline', TL.timeline, to_rdf=get_uri, from_rdf=TimeLine),
-  AttributeMap('at',       TL.atDuration,       TL.RelativeInstant,  XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
-  AttributeMap('start',    TL.beginsAtDuration, TL.RelativeInterval, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
-  AttributeMap('duration', TL.durationXSD,      TL.RelativeInterval, XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+              ('timeline', None):                PropertyMap(TL.timeline,
+                                                   to_rdf=get_uri, from_rdf=make_timeline),
+              ('at',       TL.RelativeInstant):  PropertyMap(TL.atDuration,
+                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+              ('start',    TL.RelativeInterval): PropertyMap(TL.beginsAtDuration,
+                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+              ('duration', TL.RelativeInterval): PropertyMap(TL.durationXSD,
+                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
 
 # Event specific metadata:
-  AttributeMap('time',   TL.time,    EVT.Event),
-  AttributeMap('factor', EVT.factor, EVT.Event),
+              ('time',   BSML.Event): PropertyMap(TL.time),
+##            ('factor', BSML.Event): PropertyMap(EVT.factor),   ????????????
 
 # Signal specific metadata:
-  AttributeMap('recording',    BSML.recording,    BSML.Signal, to_rdf=get_uri),
-  AttributeMap('units',        BSML.units,        BSML.Signal, to_rdf=get_uri),
-##  AttributeMap('transducer',   BSML.transducer,   BSML.Signal),
-  AttributeMap('filter',       BSML.preFilter,    BSML.Signal),
-  AttributeMap('rate',         BSML.rate,         BSML.Signal, XSD.double),
-##  AttributeMap('clock',        BSML.sampleClock,  BSML.Signal, to_rdf=get_uri),
-  AttributeMap('minFrequency', BSML.minFrequency, BSML.Signal, XSD.double),
-  AttributeMap('maxFrequency', BSML.maxFrequency, BSML.Signal, XSD.double),
-  AttributeMap('minValue',     BSML.minValue,     BSML.Signal, XSD.double),
-  AttributeMap('maxValue',     BSML.maxValue,     BSML.Signal, XSD.double),
-  AttributeMap('index',        BSML.index,        BSML.Signal, XSD.integer),
-  ]
+              ('recording',    BSML.Signal): PropertyMap(BSML.recording, to_rdf=get_uri),
+              ('units',        BSML.Signal): PropertyMap(BSML.units, to_rdf=get_uri),
+##            ('transducer',   BSML.Signal): PropertyMap(BSML.transducer),
+              ('filter',       BSML.Signal): PropertyMap(BSML.preFilter),
+              ('rate',         BSML.Signal): PropertyMap(BSML.rate, XSD.double),
+##            ('clock',        BSML.Signal): PropertyMap(BSML.sampleClock, to_rdf=get_uri),
+              ('minFrequency', BSML.Signal): PropertyMap(BSML.minFrequency, XSD.double),
+              ('maxFrequency', BSML.Signal): PropertyMap(BSML.maxFrequency, XSD.double),
+              ('minValue',     BSML.Signal): PropertyMap(BSML.minValue, XSD.double),
+              ('maxValue',     BSML.Signal): PropertyMap(BSML.maxValue, XSD.double),
+              ('index',        BSML.Signal): PropertyMap(BSML.index, XSD.integer),
+            }
 
 
-
-def _uri_protocol(u):
-#====================
-  return u.startswith('file:') or u.startswith('http:')
-
-
-def _load_mapping(maplist):
-#==========================
-  mapping = { }
-  for m in maplist:
-    key = m.attribute + (str(m.metaclass) if m.metaclass else '')
-    mapping[key] = m
-  return mapping
-
-# Generic (BSML) mapping; format specific overrides.
-_bsml_maps    = None
-_bsml_mapping = None
-
-
-def bsml_mapping():
-#==================
-  return _bsml_mapping
-
+ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf')
+#===========
 
 class Mapping(object):
 #=====================
 
-  def __init__(self, maplist=None):
+  def __init__(self, usermap=None):
   #--------------------------------
-    self._mapping = _bsml_maps.copy()
-    if maplist:
-      if isinstance(maplist, tuple):
-        for ml in maplist: self._mapping.update(_load_mapping(ml))
-      else:
-        self._mapping.update(_load_mapping(maplist))
-    self._reverse = { (str(m.property) + (str(m.metaclass) if m.metaclass else '')):
-      ReverseEntry(m.attribute, m.datatype, m.from_rdf) for m in self._mapping.itervalues() }
+    if usermap:
+      self.mapping = DEFAULT_MAP.copy()
+      self.mapping.update(usermap)
+    else:
+      self.mapping = DEFAULT_MAP
+    self.reversemap = { (str(m.property), k[1]): ReverseEntry(k[0], m.datatype, m.from_rdf)
+                          for k, m in self.mapping.iteritems() }
 
   @staticmethod
   def _makenode(v, dtype, mapfn):
@@ -187,17 +165,12 @@ class Mapping(object):
         except Exception, msg:
           logging.error("Exception mapping literal with '%s': %s", str(mapfn), msg)
       v = unicode(v)
-      if _uri_protocol(v):
+      if len(v.split(':')) > 1 and v.split(':')[0] in URI_SCHEMES:
         return Node(Uri(v))
       else:
         result = { 'literal': v }
         if dtype: result['datatype'] = dtype.uri
         return Node(**result)
-
-#  def statement(self, s, attr, v):
-#  #-------------------------------
-#    m = self._mapping[attr]
-#    return (s, m[0], self._makenode(v, m[1], m[2]))
 
   def statement_stream(self, resource):
   #------------------------------------
@@ -214,26 +187,25 @@ class Mapping(object):
     """
     if getattr(resource, 'uri', None):
       subject = resource.uri
-      metaclasses = [ cls.metaclass for cls in resource.__class__.__mro__
-                      if cls.__dict__.get('metaclass') ]
+      metaclasses = [ c.metaclass for c in resource.__class__.__mro__ if c.__dict__.get('metaclass') ]
       metadict = getattr(resource, 'metadata', { })
-      for m in self._mapping.itervalues():
-        if m.metaclass is None or m.metaclass in metaclasses:  ## Or do we need str() before lookup ??
-          if getattr(resource, m.attribute, None) not in [None, '']:
-            yield Statement(subject, m.property, self._makenode(getattr(resource, m.attribute), m.datatype, m.to_rdf))
-          if metadict.get(m.attribute, None) not in [None, '']:
-            yield Statement(subject, m.property, self._makenode(metadict.get(m.attribute), m.datatype, m.to_rdf))
+      for k, m in self.mapping.iteritems():
+        if k[1] is None or k[1] in metaclasses:  ## Or do we need str() before lookup ??
+          if getattr(resource, k[0], None) not in [None, '']:
+            yield Statement(subject, m.property, self._makenode(getattr(resource, k[0]), m.datatype, m.to_rdf))
+          if metadict.get(k[0], None) not in [None, '']:
+            yield Statement(subject, m.property, self._makenode(metadict.get(k[0]), m.datatype, m.to_rdf))
 
 
   @staticmethod
   def _makevalue(node, dtype, from_rdf):
-  #-----------------------------------
+  #-------------------------------------
     if node is None: return None
     elif node.is_resource(): v = node.uri
     elif node.is_blank(): v = node.blank
     else:
       v = node.literal[0]
-      if dtype: v = _datatypes.get(dtype, str)(v) 
+      if dtype: v = datatypes.get(dtype, str)(v) 
     return from_rdf(v) if from_rdf else v
 
   def metadata(self, statement, metaclass):
@@ -243,8 +215,8 @@ class Mapping(object):
     in the reverse mapping table use its properties to translate the value of the
     statement's object.
     """
-    m = self._reverse.get(str(statement.predicate.uri) + str(metaclass), None)
-    if m is None: m = self._reverse.get(str(statement.predicate.uri), ReverseEntry(None, None, None))
+    m = self.reversemap.get((str(statement.predicate.uri), metaclass), None)
+    if m is None: m = self.reversemap.get((str(statement.predicate.uri), None), ReverseEntry(None, None, None))
     return (statement.subject.uri, m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf))
 
   def get_value_from_graph(self, resource, attr, graph):
@@ -254,45 +226,27 @@ class Mapping(object):
     about the resource using the property is in the graph, translate and return
     its object's value.
     """
-    m = self._mapping.get(attr + str(resource.metaclass), None)
-    if m is None: m = self._mapping.get(attr, None)
+    m = self.mapping.get((attr, resource.metaclass), None)
+    if m is None: m = self.mapping.get((attr, None))
     if m:
       return self._makevalue(graph.get_object(resource.uri, m.property), m.datatype, m.from_rdf)
-
-
-def initialise():
-#================
-  global _bsml_maps, _bsml_mapping
-  if _bsml_maps is None:
-    _bsml_maps = _load_mapping(BSML_MAP)
-    _bsml_mapping = Mapping()   # Standard model
-
-
-initialise()
-
-
-#def shutdown():
-##==============
-#  global _bsml_maps, _bsml_mapping
-#  if _bsml_maps:
-#    del _bsml_maps
-#    _bsml_maps = None
-#  if _bsml_mapping:
-#    del _bsml_mapping
-#    _bsml_mapping = None
 
 
 if __name__ == '__main__':
 #=========================
 
-  from biosignalml.rdf import Graph
+  from biosignalml import Recording
+  import biosignalml.rdf as rdf
 
-  class C(object):
-    def __init__(self):
-      self.uri = 'uri'
-      self.version = 1
-      self.metadata = { 'description': 'Hello...' }
+  class MyRecording(Recording):
+  #----------------------------
+    rdfmap = Mapping( { ('xx', None): PropertyMap(DCTERMS.subject) } )
 
-  md = Graph()
-  md.add_metadata(C(), Mapping())
-  print md
+
+  r = MyRecording('http://example.org/uri1', description='Hello', xx = 'subject')
+  g = rdf.Graph()
+  r.save_to_graph(g)
+
+
+  s = MyRecording.create_from_graph('http://example.org/uri1', g, comment='From graph')
+  print s.metadata_as_string(rdf.Format.TURTLE)

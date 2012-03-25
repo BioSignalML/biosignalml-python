@@ -27,6 +27,7 @@ import uuid
 import logging
 
 import biosignalml.rdf as rdf
+import mapping
 
 
 class AbstractObject(object):
@@ -53,6 +54,10 @@ class AbstractObject(object):
   attributes = [ 'uri', 'description' ]
   '''List of generic attributes all resources have.'''
 
+  rdfmap = mapping.Mapping()
+  '''The :class:`~biosignalml.model.mapping.Mapping` used to map between RDF properties and attributes.'''
+
+
   def __init__(self, uri, metadata=None, **kwds):
   #----------------------------------------------
     self.metadata = AbstractObject.set_attributes(self, **kwds)
@@ -78,12 +83,10 @@ class AbstractObject(object):
     ## Need to go from cls to obj.class in __mro__ and set
     ## any C.attributes from obj.graph (using C.mapping if defined)
     if getattr(obj, 'graph', None):
-      import mapping
-      rdfmap = mapping.bsml_mapping()
       pos = cls.__mro__.index(obj.__class__) - 1
       while pos >= 0:
         for attr in cls.__mro__[pos].__dict__.get('attributes', []):
-          v = rdfmap.get_value_from_graph(obj, attr, obj.graph)
+          v = cls.rdfmap.get_value_from_graph(obj, attr, obj.graph)
           if v is not None:
             setattr(obj, attr, None)    # So it's able to be _assign()ed to
             obj._assign(attr, v)
@@ -150,36 +153,34 @@ class AbstractObject(object):
       else:                      return '%s/%s' % (u.rsplit('/', 1)[0], uuid.uuid1())
     else:                        return '%s/%s' % (u, uuid.uuid1())
 
-  def save_to_graph(self, graph, rdfmap=None):
-  #-------------------------------------------
+  def save_to_graph(self, graph):
+  #------------------------------
     '''
     Add RDF statements about ourselves to a graph.
 
     '''
-    import mapping
-    if rdfmap is None: rdfmap = mapping.bsml_mapping()
     if (self.metaclass):
       graph.append(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass))
-      graph.add_statements(rdfmap.statement_stream(self))
+      graph.add_statements(self.rdfmap.statement_stream(self))
 
-  def metadata_as_graph(self, rdfmap=None):
-  #----------------------------------------
+  def metadata_as_graph(self):
+  #---------------------------
     """
     Return metadata in a RDF graph.
     """
     graph = rdf.Graph(self.uri)
-    self.save_to_graph(graph, rdfmap)
+    self.save_to_graph(graph)
     return graph
 
-  def metadata_as_string(self, format=rdf.Format.TURTLE, prefixes={ }, rdfmap=None):
-  #---------------------------------------------------------------------------------
+  def metadata_as_string(self, format=rdf.Format.RDFXML, prefixes={ }):
+  #--------------------------------------------------------------------
     """
     Return metadata as a serialised RDF string.
     """
     namespaces = { 'bsml': BSML.uri }
     namespaces.update(rdf.NAMESPACES)
     namespaces.update(prefixes)
-    return self.metadata_as_graph(rdfmap=rdfmap).serialise(base=str(self.uri) + '/',
+    return self.metadata_as_graph().serialise(base=str(self.uri) + '/',
                                   format=format, prefixes=namespaces)
 
   def _assign(self, attr, value):
@@ -187,50 +188,42 @@ class AbstractObject(object):
     if attr in self.__dict__: setattr(self, attr, value)
     else:                     self.metadata[attr] = value
 
-  def load_from_graph(self, graph, rdfmap=None):
-  #---------------------------------------------
+  def load_from_graph(self, graph):
+  #--------------------------------
     """
     Set attributes from RDF triples in a graph.
 
     :param graph: A graph of RDF statements.
     :type graph: :class:`biosignalml.rdf.Graph`
-    :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     """
-    import mapping
-    if rdfmap is None: rdfmap = mapping.bsml_mapping()
     if graph.contains(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
-        s, attr, v = rdfmap.metadata(stmt, self.metaclass) # Need to go up __mro__ from AbstractObject
+        s, attr, v = self.rdfmap.metadata(stmt, self.metaclass) # Need to go up __mro__ from AbstractObject
         ##logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
         self._assign(attr, v)
 
   @classmethod
-  def create_from_graph(cls, uri, graph, rdfmap=None, **kwds):
-  #-----------------------------------------------------------
+  def create_from_graph(cls, uri, graph, **kwds):
+  #----------------------------------------------
     '''
     Create a new instance of a resource, setting attributes from RDF triples in a graph.
 
     :param uri: The URI for the resource.
     :param graph: A RDF graph.
     :type graph: :class:`~biosignalml.rdf.Graph`
-    :param rdfmap: How to map properties to attributes.
-    :type rdfmap: :class:`~biosignalml.model.mapping.Mapping`
     :rtype: :class:`AbstractObject`
     '''
     self = cls(uri, **kwds)
-    self.load_from_graph(graph, rdfmap)
+    self.load_from_graph(graph)
     self.graph = graph
     return self
 
-  def set_from_graph(self, attr, graph, rdfmap=None):
-  #--------------------------------------------------
+  def set_from_graph(self, attr, graph):
+  #-------------------------------------
     '''
     Set an attribute from RDF statement in the form `(uri, attr, value)`.
     '''
-    import mapping
-    if rdfmap is None: rdfmap = mapping.bsml_mapping()
-    v = rdfmap.get_value_from_graph(self.uri, attr, graph)
+    v = self.rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
 
 
