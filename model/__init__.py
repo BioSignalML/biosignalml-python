@@ -223,7 +223,7 @@ class AbstractRecording(core.AbstractObject):
     self.load_from_graph(graph)
     for s in graph.get_subjects(BSML.recording, self.uri):
       if graph.contains(rdf.Statement(s, rdf.RDF.type, BSML.Signal)):  ## UniformSignal ?? get rdf:type ??
-        self.add_signal(core.AbstractSignal.create_from_graph(str(s.uri), graph))
+        self.add_signal(self.SignalClass.create_from_graph(str(s.uri), graph, units=None))
       else:
         self._signal_uris.append(str(s.uri))
     self.graph = graph
