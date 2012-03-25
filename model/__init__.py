@@ -29,11 +29,11 @@ import logging
 import biosignalml.rdf as rdf
 from biosignalml.ontology import BSML
 
-from core import AbstractObject
+import core
 
 
-class AbstractSignal(AbstractObject):
-#====================================
+class AbstractSignal(core.AbstractObject):
+#=========================================
   """
   An abstract BioSignalML Signal.
 
@@ -52,12 +52,12 @@ class AbstractSignal(AbstractObject):
   def __init__(self, uri, units, metadata=None, **kwds):
   #-----------------------------------------------------
     kwds['units'] = units
-    AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
+    core.AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
     self.recording = None
 
 
-class AbstractRecording(AbstractObject):
-#=======================================
+class AbstractRecording(core.AbstractObject):
+#============================================
   '''
   An abstract BioSignalML Recording.
 
@@ -77,7 +77,7 @@ class AbstractRecording(AbstractObject):
   def __init__(self, uri, metadata=None, **kwds):
   #----------------------------------------------
     from biosignalml.timeline import TimeLine   ## Otherwise circular import...
-    AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
+    core.AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
     self.timeline = TimeLine(str(uri) + '/timeline')
     self._signals = { }
     self._signal_uris = [ ]
@@ -223,7 +223,7 @@ class AbstractRecording(AbstractObject):
     self.load_from_graph(graph)
     for s in graph.get_subjects(BSML.recording, self.uri):
       if graph.contains(rdf.Statement(s, rdf.RDF.type, BSML.Signal)):  ## UniformSignal ?? get rdf:type ??
-        self.add_signal(AbstractSignal.create_from_graph(str(s.uri), graph, rdfmap))
+        self.add_signal(core.AbstractSignal.create_from_graph(str(s.uri), graph))
       else:
         self._signal_uris.append(str(s.uri))
     self.graph = graph
@@ -244,8 +244,8 @@ class AbstractRecording(AbstractObject):
     return cls.create_from_graph(uri, rdf.Graph.create_from_string(string, format, uri), **kwds)
 
 
-class AbstractEvent(AbstractObject):
-#===================================
+class AbstractEvent(core.AbstractObject):
+#========================================
   '''
   An abstract BioSignalML Event.
   '''
@@ -258,7 +258,7 @@ class AbstractEvent(AbstractObject):
   def __init__(self, uri, metadata=None, **kwds):
   #-----------------------------------------------
     ##logging.debug('Event: %s (%s)', uri, repr(uri))
-    AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
+    core.AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
 
   def save_to_graph(self, graph):
   #------------------------------

@@ -29,8 +29,8 @@ from biosignalml.rdf import TL
 import model
 
 
-class TimeLine(model.AbstractObject):
-#====================================
+class TimeLine(model.core.AbstractObject):
+#=========================================
 
   '''
   An abstract BioSignalML TimeLine.
@@ -48,8 +48,8 @@ class TimeLine(model.AbstractObject):
     else:               return Interval(self.make_uri(), start, duration, self)
 
 
-class Instant(model.AbstractObject):
-#===================================
+class Instant(model.core.AbstractObject):
+#========================================
   '''
   An abstract BioSignalML Instant.
   '''
@@ -72,8 +72,8 @@ class Instant(model.AbstractObject):
     return Instant(self.make_uri(True), self._at + increment, self.timeline)
 
 
-class Interval(model.AbstractObject):
-#====================================
+class Interval(model.core.AbstractObject):
+#=========================================
   '''
   An abstract BioSignalML Interval.
   '''
