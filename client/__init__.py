@@ -187,10 +187,8 @@ class Repository(repository.RemoteRepository):
       raise IOError("Cannot create Recording '%s' in repository" % uri)
 
 
-  def store_recording(self, uri, **kwds):       ## or save_recording ??
-  #------------------------------------
-    rec = Recording(uri, repository=self, **kwds)
-    # Will have default metadata with attributes set from any metadata keyword dict
+  def store_recording(self, rec):       ## or save_recording ??
+  #------------------------------
     self.put_metadata(rec.uri, rec.save_to_graph())
 
 
