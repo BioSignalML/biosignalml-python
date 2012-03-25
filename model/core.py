@@ -64,7 +64,7 @@ class AbstractObject(object):
     '''Dictionary of property values with names not in :attr:`attributes` list.'''
     if metadata is not None:
       self.metadata.update(AbstractObject.set_attributes(self, **metadata))
-    self.uri = rdf.Uri(uri)
+    self.uri = rdf.Uri(str(uri).strip())
     self.graph = None
 
   def __str__(self):
