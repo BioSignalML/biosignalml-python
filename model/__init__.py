@@ -264,3 +264,13 @@ class AbstractEvent(core.AbstractObject):
   #------------------------------
     core.AbstractObject.save_to_graph(self, graph)
     core.AbstractObject.save_to_graph(self.time, graph)
+
+
+class AbstractAnnotation(core.AbstractObject):
+#=============================================
+  '''
+  An abstract BioSignalML Annotation.
+  '''
+
+  metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation`
+

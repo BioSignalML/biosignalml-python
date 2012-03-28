@@ -69,5 +69,10 @@ class Event(model.AbstractEvent):
   pass
 
 
+class Annotation(model.AbstractAnnotation):
+#==========================================
+  pass
+
+
 from client import Repository
 #============================
