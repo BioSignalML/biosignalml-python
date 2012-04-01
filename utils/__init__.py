@@ -1,7 +1,3 @@
-# Load into package's namespace:
-from params import signalrange, timerange
-
-
 ######################################################
 #
 #  BioSignalML Management in Python
