@@ -115,6 +115,18 @@ class BlockType(object):
       OPTIONAL. If unspecified the data server will determine the maximum. If *maxsize* is given,
       the data server may elect to impose a smaller value.
 
+    **dtype** (*string*)
+      The required numeric type for data points, in the format '<f4' and as defined and used
+      by numpy's array interface.
+
+      OPTIONAL.
+
+    **ctype** (*string*)
+      The required numeric type for samples, in the form '<f4' and as defined and used
+      by numpy's array interface.
+
+      OPTIONAL.
+
   The time of the first sample point in the resulting time series will not be before *start*; that
   of the last sample point will be before *start + duration*. If the signal's data finishes before
   the requested duration a shortened time series will be returned; if the period spanned in a signal
@@ -572,9 +584,11 @@ class SignalData(object):
   :type rate: double
   :param clock: An one dimensional array of time points, in seconds.
   :type clock: :class:`np.array` or None
+  :param dtype: The requested data type which to use for stream data values.
+  :param ctype: The requested data type which to use for stream time values.
   '''
-  def __init__(self, uri, start, data, rate=None, clock=None):
-  #-----------------------------------------------------------
+  def __init__(self, uri, start, data, rate=None, clock=None, dtype=None, ctype=None):
+  #-----------------------------------------------------------------------------------
     if rate is None and clock is None:
       raise StreamException('Data must have either a rate or a clock')
     elif rate is not None and clock is not None:
@@ -590,6 +604,8 @@ class SignalData(object):
     self.data = data
     self.rate = rate
     self.clock = clock
+    self.dtype = np.dtype(dtype)
+    self.ctype = np.dtype(ctype)
 
   def __len__(self):
   #-----------------
@@ -600,23 +616,33 @@ class SignalData(object):
     return ("SignalData %s: start=%f, rate=%f\n  clock=%s\n  data=%s"
            % (self.uri, self.start, self.rate, str(self.clock), str(self.data)) )
 
+  @staticmethod
+  def _convert(data, dtype):
+  #-------------------------
+    logging.debug('Convert %s to %s for %d', data.dtype, dtype, len(data))
+    if dtype is not None and dtype != data.dtype:
+      if dtype.kind in ['u', 'i']: return bytearray(np.array(data + 0.5, dtype=dtype))
+      else:                        return bytearray(np.array(data,       dtype=dtype))
+    else:                          return bytearray(data)
+
   def streamblock(self):
   #---------------------
     ''' Return a :class:`StreamBlock` representation of the signal segment. '''
     content = bytearray()
+    dtype = self.data.dtype if self.dtype is None else self.dtype
     header = { 'uri': self.uri,
                'start': self.start,
                'count': len(self.data),
-               'dtype': self.data.dtype.descr[0][1]
+               'dtype': dtype.descr[0][1]
              }
     if self.data.ndim > 1: header['dims'] = self.data.shape[1]
     if self.rate: header['rate'] = self.rate
     if self.clock:
-      header['ctype'] = self.clock.dtype.descr[0][1]
-      content.extend(bytearray(self.clock))
-    content.extend(bytearray(self.data))
+      ctype = self.clock.ctype if self.ctype is None else self.ctype
+      header['ctype'] = ctype.descr[0][1]
+      content.extend(self._convert(self.clock, self.ctype))
+    content.extend(self._convert(self.data, self.dtype))
     return SignalDataBlock(0, header, content)
-
 
 
 class BlockStream(object):
