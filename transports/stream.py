@@ -411,7 +411,7 @@ class BlockParser(object):
     :type data: bytearray
     '''
     pos = 0
-    size = datalen = len(data)
+    datalen = len(data)
     #logging.debug('Process %d bytes', datalen)
     while datalen > 0:
 
