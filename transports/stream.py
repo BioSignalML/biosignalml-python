@@ -474,13 +474,14 @@ class BlockParser(object):
           datalen -= delta
           self._length -= delta
         if self._length == 0:
+          logging.debug('JSON: %s', ''.join(self._jsonhdr))
           try:
             self._header = json.loads(''.join(self._jsonhdr)) if len(self._jsonhdr) else { }
             self._length = 0
             self._state = BlockParser._DATALEN
           except ValueError:
             self._error = Error.BAD_JSON_HEADER
-            logging.debug('JSON: %s', ''.join(self._jsonhdr))
+            logging.error('JSON: %s', ''.join(self._jsonhdr))
 
       elif self._state == BlockParser._DATALEN:                 # Getting content length
         while datalen > 0 and chr(data[pos]).isdigit():
@@ -619,8 +620,8 @@ class SignalData(object):
   @staticmethod
   def _convert(data, dtype):
   #-------------------------
-    logging.debug('Convert %s to %s for %d', data.dtype, dtype, len(data))
     if dtype is not None and dtype != data.dtype:
+      logging.debug('Convert %s to %s for %d', data.dtype, dtype, len(data))
       if dtype.kind in ['u', 'i']: return bytearray(np.array(data + 0.5, dtype=dtype))
       else:                        return bytearray(np.array(data,       dtype=dtype))
     else:                          return bytearray(data)
