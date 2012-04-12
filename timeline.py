@@ -48,29 +48,6 @@ class TimeLine(model.core.AbstractObject):
     else:               return Interval(self.make_uri(), start, duration, self)
 
 
-class Instant(model.core.AbstractObject):
-#========================================
-  '''
-  An abstract BioSignalML Instant.
-  '''
-
-  metaclass = TL.RelativeInstant   #: :attr:`.TL.RelativeInstant`
-
-  def __init__(self, uri, when, timeline, metadata={}):
-  #----------------------------------------------------
-    model.core.AbstractObject.__init__(self, uri, metadata=metadata)
-    self._at = when
-    self.timeline = timeline
-
-  @property
-  def at(self, timeline=None):     # Needs to use timeline to map
-  #---------------------------
-    return self._at
-
-  def __add__(self, increment):
-  #----------------------------
-    return Instant(self.make_uri(True), self._at + increment, self.timeline)
-
 
 class Interval(model.core.AbstractObject):
 #=========================================
@@ -80,8 +57,8 @@ class Interval(model.core.AbstractObject):
 
   metaclass = TL.RelativeInterval  #: :attr:`.TL.RelativeInterval`
 
-  def __init__(self, uri, start, duration, timeline, metadata={}):
-  #---------------------------------------------------------------
+  def __init__(self, uri, start, duration, timeline, metadata=None):
+  #-----------------------------------------------------------------
     model.core.AbstractObject.__init__(self, uri, metadata=metadata)
     self._start = start
     self._duration = duration
@@ -100,5 +77,29 @@ class Interval(model.core.AbstractObject):
   def __add__(self, increment):
   #----------------------------
     return Interval(self.make_uri(True), self._start + increment, self._duration, self.timeline)
+
+
+
+class Instant(Interval):
+#=======================
+  '''
+  An abstract BioSignalML Instant.
+  '''
+
+  metaclass = TL.RelativeInstant   #: :attr:`.TL.RelativeInstant`
+
+  def __init__(self, uri, when, timeline, metadata=None):
+  #------------------------------------------------------
+    Interval.__init__(self, uri, when, 0.0, timeline, metadata=metadata)
+    self._at = when
+
+  @property
+  def at(self, timeline=None):     # Needs to use timeline to map
+  #---------------------------
+    return self._at
+
+  def __add__(self, increment):
+  #----------------------------
+    return Instant(self.make_uri(True), self._at + increment, self.timeline)
 
 
