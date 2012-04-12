@@ -318,7 +318,7 @@ class ErrorBlock(StreamBlock):
   #-------------------------------------------
     header = errblock.header.copy()
     header['type'] = errblock.type
-    StreamBlock.__init__(self, number, BlockType.ERROR, 'C', header, bytearray(msg))
+    StreamBlock.__init__(self, number, BlockType.ERROR, header, bytearray(msg))
 
 
 class SignalDataBlock(StreamBlock):
@@ -332,7 +332,7 @@ class SignalDataBlock(StreamBlock):
   """
   def __init__(self, number, header, content):
   #-------------------------------------------
-    StreamBlock.__init__(self, number, BlockType.DATA, 'M', header, content)
+    StreamBlock.__init__(self, number, BlockType.DATA, header, content)
 
   def signaldata(self):
   #--------------------
@@ -659,7 +659,7 @@ class BlockStream(object):
   def __init__(self, endpoint):
   #----------------------------
     self._endpoint = endpoint
-    self._request = StreamBlock(0, None, 'C', { }, '')
+    self._request = StreamBlock(0, None, { }, '')
     self._receiveQ = Queue.Queue()
 
   def close(self):
@@ -727,7 +727,7 @@ class SignalDataStream(BlockStream):
     elif duration >= 0:      header['duration'] = duration
     elif count is not None:  header['count'] = count
     if maxsize > 0:          header['maxsize'] = maxsize
-    self._request = StreamBlock(0, BlockType.DATA_REQ, 'C', header, '')
+    self._request = StreamBlock(0, BlockType.DATA_REQ, header, '')
 
   def __iter__(self):
   #------------------
