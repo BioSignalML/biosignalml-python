@@ -252,7 +252,7 @@ class AbstractEvent(core.AbstractObject):
 
   metaclass = BSML.Event       #: :attr:`.BSML.Event`
 
-  attributes = [ 'description', 'factor', 'time', ]
+  attributes = ['factor', 'time', ]
   '''Generic attributes of an Event.'''
 
   def __init__(self, uri, metadata=None, **kwds):
