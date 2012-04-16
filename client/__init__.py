@@ -65,6 +65,7 @@ And to get back signal data::
 """
 
 import logging
+import numpy as np
 
 import biosignalml
 import biosignalml.rdf as rdf
@@ -114,7 +115,10 @@ class Signal(BSMLSignal):
 
   def append(self, timeseries):
   #----------------------------
-    return self.repository.put_data(str(self.uri), timeseries)
+    if isinstance(timeseries, np.ndarray) and self.rate:
+      return self.repository.put_data(str(self.uri), UniformTimeSeries(timeseries, self.rate))
+    else:
+      return self.repository.put_data(str(self.uri), timeseries)
 
 
 class Recording(BSMLRecording):
