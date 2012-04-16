@@ -145,7 +145,7 @@ class Recording(BSMLRecording):
       ## and not get_recording_with_signals()
 
       logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
-      sig.repository.post_metadata(sig.uri, sig.metadata_as_graph())
+      sig.repository.post_metadata(self.uri, sig.metadata_as_graph())
       return sig
     except Exception, msg:
       raise
