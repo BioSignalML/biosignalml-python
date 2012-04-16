@@ -22,6 +22,11 @@ import logging
 
 import RDF as librdf
 
+class RDFParseError(Exception):
+#==============================
+  '''Errors when parsing RDF'''
+  pass
+
 
 class Format(object):
 #====================
@@ -312,9 +317,9 @@ class Graph(librdf.Model):
     try:
       statements = parser.parse_as_stream(uri, base)
       if statements: self.add_statements(statements)
-      else:          raise Exception('RDF parsing error')
-    except Exception, msg:
-      raise Exception(msg)
+      else:          raise RDFParseError, 'RDF parsing error'
+    except librdf.RedlandError, msg:
+      raise RDFParseError, msg
 
   def parse_string(self, string, format, base):
   #--------------------------------------------
@@ -330,9 +335,9 @@ class Graph(librdf.Model):
     try:
       statements = parser.parse_string_as_stream(string, base)
       if statements: self.add_statements(statements)
-      else:          raise Exception('RDF parsing error')
-    except Exception, msg:
-      raise Exception(msg)
+      else:          raise RDFParseError, 'RDF parsing error'
+    except librdf.RedlandError, msg:
+      raise RDFParseError, msg
 
   def serialise(self, format=Format.RDFXML, base=None, prefixes={}):
   #-----------------------------------------------------------------
