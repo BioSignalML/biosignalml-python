@@ -188,7 +188,7 @@ class Repository(repository.RemoteRepository):
       # then when server processes PUT for a new BSML recording it will create an empty HDF5 container
       return rec
     except Exception, msg:
-      raise IOError("Cannot create Recording '%s' in repository" % uri)
+      raise IOError("Cannot create Recording '%s' in repository -- %s" % (uri, msg))
 
 
   def store_recording(self, rec):       ## or save_recording ??
