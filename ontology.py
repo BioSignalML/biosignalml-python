@@ -6,11 +6,11 @@ Generated from file:///Users/dave/refactor/ontologies/bsml/2011-04-biosignalml.t
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
 
-from biosignalml.rdf import Uri, Resource, NS as Namespace
+from biosignalml.rdf import Resource, NS as Namespace
 
 class BSML(object):
-  uri = Uri("http://www.biosignalml.org/ontologies/2011/04/biosignalml#")
-  NS = Namespace("http://www.biosignalml.org/ontologies/2011/04/biosignalml#")
+  URI = "http://www.biosignalml.org/ontologies/2011/04/biosignalml#"
+  NS = Namespace(BSML.URI)
 
 # owl:Class resources:
   Annotation     = Resource(NS.Annotation)

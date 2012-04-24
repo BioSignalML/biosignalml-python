@@ -179,7 +179,7 @@ class AbstractObject(object):
     """
     Return metadata as a serialised RDF string.
     """
-    namespaces = { 'bsml': BSML.uri }
+    namespaces = { 'bsml': BSML.URI }
     namespaces.update(rdf.NAMESPACES)
     namespaces.update(prefixes)
     return self.metadata_as_graph().serialise(base=str(self.uri) + '/',
