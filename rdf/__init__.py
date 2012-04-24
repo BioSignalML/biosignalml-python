@@ -59,14 +59,15 @@ class NS(librdf.NS):
   '''
   pass
 
-
-# Define generic namespaces:
+# Generic namespaces:
 NAMESPACES = {
   'xsd':  'http://www.w3.org/2001/XMLSchema#',
   'rdf':  'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
   'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
   'owl':  'http://www.w3.org/2002/07/owl#',
+  'dc':   'http://purl.org/dc/elements/1.1/',
   'dcterms': 'http://purl.org/dc/terms/',
+  'time': 'http://www.w3.org/2006/time#',
   'evt':  'http://purl.org/NET/c4dm/event.owl#',
   'tl':   'http://purl.org/NET/c4dm/timeline.owl#',
   }
