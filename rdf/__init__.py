@@ -70,6 +70,8 @@ NAMESPACES = {
   'time': 'http://www.w3.org/2006/time#',
   'evt':  'http://purl.org/NET/c4dm/event.owl#',
   'tl':   'http://purl.org/NET/c4dm/timeline.owl#',
+  'ao':   'http://purl.org/ao/',
+  'pav':  'http://purl.org/pav/',
   }
 for prefix, name in NAMESPACES.iteritems():
   setattr(sys.modules[__name__], prefix.upper(), NS(name))

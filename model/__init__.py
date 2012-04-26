@@ -25,9 +25,11 @@ Abstract BioSignalML objects.
 
 import uuid
 import logging
+from datetime import datetime
 
 import biosignalml.rdf as rdf
 from biosignalml.ontology import BSML
+from biosignalml.rdf import AO
 
 import core
 
@@ -274,3 +276,25 @@ class AbstractAnnotation(core.AbstractObject):
 
   metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation`
 
+  attributes = [ 'type', 'target', 'body', 'created', 'creator' ]
+
+  def __init__(self, uri, metadata=None, **kwds):
+    core.AbstractObject.__init__(self, uri, metadata=metadata, created=datetime.now(), **kwds)
+
+  @classmethod
+  def note(cls, uri, target, text, annotator):
+    return cls(uri, target=target, type=AO.Note, body=str(text), annotator=annotator)
+
+  '''
+  @classmethod
+  def tag(cls, uri, target, label, annotator):
+    return cls(uri, target=target, type=AO.Tag, body=str(label), annotator=annotator)
+
+  @classmethod
+  def graph(cls, uri, target, graph, annotator):
+    return cls(uri, target=target, type=AO.GraphAnnotation, body=graph, annotator=annotator)
+
+  @classmethod
+  def qualifier(cls, uri, target, qualifier, annotator):
+    return cls(uri, target=target, type=AO.Qualifier, body=qualifier, annotator=annotator)
+  '''

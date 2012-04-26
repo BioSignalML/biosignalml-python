@@ -16,7 +16,7 @@ from collections import namedtuple
 
 from biosignalml.ontology import BSML
 from biosignalml.rdf import Node, Uri, Statement
-from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
+from biosignalml.rdf import RDF, RDFS, DCTERMS, XSD, TL, EVT, AO, PAV
 from biosignalml.utils import datetime_to_isoformat, isoformat_to_datetime
 from biosignalml.utils import seconds_to_isoduration, isoduration_to_seconds
 
@@ -75,20 +75,25 @@ DEFAULT_MAP = {
               ('source',        BSML.Recording): PropertyMap(DCTERMS.source),
               ('investigation', BSML.Recording): PropertyMap(DCTERMS.subject),
               ('starttime',     BSML.Recording): PropertyMap(DCTERMS.created,
-                                                   XSD.dateTime, datetime_to_isoformat,  isoformat_to_datetime),
+                                                   XSD.dateTime, datetime_to_isoformat,
+                                                                 isoformat_to_datetime),
               ('duration',      BSML.Recording): PropertyMap(DCTERMS.extent,
-                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+                                                   XSD.duration, seconds_to_isoduration,
+                                                                 isoduration_to_seconds),
 ##            ('digest',        BSML.Recording): PropertyMap(BSML.digest),
 
 # Timing specific metadata:
               ('timeline', None):                PropertyMap(TL.timeline,
                                                    to_rdf=get_uri, from_rdf=make_timeline),
               ('at',       TL.RelativeInstant):  PropertyMap(TL.atDuration,
-                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+                                                   XSD.duration, seconds_to_isoduration,
+                                                                 isoduration_to_seconds),
               ('start',    TL.RelativeInterval): PropertyMap(TL.beginsAtDuration,
-                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+                                                   XSD.duration, seconds_to_isoduration,
+                                                                 isoduration_to_seconds),
               ('duration', TL.RelativeInterval): PropertyMap(TL.durationXSD,
-                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
+                                                   XSD.duration, seconds_to_isoduration,
+                                                                 isoduration_to_seconds),
 
 # Event specific metadata:
               ('time',   BSML.Event): PropertyMap(TL.time),
@@ -106,6 +111,15 @@ DEFAULT_MAP = {
               ('minValue',     BSML.Signal): PropertyMap(BSML.minValue, XSD.double),
               ('maxValue',     BSML.Signal): PropertyMap(BSML.maxValue, XSD.double),
               ('index',        BSML.Signal): PropertyMap(BSML.index, XSD.integer),
+
+# Annotation specific metadata:
+              ('type',        BSML.Annotation): PropertyMap(RDF.type, to_rdf=get_uri),
+              ('target',      BSML.Annotation): PropertyMap(AO.annotatesResource, to_rdf=get_uri),
+              ('body',        BSML.Annotation): PropertyMap(AO.body),
+              ('created',     BSML.Annotation): PropertyMap(PAV.createdOn,
+                                                  XSD.dateTime, datetime_to_isoformat,
+                                                                isoformat_to_datetime),
+              ('creator',     BSML.Annotation): PropertyMap(PAV.createdBy, to_rdf=get_uri),
             }
 
 
