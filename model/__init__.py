@@ -34,8 +34,8 @@ from biosignalml.rdf import AO
 import core
 
 
-class AbstractSignal(core.AbstractObject):
-#=========================================
+class Signal(core.AbstractObject):
+#=================================
   """
   An abstract BioSignalML Signal.
 
@@ -58,8 +58,8 @@ class AbstractSignal(core.AbstractObject):
     self.recording = None
 
 
-class AbstractRecording(core.AbstractObject):
-#============================================
+class Recording(core.AbstractObject):
+#====================================
   '''
   An abstract BioSignalML Recording.
 
@@ -73,7 +73,7 @@ class AbstractRecording(core.AbstractObject):
                ]
   '''Generic attributes of a Recording.'''
 
-  SignalClass = AbstractSignal
+  SignalClass = Signal
 
 
   def __init__(self, uri, metadata=None, **kwds):
@@ -246,8 +246,8 @@ class AbstractRecording(core.AbstractObject):
     return cls.create_from_graph(uri, rdf.Graph.create_from_string(string, format, uri), **kwds)
 
 
-class AbstractEvent(core.AbstractObject):
-#========================================
+class Event(core.AbstractObject):
+#================================
   '''
   An abstract BioSignalML Event.
   '''
@@ -268,8 +268,8 @@ class AbstractEvent(core.AbstractObject):
     core.AbstractObject.save_to_graph(self.time, graph)
 
 
-class AbstractAnnotation(core.AbstractObject):
-#=============================================
+class Annotation(core.AbstractObject):
+#=====================================
   '''
   An abstract BioSignalML Annotation.
   '''

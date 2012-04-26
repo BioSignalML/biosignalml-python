@@ -29,13 +29,11 @@ from ontology import BSML
 import biosignalml.data  as data
 import biosignalml.model as model
 
-class Recording(model.AbstractRecording):
-#========================================
-  pass
+from model  import Recording, Event, Annotation
 
 
-class Signal(model.AbstractSignal, data.TimeSeries):
-#===================================================
+class Signal(model.Signal, data.TimeSeries):  ## TEST WHAT MIXIN ENABLES...
+#===========================================
 
   ##def __init__(self, 
 
@@ -64,15 +62,4 @@ class UniformSignal(Signal, data.UniformTimeSeries):
     self = cls(uri, units, rate=rate)
 
 
-class Event(model.AbstractEvent):
-#================================
-  pass
-
-
-class Annotation(model.AbstractAnnotation):
-#==========================================
-  pass
-
-
-from client import Repository
-#============================
+from client import Repository   ## Needs to be after Signal has been declared
