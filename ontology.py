@@ -10,7 +10,7 @@ from biosignalml.rdf import Resource, NS as Namespace
 
 class BSML(object):
   URI = "http://www.biosignalml.org/ontologies/2011/04/biosignalml#"
-  NS = Namespace(BSML.URI)
+  NS = Namespace(URI)
 
 # owl:Class resources:
   Annotation     = Resource(NS.Annotation)
