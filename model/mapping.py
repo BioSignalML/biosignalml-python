@@ -13,12 +13,12 @@ import os
 import logging
 import importlib  # Python 2.7 onwards...
 from collections import namedtuple
-from datetime import datetime, timedelta
-from isodate  import isoduration
 
 from biosignalml.ontology import BSML
 from biosignalml.rdf import Node, Uri, Statement
 from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
+from biosignalml.utils import datetime_to_isoformat, isoformat_to_datetime
+from biosignalml.utils import seconds_to_isoduration, isoduration_to_seconds
 
 URI_SCHEMES = [ 'http', 'file' ]
 
@@ -51,36 +51,6 @@ def make_timeline(uri):
 #======================
   import biosignalml.timeline as timeline
   return timeline.TimeLine(uri)
-
-def datetime_to_isoformat(dt):
-#=============================
-  return dt.isoformat()
-
-def isoformat_to_datetime(v):
-#============================
-  try:
-    return datetime.strptime(v, '%Y-%m-%dT%H:%M:%S')
-  except ValueError:
-    return datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%f')
-  except Exception, msg:
-    logging.error("Cannot convert datetime '%s': %s", v, msg)
-    return None  
-
-def seconds_to_isoduration(secs):
-#================================
-  return isoduration.duration_isoformat(
-    timedelta(seconds=int(secs), microseconds=int(1000000*(secs - int(secs)) ))
-    )
-
-def isoduration_to_seconds(d):
-#=============================
-  try:
-    td = isoduration.parse_duration(d)
-    return td.days*86400 + td.seconds + td.microseconds/1000000.0
-  except:
-    pass
-  return 0
-
 
 class PropertyMap(object):
 #=========================

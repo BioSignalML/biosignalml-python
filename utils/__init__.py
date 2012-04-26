@@ -10,19 +10,49 @@
 
 import os
 import math
-import datetime
+from datetime import datetime, timedelta
+from isodate  import isoduration
 
+
+def datetime_to_isoformat(dt):
+#=============================
+  return dt.isoformat()
+
+def isoformat_to_datetime(v):
+#============================
+  try:
+    return datetime.strptime(v, '%Y-%m-%dT%H:%M:%S')
+  except ValueError:
+    return datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%f')
+  except Exception, msg:
+    logging.error("Cannot convert datetime '%s': %s", v, msg)
+    return None
+
+def seconds_to_isoduration(secs):
+#================================
+  return isoduration.duration_isoformat(
+    timedelta(seconds=int(secs), microseconds=int(1000000*(secs - int(secs)) ))
+    )
+
+def isoduration_to_seconds(d):
+#=============================
+  try:
+    td = isoduration.parse_duration(d)
+    return td.days*86400 + td.seconds + td.microseconds/1000000.0
+  except:
+    pass
+  return 0
 
 def now():
 #========
-  t = str(datetime.datetime.now())
+  t = str(datetime.now())
   dp = t.find('.')
   if dp > 0: return t[:dp]
   else:      return t
 
 def expired(when):
 #================
-  return (when and str(datetime.datetime.now())[0:10] > when)
+  return (when and str(datetime.now())[0:10] > when)
 
 def chop(s, n):
 #=============
@@ -35,7 +65,7 @@ def trimdecimal(v):
 
 def maketime(secs):
 #=================
-  return trimdecimal(datetime.timedelta(seconds=secs))
+  return trimdecimal(timedelta(seconds=secs))
 
 
 def cp1252(s):
