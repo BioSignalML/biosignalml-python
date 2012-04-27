@@ -135,25 +135,28 @@ class AbstractObject(object):
           if value is not None: metadata[attr] = value
     return metadata
 
-  def make_uri(self, sibling=False):
-  #---------------------------------
+  def make_uri(self, sibling=False, prefix=None):
+  #----------------------------------------------
     """
     Generate a unique URI that starts with the resource's URI.
 
     :param sibling: When set, replace the last component of our URI with unique text.
       The default is to append unique text to our URI.
     :type: bool
+    :param prefix: If set, insert between the URI and unique text.
+    :type: str
     :return: A unique URI.
     :rtype: str
     """
     u = str(self.uri)
-    if   u.endswith(('/', '#')): return '%s%s'  % (u, uuid.uuid1())
+    suffix = '%s/%s' % (prefix, uuid.uuid1()) if prefix else str(uuid.uuid1())
+    if   u.endswith(('/', '#')): return '%s%s'  % (u, suffix)
     elif sibling:
       slash = u.rfind('/')
       hash  = u.rfind('#')
-      if hash > slash:           return '%s#%s' % (u.rsplit('#', 1)[0], uuid.uuid1())
-      else:                      return '%s/%s' % (u.rsplit('/', 1)[0], uuid.uuid1())
-    else:                        return '%s/%s' % (u, uuid.uuid1())
+      if hash > slash:           return '%s#%s' % (u.rsplit('#', 1)[0], suffix)
+      else:                      return '%s/%s' % (u.rsplit('/', 1)[0], suffix)
+    else:                        return '%s/%s' % (u, suffix)
 
   def save_to_graph(self, graph):
   #------------------------------
