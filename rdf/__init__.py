@@ -288,19 +288,19 @@ class Graph(librdf.Model):
     return self
 
   @classmethod
-  def create_from_string(cls, string, format, base):
-  #-------------------------------------------------
+  def create_from_string(cls, uri, string, format):
+  #-----------------------------------------------
     """
     Create a new Graph from RDF statements in a string.
 
+    :param uri: The URI of the resulting graph.
     :param string: The RDF to parse and add.
     :type string: str
     :param format: The string's RDF format.
-    :param base: The base URI of the content.
     :rtype: A :class:`Graph`
     """
-    self = cls()
-    self.parse_string(string, format, base)
+    self = cls(uri)
+    self.parse_string(string, format, uri)
     return self
 
   def __str__(self):

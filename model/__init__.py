@@ -23,7 +23,6 @@
 Abstract BioSignalML objects.
 '''
 
-import uuid
 import logging
 from datetime import datetime
 
@@ -243,7 +242,7 @@ class Recording(core.AbstractObject):
     :param format: The string's RDF format.
     :rtype: :class:`Recording`
     """
-    return cls.create_from_graph(uri, rdf.Graph.create_from_string(string, format, uri), **kwds)
+    return cls.create_from_graph(uri, rdf.Graph.create_from_string(uri, string, format), **kwds)
 
 
 class Event(core.AbstractObject):
