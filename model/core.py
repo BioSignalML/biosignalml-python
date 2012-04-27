@@ -177,16 +177,15 @@ class AbstractObject(object):
     self.save_to_graph(graph)
     return graph
 
-  def metadata_as_string(self, format=rdf.Format.RDFXML, prefixes={ }):
-  #--------------------------------------------------------------------
+  def metadata_as_string(self, format=rdf.Format.RDFXML, base=None, prefixes={ }):
+  #-------------------------------------------------------------------------------
     """
     Return metadata as a serialised RDF string.
     """
     namespaces = { 'bsml': BSML.URI }
     namespaces.update(rdf.NAMESPACES)
     namespaces.update(prefixes)
-    return self.metadata_as_graph().serialise(base=str(self.uri) + '/',
-                                  format=format, prefixes=namespaces)
+    return self.metadata_as_graph().serialise(base=base, format=format, prefixes=namespaces)
 
   def _assign(self, attr, value):
   #------------------------------
