@@ -43,16 +43,16 @@ def isoduration_to_seconds(d):
     pass
   return 0
 
-def now():
-#========
-  t = str(datetime.now())
+def utc():
+#=========
+  t = str(datetime.utcnow())
   dp = t.find('.')
   if dp > 0: return t[:dp]
   else:      return t
 
 def expired(when):
 #================
-  return (when and str(datetime.now())[0:10] > when)
+  return (when and str(datetime.utcnow())[0:10] > when)
 
 def chop(s, n):
 #=============
@@ -189,5 +189,5 @@ def unescape(text):
 
 if __name__ == '__main__':
 #========================
-  print now()
+  print utc()
   print hexdump('123\x01\x41B1234567890abcdefghijklmnopqrstuvwxyz')
