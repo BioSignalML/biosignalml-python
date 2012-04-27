@@ -276,25 +276,25 @@ class Annotation(core.AbstractObject):
 
   metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation`
 
-  attributes = [ 'type', 'target', 'body', 'created', 'creator' ]
+  attributes = [ 'target', 'body', 'created', 'creator' ]
 
   def __init__(self, uri, metadata=None, **kwds):
-    core.AbstractObject.__init__(self, uri, metadata=metadata, created=datetime.now(), **kwds)
+    core.AbstractObject.__init__(self, uri, metadata=metadata, created=datetime.utcnow(), **kwds)
 
   @classmethod
-  def note(cls, uri, target, text, annotator):
-    return cls(uri, target=target, type=AO.Note, body=str(text), annotator=annotator)
+  def Note(cls, uri, target, text, creator):
+    return cls(uri, target=target, body=unicode(text), creator=creator)  # A0.Note
 
   '''
   @classmethod
-  def tag(cls, uri, target, label, annotator):
-    return cls(uri, target=target, type=AO.Tag, body=str(label), annotator=annotator)
+  def Tag(cls, uri, target, label, annotator):
+    return cls(uri, target=target, type=AO.Tag, body=unicode(label), annotator=annotator)
 
   @classmethod
-  def graph(cls, uri, target, graph, annotator):
+  def Graph(cls, uri, target, graph, annotator):
     return cls(uri, target=target, type=AO.GraphAnnotation, body=graph, annotator=annotator)
 
   @classmethod
-  def qualifier(cls, uri, target, qualifier, annotator):
+  def Qualifier(cls, uri, target, qualifier, annotator):
     return cls(uri, target=target, type=AO.Qualifier, body=qualifier, annotator=annotator)
   '''

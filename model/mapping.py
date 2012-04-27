@@ -113,7 +113,6 @@ DEFAULT_MAP = {
               ('index',        BSML.Signal): PropertyMap(BSML.index, XSD.integer),
 
 # Annotation specific metadata:
-              ('type',        BSML.Annotation): PropertyMap(RDF.type, to_rdf=get_uri),
               ('target',      BSML.Annotation): PropertyMap(AO.annotatesResource, to_rdf=get_uri),
               ('body',        BSML.Annotation): PropertyMap(AO.body),
               ('created',     BSML.Annotation): PropertyMap(PAV.createdOn,
