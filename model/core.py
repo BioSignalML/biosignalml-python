@@ -28,8 +28,8 @@ import logging
 
 import biosignalml.rdf as rdf
 from biosignalml import BSML
-
-import mapping
+from biosignalml.rdf import RDFS, DCTERMS
+from mapping import Mapping, PropertyMap
 
 
 class AbstractObject(object):
@@ -53,11 +53,24 @@ class AbstractObject(object):
   metaclass = None
   '''Class in BioSignalML Ontology as a :class:`biosignalml.rdf.Resource`'''
 
-  attributes = [ 'uri', 'description' ]
+  attributes = [ 'uri', 'label', 'comment', 'description' ]
   '''List of generic attributes all resources have.'''
 
-  rdfmap = mapping.Mapping()
+  mapping = { ('label',           None): PropertyMap(RDFS.label),
+              ('comment',         None): PropertyMap(RDFS.comment),
+              ('description',     None): PropertyMap(DCTERMS.description) }
+
+  rdfmap = None
   '''The :class:`~biosignalml.model.mapping.Mapping` used to map between RDF properties and attributes.'''
+
+  def __new__(cls, *args, **kwds):
+  #-------------------------------
+    if cls.__dict__.get('rdfmap') is None:
+      rdfmap = Mapping()
+      for c in reversed(cls.__mro__):
+        if c.__dict__.get('mapping'): rdfmap.update(c.mapping)
+      cls.rdfmap = rdfmap
+    return object.__new__(cls)
 
 
   def __init__(self, uri, metadata=None, **kwds):
@@ -88,7 +101,7 @@ class AbstractObject(object):
       pos = cls.__mro__.index(obj.__class__) - 1
       while pos >= 0:
         for attr in cls.__mro__[pos].__dict__.get('attributes', []):
-          v = cls.rdfmap.get_value_from_graph(obj, attr, obj.graph)
+          v = obj.rdfmap.get_value_from_graph(obj, attr, obj.graph)
           if v is not None:
             setattr(obj, attr, None)    # So it's able to be _assign()ed to
             obj._assign(attr, v)
@@ -162,7 +175,6 @@ class AbstractObject(object):
   #------------------------------
     '''
     Add RDF statements about ourselves to a graph.
-
     '''
     if (self.metaclass):
       graph.append(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass))

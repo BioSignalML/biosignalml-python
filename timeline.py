@@ -24,9 +24,12 @@ TimeLine, Instant and Interval objects.
 ######################################################
 
 
-from biosignalml.rdf import TL
+from biosignalml.rdf import TL, XSD
 
-import model
+import biosignalml.utils as utils
+import biosignalml.model as model
+import mapping
+from biosignalml.model.mapping import PropertyMap
 
 
 class TimeLine(model.core.AbstractObject):
@@ -49,6 +52,8 @@ class TimeLine(model.core.AbstractObject):
 
 
 
+from biosignalml.rdf import RDF, RDFS, DCTERMS, XSD
+
 class Interval(model.core.AbstractObject):
 #=========================================
   '''
@@ -56,6 +61,18 @@ class Interval(model.core.AbstractObject):
   '''
 
   metaclass = TL.RelativeInterval  #: :attr:`.TL.RelativeInterval`
+
+  attributes = [ 'timeline', 'start', 'duration' ]
+
+  mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
+                                                   to_rdf=mapping.get_uri,
+                                                   from_rdf=TimeLine),
+              ('start',    metaclass): PropertyMap(TL.beginsAtDuration, XSD.duration,
+                                                   utils.seconds_to_isoduration,
+                                                   utils.isoduration_to_seconds),
+              ('duration', metaclass): PropertyMap(TL.durationXSD, XSD.duration,
+                                                   utils.seconds_to_isoduration,
+                                                   utils.isoduration_to_seconds) }
 
   def __init__(self, uri, start, duration, timeline, metadata=None):
   #-----------------------------------------------------------------
@@ -79,7 +96,6 @@ class Interval(model.core.AbstractObject):
     return Interval(self.make_uri(True), self._start + increment, self._duration, self.timeline)
 
 
-
 class Instant(Interval):
 #=======================
   '''
@@ -87,6 +103,15 @@ class Instant(Interval):
   '''
 
   metaclass = TL.RelativeInstant   #: :attr:`.TL.RelativeInstant`
+
+  attributes = [ 'timeline', 'at' ]
+
+  mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
+                                                   to_rdf=mapping.get_uri,
+                                                   from_rdf=TimeLine),
+              ('at',       metaclass): PropertyMap(TL.atDuration, XSD.duration,
+                                                   utils.seconds_to_isoduration,
+                                                   utils.isoduration_to_seconds) }
 
   def __init__(self, uri, when, timeline, metadata=None):
   #------------------------------------------------------

@@ -26,10 +26,13 @@ Abstract BioSignalML objects.
 import logging
 from datetime import datetime
 
+import biosignalml.utils as utils
 import biosignalml.rdf as rdf
 from biosignalml.ontology import BSML
-from biosignalml.rdf import AO
+from biosignalml.rdf import XSD, DCTERMS, TL, OA, CNT, EVT
 
+import mapping
+from mapping import PropertyMap
 import core
 
 
@@ -50,12 +53,30 @@ class Signal(core.AbstractObject):
                ]
   '''Generic attributes of a Signal.'''
 
+  mapping = { ('recording',    metaclass): PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
+              ('units',        metaclass): PropertyMap(BSML.units, to_rdf=mapping.get_uri),
+##            ('transducer',   metaclass): PropertyMap(BSML.transducer),
+              ('filter',       metaclass): PropertyMap(BSML.preFilter),
+              ('rate',         metaclass): PropertyMap(BSML.rate, XSD.double),
+##            ('clock',        metaclass): PropertyMap(BSML.sampleClock, to_rdf=mapping.get_uri),
+              ('minFrequency', metaclass): PropertyMap(BSML.minFrequency, XSD.double),
+              ('maxFrequency', metaclass): PropertyMap(BSML.maxFrequency, XSD.double),
+              ('minValue',     metaclass): PropertyMap(BSML.minValue, XSD.double),
+              ('maxValue',     metaclass): PropertyMap(BSML.maxValue, XSD.double),
+              ('index',        metaclass): PropertyMap(BSML.index, XSD.integer) }
+
+
   def __init__(self, uri, units, metadata=None, **kwds):
   #-----------------------------------------------------
     kwds['units'] = units
     core.AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
     self.recording = None
 
+
+def _get_timeline(tl):      # Stops a circular import
+#--------------------
+  from biosignalml.timeline import TimeLine
+  return TimeLine(tl)
 
 class Recording(core.AbstractObject):
 #====================================
@@ -68,11 +89,25 @@ class Recording(core.AbstractObject):
   metaclass = BSML.Recording  #: :attr:`.BSML.Recording`
 
   attributes = [ 'label', 'source', 'format', 'comment', 'investigation',
-                 'starttime', 'duration',
+                 'starttime', 'duration', 'timeline'
                ]
   '''Generic attributes of a Recording.'''
 
-  SignalClass = Signal
+  mapping = { ('format',        metaclass): PropertyMap(DCTERMS.format),
+              ('source',        metaclass): PropertyMap(DCTERMS.source),
+              ('investigation', metaclass): PropertyMap(DCTERMS.subject),
+              ('starttime',     metaclass): PropertyMap(DCTERMS.created, XSD.dateTime,
+                                                        utils.datetime_to_isoformat,
+                                                        utils.isoformat_to_datetime),
+              ('duration',      metaclass): PropertyMap(DCTERMS.extent, XSD.duration,
+                                                        utils.seconds_to_isoduration,
+                                                        utils.isoduration_to_seconds),
+##            ('digest',        metaclass): PropertyMap(BSML.digest),
+              ('timeline', metaclass):      PropertyMap(TL.timeline,
+                                                        to_rdf=mapping.get_uri,
+                                                        from_rdf=_get_timeline) }
+
+  SignalClass = Signal       #: The class of Signals in the Recording
 
 
   def __init__(self, uri, metadata=None, **kwds):
@@ -251,10 +286,12 @@ class Event(core.AbstractObject):
   An abstract BioSignalML Event.
   '''
 
-  metaclass = BSML.Event       #: :attr:`.BSML.Event`
+  metaclass = BSML.Event              #: :attr:`.BSML.Event`
 
-  attributes = ['factor', 'time', ]
-  '''Generic attributes of an Event.'''
+  attributes = [ 'factor', 'time', ]   #: '''Generic attributes of an Event.'''
+
+  mapping = { ('time',   metaclass): PropertyMap(TL.time),
+              ('factor', metaclass): PropertyMap(EVT.factor) }
 
   def __init__(self, uri, metadata=None, **kwds):
   #-----------------------------------------------

@@ -11,14 +11,9 @@
 
 import os
 import logging
-import importlib  # Python 2.7 onwards...
 from collections import namedtuple
 
-from biosignalml.ontology import BSML
-from biosignalml.rdf import Node, Uri, Statement
-from biosignalml.rdf import RDF, RDFS, DCTERMS, XSD, TL, EVT, AO, PAV
-from biosignalml.utils import datetime_to_isoformat, isoformat_to_datetime
-from biosignalml.utils import seconds_to_isoduration, isoduration_to_seconds
+from biosignalml.rdf import Node, Uri, Statement, XSD
 
 URI_SCHEMES = [ 'http', 'file' ]
 
@@ -47,10 +42,6 @@ def get_uri(v):
   '''
   return v.uri if getattr(v, 'uri', None) else str(v)
 
-def make_timeline(uri):
-#======================
-  import biosignalml.timeline as timeline
-  return timeline.TimeLine(uri)
 
 class PropertyMap(object):
 #=========================
@@ -63,64 +54,6 @@ class PropertyMap(object):
     self.from_rdf = from_rdf
 
 
-DEFAULT_MAP = {
-# Generic metadata:
-              ('label',           None): PropertyMap(RDFS.label),
-              ('comment',         None): PropertyMap(RDFS.comment),
-              ('description',     None): PropertyMap(DCTERMS.description),
-              ('dateSubmitted" ', None): PropertyMap(DCTERMS.dateSubmitted),
-
-# Recording specific metadata:
-              ('format',        BSML.Recording): PropertyMap(DCTERMS.format),
-              ('source',        BSML.Recording): PropertyMap(DCTERMS.source),
-              ('investigation', BSML.Recording): PropertyMap(DCTERMS.subject),
-              ('starttime',     BSML.Recording): PropertyMap(DCTERMS.created,
-                                                   XSD.dateTime, datetime_to_isoformat,
-                                                                 isoformat_to_datetime),
-              ('duration',      BSML.Recording): PropertyMap(DCTERMS.extent,
-                                                   XSD.duration, seconds_to_isoduration,
-                                                                 isoduration_to_seconds),
-##            ('digest',        BSML.Recording): PropertyMap(BSML.digest),
-
-# Timing specific metadata:
-              ('timeline', None):                PropertyMap(TL.timeline,
-                                                   to_rdf=get_uri, from_rdf=make_timeline),
-              ('at',       TL.RelativeInstant):  PropertyMap(TL.atDuration,
-                                                   XSD.duration, seconds_to_isoduration,
-                                                                 isoduration_to_seconds),
-              ('start',    TL.RelativeInterval): PropertyMap(TL.beginsAtDuration,
-                                                   XSD.duration, seconds_to_isoduration,
-                                                                 isoduration_to_seconds),
-              ('duration', TL.RelativeInterval): PropertyMap(TL.durationXSD,
-                                                   XSD.duration, seconds_to_isoduration,
-                                                                 isoduration_to_seconds),
-
-# Event specific metadata:
-              ('time',   BSML.Event): PropertyMap(TL.time),
-##            ('factor', BSML.Event): PropertyMap(EVT.factor),   ????????????
-
-# Signal specific metadata:
-              ('recording',    BSML.Signal): PropertyMap(BSML.recording, to_rdf=get_uri),
-              ('units',        BSML.Signal): PropertyMap(BSML.units, to_rdf=get_uri),
-##            ('transducer',   BSML.Signal): PropertyMap(BSML.transducer),
-              ('filter',       BSML.Signal): PropertyMap(BSML.preFilter),
-              ('rate',         BSML.Signal): PropertyMap(BSML.rate, XSD.double),
-##            ('clock',        BSML.Signal): PropertyMap(BSML.sampleClock, to_rdf=get_uri),
-              ('minFrequency', BSML.Signal): PropertyMap(BSML.minFrequency, XSD.double),
-              ('maxFrequency', BSML.Signal): PropertyMap(BSML.maxFrequency, XSD.double),
-              ('minValue',     BSML.Signal): PropertyMap(BSML.minValue, XSD.double),
-              ('maxValue',     BSML.Signal): PropertyMap(BSML.maxValue, XSD.double),
-              ('index',        BSML.Signal): PropertyMap(BSML.index, XSD.integer),
-
-# Annotation specific metadata:
-              ('target',      BSML.Annotation): PropertyMap(AO.annotatesResource, to_rdf=get_uri),
-              ('body',        BSML.Annotation): PropertyMap(AO.body),
-              ('created',     BSML.Annotation): PropertyMap(PAV.createdOn,
-                                                  XSD.dateTime, datetime_to_isoformat,
-                                                                isoformat_to_datetime),
-              ('creator',     BSML.Annotation): PropertyMap(PAV.createdBy, to_rdf=get_uri),
-            }
-
 
 ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf')
 #===========
@@ -130,11 +63,13 @@ class Mapping(object):
 
   def __init__(self, usermap=None):
   #--------------------------------
-    if usermap:
-      self.mapping = DEFAULT_MAP.copy()
-      self.mapping.update(usermap)
-    else:
-      self.mapping = DEFAULT_MAP
+    self.mapping = { }
+    self.reversemap = { }
+    if usermap: self.update(usermap)
+
+  def update(self, usermap):
+  #-------------------------
+    self.mapping.update(usermap)
     self.reversemap = { (str(m.property), k[1]): ReverseEntry(k[0], m.datatype, m.from_rdf)
                           for k, m in self.mapping.iteritems() }
 
@@ -227,10 +162,12 @@ if __name__ == '__main__':
 
   class MyRecording(Recording):
   #----------------------------
-    rdfmap = Mapping( { ('xx', None): PropertyMap(DCTERMS.subject) } )
+    mapping = { ('xx', None): PropertyMap(rdf.DCTERMS.subject),
+                ('yy', None): PropertyMap('http://example.org/onto#subject'),
+     }
 
 
-  r = MyRecording('http://example.org/uri1', description='Hello', xx = 'subject')
+  r = MyRecording('http://example.org/uri1', description='Hello', yy = 'subject')
   g = rdf.Graph()
   r.save_to_graph(g)
 
