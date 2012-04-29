@@ -290,6 +290,24 @@ class Event(core.AbstractObject):
     core.AbstractObject.save_to_graph(self.time, graph)
 
 
+class RDFTextContent(core.AbstractObject):
+#=========================================
+  '''
+  An abstract BioSignalML Annotation.
+  '''
+
+  metaclass = CNT.ContentAsText
+
+  attributes = [ 'text', 'encoding' ]
+
+  mapping = { ('text',     metaclass): PropertyMap(CNT.chars),
+              ('encoding', metaclass): PropertyMap(CNT.characterEncoding) }
+
+  def __init__(self, uri, text=''):
+  #------------------------------
+    core.AbstractObject.__init__(self, uri, text=unicode(text, 'utf-8'), encoding='utf-8')
+
+
 class Annotation(core.AbstractObject):
 #=====================================
   '''
@@ -298,20 +316,71 @@ class Annotation(core.AbstractObject):
 
   metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation`
 
-  attributes = [ 'target', 'body', 'created', 'creator' ]
+  attributes = [ 'target', 'tags', 'body', 'annotated', 'annotator' ]
 
-  def __init__(self, uri, metadata=None, **kwds):
-    core.AbstractObject.__init__(self, uri, metadata=metadata, created=datetime.utcnow(), **kwds)
+  @staticmethod
+  def list_to_semantic_tag(l):
+    pass
+
+  @staticmethod
+  def semantic_tag_to_list(t):
+    pass
+
+  mapping = { ('target',    metaclass): PropertyMap(OA.hasTarget, to_rdf=mapping.get_uri),
+              ('annotated', metaclass): PropertyMap(OA.annotated, XSD.dateTime,
+                                                    utils.datetime_to_isoformat,
+                                                    utils.isoformat_to_datetime),
+              ('annotator', metaclass): PropertyMap(OA.annotator, to_rdf=mapping.get_uri),
+              ('body',      metaclass): PropertyMap(OA.hasBody, to_rdf=mapping.get_uri),
+              ('tags',      metaclass): PropertyMap(OA.hasSemanticTag, to_rdf=mapping.get_uri)
+            }
+
+  def __init__(self, uri, target=None, annotator=None, metadata=None, _set_time=True, **kwds):
+  #-------------------------------------------------------------------------------------------
+    annotated = kwds.pop('annotated', utils.utctime()) if _set_time else None
+    core.AbstractObject.__init__(self, uri, metadata=metadata,
+      target=target, annotator=annotator, annotated=annotated, **kwds)
+    if kwds.get('text'): self.body = RDFTextContent(self.make_uri(True), kwds['text'])
 
   @classmethod
-  def Note(cls, uri, target, text, creator):
-    return cls(uri, target=target, body=unicode(text), creator=creator)  # A0.Note
+  def Note(cls, uri, target, annotator, text, **kwds):
+  #---------------------------------------------------
+    return cls(uri, target, annotator, text=text, **kwds)
+
+  @classmethod
+  def Tag(cls, uri, target, annotator, tags, **kwds):
+  #--------------------------------------------------
+    return cls(uri, target, annotator, tags=tags, **kwds)
+
+  def save_to_graph(self, graph):
+  #------------------------------
+    """
+    Add a Recording's metadata to a RDF graph.
+
+    :param graph: A RDF graph.
+    :type graph: :class:`~biosignalml.rdf.Graph`
+    """
+    core.AbstractObject.save_to_graph(self, graph)
+    if self.body: self.body.save_to_graph(graph)
+
+  @classmethod
+  def create_from_graph(cls, uri, graph, **kwds):
+  #----------------------------------------------
+    '''
+    Create a new instance of an Annotation, setting attributes from RDF triples in a graph.
+
+    :param uri: The URI for the Annotation.
+    :param graph: A RDF graph.
+    :type graph: :class:`~biosignalml.rdf.Graph`
+    :rtype: :class:`Recording`
+    '''
+    self = cls(uri, _set_time=False, **kwds)
+    self.load_from_graph(graph)
+    for b in graph.get_objects(self.uri, OA.hasBody):
+      self.body = RDFTextContent.create_from_graph(b, graph)
+    return self
 
   '''
-  @classmethod
-  def Tag(cls, uri, target, label, annotator):
-    return cls(uri, target=target, type=AO.Tag, body=unicode(label), annotator=annotator)
-
   @classmethod
   def Graph(cls, uri, target, graph, annotator):
     return cls(uri, target=target, type=AO.GraphAnnotation, body=graph, annotator=annotator)
