@@ -121,7 +121,7 @@ class AbstractObject(object):
       raise TypeError('Object not in superclasses')
     ## Need to go from cls to obj.class in __mro__ and set
     ## any C.attributes from obj.graph (using C.mapping if defined)
-    if getattr(obj, 'graph', None):
+    if hasattr(obj, 'graph'):
       pos = cls.__mro__.index(obj.__class__) - 1
       while pos >= 0:
         for attr in cls.__mro__[pos].__dict__.get('attributes', []):

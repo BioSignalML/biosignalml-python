@@ -40,7 +40,7 @@ def get_uri(v):
   '''
   Get the `uri` attribute if it exists, otherwise the object as a string.
   '''
-  return v.uri if getattr(v, 'uri', None) else str(v)
+  return v.uri if hasattr(v, 'uri') else str(v)
 
 
 class PropertyMap(object):
@@ -78,7 +78,7 @@ class Mapping(object):
   #------------------------------
     if   isinstance(v, Node) or isinstance(v, Uri):
       return Node(v)
-    elif getattr(v, 'uri', None):
+    elif hasattr(v, 'uri'):
       if isinstance(v.uri, Node): return Node(v)
       else:                       return Node(Uri(v.uri))
     else:
@@ -117,7 +117,7 @@ class Mapping(object):
     the resource, and if so, their value in the resource is translated to an object node
     in a RDF statement.
     """
-    if getattr(resource, 'uri', None):
+    if hasattr(resource, 'uri'):
       subject = resource.uri
       metaclasses = [ c.metaclass for c in resource.__class__.__mro__ if c.__dict__.get('metaclass') ]
       metadict = getattr(resource, 'metadata', { })
