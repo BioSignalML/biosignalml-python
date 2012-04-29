@@ -246,12 +246,26 @@ class AbstractObject(object):
     :param uri: The URI for the resource.
     :param graph: A RDF graph.
     :type graph: :class:`~biosignalml.rdf.Graph`
-    :rtype: :class:`AbstractObject`
+    :rtype: :class:`AbstractObject` or a sub-class.
     '''
     self = cls(uri, **kwds)
     self.load_from_graph(graph)
     self.graph = graph
     return self
+
+  @classmethod
+  def create_from_string(cls, uri, string, format=rdf.Format.RDFXML, **kwds):
+  #--------------------------------------------------------------------------
+    """
+    Create a new instance of a resource, setting attributes from RDF statements in a string.
+
+    :param uri: The URI for the resource.
+    :param string: The RDF to parse and add.
+    :type string: str
+    :param format: The string's RDF format.
+    :rtype: :class:`AbstractObject` or a sub-class.
+    """
+    return cls.create_from_graph(uri, rdf.Graph.create_from_string(uri, string, format), **kwds)
 
   def set_from_graph(self, attr, graph):
   #-------------------------------------

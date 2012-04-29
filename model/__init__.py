@@ -265,20 +265,6 @@ class Recording(core.AbstractObject):
     self.graph = graph
     return self
 
-  @classmethod
-  def create_from_string(cls, uri, string, format=rdf.Format.TURTLE, **kwds):
-  #--------------------------------------------------------------------------
-    """
-    Create a new Recording, setting attributes from RDF statements in a string.
-
-    :param uri: The URI for the Recording.
-    :param string: The RDF to parse and add.
-    :type string: str
-    :param format: The string's RDF format.
-    :rtype: :class:`Recording`
-    """
-    return cls.create_from_graph(uri, rdf.Graph.create_from_string(uri, string, format), **kwds)
-
 
 class Event(core.AbstractObject):
 #================================
