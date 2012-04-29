@@ -164,7 +164,7 @@ class Mapping(object):
 if __name__ == '__main__':
 #=========================
 
-  from biosignalml import Recording
+  from biosignalml import Recording, Annotation
   import biosignalml.rdf as rdf
 
   #logging.basicConfig(level=logging.DEBUG)
@@ -184,3 +184,24 @@ if __name__ == '__main__':
 
   s = MyRecording.create_from_graph('http://example.org/uri1', g, comment='From graph')
   print s.metadata_as_string(rdf.Format.TURTLE)
+
+  user = 'http://example.org/users/test-user'
+
+  a1 = 'http://example.org/annotation/1'
+  a2 = 'http://example.org/annotation/2'
+  a3 = 'http://example.org/annotation/3'
+
+  t1 = 'http://example.org/onto#tag1'
+  t2 = 'http://example.org/onto#tag2'
+  t3 = 'http://example.org/onto#tag3'
+  a = Annotation.Note(a1, s.uri, user, 'A test recording...')
+  b = Annotation.Tag(a2, s.uri, user, t1)
+  c = Annotation(a3, s.uri, user, tags=[t2, t3], text='Multiple tags')
+
+  print a.metadata_as_string(rdf.Format.TURTLE)
+  print b.metadata_as_string(rdf.Format.TURTLE)
+  print c.metadata_as_string(rdf.Format.TURTLE)
+
+  c.save_to_graph(g)
+  d = Annotation.create_from_graph(a3, g)
+  print d.metadata_as_string(rdf.Format.TURTLE)
