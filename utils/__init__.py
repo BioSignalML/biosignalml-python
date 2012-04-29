@@ -12,18 +12,22 @@ import os
 import math
 from datetime import datetime, timedelta
 from isodate  import isoduration
+import dateutil.parser
+from dateutil.tz import tzutc
 
 
 def datetime_to_isoformat(dt):
 #=============================
-  return dt.isoformat()
+  iso = dt.isoformat()
+  if iso.endswith('+00:00'): return iso[:-6] + 'Z'
+  else:                      return iso
 
 def isoformat_to_datetime(v):
 #============================
   try:
-    return datetime.strptime(v, '%Y-%m-%dT%H:%M:%S')
-  except ValueError:
-    return datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%f')
+    dt = dateutil.parser.parse(v)
+    if dt.tzinfo is not None: return (dt - dt.utcoffset()).replace(tzinfo=tzutc())
+    else:                     return dt
   except Exception, msg:
     logging.error("Cannot convert datetime '%s': %s", v, msg)
     return None
@@ -40,19 +44,15 @@ def isoduration_to_seconds(d):
     td = isoduration.parse_duration(d)
     return td.days*86400 + td.seconds + td.microseconds/1000000.0
   except:
-    pass
-  return 0
+    return 0
 
-def utc():
-#=========
-  t = str(datetime.utcnow())
-  dp = t.find('.')
-  if dp > 0: return t[:dp]
-  else:      return t
+def utctime():
+#=============
+  return datetime.now(tzutc())
 
 def expired(when):
 #================
-  return (when and str(datetime.utcnow())[0:10] > when)
+  return (when and utctime() > when)
 
 def chop(s, n):
 #=============
@@ -189,5 +189,5 @@ def unescape(text):
 
 if __name__ == '__main__':
 #========================
-  print utc()
+  print utctime()
   print hexdump('123\x01\x41B1234567890abcdefghijklmnopqrstuvwxyz')
