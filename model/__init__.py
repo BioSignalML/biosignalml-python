@@ -230,18 +230,18 @@ class Recording(core.AbstractObject):
     return self.timeline.interval(start, duration)
 
 
-  def metadata_as_graph(self):
+  def save_to_graph(self, graph):
   #---------------------------
     """
-    Return a Recording's metadata in a RDF graph.
+    Add a Recording's metadata to a RDF graph.
+
+    :param graph: A RDF graph.
+    :type graph: :class:`~biosignalml.rdf.Graph`
     """
-    ## Associate mapping with recording ??
-    graph = rdf.Graph(self.uri)
-    self.save_to_graph(graph)
+    core.AbstractObject.save_to_graph(self, graph)
     self.timeline.save_to_graph(graph)
     for s in self.signals(): s.save_to_graph(graph)
     for e in self._events.itervalues(): e.save_to_graph(graph)
-    return graph
 
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
