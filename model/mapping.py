@@ -141,7 +141,7 @@ class Mapping(object):
   #----------------------------------------
     """
     Given a RDF statement and a metaclass, lookup the statement's predicate
-    in the reverse mapping table use its properties to translate the value of the
+    in the reverse mapping table and use its properties to translate the value of the
     statement's object.
     """
     m = self.reversemap.get((str(statement.predicate.uri), metaclass), None)
