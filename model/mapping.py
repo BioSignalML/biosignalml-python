@@ -94,6 +94,16 @@ class Mapping(object):
         if dtype: result['datatype'] = dtype.uri
         return Node(**result)
 
+  def _statements(self, subject, map, value):
+  #----------------------------------------------
+    if value not in [None, '']:
+      if hasattr(value, '__iter__'):
+        for v in value: yield Statement(subject, map.property,
+                                        self._makenode(v, map.datatype, map.to_rdf))
+      else:
+        yield Statement(subject, map.property,
+                        self._makenode(value, map.datatype, map.to_rdf))
+
   def statement_stream(self, resource):
   #------------------------------------
     """
@@ -113,11 +123,8 @@ class Mapping(object):
       metadict = getattr(resource, 'metadata', { })
       for k, m in self.mapping.iteritems():
         if k[1] is None or k[1] in metaclasses:  ## Or do we need str() before lookup ??
-          if getattr(resource, k[0], None) not in [None, '']:
-            yield Statement(subject, m.property, self._makenode(getattr(resource, k[0]), m.datatype, m.to_rdf))
-          if metadict.get(k[0], None) not in [None, '']:
-            yield Statement(subject, m.property, self._makenode(metadict.get(k[0]), m.datatype, m.to_rdf))
-
+          for s in self._statements(subject, m, getattr(resource, k[0], None)): yield s
+          for s in self._statements(subject, m, metadict.get(k[0], None)): yield s
 
   @staticmethod
   def _makevalue(node, dtype, from_rdf):
@@ -160,6 +167,8 @@ if __name__ == '__main__':
   from biosignalml import Recording
   import biosignalml.rdf as rdf
 
+  #logging.basicConfig(level=logging.DEBUG)
+
   class MyRecording(Recording):
   #----------------------------
     mapping = { ('xx', None): PropertyMap(rdf.DCTERMS.subject),
@@ -167,7 +176,8 @@ if __name__ == '__main__':
      }
 
 
-  r = MyRecording('http://example.org/uri1', description='Hello', yy = 'subject')
+  r = MyRecording('http://example.org/uri1', description='Hello', yy = ['subject', 'in', 'list'] )
+  print r.metadata_as_string(rdf.Format.TURTLE)
   g = rdf.Graph()
   r.save_to_graph(g)
 

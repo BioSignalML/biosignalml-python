@@ -84,7 +84,31 @@ class AbstractObject(object):
 
   def __str__(self):
   #-----------------
-    return '%s: %s' % (self.__class__, self.uri)
+    return 'Object[%s]: <%s>' % (self.metaclass, self.uri)
+
+  def __eq__(self, this):
+  #----------------------
+    return (isinstance(this, AbstractObject)
+        and str(self.uri) == str(this.uri)
+        and str(self.metaclass.uri) == str(this.metaclass.uri))
+
+  def __ne__(self, this):
+  #----------------------
+    return not self.__eq__(this)
+
+  def _assign(self, attr, value):
+  #------------------------------
+    if attr in self.__dict__:
+      v = getattr(self, attr, None)
+      if v is None: setattr(self, attr, value)
+      elif isinstance(v, set): v.add(value)
+      elif v != value: setattr(self, attr, set([v, value]))
+    else:
+      v = self.metadata.get(attr)
+      if v is None: self.metadata[attr] = value
+      elif isinstance(v, set): v.add(value)
+      elif v != value: self.metadata[attr] = set([v, value])
+
 
   def initialise(self, *args):
   #---------------------------
@@ -199,11 +223,6 @@ class AbstractObject(object):
     namespaces.update(prefixes)
     return self.metadata_as_graph().serialise(base=base, format=format, prefixes=namespaces)
 
-  def _assign(self, attr, value):
-  #------------------------------
-    if attr in self.__dict__: setattr(self, attr, value)
-    else:                     self.metadata[attr] = value
-
   def load_from_graph(self, graph):
   #--------------------------------
     """
@@ -215,7 +234,7 @@ class AbstractObject(object):
     if graph.contains(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
         s, attr, v = self.rdfmap.metadata(stmt, self.metaclass) # Need to go up __mro__ from AbstractObject
-        ##logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
+        #logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
         self._assign(attr, v)
 
   @classmethod
@@ -241,5 +260,3 @@ class AbstractObject(object):
     '''
     v = self.rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
-
-
