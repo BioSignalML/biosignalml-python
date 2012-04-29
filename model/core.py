@@ -154,7 +154,7 @@ class AbstractObject(object):
           setattr(self, attr, None)                # So it's able to be _assign()ed to
         attribs.append(attr)                      # Attributes that have been set
     return { attr: value for attr, value in values.iteritems()
-                                         if not (value is None or attr in attribs) }
+      if not (value is None or attr in attribs or attr[0] == '_') }
 
   def get_attributes(self):
   #------------------------
