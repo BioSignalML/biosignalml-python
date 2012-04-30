@@ -304,8 +304,10 @@ class RDFTextContent(core.AbstractObject):
               ('encoding', metaclass): PropertyMap(CNT.characterEncoding) }
 
   def __init__(self, uri, text=''):
-  #------------------------------
-    core.AbstractObject.__init__(self, uri, text=unicode(text, 'utf-8'), encoding='utf-8')
+  #--------------------------------
+    if isinstance(text, unicode): utf8 = text.encode('utf-8')
+    else:                         utf8 = unicode(text, 'utf-8')
+    core.AbstractObject.__init__(self, uri, text=utf8, encoding='utf-8')
 
 
 class Annotation(core.AbstractObject):
