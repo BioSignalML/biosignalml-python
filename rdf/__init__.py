@@ -166,6 +166,15 @@ class Resource(Node):
     else:
       super(Resource, self).__init__(uri=Uri(uri))
 
+  def __eq__(self, this):
+  #----------------------
+    return (isinstance(this, Resource) and str(self.uri) == str(this.uri)
+         or isinstance(this, Uri)      and str(self.uri) == str(this))
+
+  def __ne__(self, this):
+  #----------------------
+    return not self.__eq__(this)
+
 
 class Statement(librdf.Statement):
 #=================================
