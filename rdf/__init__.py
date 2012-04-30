@@ -168,8 +168,10 @@ class Resource(Node):
 
   def __eq__(self, this):
   #----------------------
-    return (isinstance(this, Resource) and str(self.uri) == str(this.uri)
-         or isinstance(this, Uri)      and str(self.uri) == str(this))
+    return (isinstance(this, librdf.Node) and this.is_resource()
+              and str(self.uri) == str(this.uri)
+         or isinstance(this, librdf.Uri)
+              and str(self.uri) == str(this))
 
   def __ne__(self, this):
   #----------------------
