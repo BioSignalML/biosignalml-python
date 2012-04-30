@@ -28,7 +28,7 @@ from biosignalml.rdf import TL, XSD
 
 import biosignalml.utils as utils
 import biosignalml.model as model
-import mapping
+import biosignalml.model.mapping as mapping
 from biosignalml.model.mapping import PropertyMap
 
 
