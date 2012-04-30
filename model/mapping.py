@@ -130,7 +130,7 @@ class Mapping(object):
   def _makevalue(node, dtype, from_rdf):
   #-------------------------------------
     if node is None: return None
-    elif node.is_resource(): v = node.uri
+    elif node.is_resource(): v = Uri(node.uri)
     elif node.is_blank(): v = node.blank
     else:
       v = node.literal[0]
