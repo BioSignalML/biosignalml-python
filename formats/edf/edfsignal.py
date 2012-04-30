@@ -23,7 +23,7 @@ import units
 class EDFSignal(BSMLSignal):
 #===========================
 
-  MAXPOINTS = 4096     #: Maximum number of sample points returned by a single :math:`read`.
+  MAXPOINTS = 50000     #: Maximum number of sample points returned by a single :math:`read`.
 
   def __init__(self, signum, edf):
   #-------------------------------
