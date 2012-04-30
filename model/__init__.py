@@ -103,7 +103,7 @@ class Recording(core.AbstractObject):
                                                         utils.seconds_to_isoduration,
                                                         utils.isoduration_to_seconds),
 ##            ('digest',        metaclass): PropertyMap(BSML.digest),
-              ('timeline', metaclass):      PropertyMap(TL.timeline,
+              ('timeline',      metaclass): PropertyMap(TL.timeline,
                                                         to_rdf=mapping.get_uri,
                                                         from_rdf=_get_timeline) }
 
