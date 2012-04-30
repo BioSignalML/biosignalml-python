@@ -100,12 +100,12 @@ class AbstractObject(object):
   #------------------------------
     if attr in self.__dict__:
       v = getattr(self, attr, None)
-      if v is None: setattr(self, attr, value)
+      if v in [None, '']: setattr(self, attr, value)
       elif isinstance(v, set): v.add(value)
       elif v != value: setattr(self, attr, set([v, value]))
     else:
       v = self.metadata.get(attr)
-      if v is None: self.metadata[attr] = value
+      if v in [None, '']: self.metadata[attr] = value
       elif isinstance(v, set): v.add(value)
       elif v != value: self.metadata[attr] = set([v, value])
 
