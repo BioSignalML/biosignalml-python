@@ -22,6 +22,11 @@ import logging
 
 import RDF as librdf
 
+class RDFParseError(Exception):
+#==============================
+  '''Errors when parsing RDF'''
+  pass
+
 
 class Format(object):
 #====================
@@ -54,16 +59,20 @@ class NS(librdf.NS):
   '''
   pass
 
-
-# Define generic namespaces:
+# Generic namespaces:
 NAMESPACES = {
   'xsd':  'http://www.w3.org/2001/XMLSchema#',
   'rdf':  'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
   'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+  'cnt':  'http://www.w3.org/2011/content#',      # Content in RDF
   'owl':  'http://www.w3.org/2002/07/owl#',
+  'dc':   'http://purl.org/dc/elements/1.1/',
   'dcterms': 'http://purl.org/dc/terms/',
+  'time': 'http://www.w3.org/2006/time#',
   'evt':  'http://purl.org/NET/c4dm/event.owl#',
   'tl':   'http://purl.org/NET/c4dm/timeline.owl#',
+  'oa':   'http://www.openannotation.org/ns/',
+  'pav':  'http://purl.org/pav/',
   }
 for prefix, name in NAMESPACES.iteritems():
   setattr(sys.modules[__name__], prefix.upper(), NS(name))
@@ -156,6 +165,17 @@ class Resource(Node):
       super(Resource, self).__init__(node=uri)
     else:
       super(Resource, self).__init__(uri=Uri(uri))
+
+  def __eq__(self, this):
+  #----------------------
+    return (isinstance(this, librdf.Node) and this.is_resource()
+              and str(self.uri) == str(this.uri)
+         or isinstance(this, librdf.Uri)
+              and str(self.uri) == str(this))
+
+  def __ne__(self, this):
+  #----------------------
+    return not self.__eq__(this)
 
 
 class Statement(librdf.Statement):
@@ -280,19 +300,19 @@ class Graph(librdf.Model):
     return self
 
   @classmethod
-  def create_from_string(cls, string, format, base):
-  #-------------------------------------------------
+  def create_from_string(cls, uri, string, format):
+  #-----------------------------------------------
     """
     Create a new Graph from RDF statements in a string.
 
+    :param uri: The URI of the resulting graph.
     :param string: The RDF to parse and add.
     :type string: str
     :param format: The string's RDF format.
-    :param base: The base URI of the content.
     :rtype: A :class:`Graph`
     """
-    self = cls()
-    self.parse_string(string, format, base)
+    self = cls(uri)
+    self.parse_string(string, format, uri)
     return self
 
   def __str__(self):
@@ -312,9 +332,9 @@ class Graph(librdf.Model):
     try:
       statements = parser.parse_as_stream(uri, base)
       if statements: self.add_statements(statements)
-      else:          raise Exception('RDF parsing error')
-    except Exception, msg:
-      raise Exception(msg)
+      else:          raise RDFParseError, 'RDF parsing error'
+    except librdf.RedlandError, msg:
+      raise RDFParseError, msg
 
   def parse_string(self, string, format, base):
   #--------------------------------------------
@@ -330,9 +350,9 @@ class Graph(librdf.Model):
     try:
       statements = parser.parse_string_as_stream(string, base)
       if statements: self.add_statements(statements)
-      else:          raise Exception('RDF parsing error')
-    except Exception, msg:
-      raise Exception(msg)
+      else:          raise RDFParseError, 'RDF parsing error'
+    except librdf.RedlandError, msg:
+      raise RDFParseError, msg
 
   def serialise(self, format=Format.RDFXML, base=None, prefixes={}):
   #-----------------------------------------------------------------

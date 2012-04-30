@@ -83,13 +83,12 @@ class RemoteRepository(object):
       stream = WebStreamWriter(self._sd_uri)
       MAXPOINTS = 50000   ##### TESTING    (200K bytes if double precision)
       params = { }
-      if getattr(timeseries,'rate', None):
-        params['rate'] = timeseries.rate
+      if hasattr(timeseries, 'rate'): params['rate'] = timeseries.rate
       pos = 0
       count = len(timeseries)
       while count > 0:
         blen = min(count, MAXPOINTS)
-        if getattr(timeseries, 'clock', None):
+        if hasattr(timeseries, 'clock'):
           params['clock'] = timeseries.clock[pos:pos+blen]
         stream.write_block(SignalData(uri, timeseries.time[pos], timeseries.data[pos:pos+blen], **params))
         pos += blen

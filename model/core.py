@@ -28,8 +28,8 @@ import logging
 
 import biosignalml.rdf as rdf
 from biosignalml import BSML
-
-import mapping
+from biosignalml.rdf import RDFS, DCTERMS
+from mapping import Mapping, PropertyMap
 
 
 class AbstractObject(object):
@@ -53,11 +53,24 @@ class AbstractObject(object):
   metaclass = None
   '''Class in BioSignalML Ontology as a :class:`biosignalml.rdf.Resource`'''
 
-  attributes = [ 'uri', 'description' ]
+  attributes = [ 'uri', 'label', 'comment', 'description' ]
   '''List of generic attributes all resources have.'''
 
-  rdfmap = mapping.Mapping()
+  mapping = { ('label',           None): PropertyMap(RDFS.label),
+              ('comment',         None): PropertyMap(RDFS.comment),
+              ('description',     None): PropertyMap(DCTERMS.description) }
+
+  rdfmap = None
   '''The :class:`~biosignalml.model.mapping.Mapping` used to map between RDF properties and attributes.'''
+
+  def __new__(cls, *args, **kwds):
+  #-------------------------------
+    if cls.__dict__.get('rdfmap') is None:
+      rdfmap = Mapping()
+      for c in reversed(cls.__mro__):
+        if c.__dict__.get('mapping'): rdfmap.update(c.mapping)
+      cls.rdfmap = rdfmap
+    return object.__new__(cls)
 
 
   def __init__(self, uri, metadata=None, **kwds):
@@ -71,7 +84,31 @@ class AbstractObject(object):
 
   def __str__(self):
   #-----------------
-    return '%s: %s' % (self.__class__, self.uri)
+    return 'Object[%s]: <%s>' % (self.metaclass, self.uri)
+
+  def __eq__(self, this):
+  #----------------------
+    return (isinstance(this, AbstractObject)
+        and str(self.uri) == str(this.uri)
+        and str(self.metaclass.uri) == str(this.metaclass.uri))
+
+  def __ne__(self, this):
+  #----------------------
+    return not self.__eq__(this)
+
+  def _assign(self, attr, value):
+  #------------------------------
+    if attr in self.__dict__:
+      v = getattr(self, attr, None)
+      if v in [None, '']: setattr(self, attr, value)
+      elif isinstance(v, set): v.add(value)
+      elif v != value: setattr(self, attr, set([v, value]))
+    else:
+      v = self.metadata.get(attr)
+      if v in [None, '']: self.metadata[attr] = value
+      elif isinstance(v, set): v.add(value)
+      elif v != value: self.metadata[attr] = set([v, value])
+
 
   def initialise(self, *args):
   #---------------------------
@@ -84,11 +121,11 @@ class AbstractObject(object):
       raise TypeError('Object not in superclasses')
     ## Need to go from cls to obj.class in __mro__ and set
     ## any C.attributes from obj.graph (using C.mapping if defined)
-    if getattr(obj, 'graph', None):
+    if hasattr(obj, 'graph'):
       pos = cls.__mro__.index(obj.__class__) - 1
       while pos >= 0:
         for attr in cls.__mro__[pos].__dict__.get('attributes', []):
-          v = cls.rdfmap.get_value_from_graph(obj, attr, obj.graph)
+          v = obj.rdfmap.get_value_from_graph(obj, attr, obj.graph)
           if v is not None:
             setattr(obj, attr, None)    # So it's able to be _assign()ed to
             obj._assign(attr, v)
@@ -117,7 +154,7 @@ class AbstractObject(object):
           setattr(self, attr, None)                # So it's able to be _assign()ed to
         attribs.append(attr)                      # Attributes that have been set
     return { attr: value for attr, value in values.iteritems()
-                                         if not (value is None or attr in attribs) }
+      if not (value is None or attr in attribs or attr[0] == '_') }
 
   def get_attributes(self):
   #------------------------
@@ -135,31 +172,33 @@ class AbstractObject(object):
           if value is not None: metadata[attr] = value
     return metadata
 
-  def make_uri(self, sibling=False):
-  #---------------------------------
+  def make_uri(self, sibling=False, prefix=None):
+  #----------------------------------------------
     """
     Generate a unique URI that starts with the resource's URI.
 
     :param sibling: When set, replace the last component of our URI with unique text.
       The default is to append unique text to our URI.
     :type: bool
+    :param prefix: If set, insert between the URI and unique text.
+    :type: str
     :return: A unique URI.
     :rtype: str
     """
     u = str(self.uri)
-    if   u.endswith(('/', '#')): return '%s%s'  % (u, uuid.uuid1())
+    suffix = '%s/%s' % (prefix, uuid.uuid1()) if prefix else str(uuid.uuid1())
+    if   u.endswith(('/', '#')): return '%s%s'  % (u, suffix)
     elif sibling:
       slash = u.rfind('/')
       hash  = u.rfind('#')
-      if hash > slash:           return '%s#%s' % (u.rsplit('#', 1)[0], uuid.uuid1())
-      else:                      return '%s/%s' % (u.rsplit('/', 1)[0], uuid.uuid1())
-    else:                        return '%s/%s' % (u, uuid.uuid1())
+      if hash > slash:           return '%s#%s' % (u.rsplit('#', 1)[0], suffix)
+      else:                      return '%s/%s' % (u.rsplit('/', 1)[0], suffix)
+    else:                        return '%s/%s' % (u, suffix)
 
   def save_to_graph(self, graph):
   #------------------------------
     '''
     Add RDF statements about ourselves to a graph.
-
     '''
     if (self.metaclass):
       graph.append(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass))
@@ -174,21 +213,15 @@ class AbstractObject(object):
     self.save_to_graph(graph)
     return graph
 
-  def metadata_as_string(self, format=rdf.Format.RDFXML, prefixes={ }):
-  #--------------------------------------------------------------------
+  def metadata_as_string(self, format=rdf.Format.RDFXML, base=None, prefixes={ }):
+  #-------------------------------------------------------------------------------
     """
     Return metadata as a serialised RDF string.
     """
-    namespaces = { 'bsml': BSML.uri }
+    namespaces = { 'bsml': BSML.URI }
     namespaces.update(rdf.NAMESPACES)
     namespaces.update(prefixes)
-    return self.metadata_as_graph().serialise(base=str(self.uri) + '/',
-                                  format=format, prefixes=namespaces)
-
-  def _assign(self, attr, value):
-  #------------------------------
-    if attr in self.__dict__: setattr(self, attr, value)
-    else:                     self.metadata[attr] = value
+    return self.metadata_as_graph().serialise(base=base, format=format, prefixes=namespaces)
 
   def load_from_graph(self, graph):
   #--------------------------------
@@ -201,7 +234,7 @@ class AbstractObject(object):
     if graph.contains(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
         s, attr, v = self.rdfmap.metadata(stmt, self.metaclass) # Need to go up __mro__ from AbstractObject
-        ##logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
+        #logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
         self._assign(attr, v)
 
   @classmethod
@@ -213,12 +246,26 @@ class AbstractObject(object):
     :param uri: The URI for the resource.
     :param graph: A RDF graph.
     :type graph: :class:`~biosignalml.rdf.Graph`
-    :rtype: :class:`AbstractObject`
+    :rtype: :class:`AbstractObject` or a sub-class.
     '''
     self = cls(uri, **kwds)
     self.load_from_graph(graph)
     self.graph = graph
     return self
+
+  @classmethod
+  def create_from_string(cls, uri, string, format=rdf.Format.RDFXML, **kwds):
+  #--------------------------------------------------------------------------
+    """
+    Create a new instance of a resource, setting attributes from RDF statements in a string.
+
+    :param uri: The URI for the resource.
+    :param string: The RDF to parse and add.
+    :type string: str
+    :param format: The string's RDF format.
+    :rtype: :class:`AbstractObject` or a sub-class.
+    """
+    return cls.create_from_graph(uri, rdf.Graph.create_from_string(uri, string, format), **kwds)
 
   def set_from_graph(self, attr, graph):
   #-------------------------------------
@@ -227,5 +274,3 @@ class AbstractObject(object):
     '''
     v = self.rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
-
-

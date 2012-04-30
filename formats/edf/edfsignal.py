@@ -17,6 +17,7 @@ from biosignalml.data import DataSegment, UniformTimeSeries
 from biosignalml.formats import BSMLSignal
 
 from edffile import EDF
+import units
 
 
 class EDFSignal(BSMLSignal):
@@ -26,9 +27,10 @@ class EDFSignal(BSMLSignal):
 
   def __init__(self, signum, edf):
   #-------------------------------
-    BSMLSignal.__init__(self, str(edf.uri) + '/signal/%d' % signum,
+    BSMLSignal.__init__(self,
+      str(edf.uri) + '/signal/%d' % signum,
+      units.to_UOME(edf._edffile.units[signum]),
       metadata = { 'label': edf._edffile.label[signum],
-                   'units': edf._edffile.units[signum],
                    'transducer': edf._edffile.transducer[signum],
                    'filter': edf._edffile.prefilter[signum],
                    'rate': edf._edffile.rate[signum],
@@ -41,7 +43,7 @@ class EDFSignal(BSMLSignal):
 
 
   def initialise(self, rec):
-  #---------------------------------
+  #-------------------------
     self._rec_count = rec._edffile.nsamples[self.index]
 
     ##if edf._edffile.edf_type == EDF.EDF:
@@ -101,8 +103,12 @@ class EDFSignal(BSMLSignal):
     if interval is not None:
       #logging.debug('Interval: (%s, %s)', interval.start, interval.duration)
       start = self.rate*interval.start if interval.start else 0
-      segment = (start, self.rate*interval.duration if interval.duration is not None
-                   else len(self))
+      if interval.duration is not None:
+        length = self.rate*interval.duration
+        if length == 0: length = 1   #  Always get at least one data point
+      else:
+        length = len(self)
+      segment = (start, length)
     #logging.debug('Segment: %s', segment)
 
     if segment is None:

@@ -1,16 +1,16 @@
 """
 Provide access to the BioSignalML ontology.
 
-Generated from file:///Users/dave/refactor/ontologies/bsml/2011-04-biosignalml.ttl at Wed Feb 29 11:02:10 2012
+Generated from file:///Users/dave/biosignalml/ontologies/bsml/2011-04-biosignalml.ttl at Fri Apr 27 17:25:50 2012
 
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
 
-from biosignalml.rdf import Uri, Resource, NS as Namespace
+from biosignalml.rdf import Resource, NS as Namespace
 
 class BSML(object):
-  uri = Uri("http://www.biosignalml.org/ontologies/2011/04/biosignalml#")
-  NS = Namespace("http://www.biosignalml.org/ontologies/2011/04/biosignalml#")
+  URI = "http://www.biosignalml.org/ontologies/2011/04/biosignalml#"
+  NS = Namespace(URI)
 
 # owl:Class resources:
   Annotation     = Resource(NS.Annotation)
@@ -75,6 +75,8 @@ Measurement units would normally be entities in a specialised units of measure o
   dataBits       = Resource(NS.dataBits)
   '''The binary-bit resolution of the analogue-to-digital convertor or
         sampling device used to digitise the signal.'''
+  index          = Resource(NS.index)
+  '''The 0-origin position of a signal in a physical recording.'''
   maxFrequency   = Resource(NS.maxFrequency)
   '''The maximum frequency, in Hertz, contained in the signal.'''
   maxValue       = Resource(NS.maxValue)
@@ -123,5 +125,3 @@ Measurement units would normally be entities in a specialised units of measure o
   '''The physical units that are represented by a signal's data values.
 
 Specification of units allows for consistency checking and automatic conversion.'''
-  index          = Resource(NS.index)
-  '''The 0-origin position of a signal in a physical recording.'''

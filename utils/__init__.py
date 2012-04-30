@@ -10,19 +10,49 @@
 
 import os
 import math
-import datetime
+from datetime import datetime, timedelta
+from isodate  import isoduration
+import dateutil.parser
+from dateutil.tz import tzutc
 
 
-def now():
-#========
-  t = str(datetime.datetime.now())
-  dp = t.find('.')
-  if dp > 0: return t[:dp]
-  else:      return t
+def datetime_to_isoformat(dt):
+#=============================
+  iso = dt.isoformat()
+  if iso.endswith('+00:00'): return iso[:-6] + 'Z'
+  else:                      return iso
+
+def isoformat_to_datetime(v):
+#============================
+  try:
+    dt = dateutil.parser.parse(v)
+    if dt.tzinfo is not None: return (dt - dt.utcoffset()).replace(tzinfo=tzutc())
+    else:                     return dt
+  except Exception, msg:
+    logging.error("Cannot convert datetime '%s': %s", v, msg)
+    return None
+
+def seconds_to_isoduration(secs):
+#================================
+  return isoduration.duration_isoformat(
+    timedelta(seconds=int(secs), microseconds=int(1000000*(secs - int(secs)) ))
+    )
+
+def isoduration_to_seconds(d):
+#=============================
+  try:
+    td = isoduration.parse_duration(d)
+    return td.days*86400 + td.seconds + td.microseconds/1000000.0
+  except:
+    return 0
+
+def utctime():
+#=============
+  return datetime.now(tzutc())
 
 def expired(when):
 #================
-  return (when and str(datetime.datetime.now())[0:10] > when)
+  return (when and utctime() > when)
 
 def chop(s, n):
 #=============
@@ -35,7 +65,7 @@ def trimdecimal(v):
 
 def maketime(secs):
 #=================
-  return trimdecimal(datetime.timedelta(seconds=secs))
+  return trimdecimal(timedelta(seconds=secs))
 
 
 def cp1252(s):
@@ -159,5 +189,5 @@ def unescape(text):
 
 if __name__ == '__main__':
 #========================
-  print now()
+  print utctime()
   print hexdump('123\x01\x41B1234567890abcdefghijklmnopqrstuvwxyz')

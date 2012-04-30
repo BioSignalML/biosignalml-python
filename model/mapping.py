@@ -11,14 +11,9 @@
 
 import os
 import logging
-import importlib  # Python 2.7 onwards...
 from collections import namedtuple
-from datetime import datetime, timedelta
-from isodate  import isoduration
 
-from biosignalml.ontology import BSML
-from biosignalml.rdf import Node, Uri, Statement
-from biosignalml.rdf import RDFS, DCTERMS, XSD, TL, EVT
+from biosignalml.rdf import Node, Uri, Statement, XSD
 
 URI_SCHEMES = [ 'http', 'file' ]
 
@@ -45,41 +40,7 @@ def get_uri(v):
   '''
   Get the `uri` attribute if it exists, otherwise the object as a string.
   '''
-  return v.uri if getattr(v, 'uri', None) else str(v)
-
-def make_timeline(uri):
-#======================
-  import biosignalml.timeline as timeline
-  return timeline.TimeLine(uri)
-
-def datetime_to_isoformat(dt):
-#=============================
-  return dt.isoformat()
-
-def isoformat_to_datetime(v):
-#============================
-  try:
-    return datetime.strptime(v, '%Y-%m-%dT%H:%M:%S')
-  except ValueError:
-    return datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%f')
-  except Exception, msg:
-    logging.error("Cannot convert datetime '%s': %s", v, msg)
-    return None  
-
-def seconds_to_isoduration(secs):
-#================================
-  return isoduration.duration_isoformat(
-    timedelta(seconds=int(secs), microseconds=int(1000000*(secs - int(secs)) ))
-    )
-
-def isoduration_to_seconds(d):
-#=============================
-  try:
-    td = isoduration.parse_duration(d)
-    return td.days*86400 + td.seconds + td.microseconds/1000000.0
-  except:
-    pass
-  return 0
+  return v.uri if hasattr(v, 'uri') else str(v)
 
 
 class PropertyMap(object):
@@ -93,51 +54,6 @@ class PropertyMap(object):
     self.from_rdf = from_rdf
 
 
-DEFAULT_MAP = {
-# Generic metadata:
-              ('label',           None): PropertyMap(RDFS.label),
-              ('comment',         None): PropertyMap(RDFS.comment),
-              ('description',     None): PropertyMap(DCTERMS.description),
-              ('dateSubmitted" ', None): PropertyMap(DCTERMS.dateSubmitted),
-
-# Recording specific metadata:
-              ('format',        BSML.Recording): PropertyMap(DCTERMS.format),
-              ('source',        BSML.Recording): PropertyMap(DCTERMS.source),
-              ('investigation', BSML.Recording): PropertyMap(DCTERMS.subject),
-              ('starttime',     BSML.Recording): PropertyMap(DCTERMS.created,
-                                                   XSD.dateTime, datetime_to_isoformat,  isoformat_to_datetime),
-              ('duration',      BSML.Recording): PropertyMap(DCTERMS.extent,
-                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
-##            ('digest',        BSML.Recording): PropertyMap(BSML.digest),
-
-# Timing specific metadata:
-              ('timeline', None):                PropertyMap(TL.timeline,
-                                                   to_rdf=get_uri, from_rdf=make_timeline),
-              ('at',       TL.RelativeInstant):  PropertyMap(TL.atDuration,
-                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
-              ('start',    TL.RelativeInterval): PropertyMap(TL.beginsAtDuration,
-                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
-              ('duration', TL.RelativeInterval): PropertyMap(TL.durationXSD,
-                                                   XSD.duration, seconds_to_isoduration, isoduration_to_seconds),
-
-# Event specific metadata:
-              ('time',   BSML.Event): PropertyMap(TL.time),
-##            ('factor', BSML.Event): PropertyMap(EVT.factor),   ????????????
-
-# Signal specific metadata:
-              ('recording',    BSML.Signal): PropertyMap(BSML.recording, to_rdf=get_uri),
-              ('units',        BSML.Signal): PropertyMap(BSML.units, to_rdf=get_uri),
-##            ('transducer',   BSML.Signal): PropertyMap(BSML.transducer),
-              ('filter',       BSML.Signal): PropertyMap(BSML.preFilter),
-              ('rate',         BSML.Signal): PropertyMap(BSML.rate, XSD.double),
-##            ('clock',        BSML.Signal): PropertyMap(BSML.sampleClock, to_rdf=get_uri),
-              ('minFrequency', BSML.Signal): PropertyMap(BSML.minFrequency, XSD.double),
-              ('maxFrequency', BSML.Signal): PropertyMap(BSML.maxFrequency, XSD.double),
-              ('minValue',     BSML.Signal): PropertyMap(BSML.minValue, XSD.double),
-              ('maxValue',     BSML.Signal): PropertyMap(BSML.maxValue, XSD.double),
-              ('index',        BSML.Signal): PropertyMap(BSML.index, XSD.integer),
-            }
-
 
 ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf')
 #===========
@@ -147,11 +63,13 @@ class Mapping(object):
 
   def __init__(self, usermap=None):
   #--------------------------------
-    if usermap:
-      self.mapping = DEFAULT_MAP.copy()
-      self.mapping.update(usermap)
-    else:
-      self.mapping = DEFAULT_MAP
+    self.mapping = { }
+    self.reversemap = { }
+    if usermap: self.update(usermap)
+
+  def update(self, usermap):
+  #-------------------------
+    self.mapping.update(usermap)
     self.reversemap = { (str(m.property), k[1]): ReverseEntry(k[0], m.datatype, m.from_rdf)
                           for k, m in self.mapping.iteritems() }
 
@@ -160,7 +78,7 @@ class Mapping(object):
   #------------------------------
     if   isinstance(v, Node) or isinstance(v, Uri):
       return Node(v)
-    elif getattr(v, 'uri', None):
+    elif hasattr(v, 'uri'):
       if isinstance(v.uri, Node): return Node(v)
       else:                       return Node(Uri(v.uri))
     else:
@@ -176,6 +94,16 @@ class Mapping(object):
         if dtype: result['datatype'] = dtype.uri
         return Node(**result)
 
+  def _statements(self, subject, map, value):
+  #----------------------------------------------
+    if value not in [None, '']:
+      if hasattr(value, '__iter__'):
+        for v in value: yield Statement(subject, map.property,
+                                        self._makenode(v, map.datatype, map.to_rdf))
+      else:
+        yield Statement(subject, map.property,
+                        self._makenode(value, map.datatype, map.to_rdf))
+
   def statement_stream(self, resource):
   #------------------------------------
     """
@@ -189,23 +117,20 @@ class Mapping(object):
     the resource, and if so, their value in the resource is translated to an object node
     in a RDF statement.
     """
-    if getattr(resource, 'uri', None):
+    if hasattr(resource, 'uri'):
       subject = resource.uri
       metaclasses = [ c.metaclass for c in resource.__class__.__mro__ if c.__dict__.get('metaclass') ]
       metadict = getattr(resource, 'metadata', { })
       for k, m in self.mapping.iteritems():
         if k[1] is None or k[1] in metaclasses:  ## Or do we need str() before lookup ??
-          if getattr(resource, k[0], None) not in [None, '']:
-            yield Statement(subject, m.property, self._makenode(getattr(resource, k[0]), m.datatype, m.to_rdf))
-          if metadict.get(k[0], None) not in [None, '']:
-            yield Statement(subject, m.property, self._makenode(metadict.get(k[0]), m.datatype, m.to_rdf))
-
+          for s in self._statements(subject, m, getattr(resource, k[0], None)): yield s
+          for s in self._statements(subject, m, metadict.get(k[0], None)): yield s
 
   @staticmethod
   def _makevalue(node, dtype, from_rdf):
   #-------------------------------------
     if node is None: return None
-    elif node.is_resource(): v = node.uri
+    elif node.is_resource(): v = Uri(node.uri)
     elif node.is_blank(): v = node.blank
     else:
       v = node.literal[0]
@@ -216,7 +141,7 @@ class Mapping(object):
   #----------------------------------------
     """
     Given a RDF statement and a metaclass, lookup the statement's predicate
-    in the reverse mapping table use its properties to translate the value of the
+    in the reverse mapping table and use its properties to translate the value of the
     statement's object.
     """
     m = self.reversemap.get((str(statement.predicate.uri), metaclass), None)
@@ -239,18 +164,44 @@ class Mapping(object):
 if __name__ == '__main__':
 #=========================
 
-  from biosignalml import Recording
+  from biosignalml import Recording, Annotation
   import biosignalml.rdf as rdf
+
+  #logging.basicConfig(level=logging.DEBUG)
 
   class MyRecording(Recording):
   #----------------------------
-    rdfmap = Mapping( { ('xx', None): PropertyMap(DCTERMS.subject) } )
+    mapping = { ('xx', None): PropertyMap(rdf.DCTERMS.subject),
+                ('yy', None): PropertyMap('http://example.org/onto#subject'),
+     }
 
 
-  r = MyRecording('http://example.org/uri1', description='Hello', xx = 'subject')
+  r = MyRecording('http://example.org/uri1', description='Hello', yy = ['subject', 'in', 'list'] )
+  print r.metadata_as_string(rdf.Format.TURTLE)
   g = rdf.Graph()
   r.save_to_graph(g)
 
 
   s = MyRecording.create_from_graph('http://example.org/uri1', g, comment='From graph')
   print s.metadata_as_string(rdf.Format.TURTLE)
+
+  user = 'http://example.org/users/test-user'
+
+  a1 = 'http://example.org/annotation/1'
+  a2 = 'http://example.org/annotation/2'
+  a3 = 'http://example.org/annotation/3'
+
+  t1 = 'http://example.org/onto#tag1'
+  t2 = 'http://example.org/onto#tag2'
+  t3 = 'http://example.org/onto#tag3'
+  a = Annotation.Note(a1, s.uri, user, 'A test recording...')
+  b = Annotation.Tag(a2, s.uri, user, t1)
+  c = Annotation(a3, s.uri, user, tags=[t2, t3], text='Multiple tags')
+
+  print a.metadata_as_string(rdf.Format.TURTLE)
+  print b.metadata_as_string(rdf.Format.TURTLE)
+  print c.metadata_as_string(rdf.Format.TURTLE)
+
+  c.save_to_graph(g)
+  d = Annotation.create_from_graph(a3, g)
+  print d.metadata_as_string(rdf.Format.TURTLE)

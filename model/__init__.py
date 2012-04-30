@@ -23,17 +23,21 @@
 Abstract BioSignalML objects.
 '''
 
-import uuid
 import logging
+from datetime import datetime
 
+import biosignalml.utils as utils
 import biosignalml.rdf as rdf
 from biosignalml.ontology import BSML
+from biosignalml.rdf import XSD, DCTERMS, TL, OA, CNT, EVT
 
+import mapping
+from mapping import PropertyMap
 import core
 
 
-class AbstractSignal(core.AbstractObject):
-#=========================================
+class Signal(core.AbstractObject):
+#=================================
   """
   An abstract BioSignalML Signal.
 
@@ -49,6 +53,19 @@ class AbstractSignal(core.AbstractObject):
                ]
   '''Generic attributes of a Signal.'''
 
+  mapping = { ('recording',    metaclass): PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
+              ('units',        metaclass): PropertyMap(BSML.units, to_rdf=mapping.get_uri),
+##            ('transducer',   metaclass): PropertyMap(BSML.transducer),
+              ('filter',       metaclass): PropertyMap(BSML.preFilter),
+              ('rate',         metaclass): PropertyMap(BSML.rate, XSD.double),
+##            ('clock',        metaclass): PropertyMap(BSML.sampleClock, to_rdf=mapping.get_uri),
+              ('minFrequency', metaclass): PropertyMap(BSML.minFrequency, XSD.double),
+              ('maxFrequency', metaclass): PropertyMap(BSML.maxFrequency, XSD.double),
+              ('minValue',     metaclass): PropertyMap(BSML.minValue, XSD.double),
+              ('maxValue',     metaclass): PropertyMap(BSML.maxValue, XSD.double),
+              ('index',        metaclass): PropertyMap(BSML.index, XSD.integer) }
+
+
   def __init__(self, uri, units, metadata=None, **kwds):
   #-----------------------------------------------------
     kwds['units'] = units
@@ -56,8 +73,13 @@ class AbstractSignal(core.AbstractObject):
     self.recording = None
 
 
-class AbstractRecording(core.AbstractObject):
-#============================================
+def _get_timeline(tl):      # Stops a circular import
+#--------------------
+  from biosignalml.timeline import TimeLine
+  return TimeLine(tl)
+
+class Recording(core.AbstractObject):
+#====================================
   '''
   An abstract BioSignalML Recording.
 
@@ -67,11 +89,25 @@ class AbstractRecording(core.AbstractObject):
   metaclass = BSML.Recording  #: :attr:`.BSML.Recording`
 
   attributes = [ 'label', 'source', 'format', 'comment', 'investigation',
-                 'starttime', 'duration',
+                 'starttime', 'duration', 'timeline'
                ]
   '''Generic attributes of a Recording.'''
 
-  SignalClass = AbstractSignal
+  mapping = { ('format',        metaclass): PropertyMap(DCTERMS.format),
+              ('source',        metaclass): PropertyMap(DCTERMS.source),
+              ('investigation', metaclass): PropertyMap(DCTERMS.subject),
+              ('starttime',     metaclass): PropertyMap(DCTERMS.created, XSD.dateTime,
+                                                        utils.datetime_to_isoformat,
+                                                        utils.isoformat_to_datetime),
+              ('duration',      metaclass): PropertyMap(DCTERMS.extent, XSD.duration,
+                                                        utils.seconds_to_isoduration,
+                                                        utils.isoduration_to_seconds),
+##            ('digest',        metaclass): PropertyMap(BSML.digest),
+              ('timeline',      metaclass): PropertyMap(TL.timeline,
+                                                        to_rdf=mapping.get_uri,
+                                                        from_rdf=_get_timeline) }
+
+  SignalClass = Signal       #: The class of Signals in the Recording
 
 
   def __init__(self, uri, metadata=None, **kwds):
@@ -194,18 +230,18 @@ class AbstractRecording(core.AbstractObject):
     return self.timeline.interval(start, duration)
 
 
-  def metadata_as_graph(self):
+  def save_to_graph(self, graph):
   #---------------------------
     """
-    Return a Recording's metadata in a RDF graph.
+    Add a Recording's metadata to a RDF graph.
+
+    :param graph: A RDF graph.
+    :type graph: :class:`~biosignalml.rdf.Graph`
     """
-    ## Associate mapping with recording ??
-    graph = rdf.Graph(self.uri)
-    self.save_to_graph(graph)
+    core.AbstractObject.save_to_graph(self, graph)
     self.timeline.save_to_graph(graph)
     for s in self.signals(): s.save_to_graph(graph)
     for e in self._events.itervalues(): e.save_to_graph(graph)
-    return graph
 
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
@@ -229,31 +265,19 @@ class AbstractRecording(core.AbstractObject):
     self.graph = graph
     return self
 
-  @classmethod
-  def create_from_string(cls, uri, string, format=rdf.Format.TURTLE, **kwds):
-  #--------------------------------------------------------------------------
-    """
-    Create a new Recording, setting attributes from RDF statements in a string.
 
-    :param uri: The URI for the Recording.
-    :param string: The RDF to parse and add.
-    :type string: str
-    :param format: The string's RDF format.
-    :rtype: :class:`Recording`
-    """
-    return cls.create_from_graph(uri, rdf.Graph.create_from_string(string, format, uri), **kwds)
-
-
-class AbstractEvent(core.AbstractObject):
-#========================================
+class Event(core.AbstractObject):
+#================================
   '''
   An abstract BioSignalML Event.
   '''
 
-  metaclass = BSML.Event       #: :attr:`.BSML.Event`
+  metaclass = BSML.Event              #: :attr:`.BSML.Event`
 
-  attributes = [ 'description', 'factor', 'time', ]
-  '''Generic attributes of an Event.'''
+  attributes = [ 'factor', 'time', ]   #: '''Generic attributes of an Event.'''
+
+  mapping = { ('time',   metaclass): PropertyMap(TL.time),
+              ('factor', metaclass): PropertyMap(EVT.factor) }
 
   def __init__(self, uri, metadata=None, **kwds):
   #-----------------------------------------------
@@ -266,11 +290,104 @@ class AbstractEvent(core.AbstractObject):
     core.AbstractObject.save_to_graph(self.time, graph)
 
 
-class AbstractAnnotation(core.AbstractObject):
-#=============================================
+class RDFTextContent(core.AbstractObject):
+#=========================================
+  '''
+  An abstract BioSignalML Annotation.
+  '''
+
+  metaclass = CNT.ContentAsText
+
+  attributes = [ 'text', 'encoding' ]
+
+  mapping = { ('text',     metaclass): PropertyMap(CNT.chars),
+              ('encoding', metaclass): PropertyMap(CNT.characterEncoding) }
+
+  def __init__(self, uri, text=''):
+  #--------------------------------
+    if isinstance(text, unicode): utf8 = text.encode('utf-8')
+    else:                         utf8 = unicode(text, 'utf-8')
+    core.AbstractObject.__init__(self, uri, text=utf8, encoding='utf-8')
+
+
+class Annotation(core.AbstractObject):
+#=====================================
   '''
   An abstract BioSignalML Annotation.
   '''
 
   metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation`
 
+  attributes = [ 'target', 'tags', 'body', 'annotated', 'annotator' ]
+
+  @staticmethod
+  def list_to_semantic_tag(l):
+    pass
+
+  @staticmethod
+  def semantic_tag_to_list(t):
+    pass
+
+  mapping = { ('target',    metaclass): PropertyMap(OA.hasTarget, to_rdf=mapping.get_uri),
+              ('annotated', metaclass): PropertyMap(OA.annotated, XSD.dateTime,
+                                                    utils.datetime_to_isoformat,
+                                                    utils.isoformat_to_datetime),
+              ('annotator', metaclass): PropertyMap(OA.annotator, to_rdf=mapping.get_uri),
+              ('body',      metaclass): PropertyMap(OA.hasBody, to_rdf=mapping.get_uri),
+              ('tags',      metaclass): PropertyMap(OA.hasSemanticTag, to_rdf=mapping.get_uri)
+            }
+
+  def __init__(self, uri, target=None, annotator=None, metadata=None, _set_time=True, **kwds):
+  #-------------------------------------------------------------------------------------------
+    annotated = kwds.pop('annotated', utils.utctime()) if _set_time else None
+    core.AbstractObject.__init__(self, uri, metadata=metadata,
+      target=target, annotator=annotator, annotated=annotated, **kwds)
+    if kwds.get('text'): self.body = RDFTextContent(self.make_uri(True), kwds['text'])
+
+  @classmethod
+  def Note(cls, uri, target, annotator, text, **kwds):
+  #---------------------------------------------------
+    return cls(uri, target, annotator, text=text, **kwds)
+
+  @classmethod
+  def Tag(cls, uri, target, annotator, tags, **kwds):
+  #--------------------------------------------------
+    return cls(uri, target, annotator, tags=tags, **kwds)
+
+  def save_to_graph(self, graph):
+  #------------------------------
+    """
+    Add a Recording's metadata to a RDF graph.
+
+    :param graph: A RDF graph.
+    :type graph: :class:`~biosignalml.rdf.Graph`
+    """
+    core.AbstractObject.save_to_graph(self, graph)
+    if self.body: self.body.save_to_graph(graph)
+
+  @classmethod
+  def create_from_graph(cls, uri, graph, **kwds):
+  #----------------------------------------------
+    '''
+    Create a new instance of an Annotation, setting attributes from RDF triples in a graph.
+
+    :param uri: The URI for the Annotation.
+    :param graph: A RDF graph.
+    :type graph: :class:`~biosignalml.rdf.Graph`
+    :rtype: :class:`Recording`
+    '''
+    self = cls(uri, _set_time=False, **kwds)
+    self.load_from_graph(graph)
+    for b in graph.get_objects(self.uri, OA.hasBody):
+      self.body = RDFTextContent.create_from_graph(b, graph)
+    return self
+
+  '''
+  @classmethod
+  def Graph(cls, uri, target, graph, annotator):
+    return cls(uri, target=target, type=AO.GraphAnnotation, body=graph, annotator=annotator)
+
+  @classmethod
+  def Qualifier(cls, uri, target, qualifier, annotator):
+    return cls(uri, target=target, type=AO.Qualifier, body=qualifier, annotator=annotator)
+  '''

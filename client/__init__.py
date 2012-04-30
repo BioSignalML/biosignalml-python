@@ -65,6 +65,7 @@ And to get back signal data::
 """
 
 import logging
+import numpy as np
 
 import biosignalml
 import biosignalml.rdf as rdf
@@ -114,7 +115,10 @@ class Signal(BSMLSignal):
 
   def append(self, timeseries):
   #----------------------------
-    return self.repository.put_data(str(self.uri), timeseries)
+    if isinstance(timeseries, np.ndarray) and self.rate:
+      return self.repository.put_data(str(self.uri), UniformTimeSeries(timeseries, self.rate))
+    else:
+      return self.repository.put_data(str(self.uri), timeseries)
 
 
 class Recording(BSMLRecording):
@@ -145,7 +149,7 @@ class Recording(BSMLRecording):
       ## and not get_recording_with_signals()
 
       logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
-      sig.repository.post_metadata(sig.uri, sig.metadata_as_graph())
+      sig.repository.post_metadata(self.uri, sig.metadata_as_graph())
       return sig
     except Exception, msg:
       raise
@@ -184,7 +188,7 @@ class Repository(repository.RemoteRepository):
       # then when server processes PUT for a new BSML recording it will create an empty HDF5 container
       return rec
     except Exception, msg:
-      raise IOError("Cannot create Recording '%s' in repository" % uri)
+      raise IOError("Cannot create Recording '%s' in repository -- %s" % (uri, msg))
 
 
   def store_recording(self, rec):       ## or save_recording ??
