@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2010  David Brooks
 #
-#  $ID$
+#  $ID: 99cbf49 on Tue May 1 09:52:56 2012 +1200 by Dave Brooks $
 #
 ######################################################
 
