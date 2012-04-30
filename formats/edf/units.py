@@ -6,13 +6,15 @@ class UOME_Test(object):
 UOME = UOME_Test()
 
 
-_units_to_UOME = { }
+_units_to_UOME = { '': '' }
 
 
 _units = {
   '%':    'Percent',
   'A':    'ampere',
   'degC': 'DegreeCelsius',
+  'mHg':  'metresOfMercury',
+  'mH2O': 'metresOfWater',
   'g':    'gram',
   'J':    'joule',
   'K':    'Kelvin',
@@ -20,7 +22,9 @@ _units = {
   'm':    'metre',
   's':    'second',
   'V':    'volt',
-  'W':    'watt'
+  'W':    'watt',
+  'bar':  'bar',
+  'bpm':  'BeatsPerMinute',
   }
 
 _powers_prefix = {
@@ -100,6 +104,12 @@ if __name__ == '__main__':
   test('%')
   test('uV')
   test('mV')
+  test('bar')
+  test('mbar')
   test('degC')
+  test('mmHg')
+  test('cmH2O')
+  test('bpm')
+  test('')
   test(u'\u00b5V')
 
