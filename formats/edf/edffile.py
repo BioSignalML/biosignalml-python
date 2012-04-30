@@ -200,14 +200,12 @@ class EDFFile(object):
     #: Scale and offset to convert from data block to physical values.
     self.scaling = [ ]
     for n in self.data_signals:
-      if self.units[n] == '': self.scaling.append( (1.0, 0.0) )
-      else:
-        try:
-          scale = float(self._physmax[n] - self._physmin[n]) / float(self._digmax[n] - self._digmin[n])
-          self.scaling.append( Scaling(scale, float(self._physmin[n]) - scale * float(self._digmin[n])) )
-        except ZeroDivisionError:
-          self._error('Physical max equal to minimum for signal %d: %s' % (n, self.label[n]))
-          self.scaling.append(None)
+      try:
+        scale = float(self._physmax[n] - self._physmin[n]) / float(self._digmax[n] - self._digmin[n])
+        self.scaling.append( Scaling(scale, float(self._physmin[n]) - scale * float(self._digmin[n])) )
+      except ZeroDivisionError:
+        self._error('Physical max equal to minimum for signal %d: %s' % (n, self.label[n]))
+        self.scaling.append( Scaling(1.0, 0.0) )
 
     self._offsets = [0]
     for i in xrange(1, self._nsignals):
