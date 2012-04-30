@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2010 - 2011  David Brooks
 #
-#  $ID: 0eec3d2 on Tue May 1 10:38:40 2012 +1200 by Dave Brooks $
+#  $ID$
 #
 ######################################################
 
