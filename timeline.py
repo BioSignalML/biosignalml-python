@@ -77,23 +77,15 @@ class Interval(model.core.AbstractObject):
   def __init__(self, uri, start, duration, timeline, metadata=None):
   #-----------------------------------------------------------------
     model.core.AbstractObject.__init__(self, uri, metadata=metadata)
-    self._start = start
-    self._duration = duration
+    self.start = start
+    self.duration = duration
     self.timeline = timeline
 
-  @property
-  def start(self, timeline=None):     # Needs to use timeline to map
-  #------------------------------
-    return self._start
 
-  @property
-  def duration(self, timeline=None):  # Needs to use timeline to map
-  #---------------------------------
-    return self._duration
 
   def __add__(self, increment):
   #----------------------------
-    return Interval(self.make_uri(True), self._start + increment, self._duration, self.timeline)
+    return Interval(self.make_uri(True), self.start + increment, self.duration, self.timeline)
 
 
 class Instant(Interval):
@@ -116,15 +108,11 @@ class Instant(Interval):
   def __init__(self, uri, when, timeline, metadata=None):
   #------------------------------------------------------
     Interval.__init__(self, uri, when, 0.0, timeline, metadata=metadata)
-    self._at = when
+    self.at = when
 
-  @property
-  def at(self, timeline=None):     # Needs to use timeline to map
-  #---------------------------
-    return self._at
 
   def __add__(self, increment):
   #----------------------------
-    return Instant(self.make_uri(True), self._at + increment, self.timeline)
+    return Instant(self.make_uri(True), self.at + increment, self.timeline)
 
 
