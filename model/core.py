@@ -84,7 +84,10 @@ class AbstractObject(object):
 
   def __str__(self):
   #-----------------
-    return 'Object[%s]: <%s>' % (self.metaclass, self.uri)
+    try:
+      return 'Object[%s]: <%s>' % (self.metaclass, self.uri)
+    except AttributeError:
+      return 'Object[%s]: None' %  self.metaclass
 
   def __eq__(self, this):
   #----------------------
