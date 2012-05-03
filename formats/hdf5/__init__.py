@@ -178,6 +178,7 @@ class HDF5Recording(BSMLRecording):
 
   FORMAT = BSML.BSML_HDF5
   MIMETYPE = 'application/x-bsml'
+  EXTENSIONS = [ 'h5', 'hdf', 'hdf5' ]
   SignalClass = HDF5Signal
 
   def __init__(self, uri, fname=None, metadata=None, **kwds):

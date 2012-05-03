@@ -33,6 +33,7 @@ class EDFRecording(BSMLRecording):
 
   FORMAT = BSML.EDF
   MIMETYPE = 'application/x-edf'
+  EXTENSIONS = [ 'edf' ]
   SignalClass = EDFSignal
 
   def __init__(self, uri, fname=None, metadata=None, **kwds):

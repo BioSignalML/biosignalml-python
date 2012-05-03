@@ -57,7 +57,10 @@ class BSMLRecording(biosignalml.Recording):
   '''
 
   attributes = [ 'digest' ]
+
   FORMAT = BSML.RAW
+  MIMETYPE = 'application/x-raw'
+  EXTENSIONS = [ 'raw' ]
 
   def __init__(self, uri=None, fname=None, mode='r', metadata=None, **kwds):
   #-------------------------------------------------------------------------
