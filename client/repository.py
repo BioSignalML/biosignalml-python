@@ -29,6 +29,12 @@ class RemoteRepository(object):
     self._http = httplib2.Http()
     self.metadata = self.get_metadata('')
 
+  @classmethod
+  def connect(cls, uri, **kwds):
+  #-----------------------------
+    self = cls(uri, **kwds)
+    return self
+
   def close(self):
   #---------------
     pass
