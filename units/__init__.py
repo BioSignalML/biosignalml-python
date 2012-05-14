@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Provide access to the OUME List ontology.
 
