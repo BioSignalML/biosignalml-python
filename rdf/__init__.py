@@ -71,7 +71,11 @@ NAMESPACES = {
   'time': 'http://www.w3.org/2006/time#',
   'evt':  'http://purl.org/NET/c4dm/event.owl#',
   'tl':   'http://purl.org/NET/c4dm/timeline.owl#',
-  'oa':   'http://www.openannotation.org/ns/',
+  'uome': 'http://www.sbpax.org/uome/list.owl#',
+  'unit': 'http://www.biosignalml.org/ontologies/unit#',
+  'wfdb': 'http://www.biosignalml.org/ontologies/physiobank#',
+  'oa':   'http://www.w3.org/ns/openannotation/core/',
+  'oax':  'http://www.w3.org/ns/openannotation/extension/',
   'pav':  'http://purl.org/pav/',
   }
 for prefix, name in NAMESPACES.iteritems():
