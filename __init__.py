@@ -62,4 +62,4 @@ class UniformSignal(Signal, data.UniformTimeSeries):
     self = cls(uri, units, rate=rate)
 
 
-from client import Repository   ## Needs to be after Signal has been declared
+## from client import Repository   ## Needs to be after Signal has been declared
