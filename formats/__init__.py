@@ -19,7 +19,7 @@ Read and write physical Recordings and Signals.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-#  $ID$
+#  $ID: 60c35bd on Tue May 1 11:33:00 2012 +1200 by Dave Brooks $
 #
 ######################################################
 
