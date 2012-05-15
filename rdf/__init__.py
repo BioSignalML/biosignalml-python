@@ -163,12 +163,14 @@ class Resource(Node):
 
   :param uri: The URI of the resource.
   '''
-  def __init__(self, uri):
-  #-----------------------
+  def __init__(self, uri, label='', desc=''):
+  #------------------------------------------
     if isinstance(uri, librdf.Node) and uri.is_resource():
       super(Resource, self).__init__(node=uri)
     else:
       super(Resource, self).__init__(uri=Uri(uri))
+    self.label = label
+    self.description = desc
 
   def __eq__(self, this):
   #----------------------
