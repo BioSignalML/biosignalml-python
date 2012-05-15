@@ -1,30 +1,41 @@
-##from biosignalml,owl import UOME
+from biosignalml.rdf import Resource, NS
 
-class UOME_Test(object):
-  def __getattribute__(self, attr):
-    return attr
-UOME = UOME_Test()
+from ontology import UOME
+
+UNITS = NS('http://www.biosignalml.org/ontologies/units#')
 
 
-_units_to_UOME = { '': '' }
-
+_direct = {
+  'bmp':    'BeatsPerMinute',
+  'cc':     'CubicCentimetre',
+  'pm':     'PerMinute',
+  '1/min':  'PerMinute',
+  'Lpm':    'LitrePerMinute',
+  'lpm':    'LitrePerMinute',
+  'mv':     'Millivolt',
+  'uV-mrs': 'Microvolt',
+  }
 
 _units = {
-  '%':    'Percent',
-  'A':    'ampere',
-  'degC': 'DegreeCelsius',
-  'mHg':  'metresOfMercury',
-  'mH2O': 'metresOfWater',
-  'g':    'gram',
-  'J':    'joule',
-  'K':    'Kelvin',
-  'l':    'litre',
-  'm':    'metre',
-  's':    'second',
-  'V':    'volt',
-  'W':    'watt',
-  'bar':  'bar',
-  'bpm':  'BeatsPerMinute',
+  '%':     'Percent',
+  'A':     'ampere',
+  'deg':   'DegreeOfArc',
+  'degC':  'DegreeCelsius',
+  'mHg':   'metresOfMercury',
+  'mH2O':  'metresOfWater',
+  'g':     'gram',
+  'J':     'joule',
+  'K':     'Kelvin',
+  'l':     'litre',
+  'L':     'litre',
+  'm':     'metre',
+  'min':   'minute',
+  's':     'second',
+  'V':     'volt',
+  'W':     'watt',
+  'bar':   'bar',
+  'BPM':   'BeatsPerMinute',
+  'bpm':   'BeatsPerMinute',
   }
 
 _powers_prefix = {
@@ -76,23 +87,35 @@ def _mult(u):
   return ''.join([_power(v) for v in u.split('*')])
 
 
-def to_UOME(units):
+def to_UNITS(units):
 #==================
-  try:                   return _units_to_UOME[units]
-  except KeyError:       pass
-  try:                   return getattr(UOME, 'Per'.join([_mult(u) for u in units.split('/')]))
-  except AttributeError: raise KeyError, "Cannot map units of '%s'" % units
+  if units:
+    try:
+      uome = _direct[units]
+    except KeyError:
+      try: uome = 'Per'.join([_mult(u) for u in units.split('/')])
+      except KeyError: return None
+    return getattr(UOME, uome, None)
+  return None
 
 if __name__ == '__main__':
 #=========================
 
-  def test(u):
+  import sys
+
+  def convert(u):
     try:
-      print '%s --> %s' % (u, to_UOME(u))
+      o = to_UNITS(u)
+      if o: print '%s --> %s' % (u, o)
+      else: print 'Cannot convert: %s' % u
     except Exception, msg:
-      print '%s --> %s (%s)' % (u, type(msg), str(msg))
+      print 'Error converting: %s (%s)' % (u, msg)
 
+  for l in sys.stdin:
+    for w in l.split():
+      convert(w)
 
+  '''
   test('Km')
   test('Kg*m/s^2/W*m')
   test('mm^2')
@@ -112,4 +135,4 @@ if __name__ == '__main__':
   test('bpm')
   test('')
   test(u'\u00b5V')
-
+  '''

@@ -15,9 +15,9 @@ import math
 
 from biosignalml.data import DataSegment, UniformTimeSeries
 from biosignalml.formats import BSMLSignal
+import biosignalml.units as units
 
 from edffile import EDF
-import units
 
 
 class EDFSignal(BSMLSignal):
@@ -29,7 +29,7 @@ class EDFSignal(BSMLSignal):
   #-------------------------------
     BSMLSignal.__init__(self,
       str(edf.uri) + '/signal/%d' % signum,
-      units.to_UOME(edf._edffile.units[signum]),
+      units.to_UNITS(edf._edffile.units[signum]),
       metadata = { 'label': edf._edffile.label[signum],
                    'transducer': edf._edffile.transducer[signum],
                    'filter': edf._edffile.prefilter[signum],
