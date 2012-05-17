@@ -23,7 +23,6 @@
 Abstract BioSignalML objects.
 '''
 
-import uuid
 import logging
 
 import biosignalml.rdf as rdf
