@@ -188,15 +188,7 @@ class AbstractObject(object):
     :return: A unique URI.
     :rtype: str
     """
-    u = str(self.uri)
-    suffix = '%s/%s' % (prefix, uuid.uuid1()) if prefix else str(uuid.uuid1())
-    if   u.endswith(('/', '#')): return '%s%s'  % (u, suffix)
-    elif sibling:
-      slash = u.rfind('/')
-      hash  = u.rfind('#')
-      if hash > slash:           return '%s#%s' % (u.rsplit('#', 1)[0], suffix)
-      else:                      return '%s/%s' % (u.rsplit('/', 1)[0], suffix)
-    else:                        return '%s/%s' % (u, suffix)
+    return self.uri.make_Uri(sibling=sibling, prefix=prefix)
 
   def save_to_graph(self, graph):
   #------------------------------

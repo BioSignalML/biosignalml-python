@@ -18,6 +18,7 @@ available from http://librdf.org/.
 ######################################################
 
 import sys
+import uuid
 import logging
 
 import RDF as librdf
@@ -99,6 +100,30 @@ class Uri(librdf.Uri):
     :rtype: :class:`Uri`
     '''
     return Uri(str(self) + s)
+
+  def make_uri(self, sibling=False, prefix=None):
+  #----------------------------------------------
+    """
+    Generate a unique URI that starts with this URI.
+
+    :param sibling: When set, replace the last component of our URI with unique text.
+      The default is to append unique text to our URI.
+    :type: bool
+    :param prefix: If set, insert between the URI and unique text.
+    :type: str
+    :return: A unique URI.
+    :rtype: Uri
+    """
+    u = str(self)
+    suffix = '%s/%s' % (prefix, uuid.uuid1()) if prefix else str(uuid.uuid1())
+    if   u.endswith(('/', '#')): nu = '%s%s'  % (u, suffix)
+    elif sibling:
+      slash = u.rfind('/')
+      hash  = u.rfind('#')
+      if hash > slash: nu = '%s#%s' % (u.rsplit('#', 1)[0], suffix)
+      else: nu = '%s/%s' % (u.rsplit('/', 1)[0], suffix)
+    else: nu = '%s/%s' % (u, suffix)
+    return Uri(nu)
 
 
 class Node(librdf.Node):
