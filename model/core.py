@@ -79,7 +79,7 @@ class AbstractObject(object):
     if metadata is not None:
       self.metadata.update(AbstractObject.set_attributes(self, **metadata))
     self.uri = uri if isinstance(uri, rdf.Uri) else rdf.Uri(str(uri).strip())
-    self.graph = None
+    self.graph_uri = None
 
   def __str__(self):
   #-----------------
@@ -244,7 +244,7 @@ class AbstractObject(object):
     '''
     self = cls(uri, **kwds)
     self.load_from_graph(graph)
-    self.graph = graph
+    self.graph_uri = graph.uri
     return self
 
   @classmethod
