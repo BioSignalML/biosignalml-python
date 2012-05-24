@@ -105,7 +105,7 @@ class AbstractObject(object):
       if v in [None, '']: setattr(self, attr, value)
       elif isinstance(v, set): v.add(value)
       elif v != value: setattr(self, attr, set([v, value]))
-    else:
+    elif attr is not None:
       v = self.metadata.get(attr)
       if v in [None, '']: self.metadata[attr] = value
       elif isinstance(v, set): v.add(value)
@@ -229,7 +229,7 @@ class AbstractObject(object):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
         s, attr, v = self.rdfmap.metadata(stmt, self.metaclass) # Need to go up __mro__ from AbstractObject
         #logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
-        self._assign(attr, v)
+        if attr is not None: self._assign(attr, v)
 
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
