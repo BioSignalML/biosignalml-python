@@ -303,7 +303,7 @@ class QueryResults(librdf.QueryResults):
 class Graph(librdf.Model):
 #=========================
   '''
-  Extends Redland Graph class --- see http://librdf.org/docs/pydoc/RDF.html#Model.
+  Extends Redland Model class --- see http://librdf.org/docs/pydoc/RDF.html#Model.
 
   We always store graphs in memory using a hash index.
   '''
@@ -394,7 +394,7 @@ class Graph(librdf.Model):
     :param format: The RDF format to return.
     :param base: An optional base URI.
     :param prefixes: A dictionary of { 'prefix': 'namespace_uri' } abbreviations
-      to use in the resulting serialiasation.
+      to use in the resulting serialisation.
     :type prefixes: dict
     :return: The graph serialised as a string.
     :rtype: str
