@@ -312,8 +312,8 @@ class Graph(librdf.Model):
     librdf.Model.__init__(self, storage=librdf.Storage(name='triples',
                                                        storage_name='hashes',
                                                        options_string="hash-type='memory'"))
-    if uri and not isinstance(uri, Node) and not isinstance(uri, Uri):
-      uri = Uri(uri)
+    if isinstance(uri, Node): uri = uri.uri
+    if uri and not isinstance(uri, Uri): uri = Uri(uri)
     self.uri = uri
 
   @classmethod
