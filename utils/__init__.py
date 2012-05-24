@@ -18,12 +18,24 @@ from dateutil.tz import tzutc
 
 def datetime_to_isoformat(dt):
 #=============================
+  """
+  Convert a Python datetime to an ISO 8601 representation.
+
+  :param dt: A Python :class:~`datetime.datetime`.
+  :return: A string representation of the date and time formatted as ISO 8601.
+  """
   iso = dt.isoformat()
   if iso.endswith('+00:00'): return iso[:-6] + 'Z'
   else:                      return iso
 
 def isoformat_to_datetime(v):
 #============================
+  """
+  Convert a string to a Python datetime.
+
+  :param v: A string representing a date and time.
+  :rtype: :class:~`datetime.datetime`
+  """
   try:
     dt = dateutil.parser.parse(v)
     if dt.tzinfo is not None: return (dt - dt.utcoffset()).replace(tzinfo=tzutc())
@@ -34,12 +46,26 @@ def isoformat_to_datetime(v):
 
 def seconds_to_isoduration(secs):
 #================================
+  """
+  Convert a duration to an ISO 8601 representation.
+
+  :param secs: The duration in seconds.
+  :type secs: float
+  :return: A string representation of the duration formatted as ISO 8601.
+  """
   return isoduration.duration_isoformat(
     timedelta(seconds=int(secs), microseconds=int(1000000*(secs - int(secs)) ))
     )
 
 def isoduration_to_seconds(d):
 #=============================
+  """
+  Convert an ISO duration to a number of seconds.
+
+  :param v: A string representing a duration, formatted as ISO 8601.
+  :return: The number of seconds.
+  :rtype: float
+  """
   try:
     td = isoduration.parse_duration(d)
     return td.days*86400 + td.seconds + td.microseconds/1000000.0
@@ -48,11 +74,33 @@ def isoduration_to_seconds(d):
 
 def utctime():
 #=============
+  """
+  Return the current UTC date and time.
+
+  :rtype: :class:~`datetime.datetime`
+  """
   return datetime.now(tzutc())
 
+def utctime_as_string():
+#=======================
+  """
+  Return the current UTC date and time formatted as ISO 8601.
+
+  :rtype: str
+  """
+  return datetime_to_isoformat(utctime())
+
 def expired(when):
-#================
+#=================
+  """
+  Check if a datetime point has been reached.
+
+  :param when: The Python :class:~`datetime.datetime` to test.
+  :return: True if the time has been passed.
+
+  """
   return (when and utctime() > when)
+
 
 def chop(s, n):
 #=============
@@ -74,14 +122,19 @@ def cp1252(s):
   try:
     if isinstance(s, unicode): return s
     elif isinstance(s, str):   return s.decode('cp1252')
-    else:                      return str(s).decode('cp1252')  
+    else:                      return str(s).decode('cp1252')
   except Exception, e:
     logging.error("Can not encode %s", s)
     return('???')
 
 def nbspescape(s):
 #================
-  return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace(' ', '&#160;')
+  return s.replace('&',
+                   '&amp;').replace('<',
+                                    '&lt;').replace('>',
+                                                    '&gt;').replace('"',
+                                                                    '&quot;').replace(' ',
+                                                                                      '&#160;')
 
 def xmlescape(s):
 #===============
@@ -107,7 +160,7 @@ def xml(x):
 def num(n):
 #=========
   """ Convert a string to an integer, returning 0 if
-      the string isn't a valid integer.""" 
+      the string isn't a valid integer."""
   if not isinstance(n, int):
     try: n = int(float(str(n)) + 0.5)
     except ValueError: n = 0
@@ -190,4 +243,5 @@ def unescape(text):
 if __name__ == '__main__':
 #========================
   print utctime()
+  print utctime_as_string()
   print hexdump('123\x01\x41B1234567890abcdefghijklmnopqrstuvwxyz')
