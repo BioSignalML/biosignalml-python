@@ -23,143 +23,13 @@ from biosignalml.utils import file_uri
 
 from biosignalml.formats import BSMLRecording, BSMLSignal
 
-
-
-class WFDBRecording(BSMLRecording):
-#==================================
-
-  FORMAT = BSML.WFDB
-  MIMETYPE = 'application/x-wfdb'
-
-  def __init__(self, uri=None, fname=None, metadata=None):
-  #-------------------------------------------------------
-
-    wfdb.setgvmode(wfdb.WFDB_HIGHRES)
-    ## http: url needs .hea extension??
-
-    #logging.debug('Opening: %s (%s)', fname, uri)
-    if not fname:
-      BSMLRecording.__init__(self, uri=uri, metadata=metadata)
-      return
-    self._siginfo = wfdb.isigopen(fname)
-    if self._siginfo is None: raise IOError("Cannot open header for X '%s'" % fname)
-    self._nsignals = self._siginfo.nsig
-
-    wfdbname = wfdb.wfdbfile(None, None)
-    recname = wfdbname[:-4] if wfdbname.endswith('.hea') else wfdbname
-    if   recname.startswith('http://') or recname.startswith('ftp://'):
-      source = wfdbname
-    else:
-      recname = file_uri(recname)
-      source = file_uri(wfdbname)
-    if not uri: uri = recname
-    ##logging.debug('rec: %s, source: %s', recname, source)
-
-    if metadata is None: metadata = { }
-    metadata['format'] = BSML.WFDB
-    metadata['source'] = source
-
-    BSMLRecording.__init__(self, uri=uri, fname=fname, metadata=metadata)
-
-    self._framerate = wfdb.sampfreq(None)/wfdb.getspf()
-
-    start = wfdb.mstimstr(0)
-    if start[0] == '[':
-      self.starttime = dateutil.parser.parse(start[1:-1], dayfirst=True)
-    if self._siginfo[0].nsamp > 0:
-      self.duration = self._siginfo[0].nsamp/float(self._framerate)
-
-    ##duration = dateutil.parser.parse(wfdb.mstimstr(wfdb.strtim('e')))
-    ##print duration   ## But has date...
-
-    self._framesize = 0
-    self.data_signals = [ ]
-    self.annotation_signals = [ ]
-    self._offsets = [ ]
-    offset = 0
-    for n in xrange(self._nsignals):
-      if self._siginfo[n].desc != 'EDF Annotations':
-        self.data_signals.append(n)
-        self.add_signal(WFDBSignal(n, self, metadata =
-         { 'label': self._siginfo[n].desc,
-           'units': self._siginfo[n].units,
-           'rate': self._framerate*self._siginfo[n].spf,
-         } ))
-      else:
-        self.annotation_signals.append(n)
-      self._framesize += self._siginfo[n].spf
-      self._offsets.append((offset, self._framesize))
-      offset = self._framesize
-
-    self._sigpoints = np.ones(self._framesize, 'bool')
-    for n in xrange(self._nsignals):
-      if n in self.annotation_signals:
-        for i in xrange(*self._offsets[n]): self._sigpoints[i] = False
-
-    #if len(self.annotation_signals) > 0:
-      # read all frames, build TAL and add events -- see edffile.py
-
-
-  ## Some of the above will belong to open() when we have a create()
-
-
-  def initialise(self, fname):
-  #---------------------------
-    pass
-    #for s in self._signals:
-    #  WFDBSignal.initialise_class(self._signals[s], int(str(s).rsplit('/', 1)[-1]), self)
-
-
-  @classmethod
-  def open(cls, fname, uri=None):
-  #------------------------------
-    return cls(uri=uri, fname=fname)               ## This is the same as BSML superclass
-
-
-    """
-
-    A WFDB annotation is an irregularly sampled signal...
-
-    #self._annotators = database_name/ANNOTATORS...
-    for ann in self._annotators:
-      ainfo = wfdb.WFDB_Anninfo()
-      ainfo.name = ann
-      ainfo.stat = wfdb.WFDB_READ
-      if wfdb.annopen(fname, ainfo, 1) < 0:
-        raise IOError("Cannot get annotation '%s' info for '%s'" % (ann, fname))
-
-      annot = wfdb.WFDB_Annotation()
-      while wfdb.getann(0, annot.cast()) == 0:
-
-        start = wfdb.timstr(annot.time)  # sinces record start
-
-        wfdb.annstr(annot.anntyp)
-        annot.subtyp
-        annot.chan
-        annot.num
-        if annot.aux is not None: aux = annot.aux[1:]
-        else:                     aux = ""
-
-        self.add_event(....)
-    """
-
-  def close(self):
-  #---------------
-    wfdb.wfdbquit()
-
-  def _read_frame(self, signo = -1):
-  #---------------------------------
-    if signo < 0 or signo in self.data_signals:
-      v = wfdb.WFDB_SampleArray(self._framesize)
-      while wfdb.getframe(v.cast()) == self._nsignals:
-        if signo < 0: yield [v[i] for i in xrange(self._framesize) if self._sigpoints[i]]
-        else:         yield [v[i] for i in xrange(*self._offsets[n])]
+PHYSIOBANK = 'http://physionet.org/physiobank/database/'
 
 
 class WFDBSignal(BSMLSignal):
 #============================
 
-  MAXPOINTS = 512 #  4096
+  MAXPOINTS = 2048
 
   def __init__(self, signum, rec, metadata={}):
   #--------------------------------------------
@@ -173,11 +43,12 @@ class WFDBSignal(BSMLSignal):
 ##                   'minValue': edf._edffile._physmin[signum],
 ##                   'maxValue': edf._edffile._physmax[signum],
 ##                 }
-    self.initialise(signum, rec)
+    self.initialise(rec)
 
 
-  def initialise(self, signum, rec):
-  #---------------------------------
+  def initialise(self, rec):
+  #-------------------------
+    signum = self.index
     self._record = rec
     self._signum = signum
     info = rec._siginfo[signum]
@@ -228,7 +99,6 @@ class WFDBSignal(BSMLSignal):
 
     if duration: points = int(self.rate*duration + 0.5)
 
-
     if points > WFDBSignal.MAXPOINTS or points <= 0:
       points = WFDBSignal.MAXPOINTS
 
@@ -257,6 +127,137 @@ class WFDBSignal(BSMLSignal):
       yield DataSegment(float(startpos)/self.rate, UniformTimeSeries(data, self.rate))
       startpos += len(data)
       length -= len(data)
+
+
+class WFDBRecording(BSMLRecording):
+#==================================
+
+  FORMAT = BSML.WFDB
+  MIMETYPE = 'application/x-wfdb'
+  EXTENSIONS = [ 'hea' ]
+  SignalClass = WFDBSignal
+
+  def __init__(self, uri, fname=None, metadata=None, **kwds):
+  #----------------------------------------------------------
+    BSMLRecording.__init__(self, uri=uri, fname=fname, metadata=metadata, **kwds)
+    self._siginfo = None
+
+  def initialise(self, fname):
+  #---------------------------
+    wfdb.setgvmode(wfdb.WFDB_HIGHRES)
+    ## http: url needs .hea extension??
+    #logging.debug('Opening: %s (%s)', fname, uri)
+    if fname.startswith(PHYSIOBANK):
+      fname = fname[len(PHYSIOBANK):]
+    self._siginfo = wfdb.isigopen(fname)
+    self._nsignals = self._siginfo.nsig
+    if self._siginfo is None:
+      raise IOError("Cannot open header for '%s'" % fname)
+    for s in self.signals():
+      WFDBSignal.initialise_class(s, self)
+
+  def _set_attributes(self):
+  #-------------------------
+    if self._siginfo is None: return
+#    wfdbname = wfdb.wfdbfile(None, None)
+#    recname = wfdbname[:-4] if wfdbname.endswith('.hea') else wfdbname
+#    if   source.startswith('http://') or recname.startswith('ftp://'):
+#      source = wfdbname
+#    else:
+#      recname = file_uri(recname)
+#      source = file_uri(wfdbname)
+#    if not uri: uri = recname
+    ##logging.debug('rec: %s, source: %s', recname, source)
+
+    self._framerate = wfdb.sampfreq(None)/wfdb.getspf()
+
+    start = wfdb.mstimstr(0)
+    if start[0] == '[':
+      self.starttime = dateutil.parser.parse(start[1:-1], dayfirst=True)
+    if self._siginfo[0].nsamp > 0:
+      self.duration = self._siginfo[0].nsamp/float(self._framerate)
+
+    ##duration = dateutil.parser.parse(wfdb.mstimstr(wfdb.strtim('e')))
+    ##print duration   ## But has date...
+
+    self._framesize = 0
+    self.data_signals = [ ]
+    self.annotation_signals = [ ]
+    self._offsets = [ ]
+    offset = 0
+    for n in xrange(self._nsignals):
+      if self._siginfo[n].desc != 'EDF Annotations':
+        self.data_signals.append(n)
+        self.add_signal(WFDBSignal(n, self, metadata =
+         { 'label': self._siginfo[n].desc,
+           'units': self._siginfo[n].units,
+           'rate': self._framerate*self._siginfo[n].spf,
+         } ))
+      else:
+        self.annotation_signals.append(n)
+      self._framesize += self._siginfo[n].spf
+      self._offsets.append((offset, self._framesize))
+      offset = self._framesize
+
+    self._sigpoints = np.ones(self._framesize, 'bool')
+    for n in xrange(self._nsignals):
+      if n in self.annotation_signals:
+        for i in xrange(*self._offsets[n]): self._sigpoints[i] = False
+
+    #if len(self.annotation_signals) > 0:
+      # read all frames, build TAL and add events -- see edffile.py
+
+
+  ## Some of the above will belong to open() when we have a create()
+
+
+  @classmethod
+  def open(cls, fname, uri=None):
+  #------------------------------
+    self = cls(uri=uri, fname=fname)
+    self.initialise(fname)
+    self._set_attributes()
+    return self
+
+
+    """
+
+    A WFDB annotation is an irregularly sampled signal...
+
+    #self._annotators = database_name/ANNOTATORS...
+    for ann in self._annotators:
+      ainfo = wfdb.WFDB_Anninfo()
+      ainfo.name = ann
+      ainfo.stat = wfdb.WFDB_READ
+      if wfdb.annopen(fname, ainfo, 1) < 0:
+        raise IOError("Cannot get annotation '%s' info for '%s'" % (ann, fname))
+
+      annot = wfdb.WFDB_Annotation()
+      while wfdb.getann(0, annot.cast()) == 0:
+
+        start = wfdb.timstr(annot.time)  # sinces record start
+
+        wfdb.annstr(annot.anntyp)
+        annot.subtyp
+        annot.chan
+        annot.num
+        if annot.aux is not None: aux = annot.aux[1:]
+        else:                     aux = ""
+
+        self.add_event(....)
+    """
+
+  def close(self):
+  #---------------
+    wfdb.wfdbquit()
+
+  def _read_frame(self, signo = -1):
+  #---------------------------------
+    if signo < 0 or signo in self.data_signals:
+      v = wfdb.WFDB_SampleArray(self._framesize)
+      while wfdb.getframe(v.cast()) == self._nsignals:
+        if signo < 0: yield [v[i] for i in xrange(self._framesize) if self._sigpoints[i]]
+        else:         yield [v[i] for i in xrange(*self._offsets[n])]
 
 
 
