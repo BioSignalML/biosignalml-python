@@ -64,11 +64,7 @@ class BSMLRecording(biosignalml.Recording):
 
   def __init__(self, uri=None, fname=None, mode='r', metadata=None, **kwds):
   #-------------------------------------------------------------------------
-    if fname:
-      if 'source' not in kwds: kwds['source'] = file_uri(fname)
-      if not uri: uri = kwds['source']
-    elif 'source' not in kwds:
-      kwds['source'] = uri
+    if not uri and fname: uri = file_uri(fname)
     kwds['format'] = getattr(self, 'FORMAT')
     biosignalml.Recording.__init__(self, uri, metadata=metadata, **kwds)
 
