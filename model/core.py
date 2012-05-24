@@ -187,7 +187,7 @@ class AbstractObject(object):
     :return: A unique URI.
     :rtype: str
     """
-    return self.uri.make_Uri(sibling=sibling, prefix=prefix)
+    return self.uri.make_uri(sibling=sibling, prefix=prefix)
 
   def save_to_graph(self, graph):
   #------------------------------
