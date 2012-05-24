@@ -37,8 +37,8 @@ class Signal(model.Signal, data.TimeSeries):  ## TEST WHAT MIXIN ENABLES...
 
   ##def __init__(self, 
 
-  def read(self, interval):
-  #------------------------
+  def read(self, interval=None, **kwds):
+  #-------------------------------------
     '''
     :return: A :class:TimeSeries containing signal data covering the interval.
     '''
