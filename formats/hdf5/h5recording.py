@@ -166,9 +166,9 @@ class H5Clock(object):
 class H5Signal(object):
 #======================
   """
-  A single signal in a HDF5 dataset.
+  A single signal in a HDF5 recording.
 
-  :param dataset: A :class:`h5py.Dataset` containg the signal's data and attributes.
+  :param dataset: A :class:`h5py.Dataset` containing the signal's data and attributes.
   :param index: The index of the signal if the dataset is compound, otherwise None.
   """
 
@@ -231,9 +231,9 @@ class H5Signal(object):
   def __getitem__(self, pos):
   #--------------------------
     """
-    Return signal data by subscripting a H5Signal instance.
+    Return signal data by subscripting.
 
-    :param pos: The index of the data point(s).
+    :param pos: A data point index or slice specifying a range.
     :type pos: A Python slice.
     """
     return self.dataset[pos] if self.index is None else self.dataset[self.index, pos]
@@ -251,7 +251,6 @@ class H5Signal(object):
       return self.dataset.file[attrs['clock']][i]
     else:
       return i * self.period
-
 
 
 class H5Recording(object):
@@ -630,7 +629,8 @@ class H5Recording(object):
     """
     Get metadata from the HDF5 recording.
 
-    :return: A tuple of retrieved metadata and mimetype.
+    :return: A 2-tuple of retrieved metadata and mimetype, or None
+             if the recording has no '/metadata' dataset.
     :rtype: tuple(unicode, str)
     """
     if self._h5.get('/metadata'):
