@@ -16,8 +16,8 @@ Files are structured as follows::
   /uris        Group
   /recording   Group     uri
     ./signal   Group
-      ./0      Dataset   uri, units, rate/period/clock, timing
-      ./1      Dataset   uri, units, rate/period/clock, timing
+      ./0      Dataset   uri, units, rate/period/clock, timeunits
+      ./1      Dataset   uri, units, rate/period/clock, timeunits
        .
     ./clock    Group
       /0       Dataset   uri, units
@@ -49,9 +49,9 @@ using standard mimetypes for RDF.
 /uris (group)
 -------------
 
-This group has an attribute for each URI that is an attribute in the recording and
-is used to ensure URI uniqeness. The value of each attribute is a HDF5 reference to the
-dataset which contains data about the resource.
+This group has an attribute for each URI that is an attribute in the recording. It
+is used to ensure URI uniqeness and to lookup datasets. The value of each attribute
+is a HDF5 reference to the dataset which contains a resource's data.
 
 
 /recording (group)
@@ -77,8 +77,8 @@ the ``uri`` array.
 
 Timing for the signal(s) in a dataset is given by the mutually exclusive attributes
 of ``rate``, ``period`` and ``clock``. If ``rate`` or ``period`` is given then an
-optional ``timing`` attribute specifies the units of ``period``, with that of ``rate``
-being the reciprical; default units are seconds. If ``clock`` is given its value
+optional ``timeunits`` attribute specifies the units of ``period``, with that of ``rate``
+being the reciprocal; default units are seconds. If ``clock`` is given its value
 is a HDF5 reference to a dataset within the '/recording/clock' group.
 
 
@@ -98,7 +98,7 @@ Signals and Timing
 ==================
 
 We do not assume that individual signal values are scalar quantities varying in time.
-'time' is measured in whatever units are given for a signal's ``timing`` attribute or a
+'time' is measured in whatever units are given for a signal's ``timeunits`` attribute or a
 clock's ``units`` attribute and could for example refer to a spatial position. A signal
 value in a simple dataset may be a vector or matrix quantity, as determined by the
 ``shape`` parameter when a signal is created, as well as scalar; all signals in a
@@ -126,7 +126,12 @@ DTYPE_STRING = h5py.special_dtype(vlen=str)   #: Store strings as variable lengt
 
 class H5Recording(object):
 #=========================
+  """
+  Store signals as HDF5 Recordings.
 
+  The `create` and `open` class methods are intended to be used instead
+  of directly constructing instances.
+  """
   def __init__(self, uri, fname, h5=None, **kwds):
   #-----------------------------------------------
     self._h5 = h5
@@ -202,7 +207,7 @@ class H5Recording(object):
 
 
   def create_signal(self, uri, units, shape=None, data=None, dtype=None,
-                          rate=None, period=None, timing=None, clock=None):
+                          rate=None, period=None, timeunits=None, clock=None):
   #------------------------------------------------------------------------
     """
     Create a dataset for a signal or group of signals in a HDF5 recording.
@@ -223,8 +228,8 @@ class H5Recording(object):
     :type rate: float
     :param period: The time, in time-units, between data points.
     :type period: float
-    :param timing: The units 'time' is measured in. Optional, default is seconds.
-    :param clock: The name of a clock dataset containing sample times. Optional.
+    :param timeunits: The units 'time' is measured in. Optional, default is seconds.
+    :param clock: The URI of a clock dataset containing sample times. Optional.
     :return: The name of the signal dataset created.
     :rtype: str
 
@@ -302,7 +307,7 @@ class H5Recording(object):
     if   rate:               dset.attrs['rate'] = rate
     elif period:             dset.attrs['period'] = period
     elif clock is not None:  dset.attrs['clock'] = clocktimes.ref
-    if timing: dset.attrs['timing'] = timing
+    if timeunits: dset.attrs['timeunits'] = timeunits
     return dset.name
 
 
