@@ -124,6 +124,88 @@ COMPRESSION = 'gzip'
 DTYPE_STRING = h5py.special_dtype(vlen=str)   #: Store strings as variable length.
 
 
+class H5Signal(object):
+#======================
+  """
+  A single signal in a HDF5 dataset.
+
+  :param dataset: A :class:`h5py.Dataset` containg the signal's data and attributes.
+  :param index: The index of the signal if the dataset is compound, otherwise None.
+  """
+
+  def __init__(self, dataset, index=None):
+  #---------------------------------------
+    self.dataset = dataset
+    self.index = index
+
+  @property
+  def uri(self):
+  #-------------
+    """The URI of the signal."""
+    uri = self.dataset.attrs['uri']
+    return uri if self.index is None else uri[self.index]
+
+  @property
+  def units(self):
+  #---------------
+    """The physical units of the signal's data."""
+    units = self.dataset.attrs['units']
+    return units if self.index is None else units[self.index]
+
+  @property
+  def rate(self):
+  #--------------
+    """The sampling rate of the signal, or None if sampling is non-uniform."""
+    attrs = self.dataset.attrs
+    if   attrs.get('rate'):   return attrs['rate']
+    elif attrs.get('period'): return 1.0/attrs['period']
+    else:                     return None
+
+  @property
+  def period(self):
+  #----------------
+    """The sampling period of the signal, or None if sampling is non-uniform."""
+    attrs = self.dataset.attrs
+    if   attrs.get('period'): return attrs['period']
+    elif attrs.get('rate'):   return 1.0/attrs['rate']
+    else:                     return None
+
+  @property
+  def timeunits(self):
+  #-------------------
+    """The units signal timing is measured in."""
+    attrs = self.dataset.attrs
+    if attrs.get('clock'):
+      return self.dataset.file[attrs['clock']].attrs.get('units')
+    else:
+      return attrs.get('timeunits')
+
+  def __getitem__(self, pos):
+  #--------------------------
+    """
+    Return signal data by subscripting a H5Signal instance.
+
+    :param pos: The index of the data point(s).
+    :type pos: A Python slice.
+    """
+    return self.dataset[pos] if self.index is None else self.dataset[self.index, pos]
+
+  def time(self, i):
+  #-----------------
+    """
+    Get the 'time' of a data point.
+
+    :param i: The data point's index.
+    :type i: int
+    """
+    attrs = self.dataset.attrs
+    if attrs.get('clock'):
+      return self.dataset.file[attrs['clock']][i]
+    else:
+      return i * self.period
+
+
+
 class H5Recording(object):
 #=========================
   """
@@ -282,7 +364,7 @@ class H5Recording(object):
     elif clock is not None:
       if rate is not None or period is not None:
         raise ValueError("Only one of 'rate', 'period', or 'clock' can be specified")
-      clocktimes = self._h5.get(clock)
+      clocktimes = self.get_clock(clock)
       if clocktimes is None or clocktimes.len() < npoints:
         raise ValueError("Clock either doesn't exist or have sufficient times")
     else:
@@ -359,22 +441,23 @@ class H5Recording(object):
     return dset.name
 
 
-  def extend_signal(self, name, data):
-  #-----------------------------------
+  def extend_signal(self, uri, data):
+  #----------------------------------
     """
     Extend a signal dataset in a HDF5 recording.
 
-    :param name: The name of the dataset.
-    :type name: str
+    :param uri: The URI of the signal for a simple dataset, or of any
+                signal in a compound dataset.
     :param data: Data points for the signal(s).
     :type data: :class:`numpy.ndarray` or an iterable.
 
     If the dataset is compound (i.e. contains several signals) then the size of the
     supplied data must be a multiple of the number of signals.
     """
-    dset = self._h5.get(name)
-    if dset is None: raise KeyError("Unknown signal '%s'" % name)
-    nsignals = len(dset.attrs['uri']) if dset.attrs['uri'].shape else 1
+    sig = self.get_signal(uri)
+    if sig is None: raise KeyError("Unknown signal '%s'" % uri)
+    dset = sig.dataset
+    nsignals = len(dset.attrs['uri']) if sig.index is not None else 1
     if not isinstance(data, np.ndarray): data = np.array(data)
 
     if nsignals > 1:         # compound dataset
@@ -384,8 +467,8 @@ class H5Recording(object):
       if len(dset.shape) == 1: npoints = data.size
       else:                    npoints = data.size/reduce((lambda x, y: x * y), dset.shape[1:])
       dpoints = dset.len()
-    clock = dset.attrs.get('clock')
-    if clock and clock.len() < npoints:
+    clockref = dset.attrs.get('clock')
+    if clockref and self._h5[clockref].len() < (npoints+dpoints):
       raise ValueError("Clock doesn't have sufficient times")
     try:
       if nsignals > 1:         # compound dataset
@@ -398,17 +481,16 @@ class H5Recording(object):
       raise RuntimeError("Cannot extend signal dataset '%s' (%s)" % (name, msg))
 
 
-  def extend_clock(self, name, times):
-  #-----------------------------------
+  def extend_clock(self, uri, times):
+  #----------------------------------
     """
     Extend a clock dataset in a HDF5 recording.
 
-    :param name: The name of the dataset.
-    :type name: str
-    :param times: Time points for the clock.
+    :param uri: The URI of the clock dataset.
+    :param times: Time points with which to extend the clock.
     :type times: :class:`numpy.ndarray` or an iterable.
     """
-    dset = self._h5.get(name)
+    dset = self.get_clock(uri)
     if dset is None: raise KeyError("Unknown clock '%s'" % name)
     if not isinstance(times, np.ndarray): times = np.array(times)
     if len(dset.shape) == 1: npoints = times.size
@@ -419,6 +501,52 @@ class H5Recording(object):
       dset[dpoints:] = times.reshape((npoints,) + dset.shape[1:])
     except Exception, msg:
       raise RuntimeError("Cannot extend clock dataset '%s' (%s)" % (name, msg))
+
+
+  def find_dataset(self, uri):
+  #---------------------------
+    """
+    Find a dataset from its URI.
+
+    :param uri: The URI of the dataset to locate.
+    :return: A :class:`h5py.Dataset` containing the resource's data, or None if
+             the URI is unknown.
+    """
+    ref = self._h5['uris'].attrs.get(str(uri))
+    return self._h5[ref] if ref else None
+
+
+  def get_clock(self, uri):
+  #------------------------
+    """
+    Find a clock dataset from its URI.
+
+    :param uri: The URI of the clock dataset to locate.
+    :return: A :class:`h5py.Dataset` containing the clock's times, or None if
+             the URI is unknown or the dataset is not that for a clock.
+    """
+    dset = self.find_dataset(uri)
+    return dset if dset and dset.name.startswith('/recording/clock/') else None
+
+
+  def get_signal(self, uri):
+  #------------------------
+    """
+    Find a signal dataset from its URI.
+
+    :param uri: The URI of the signal dataset to locate.
+    :return: A :class:`H5Signal` containing the signal, or None if
+             the URI is unknown or the dataset is not that for a signal.
+    """
+    dset = self.find_dataset(uri)
+    if dset and dset.name.startswith('/recording/signal/'):
+      uris = dset.attrs['uri']
+      if uris == str(uri): return H5Signal(dset)
+      try:               return H5Signal(dset, list(uris).index(str(uri)))
+      except ValueError: pass
+      raise KeyError("Cannot locate correct dataset for '%s'" % uri)
+    else:
+      return None
 
 
 
@@ -433,16 +561,19 @@ if __name__ == '__main__':
 
   g.create_signal('a signal URI', 'mV', data=[1, 2, 3], rate=10)
   
-  s2 = g.create_signal('2d signal', 'mV', data=[1, 2, 3, 4], shape=(2,), rate=100)
+  g.create_signal('2d signal', 'mV', data=[1, 2, 3, 4], shape=(2,), rate=100)
 
   g.create_signal(['URI1', 'URI2'], ['mA', 'mV'], data=[1, 2, 3, 4], period=0.001)
 
-  c = g.create_clock('clock URI', times=[1, 2, 3, 4, 5])
-  g.create_signal('another signal URI', 'mV', data=[1, 2, 1], clock=c)
+  g.create_clock('clock URI', times=[1, 2, 3, 4, 5])
+  g.create_signal('another signal URI', 'mV', data=[1, 2, 1], clock='clock URI')
 
   g.create_clock('2d clock', times=[1, 2, 3, 4, 5, 6], shape=(2,))
 
-  g.extend_signal(s2, [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ])
+  g.extend_signal('2d signal', [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ])
+
+  g.extend_clock('clock URI', [ 1, 2, 4, 5, 6, 7, 8, 9, ])
+  g.extend_signal('another signal URI', [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ])
 
   g.close()
 
