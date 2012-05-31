@@ -205,15 +205,31 @@ class H5Recording(object):
                           rate=None, period=None, timing=None, clock=None):
   #------------------------------------------------------------------------
     """
+    Create a dataset for a signal or group of signals in a HDF5 recording.
 
     :param uri: The URI(s) of the signal(s). If ``uri`` is an iterable then the dataset
                 is compound and contains several scalar signals.
-    :param units: The unit(s) of the signal(s). Must be iterable and have the same number
+    :param units: The units for the signal(s). Must be iterable and have the same number
                   of elements as ``uri`` when the dataset is compound.
-
     :param shape: The shape of a single data point. Must be None or scalar ('()') for
-                  a compound dataset.
+                  a compound dataset. Optional.
     :type shape: tuple
+    :param data: Initial data for the signal(s). Optional.
+    :type data: :class:`numpy.ndarray` or an iterable.
+    :param dtype: The datatype in which to store data points. Must be specified if
+                  no ``data`` is given.
+    :type dtype: :class:`numpy.dtype`
+    :param rate: The frequency, as samples/time-unit, of data points.
+    :type rate: float
+    :param period: The time, in time-units, between data points.
+    :type period: float
+    :param timing: The units 'time' is measured in. Optional, default is seconds.
+    :param clock: The name of a clock dataset containing sample times. Optional.
+    :return: The name of the signal dataset created.
+    :rtype: str
+
+    Only one of ``rate``, ``period``, or ``clock`` can be given.
+
     """
 
     if not getattr(uri, '__iter__', None) and not getattr(units, '__iter__', None):
@@ -292,6 +308,21 @@ class H5Recording(object):
 
   def create_clock(self, uri, units=None, shape=None, times=None, dtype=None):
   #---------------------------------------------------------------------------
+    """
+    Create a clock dataset in a HDF5 recording.
+
+    :param uri: The URI for the clock.
+    :param units: The units of the clock. Optional, default is seconds.
+    :param shape: The shape of a single time point. Optional.
+    :type shape: tuple
+    :param times: Initial time points for the clock. Optional.
+    :type times: :class:`numpy.ndarray` or an iterable.
+    :param dtype: The datatype in which to store time points. Must be specified if
+                  no ``times`` are given.
+    :type dtype: :class:`numpy.dtype`
+    :return: The name of the clock dataset created.
+    :rtype: str
+    """
     if self._h5['uris'].attrs.get(str(uri)):
       raise KeyError("A clock already has URI '%s'" % uri)
     if times and not isinstance(times, np.ndarray):
@@ -325,6 +356,17 @@ class H5Recording(object):
 
   def extend_signal(self, name, data):
   #-----------------------------------
+    """
+    Extend a signal dataset in a HDF5 recording.
+
+    :param name: The name of the dataset.
+    :type name: str
+    :param data: Data points for the signal(s).
+    :type data: :class:`numpy.ndarray` or an iterable.
+
+    If the dataset is compound (i.e. contains several signals) then the size of the
+    supplied data must be a multiple of the number of signals.
+    """
     dset = self._h5.get(name)
     if dset is None: raise KeyError("Unknown signal '%s'" % name)
     nsignals = len(dset.attrs['uri']) if dset.attrs['uri'].shape else 1
@@ -353,6 +395,14 @@ class H5Recording(object):
 
   def extend_clock(self, name, times):
   #-----------------------------------
+    """
+    Extend a clock dataset in a HDF5 recording.
+
+    :param name: The name of the dataset.
+    :type name: str
+    :param times: Time points for the clock.
+    :type times: :class:`numpy.ndarray` or an iterable.
+    """
     dset = self._h5.get(name)
     if dset is None: raise KeyError("Unknown clock '%s'" % name)
     if not isinstance(times, np.ndarray): times = np.array(times)
@@ -370,10 +420,10 @@ class H5Recording(object):
 if __name__ == '__main__':
 #=========================
 
-  f = HDF5Recording.create('/some/uri', 'test.h5', True)
+  f = H5Recording.create('/some/uri', 'test.h5', True)
   f.close()
 
-  g = HDF5Recording.open('test.h5')
+  g = H5Recording.open('test.h5')
 
 
   g.create_signal('a signal URI', 'mV', data=[1, 2, 3], rate=10)
