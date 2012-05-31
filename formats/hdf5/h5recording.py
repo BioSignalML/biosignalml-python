@@ -124,6 +124,45 @@ COMPRESSION = 'gzip'
 DTYPE_STRING = h5py.special_dtype(vlen=str)   #: Store strings as variable length.
 
 
+class H5Clock(object):
+#=====================
+  """
+  A clock in a HDF5 recording.
+
+  :param dataset: A :class:`h5py.Dataset` containing the clock's data and attributes.
+  """
+
+  def __init__(self, dataset):
+  #---------------------------
+    self.dataset = dataset
+
+  @property
+  def uri(self):
+  #-------------
+    """The URI of the clock."""
+    return self.dataset.attrs['uri']
+
+  @property
+  def units(self):
+  #---------------
+    """The physical units of the clock."""
+    return self.dataset.attrs.get('units')
+
+  def __len__(self):
+  #-----------------
+    return self.dataset.len()
+
+  def __getitem__(self, pos):
+  #--------------------------
+    """
+    Return clock times by subscripting.
+
+    :param pos: A time point index or slice specifying a range.
+    :type pos: A Python slice.
+    """
+    return self.dataset[pos]
+
+
 class H5Signal(object):
 #======================
   """
@@ -179,6 +218,13 @@ class H5Signal(object):
       return self.dataset.file[attrs['clock']].attrs.get('units')
     else:
       return attrs.get('timeunits')
+
+  @property
+  def clock(self):
+  #---------------
+    """The signal's clock dataset."""
+    attrs = self.dataset.attrs
+    if attrs.get('clock'): return H5Clock(self.dataset.file[attrs['clock']])
 
   def __getitem__(self, pos):
   #--------------------------
@@ -364,7 +410,7 @@ class H5Recording(object):
       if rate is not None or period is not None:
         raise ValueError("Only one of 'rate', 'period', or 'clock' can be specified")
       clocktimes = self.get_clock(clock)
-      if clocktimes is None or clocktimes.len() < npoints:
+      if clocktimes is None or len(clocktimes) < npoints:
         raise ValueError("Clock either doesn't exist or have sufficient times")
     else:
       raise ValueError("No timing information given")
@@ -387,7 +433,7 @@ class H5Recording(object):
       for u in uri: self._h5['uris'].attrs[str(u)] = dset.ref
     if   rate:               dset.attrs['rate'] = rate
     elif period:             dset.attrs['period'] = period
-    elif clock is not None:  dset.attrs['clock'] = clocktimes.ref
+    elif clock is not None:  dset.attrs['clock'] = clocktimes.dataset.ref
     if timeunits: dset.attrs['timeunits'] = timeunits
     return dset.name
 
@@ -489,8 +535,9 @@ class H5Recording(object):
     :param times: Time points with which to extend the clock.
     :type times: :class:`numpy.ndarray` or an iterable.
     """
-    dset = self.get_clock(uri)
-    if dset is None: raise KeyError("Unknown clock '%s'" % name)
+    clock = self.get_clock(uri)
+    if clock is None: raise KeyError("Unknown clock '%s'" % name)
+    dset = clock.dataset
     if not isinstance(times, np.ndarray): times = np.array(times)
     if len(dset.shape) == 1: npoints = times.size
     else:                    npoints = times.size/reduce((lambda x, y: x * y), dset.shape[1:])
@@ -520,12 +567,12 @@ class H5Recording(object):
     """
     Find a clock dataset from its URI.
 
-    :param uri: The URI of the clock dataset to locate.
-    :return: A :class:`h5py.Dataset` containing the clock's times, or None if
-             the URI is unknown or the dataset is not that for a clock.
+    :param uri: The URI of the clock dataset to get.
+    :return: A :class:`H5Clock` or None if the URI is unknown or
+             the dataset is not that for a clock.
     """
     dset = self.find_dataset(uri)
-    return dset if dset and dset.name.startswith('/recording/clock/') else None
+    if dset and dset.name.startswith('/recording/clock/'): return H5Clock(dset)
 
 
   def get_signal(self, uri):
