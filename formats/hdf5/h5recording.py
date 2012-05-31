@@ -224,6 +224,10 @@ class H5Signal(object):
     attrs = self.dataset.attrs
     if attrs.get('clock'): return H5Clock(self.dataset.file[attrs['clock']])
 
+  def __len__(self):
+  #-----------------
+    return self.dataset.len() if self.index is None else self.dataset[self.index].len()
+
   def __getitem__(self, pos):
   #--------------------------
     """
