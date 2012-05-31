@@ -590,8 +590,8 @@ class H5Recording(object):
     dset = self.find_dataset(uri)
     if dset and dset.name.startswith('/recording/signal/'):
       uris = dset.attrs['uri']
-      if uris == str(uri): return (dset, None)
-      try:                 return (dset, list(uris).index(str(uri)))
+      if str(uris) == str(uri): return (dset, None)
+      try:                      return (dset, list(uris).index(str(uri)))
       except ValueError: pass
       raise KeyError("Cannot locate correct dataset for '%s'" % uri)
 
