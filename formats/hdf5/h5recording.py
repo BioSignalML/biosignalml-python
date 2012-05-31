@@ -42,8 +42,8 @@ software; files will always be compatible withhin minor releases.
 -------------------
 
 This is an optional dataset containing a RDF serialisation of metadata associated with
-the recording and its signals. The ``format`` attribute gives the serialisation format,
-using standard mimetypes for RDF.
+the recording and its signals, stored as a UTF-8 string. The ``format`` attribute gives
+the serialisation format, using standard mimetypes for RDF.
 
 
 /uris (group)
@@ -285,7 +285,6 @@ class H5Recording(object):
     if self._h5:
       self._h5.close()
       self._h5 = None
-
 
 
   def create_signal(self, uri, units, shape=None, data=None, dtype=None,
@@ -549,15 +548,45 @@ class H5Recording(object):
       return None
 
 
+  def store_metadata(self, metadata, mimetype):
+  #--------------------------------------------
+    """
+    Store metadata in the HDF5 recording.
+
+    :param metadata: RDF serialised as a string.
+    :type metadata: str or unicode
+    :param mimetype: A mimetype string for the RDF format used.
+
+    Metadata is encoded as UTF-8 when stored.
+    """
+    if self._h5.get('/metadata'): del self._h5['/metadata']
+    md = self._h5.create_dataset('/metadata', data=metadata.encode('utf-8'))
+    md.attrs['format'] = mimetype
+
+  def get_metadata(self):
+  #----------------------
+    """
+    Get metadata from the HDF5 recording.
+
+    :return: A tuple of retrieved metadata and mimetype.
+    :rtype: tuple(unicode, str)
+    """
+    if self._h5.get('/metadata'):
+      md = self._h5['/metadata']
+      return (md[()].decode('utf-8'), md.attrs.get('format'))
+    else:
+      return (None, None)
+
+
 
 if __name__ == '__main__':
 #=========================
 
   f = H5Recording.create('/some/uri', 'test.h5', True)
+  f.store_metadata('metadata string', 'format')
   f.close()
 
   g = H5Recording.open('test.h5')
-
 
   g.create_signal('a signal URI', 'mV', data=[1, 2, 3], rate=10)
   
@@ -574,6 +603,8 @@ if __name__ == '__main__':
 
   g.extend_clock('clock URI', [ 1, 2, 4, 5, 6, 7, 8, 9, ])
   g.extend_signal('another signal URI', [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ])
+
+  print g.get_metadata()
 
   g.close()
 
