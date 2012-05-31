@@ -198,7 +198,6 @@ class H5Signal(object):
     attrs = self.dataset.attrs
     if   attrs.get('rate'):   return attrs['rate']
     elif attrs.get('period'): return 1.0/attrs['period']
-    else:                     return None
 
   @property
   def period(self):
@@ -207,7 +206,6 @@ class H5Signal(object):
     attrs = self.dataset.attrs
     if   attrs.get('period'): return attrs['period']
     elif attrs.get('rate'):   return 1.0/attrs['rate']
-    else:                     return None
 
   @property
   def timeunits(self):
@@ -559,7 +557,7 @@ class H5Recording(object):
              the URI is unknown.
     """
     ref = self._h5['uris'].attrs.get(str(uri))
-    return self._h5[ref] if ref else None
+    if ref: return self._h5[ref]
 
 
   def get_clock(self, uri):
@@ -591,8 +589,6 @@ class H5Recording(object):
       try:               return H5Signal(dset, list(uris).index(str(uri)))
       except ValueError: pass
       raise KeyError("Cannot locate correct dataset for '%s'" % uri)
-    else:
-      return None
 
 
   def store_metadata(self, metadata, mimetype):
@@ -621,9 +617,6 @@ class H5Recording(object):
     if self._h5.get('/metadata'):
       md = self._h5['/metadata']
       return (md[()].decode('utf-8'), md.attrs.get('format'))
-    else:
-      return (None, None)
-
 
 
 if __name__ == '__main__':
