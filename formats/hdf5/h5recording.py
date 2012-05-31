@@ -550,14 +550,29 @@ class H5Recording(object):
       raise RuntimeError("Cannot extend clock dataset '%s' (%s)" % (name, msg))
 
 
-  def find_dataset(self, uri):
-  #---------------------------
+  def get_dataset_by_name(self, name):
+  #-----------------------------------
+    """
+    Find a dataset from its name.
+
+    :param uri: The name of the dataset.
+    :return: A :class:`h5py.Dataset`.
+    """
+    obj = self._h5.get(name)
+    if isinstance(obj, h5py.Dataset): return obj
+
+
+  def get_dataset(self, uri):
+  #--------------------------
     """
     Find a dataset from its URI.
 
-    :param uri: The URI of the dataset to locate.
+    :param uri: The URI of the dataset.
     :return: A :class:`h5py.Dataset` containing the resource's data, or None if
              the URI is unknown.
+
+    If the dataset is compound it will have several URI's, one for each
+    constituent signal.
     """
     ref = self._h5['uris'].attrs.get(str(uri))
     if ref: return self._h5[ref]
@@ -572,7 +587,7 @@ class H5Recording(object):
     :return: A :class:`H5Clock` or None if the URI is unknown or
              the dataset is not that for a clock.
     """
-    dset = self.find_dataset(uri)
+    dset = self.get_dataset(uri)
     if dset and dset.name.startswith('/recording/clock/'): return H5Clock(dset)
 
 
@@ -587,7 +602,7 @@ class H5Recording(object):
              None. None is returned if the URI connot be found.
      :rtype: tuple(:class:`h5py.Dataset`, int or None)
     """
-    dset = self.find_dataset(uri)
+    dset = self.get_dataset(uri)
     if dset and dset.name.startswith('/recording/signal/'):
       uris = dset.attrs['uri']
       if str(uris) == str(uri): return (dset, None)
