@@ -298,14 +298,15 @@ class H5Recording(object):
     try:
       h5 = h5py.File(fname, 'r' if readonly else 'r+')
     except IOError, msg:
-      raise IOError("Cannot open file '%s' (%s)", (fname, msg))
+      raise IOError("Cannot open file '%s' (%s)" % (fname, msg))
     try:
       v = h5.attrs['version']
-      if v[0:5] != IDENTIFIER[0:5]: raise TypeError
+      if v[0:5] != IDENTIFIER[0:5]: raise TypeError("Not a valid BSML file")
       (m, n) = tuple([int(i) for i in v[5:].split('.')])
-      if m > MAJOR: raise ValueError
+      if m > MAJOR:
+        raise ValueError("File '%s' not compatible with version %s" % (fname, VERSION))
     except Exception:
-      raise ValueError("File '%s' not compatible with version %s" % (fname, VERSION))
+      raise ValueError("Invalid file format")
     if (not h5.get('/uris')
      or not h5.get('/recording/signal')
      or not h5['recording'].attrs.get('uri')):
@@ -328,7 +329,7 @@ class H5Recording(object):
     try:
       h5 = h5py.File(fname, 'w' if replace else 'w-')
     except IOError, msg:
-      raise IOError("Cannot create file '%s' (%s)", (fname, msg))
+      raise IOError("Cannot create file '%s' (%s)" % (fname, msg))
     h5.attrs['version'] = IDENTIFIER
     h5.create_group('uris')
     h5.create_group('recording')
@@ -420,6 +421,8 @@ class H5Recording(object):
       npoints = 0
       shape = (0,)
       maxshape = (None,)
+    if data is None and dtype is None:
+      dtype = np.dtype('f8')      # Default to 64-bit float
 
     if rate or period:
       if (clock is not None
