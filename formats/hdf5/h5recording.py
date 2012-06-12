@@ -38,8 +38,8 @@ Newer major releases will always read files created by prior versions of the
 software; files will always be compatible withhin minor releases.
 
 
-/metadata (dataset)
--------------------
+/metadata dataset
+-----------------
 
 This is an optional dataset containing a RDF serialisation of metadata associated with
 the recording and its signals, stored as a UTF-8 string. The ``format`` attribute gives
@@ -104,11 +104,11 @@ Signals and Timing
 ==================
 
 We do not assume that individual signal values are scalar quantities varying in time.
-'time' is measured in whatever units are given for a signal's ``timeunits`` attribute or a
-clock's ``units`` attribute and could for example refer to a spatial position. A signal
-value in a simple dataset may be a vector or matrix quantity, as determined by the
-``shape`` parameter when a signal is created, as well as scalar; all signals in a
-compound signal dataset must be scalar. Similarly a clock can have sclar, vector, or
+'time' is measured in the units given by a signal's ``timeunits`` attribute or a
+clock's ``units`` attribute and could, for example, refer to a spatial position. A
+signal contained in a simple dataset may be a vector or matrix quantity as well as scalar
+(determined by the ``shape`` parameter when a signal is created), however all signals in a
+compound signal dataset must be scalar. A clock can have scalar, vector, or
 matrix 'time' values,
 
 """
@@ -231,7 +231,7 @@ class H5Signal(object):
   @property
   def clock(self):
   #---------------
-    """The signal's clock dataset."""
+    """The signal's clock dataset, or None if sampling is regular"""
     attrs = self.dataset.attrs
     if attrs.get('clock'): return H5Clock(self.dataset.file[attrs['clock']])
 
