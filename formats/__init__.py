@@ -36,89 +36,6 @@ def not_implemented(instance, method):
   raise NotImplementedError('%s.%s()' % (instance.__class__.__name__, method))
 
 
-class BSMLRecording(biosignalml.Recording):
-#==========================================
-  '''
-  A generic biosignal Recording as a physical object.
-
-  :param fname: Name of filesystem object holding a Recording.
-  :type fname: str
-  :param uri: URI of the Recording.
-  :type uri: str
-  :param mode: Open the recording for reading ('r') or create a new recording ('w').
-  :type mode: str
-  :param metadata: Dictionary containing metadata values for the recording.
-  :type metadata: dict
-
-  If `fname` is set but not `metadata['source']` then `source` is set to
-  the full 'file://' path of `fname`; if `uri` is not given it is set to `source`.
-
-  If no `fname` and no `metadata['source']` then `source` is set to `uri`.
-  '''
-
-  attributes = [ 'digest' ]
-
-  FORMAT = BSML.RAW
-  MIMETYPE = 'application/x-raw'
-  EXTENSIONS = [ 'raw' ]
-
-  def __init__(self, uri=None, fname=None, mode='r', metadata=None, **kwds):
-  #-------------------------------------------------------------------------
-    if not uri and fname: uri = file_uri(fname)
-    kwds['format'] = getattr(self, 'FORMAT')
-    biosignalml.Recording.__init__(self, uri, metadata=metadata, **kwds)
-
-  @classmethod
-  def open(cls, fname, uri=None, mode='r', **kwds):
-  #------------------------------------------------
-    '''
-    Open a Recording.
-
-    :param fname: Name of filesystem object holding the recording.
-    :type fname: str
-    :param uri: URI of the recording.
-    :type uri: str
-    :param mode: Open the recording for reading ('r') or create a new recording ('w').
-    :type mode: str
-    :return: a biosignal Recording.
-    '''
-    return cls(uri=uri, fname=fname, mode=mode, **kwds)
-
-  @classmethod
-  def create(cls, fname, uri=None, **kwds):
-  #----------------------------------------
-    '''
-    Create a Recording.
-
-    :param fname: Name of filesystem object holding a Recording.
-    :type fname: str
-    :param uri: URI of the Recording.
-    :type uri: str
-    :return: a new biosignal Recording (with no Signals).
-    '''
-    return cls.open(uri=uri, fname=fname, mode='w', **kwds)
-
-  def close(self):
-  #---------------
-    '''
-    Close a Recording.
-    '''
-    pass
-
-  def rdf_metadata(self, format='turtle', prefixes={}):
-  #----------------------------------------------------
-    """
-    Get a Recording's metadata as RDF.
-
-    :param format: The RDF format with which to serialise metadata. Options are 'turtle'
-      and 'rdfxml'.
-    :type format: str
-    :return: The RDF as a string.
-    :rtype: str
-    """
-    not_implemented(self, 'save_metadata')
-
-
 class BSMLSignal(biosignalml.Signal):
 #====================================
   '''
@@ -178,6 +95,90 @@ class BSMLSignal(biosignalml.Signal):
     :return: The time of the n\ :sup:`th` data point.
     '''
     not_implemented(self, 'time')
+
+
+class BSMLRecording(biosignalml.Recording):
+#==========================================
+  '''
+  A generic biosignal Recording as a physical object.
+
+  :param fname: Name of filesystem object holding a Recording.
+  :type fname: str
+  :param uri: URI of the Recording.
+  :type uri: str
+  :param mode: Open the recording for reading ('r') or create a new recording ('w').
+  :type mode: str
+  :param metadata: Dictionary containing metadata values for the recording.
+  :type metadata: dict
+
+  If `fname` is set but not `metadata['source']` then `source` is set to
+  the full 'file://' path of `fname`; if `uri` is not given it is set to `source`.
+
+  If no `fname` and no `metadata['source']` then `source` is set to `uri`.
+  '''
+
+  attributes = [ 'digest' ]
+
+  FORMAT = BSML.RAW
+  MIMETYPE = 'application/x-raw'
+  EXTENSIONS = [ 'raw' ]
+  SignalClass = BSMLSignal
+
+  def __init__(self, uri=None, fname=None, mode='r', metadata=None, **kwds):
+  #-------------------------------------------------------------------------
+    if not uri and fname: uri = file_uri(fname)
+    kwds['format'] = getattr(self, 'FORMAT')
+    biosignalml.Recording.__init__(self, uri, metadata=metadata, **kwds)
+
+  @classmethod
+  def open(cls, fname, uri=None, mode='r', **kwds):
+  #------------------------------------------------
+    '''
+    Open a Recording.
+
+    :param fname: Name of filesystem object holding the recording.
+    :type fname: str
+    :param uri: URI of the recording.
+    :type uri: str
+    :param mode: Open the recording for reading ('r') or create a new recording ('w').
+    :type mode: str
+    :return: a biosignal Recording.
+    '''
+    return cls(uri=uri, fname=fname, mode=mode, **kwds)
+
+  @classmethod
+  def create(cls, fname, uri=None, **kwds):
+  #----------------------------------------
+    '''
+    Create a Recording.
+
+    :param fname: Name of filesystem object holding a Recording.
+    :type fname: str
+    :param uri: URI of the Recording.
+    :type uri: str
+    :return: a new biosignal Recording (with no Signals).
+    '''
+    return cls.open(uri=uri, fname=fname, mode='w', **kwds)
+
+  def close(self):
+  #---------------
+    '''
+    Close a Recording.
+    '''
+    pass
+
+  def rdf_metadata(self, format='turtle', prefixes={}):
+  #----------------------------------------------------
+    """
+    Get a Recording's metadata as RDF.
+
+    :param format: The RDF format with which to serialise metadata. Options are 'turtle'
+      and 'rdfxml'.
+    :type format: str
+    :return: The RDF as a string.
+    :rtype: str
+    """
+    not_implemented(self, 'save_metadata')
 
 
 from raw  import RAWRecording
