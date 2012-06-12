@@ -31,9 +31,9 @@ class WFDBSignal(BSMLSignal):
 
   MAXPOINTS = 2048
 
-  def __init__(self, signum, rec, metadata={}):
-  #--------------------------------------------
-    super(WFDBSignal, self).__init__(str(rec.uri) + '/signal/%d' % signum,  metadata = metadata)
+  def __init__(self, signum, rec, units, metadata=None):  ## Hmm, URI should be a parameter...
+  #-----------------------------------------------------
+    BSMLSignal.__init__(self, str(rec.uri) + '/signal/%d' % signum, units, metadata = metadata)
 ##      metadata = { 'label': edf._edffile.label[signum],
 ##                   'units': edf._edffile.units[signum],
 ##                   'transducer': edf._edffile.transducer[signum],
@@ -43,6 +43,7 @@ class WFDBSignal(BSMLSignal):
 ##                   'minValue': edf._edffile._physmin[signum],
 ##                   'maxValue': edf._edffile._physmax[signum],
 ##                 }
+    self.index = signum
     self.initialise(rec)
 
 
@@ -114,13 +115,23 @@ class WFDBSignal(BSMLSignal):
       if segment[0] <= segment[1]: seg = segment
       else:                        seg = (segment[1], segment[0])
       startpos = max(0, int(math.floor(seg[0])))
-      length = min(len(self), int(math.ceil(seg[1])) - startpos + 1)
+      length = min(len(self), int(math.ceil(seg[1])) - startpos)
 
     wfdb.tnextvec(self._signum, startpos)
-    v = wfdb.WFDB_SampleArray(self._record._nsignals)
+
+    # Setup offsets into frame for each signal
+    siginfo = self._record._siginfo
+    offsets = [ (0, siginfo[0].spf) ]    ## This is record wide data...
+    samplesperframe = siginfo[0].spf
+    for s in xrange(1, self._record._nsignals):
+      offsets.append((samplesperframe, siginfo[s].spf))
+      samplesperframe += siginfo[s].spf
+
+    v = wfdb.WFDB_SampleArray(samplesperframe)
     while length > 0:
       if points > length: points = length
-      data = (np.array([ v[self._signum]
+      s = self._signum
+      data = (np.array([ v[n] for n in xrange(offsets[s][0], offsets[s][0]+offsets[s][1])
                            for i in xrange(points)
                              if wfdb.getvec(v.cast()) >= 0 ]) - self._baseline)/self._gain
       if len(data) <= 0: break
@@ -150,9 +161,9 @@ class WFDBRecording(BSMLRecording):
     if fname.startswith(PHYSIOBANK):
       fname = fname[len(PHYSIOBANK):]
     self._siginfo = wfdb.isigopen(fname)
-    self._nsignals = self._siginfo.nsig
     if self._siginfo is None:
       raise IOError("Cannot open header for '%s'" % fname)
+    self._nsignals = self._siginfo.nsig
     for s in self.signals():
       WFDBSignal.initialise_class(s, self)
 
@@ -188,9 +199,10 @@ class WFDBRecording(BSMLRecording):
     for n in xrange(self._nsignals):
       if self._siginfo[n].desc != 'EDF Annotations':
         self.data_signals.append(n)
-        self.add_signal(WFDBSignal(n, self, metadata =
+        self.add_signal(WFDBSignal(n, self,
+         self._siginfo[n].units,
+         metadata =
          { 'label': self._siginfo[n].desc,
-           'units': self._siginfo[n].units,
            'rate': self._framerate*self._siginfo[n].spf,
          } ))
       else:
@@ -207,14 +219,12 @@ class WFDBRecording(BSMLRecording):
     #if len(self.annotation_signals) > 0:
       # read all frames, build TAL and add events -- see edffile.py
 
-
   ## Some of the above will belong to open() when we have a create()
-
 
   @classmethod
   def open(cls, fname, uri=None):
   #------------------------------
-    self = cls(uri=uri, fname=fname)
+    self = cls(uri, fname=fname)
     self.initialise(fname)
     self._set_attributes()
     return self
