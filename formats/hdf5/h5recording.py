@@ -277,6 +277,7 @@ class H5Recording(object):
   """
   def __init__(self, uri, fname, h5=None, **kwds):
   #-----------------------------------------------
+    self.uri = uri
     self._h5 = h5
 
   def __del__(self):
