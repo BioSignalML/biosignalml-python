@@ -16,11 +16,11 @@ Files are structured as follows::
   /uris        Group
   /recording   Group     uri
     ./signal   Group
-      ./0      Dataset   uri, units, rate/period/clock, timeunits
-      ./1      Dataset   uri, units, rate/period/clock, timeunits
+      ./0      Dataset   uri, units, gain/offset, rate/period/clock, timeunits
+      ./1      Dataset   uri, units, gain/offset, rate/period/clock, timeunits
        .
     ./clock    Group
-      /0       Dataset   uri, units
+      /0       Dataset   uri, units, scale
        .
 
 
@@ -75,6 +75,10 @@ when the ``uri`` and ``units`` attributes are string arrays the dataset is Compo
 and contains multiple signals, with each signal corresponding to an element of
 the ``uri`` array.
 
+A signal or group of signals can optionally have a ``gain`` and/or ``offset`` specified,
+which are stored as dataset attributes. Returned signal values are obtained from the
+raw data value (as read) by subtracting any offset before multiplying by any gain.
+
 Timing for the signal(s) in a dataset is given by the mutually exclusive attributes
 of ``rate``, ``period`` and ``clock``. If ``rate`` or ``period`` is given then an
 optional ``timeunits`` attribute specifies the units of ``period``, with that of ``rate``
@@ -90,8 +94,10 @@ Any clock (i.e. timing) datasets are contained within a 'clock' group in '/recor
 /recording/clock/N (dataset)
 ----------------------------
 
-Clock datasets are numbered, starting from '0'. Attributes are ``uri`` and ``units``;
-default units are seconds.
+Clock datasets are numbered, starting from '0'. Attributes are ``uri`` and ``units`` with
+default units of seconds. A clock can optionally have a ``scale'' factor; if so the stored
+value of a time point is be multiplied by the scaling factor to obtain a value in the
+specified units.
 
 
 Signals and Timing
@@ -160,7 +166,10 @@ class H5Clock(object):
     :param pos: A time point index or slice specifying a range.
     :type pos: A Python slice.
     """
-    return self.dataset[pos]
+    t = self.dataset[pos]
+    attrs = self.dataset.attrs
+    if attrs.get('scale'): return t*float(attrs['scale'])
+    else:                  return t
 
 
 class H5Signal(object):
@@ -176,6 +185,8 @@ class H5Signal(object):
   #---------------------------------------
     self.dataset = dataset
     self.index = index
+    self.gain = self.dataset.attrs.get('gain', 1.0)
+    self.offset = self.dataset.attrs.get('offset', 0)
 
   @property
   def uri(self):
@@ -236,7 +247,10 @@ class H5Signal(object):
     :param pos: A data point index or slice specifying a range.
     :type pos: A Python slice.
     """
-    return self.dataset[pos] if self.index is None else self.dataset[self.index, pos]
+    data = self.dataset[pos] if self.index is None else self.dataset[self.index, pos]
+    if self.offset != 0: data -= self.offset
+    if self.gain != 1.0: data *= self.gain
+    return data
 
   def time(self, i):
   #-----------------
@@ -334,9 +348,10 @@ class H5Recording(object):
       self._h5 = None
 
 
-  def create_signal(self, uri, units, shape=None, data=None, dtype=None,
+  def create_signal(self, uri, units, shape=None, data=None,
+                          dtype=None, gain=None, offset=None,
                           rate=None, period=None, timeunits=None, clock=None):
-  #------------------------------------------------------------------------
+  #---------------------------------------------------------------------------
     """
     Create a dataset for a signal or group of signals in a HDF5 recording.
 
@@ -352,6 +367,10 @@ class H5Recording(object):
     :param dtype: The datatype in which to store data points. Must be specified if
                   no ``data`` is given.
     :type dtype: :class:`numpy.dtype`
+    :param gain: If set, the signal's data values are multiplied by the ``gain`` when read. Optional.
+    :type gain: float
+    :param gain: If set, ``offset`` is subtracted from a data value before any gain
+                 multiplication. Optional.
     :param rate: The frequency, as samples/time-unit, of data points.
     :type rate: float
     :param period: The time, in time-units, between data points.
@@ -432,6 +451,8 @@ class H5Recording(object):
       dset.attrs.create('uri',   [str(u) for u in uri],   dtype=DTYPE_STRING)
       dset.attrs.create('units', [str(u) for u in units], dtype=DTYPE_STRING)
       for u in uri: self._h5['uris'].attrs[str(u)] = dset.ref
+    if gain: dset.attrs['gain'] = gain
+    if offset: dset.attrs['offset'] = offset
     if   rate:               dset.attrs['rate'] = rate
     elif period:             dset.attrs['period'] = period
     elif clock is not None:  dset.attrs['clock'] = clocktimes.dataset.ref
@@ -439,8 +460,8 @@ class H5Recording(object):
     return dset.name
 
 
-  def create_clock(self, uri, units=None, shape=None, times=None, dtype=None):
-  #---------------------------------------------------------------------------
+  def create_clock(self, uri, units=None, shape=None, times=None, dtype=None, scale=None):
+  #---------------------------------------------------------------------------------------
     """
     Create a clock dataset in a HDF5 recording.
 
@@ -453,6 +474,8 @@ class H5Recording(object):
     :param dtype: The datatype in which to store time points. Must be specified if
                   no ``times`` are given.
     :type dtype: :class:`numpy.dtype`
+    :param scale: A scaling factor to obtain time units from time points. Optional.
+    :type scale: float
     :return: The name of the clock dataset created.
     :rtype: str
     """
@@ -483,6 +506,7 @@ class H5Recording(object):
 
     dset.attrs['uri'] = str(uri)
     if units: dset.attrs['units'] = str(units)
+    if scale: dset.attrs['scale'] = float(scale)
     self._h5['uris'].attrs[str(uri)] = dset.ref
     return dset.name
 
