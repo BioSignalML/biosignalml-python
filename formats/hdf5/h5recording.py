@@ -485,6 +485,7 @@ class H5Recording(object):
     """
     if self._h5['uris'].attrs.get(str(uri)):
       raise KeyError("A clock already has URI '%s'" % uri)
+
     if times and not isinstance(times, np.ndarray):
       times = np.array(times)
     if shape is not None:
@@ -637,9 +638,39 @@ class H5Recording(object):
       raise KeyError("Cannot locate correct dataset for '%s'" % uri)
 
 
+  def signals(self):
+  #-----------------
     """
+    Return all signals in the recording.
 
+    :rtype: list of :class:`H5Signal`
     """
+    uris = []
+    for n in sorted(list(self._h5.get('/recording/signal'))):
+      sig = self.get_dataset_by_name('/recording/signal/%s' % n)
+      if sig:
+        uri = sig.attrs.get('uri')
+        if uri is None: pass
+        elif isinstance(uri, np.ndarray): uris.extend(list(uri))
+        else: uris.append(uri)
+    return [ self.get_signal(u) for u in uris ]
+
+
+  def clocks(self):
+  #----------------
+    """
+    Return all clocks in the recording.
+
+    :rtype: list of :class:`H5Clock`
+    """
+    uris = []
+    for n in sorted(list(self._h5.get('/recording/clock'))):
+      clk = self.get_dataset_by_name('/recording/clock/%s' % n)
+      if clk:
+        uri = clk.attrs.get('uri')
+        if uri is None: pass
+        else: uris.append(uri)
+    return [ self.get_clock(u) for u in uris ]
 
 
   def store_metadata(self, metadata, mimetype):
