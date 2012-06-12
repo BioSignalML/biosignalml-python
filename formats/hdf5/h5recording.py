@@ -619,26 +619,6 @@ class H5Recording(object):
     if dset and dset.name.startswith('/recording/clock/'): return H5Clock(dset)
 
 
-  def get_signals(self, uri):
-  #-------------------------
-    """
-    Find a signal dataset from its URI.
-
-    :param uri: The URI of the signal dataset to get.
-    :return: A 2-tuple of the dataset containing the signal's data and, if a
-             compound dataset, the index of the signal in the dataset, otherwise
-             None. None is returned if the URI connot be found.
-     :rtype: tuple(:class:`h5py.Dataset`, int or None)
-    """
-    dset = self.get_dataset(uri)
-    if dset and dset.name.startswith('/recording/signal/'):
-      uris = dset.attrs['uri']
-      if str(uris) == str(uri): return (dset, None)
-      try:                      return (dset, list(uris).index(str(uri)))
-      except ValueError: pass
-      raise KeyError("Cannot locate correct dataset for '%s'" % uri)
-
-
   def get_signal(self, uri):
   #------------------------
     """
@@ -648,8 +628,18 @@ class H5Recording(object):
     :return: A :class:`H5Signal` containing the signal, or None if
              the URI is unknown or the dataset is not that for a signal.
     """
-    sigs = self.get_signals(uri)
-    if sigs: return H5Signal(*sigs)
+    dset = self.get_dataset(uri)
+    if dset and dset.name.startswith('/recording/signal/'):
+      uris = dset.attrs['uri']
+      if str(uris) == str(uri): return H5Signal(dset, None)
+      try:                      return H5Signal(dset, list(uris).index(str(uri)))
+      except ValueError: pass
+      raise KeyError("Cannot locate correct dataset for '%s'" % uri)
+
+
+    """
+
+    """
 
 
   def store_metadata(self, metadata, mimetype):
