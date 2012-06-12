@@ -693,13 +693,15 @@ class H5Recording(object):
     """
     Get metadata from the HDF5 recording.
 
-    :return: A 2-tuple of retrieved metadata and mimetype, or None
-             if the recording has no '/metadata' dataset.
+    :return: A 2-tuple of retrieved metadata and mimetype, or
+             (None, None) if the recording has no '/metadata' dataset.
     :rtype: tuple(unicode, str)
     """
     if self._h5.get('/metadata'):
       md = self._h5['/metadata']
       return (md[()].decode('utf-8'), md.attrs.get('format'))
+    else:
+      return (None, None)
 
 
 if __name__ == '__main__':
