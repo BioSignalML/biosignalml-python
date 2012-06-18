@@ -208,19 +208,26 @@ class AbstractObject(object):
     """
     return self.uri.make_uri(sibling=sibling, prefix=prefix)
 
+  def metadata_as_stream(self):
+  #----------------------------
+    '''
+    Add RDF statements about ourselves as a stream.
+    '''
+    if self.metaclass:
+      yield rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)
+      for s in self.rdfmap.statement_stream(self): yield s
+
   def save_to_graph(self, graph):
   #------------------------------
     '''
     Add RDF statements about ourselves to a graph.
     '''
-    if (self.metaclass):
-      graph.append(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass))
-      graph.add_statements(self.rdfmap.statement_stream(self))
+    graph.add_statements(self.metadata_as_stream())
 
   def metadata_as_graph(self):
   #---------------------------
     """
-    Return metadata in a RDF graph.
+    Return a RDF graph containing our metadata.
     """
     graph = rdf.Graph(self.uri)
     self.save_to_graph(graph)

@@ -150,12 +150,12 @@ class Mapping(object):
         for v in value:
           if isinstance(v, AbstractObject):
             yield Statement(subject, map.property, self._makenode(v, None, None))
-            for s in v.rdfmap.statement_stream(v): yield s
+            for s in v.metadata_as_stream(): yield s
           else:
             yield Statement(subject, map.property, self._makenode(v, map.datatype, map.to_rdf))
       elif isinstance(value, AbstractObject):
         yield Statement(subject, map.property, self._makenode(value, None, None))
-        for s in value.rdfmap.statement_stream(value): yield s
+        for s in value.metadata_as_stream(): yield s
       else:
         yield Statement(subject, map.property, self._makenode(value, map.datatype, map.to_rdf))
 
