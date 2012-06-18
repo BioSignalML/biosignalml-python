@@ -239,7 +239,6 @@ class Recording(core.AbstractObject):
     :type graph: :class:`~biosignalml.rdf.Graph`
     """
     core.AbstractObject.save_to_graph(self, graph)
-    self.timeline.save_to_graph(graph)
     for s in self.signals(): s.save_to_graph(graph)
     for e in self._events.itervalues(): e.save_to_graph(graph)
 
@@ -348,17 +347,6 @@ class Annotation(core.AbstractObject):
   def tag(self, tag):
   #------------------
     self.tags.append(tag)
-
-  def save_to_graph(self, graph):
-  #------------------------------
-    """
-    Add a Recording's metadata to a RDF graph.
-
-    :param graph: A RDF graph.
-    :type graph: :class:`~biosignalml.rdf.Graph`
-    """
-    core.AbstractObject.save_to_graph(self, graph)
-    if self.body: self.body.save_to_graph(graph)
 
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
