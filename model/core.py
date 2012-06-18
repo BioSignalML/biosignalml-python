@@ -104,6 +104,7 @@ class AbstractObject(object):
       v = getattr(self, attr, None)
       if v in [None, '']: setattr(self, attr, value)
       elif isinstance(v, set): v.add(value)
+      elif isinstance(v, list): v.append(value)
       elif v != value: setattr(self, attr, set([v, value]))
     elif attr is not None:
       v = self.metadata.get(attr)
