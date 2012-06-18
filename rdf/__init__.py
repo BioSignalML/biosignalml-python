@@ -32,14 +32,9 @@ class RDFParseError(Exception):
 class Format(object):
 #====================
   '''Different RDF representation formats.'''
-  RDFXML = 'rdfxml'
-  TURTLE = 'turtle'
-  JSON   = 'json'
-
-  mimetypes = { RDFXML: 'application/rdf+xml',
-                TURTLE: 'text/turtle',
-                JSON:   'application/json',
-              }
+  RDFXML = 'application/rdf+xml'
+  TURTLE = 'text/turtle'
+  JSON   = 'application/json'
 
   @staticmethod
   def mimetype(format):
@@ -50,7 +45,7 @@ class Format(object):
     :param format: A RDF representation.
     :rtype: str
     '''
-    return Format.mimetypes[format]
+    return format
 
 
 class NS(librdf.NS):
@@ -360,7 +355,7 @@ class Graph(librdf.Model):
     :param format: The content's RDF format.
     :param base: An optional base URI of the content.
     """
-    parser = librdf.Parser(name=str(format))
+    parser = librdf.Parser(mime_type=format)
     try:
       statements = parser.parse_as_stream(uri, base)
       if statements: self.add_statements(statements)
@@ -378,7 +373,7 @@ class Graph(librdf.Model):
     :param format: The string's RDF format.
     :param base: The base URI of the content.
     """
-    parser = librdf.Parser(name=str(format))
+    parser = librdf.Parser(mime_type=format)
     try:
       statements = parser.parse_string_as_stream(string, base)
       if statements: self.add_statements(statements)
@@ -400,7 +395,7 @@ class Graph(librdf.Model):
     :rtype: str
     '''
     if base is None: base = self.uri
-    serialiser = librdf.Serializer(format)
+    serialiser = librdf.Serializer(mime_type=format)
     for prefix, uri in prefixes.iteritems():
       serialiser.set_namespace(prefix, Uri(uri))
     return serialiser.serialize_model_to_string(self, base_uri=base)
