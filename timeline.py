@@ -58,6 +58,8 @@ class Interval(model.core.AbstractObject):
 #=========================================
   '''
   An abstract BioSignalML Interval.
+
+  We assume intervals are topologically semi-open -- ``end`` is just outside.
   '''
 
   metaclass = TL.RelativeInterval  #: :attr:`.TL.RelativeInterval`
@@ -81,7 +83,11 @@ class Interval(model.core.AbstractObject):
     self.duration = duration
     self.timeline = timeline
 
-
+  @property
+  def end(self, timeline=None):     # Needs to use timeline to map
+  #----------------------------
+    '''Get the end of the interval.'''
+    return self.start + self.duration
 
   def __add__(self, increment):
   #----------------------------
