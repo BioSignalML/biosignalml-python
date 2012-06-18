@@ -53,7 +53,12 @@ class NS(librdf.NS):
   '''
   Wrapper for Redland Namespace utility class --- see http://librdf.org/docs/pydoc/RDF.html#NS.
   '''
-  pass
+  @property
+  def prefix(self):
+  #----------------
+    """Get the namespace's prefix."""
+    return self._prefix
+
 
 # Generic namespaces:
 NAMESPACES = {
