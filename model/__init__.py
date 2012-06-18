@@ -371,7 +371,7 @@ class Annotation(core.AbstractObject):
     :type graph: :class:`~biosignalml.rdf.Graph`
     :rtype: :class:`Recording`
     '''
-    self = cls(uri, _set_time=False, **kwds)
+    self = cls(uri, set_time=False, **kwds)
     self.load_from_graph(graph)
     for b in graph.get_objects(self.uri, OA.hasBody):
       self.body = Annotation.TextContent.create_from_graph(b, graph)
