@@ -159,6 +159,24 @@ class AbstractObject(object):
     return { attr: value for attr, value in values.iteritems()
       if not (value is None or attr in attribs or attr[0] == '_') }
 
+
+  def set_metadata(self, metadata=None, **kwds):
+  #----------------------------------------------
+    """
+    Update metadata attributes.
+
+    :param metadata: Dictionary containing metadata values for the resource.
+    :type metadata: dict
+    :param kwds: Keyword/value pairs of metadata elements. These have precedence
+      over values in the `metadata` parameter for setting of attributes; values
+      in the `metadata` parameter take precedence for setting the object's
+      `metadata` dictionary.
+    """
+    if metadata is not None:
+      self.metadata.update(AbstractObject.set_attributes(self, **metadata))
+    self.metadata.update(AbstractObject.set_attributes(self, **kwds))
+
+
   def get_attributes(self):
   #------------------------
     '''
