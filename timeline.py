@@ -1,5 +1,5 @@
 '''
-TimeLine, Instant and Interval objects.
+RelativeTimeLine, Instant and Interval objects.
 '''
 ######################################################
 #
@@ -32,8 +32,8 @@ import biosignalml.model.mapping as mapping
 from biosignalml.model.mapping import PropertyMap
 
 
-class TimeLine(model.core.AbstractObject):
-#=========================================
+class RelativeTimeLine(model.core.AbstractObject):
+#=================================================
 
   '''
   An abstract BioSignalML TimeLine.
@@ -66,7 +66,7 @@ class Interval(model.core.AbstractObject):
 
   mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
                                                    to_rdf=mapping.get_uri,
-                                                   from_rdf=TimeLine),
+                                                   from_rdf=RelativeTimeLine),
               ('start',    metaclass): PropertyMap(TL.beginsAtDuration, XSD.duration,
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds),
@@ -100,7 +100,7 @@ class Instant(Interval):
 
   mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
                                                    to_rdf=mapping.get_uri,
-                                                   from_rdf=TimeLine),
+                                                   from_rdf=RelativeTimeLine),
               ('at',       metaclass): PropertyMap(TL.atDuration, XSD.duration,
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds) }

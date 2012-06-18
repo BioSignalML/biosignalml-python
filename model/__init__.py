@@ -75,8 +75,8 @@ class Signal(core.AbstractObject):
 
 def _get_timeline(tl):      # Stops a circular import
 #--------------------
-  from biosignalml.timeline import TimeLine
-  return TimeLine(tl)
+  from biosignalml.timeline import RelativeTimeLine
+  return RelativeTimeLine(tl)
 
 class Recording(core.AbstractObject):
 #====================================
@@ -112,9 +112,9 @@ class Recording(core.AbstractObject):
 
   def __init__(self, uri, metadata=None, **kwds):
   #----------------------------------------------
-    from biosignalml.timeline import TimeLine   ## Otherwise circular import...
+    from biosignalml.timeline import RelativeTimeLine   ## Otherwise circular import...
     core.AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
-    self.timeline = TimeLine(str(uri) + '/timeline')
+    self.timeline = RelativeTimeLine(str(uri) + '/timeline')
     self._signals = { }
     self._signal_uris = [ ]
     self._events = { }
