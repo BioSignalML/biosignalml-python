@@ -239,14 +239,12 @@ if __name__ == '__main__':
 
 
   r = MyRecording('http://example.org/uri1', description='Hello', yy = ['subject', 'in', 'list'] )
-  #print rdf.Format.TURTLE
-  #print r.metadata_as_string(rdf.Format.TURTLE)
   g = rdf.Graph()
   r.save_to_graph(g)
 
-
-  s = MyRecording.create_from_graph('http://example.org/uri1', g, comment='From graph')
-  #print s.metadata_as_string(rdf.Format.TURTLE)
+  s = MyRecording.create_from_graph('http://example.org/uri1', g)
+  assert(r.metadata_as_string(rdf.Format.TURTLE) == s.metadata_as_string(rdf.Format.TURTLE))
+  s.comment='From graph'
 
   user = 'http://example.org/users/test-user'
 
@@ -261,13 +259,13 @@ if __name__ == '__main__':
   b = Annotation.Tag(a2, s.uri, user, t1)
   c = Annotation(a3, s.uri, user, tags=[t2, t3], text='Multiple tags')
 
-  print a.metadata_as_string(rdf.Format.TURTLE)
-  print b.metadata_as_string(rdf.Format.TURTLE)
-  print c.metadata_as_string(rdf.Format.TURTLE)
+  #print a.metadata_as_string(rdf.Format.TURTLE)
+  #print b.metadata_as_string(rdf.Format.TURTLE)
+  #print c.metadata_as_string(rdf.Format.TURTLE)
 
   c.save_to_graph(g)
   d = Annotation.create_from_graph(a3, g)
-  print d.metadata_as_string(rdf.Format.TURTLE)
+  assert(c.metadata_as_string(rdf.Format.TURTLE) == d.metadata_as_string(rdf.Format.TURTLE))
 
   s.metadata['zz'] = [ a, b, c ]
   print s.metadata_as_string(rdf.Format.TURTLE)
