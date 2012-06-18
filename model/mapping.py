@@ -143,14 +143,21 @@ class Mapping(object):
         return Node(**result)
 
   def _statements(self, subject, map, value):
-  #----------------------------------------------
+  #------------------------------------------
+    from biosignalml.model.core import AbstractObject
     if value not in [None, '']:
       if hasattr(value, '__iter__'):
-        for v in value: yield Statement(subject, map.property,
-                                        self._makenode(v, map.datatype, map.to_rdf))
+        for v in value:
+          if isinstance(v, AbstractObject):
+            yield Statement(subject, map.property, self._makenode(v, None, None))
+            for s in v.rdfmap.statement_stream(v): yield s
+          else:
+            yield Statement(subject, map.property, self._makenode(v, map.datatype, map.to_rdf))
+      elif isinstance(value, AbstractObject):
+        yield Statement(subject, map.property, self._makenode(value, None, None))
+        for s in value.rdfmap.statement_stream(value): yield s
       else:
-        yield Statement(subject, map.property,
-                        self._makenode(value, map.datatype, map.to_rdf))
+        yield Statement(subject, map.property, self._makenode(value, map.datatype, map.to_rdf))
 
   def statement_stream(self, resource):
   #------------------------------------
@@ -183,7 +190,7 @@ class Mapping(object):
     elif node.is_blank(): v = node.blank
     else:
       v = node.literal[0]
-      if dtype: v = datatypes.get(dtype, str)(v) 
+      if dtype: v = datatypes.get(dtype, str)(v)
     return from_rdf(v) if from_rdf else v
 
   def metadata(self, statement, metaclass):
@@ -227,17 +234,19 @@ if __name__ == '__main__':
   #----------------------------
     mapping = { ('xx', None): PropertyMap(rdf.DCTERMS.subject),
                 ('yy', None): PropertyMap('http://example.org/onto#subject'),
+                ('zz', None): PropertyMap('http://example.org/onto#annotation'),
      }
 
 
   r = MyRecording('http://example.org/uri1', description='Hello', yy = ['subject', 'in', 'list'] )
-  print r.metadata_as_string(rdf.Format.TURTLE)
+  #print rdf.Format.TURTLE
+  #print r.metadata_as_string(rdf.Format.TURTLE)
   g = rdf.Graph()
   r.save_to_graph(g)
 
 
   s = MyRecording.create_from_graph('http://example.org/uri1', g, comment='From graph')
-  print s.metadata_as_string(rdf.Format.TURTLE)
+  #print s.metadata_as_string(rdf.Format.TURTLE)
 
   user = 'http://example.org/users/test-user'
 
@@ -259,3 +268,7 @@ if __name__ == '__main__':
   c.save_to_graph(g)
   d = Annotation.create_from_graph(a3, g)
   print d.metadata_as_string(rdf.Format.TURTLE)
+
+  s.metadata['zz'] = [ a, b, c ]
+  print s.metadata_as_string(rdf.Format.TURTLE)
+
