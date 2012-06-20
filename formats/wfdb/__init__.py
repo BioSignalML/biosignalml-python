@@ -255,33 +255,6 @@ class WFDBRecording(BSMLRecording):
     self._set_attributes()
     return self
 
-
-    """
-
-    A WFDB annotation is an irregularly sampled signal...
-
-    #self._annotators = database_name/ANNOTATORS...
-    for ann in self._annotators:
-      ainfo = wfdb.WFDB_Anninfo()
-      ainfo.name = ann
-      ainfo.stat = wfdb.WFDB_READ
-      if wfdb.annopen(fname, ainfo, 1) < 0:
-        raise IOError("Cannot get annotation '%s' info for '%s'" % (ann, fname))
-
-      annot = wfdb.WFDB_Annotation()
-      while wfdb.getann(0, annot.cast()) == 0:
-
-        start = wfdb.timstr(annot.time)  # sinces record start
-
-        wfdb.annstr(annot.anntyp)
-        annot.subtyp
-        annot.chan
-        annot.num
-        if annot.aux is not None: aux = annot.aux[1:]
-        else:                     aux = ""
-
-        self.add_event(....)
-    """
   def __del__(self):
   #-----------------
     self.close()
