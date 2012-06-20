@@ -59,6 +59,29 @@ class Clock(AbstractObject):
     """Return the time at index ``pos`` in seconds."""
     return self.resolution*float(self[pos])
 
+  def index(self, t):
+  #------------------
+    """
+    Find the index of a time in the clock.
+
+    :param t: The time to lookup, in seconds.
+    :type t: float
+    :return: The greatest index such that ``self.time(index) <= t``.
+      -1 is returned if ``t`` is before ``self.time(0)``.
+    :rtype: int
+    """
+    i = 0
+    j = len(self) - 1
+    if time < self.time(0): return -1
+    elif time >= self.time(j): return j
+    while i <= j:
+      m = (i + j)//2
+      v = self.time(m)
+      print i, j, m, v
+      if   v < time: i = m + 1
+      elif v > time: j = m - 1
+      else: return m
+    return m - 1
 
   :param np.array times: Array of sample times, in seconds.
   """
@@ -105,6 +128,12 @@ class UniformClock(Clock):
   """
   We can not extend a UniformClock.
   """
+  def index(self, t):
+  #------------------
+    i = 0
+    if t < 0.0: return -1
+    else: return int(math.floor(t*self._rate))
+
   def extend(self, times):
   #-----------------------
     raise DataError('Can not extend a UniformClock')
