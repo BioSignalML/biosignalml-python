@@ -76,8 +76,9 @@ class UniformClock(Clock):
 
   :param float rate: The sample rate, in Hertz.
   """
-  def __init__(self, rate):
-  #------------------------
+  def __init__(self, uri, rate):
+  #-----------------------------
+    Clock.__init__(self, uri, None)
     self._rate = float(rate)
 
   '''
@@ -126,7 +127,7 @@ class TimeSeries(object):
       raise DataError('Number of sample times and data points are different')
     self.data = data
     if isinstance(times, Clock): self.time = times
-    else:                        self.time = Clock(times)
+    else:                        self.time = Clock(None, times)
 
   def __len__(self):
   #-----------------
@@ -218,7 +219,7 @@ class UniformTimeSeries(TimeSeries):
       raise DataError('Only one of rate or period can be specified')
     self.data = data
     self.rate = rate if rate else 1.0/period
-    self.time = UniformClock(self.rate)
+    self.time = UniformClock(None, self.rate)
 
   def __str__(self):
   #-----------------
