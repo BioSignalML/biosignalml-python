@@ -249,7 +249,7 @@ class H5Signal(object):
     """
     data = self.dataset[pos] if self.index is None else self.dataset[self.index, pos]
     if self.offset != 0: data -= self.offset
-    if self.gain != 1.0: data *= self.gain
+    if self.gain != 1.0: data = data/float(self.gain)
     return data
 
   def time(self, i):
