@@ -260,11 +260,6 @@ class Event(core.AbstractObject):
     ##logging.debug('Event: %s (%s)', uri, repr(uri))
     core.AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
 
-  def save_to_graph(self, graph):
-  #------------------------------
-    core.AbstractObject.save_to_graph(self, graph)
-    core.AbstractObject.save_to_graph(self.time, graph)
-
 
 class Annotation(core.AbstractObject):
 #=====================================
