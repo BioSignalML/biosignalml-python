@@ -47,21 +47,28 @@ class BSMLSignal(biosignalml.Signal):
   :type metadata: dict
   '''
 
+  MAXPOINTS = 50000     #: Maximum number of sample points returned by a single :meth:`read`.
+
   def __init__(self, uri, units, metadata=None, **kwds):
   #-----------------------------------------------------
     biosignalml.Signal.__init__(self, uri, units, metadata=metadata, **kwds)
 
-  def read(self, interval=None, segment=None, duration=None, points=0):
-  #--------------------------------------------------------------------
-    '''
+  def read(self, interval=None, segment=None, maxduration=None, maxpoints=None):
+  #-----------------------------------------------------------------------------
+    """
     Read data from a Signal.
 
     :param interval: The portion of the signal to read.
-    :return: A DataSegment containing signal data covering the interval.
-    :rtype: :class:`~biosignalml.data.DataSegment`
+    :type interval: :class:`~biosignaml.time.Interval`
+    :param segment: A 2-tuple with start and finishing data indices, with the end
+      point not included in the returned range.
+    :param maxduration: The maximum duration, in seconds, of a single returned segment.
+    :param maxpoints: The maximum length, in samples, of a single returned segment.
+    :return: An `iterator` returning :class:`~biosignalml.data.DataSegment` segments
+      of the signal data.
 
-    The `interval` to be read can be given as either a temporal interval or as data indices.
-    '''
+    If both ``maxduration`` and ``maxpoints`` are given their minimum value is used.
+    """
     not_implemented(self, 'read')
 
   def append(self, timeseries):

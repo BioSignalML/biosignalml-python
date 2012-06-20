@@ -23,8 +23,6 @@ from edffile import EDF
 class EDFSignal(BSMLSignal):
 #===========================
 
-  MAXPOINTS = 50000     #: Maximum number of sample points returned by a single :math:`read`.
-
   def __init__(self, signum, edf):
   #-------------------------------
     BSMLSignal.__init__(self,
@@ -53,7 +51,7 @@ class EDFSignal(BSMLSignal):
     ##  filter = edf._edffile.prefilter[signum]   ## But have parameters...
 
     ## self.set_clock(recording.get_clock(edf._edffile.sampleRate(n)))
-    
+
     ## Aren't scale/offset really attributes of the data stream...
     ##self.scale = edf._edffile.scaling[signum][0]
     ##self.offset = edf._edffile.scaling[signum][1]
@@ -73,30 +71,32 @@ class EDFSignal(BSMLSignal):
 # * Pass all attributes to __init__ and have it set file header.
 
 
-  def read(self, interval=None, segment=None, duration=None, points=0):
-  #--------------------------------------------------------------------
+  def read(self, interval=None, segment=None, maxduration=None, maxpoints=None):
+  #-----------------------------------------------------------------------------
     """
-    :return: A :class:DataSegment containing signal data covering the interval.
-    """
+    Read data from a Signal.
 
-    """
-    read interval needs to set offset (in seconds), usually -ve, that first point
-    is ahead of requested interval.
+    :param interval: The portion of the signal to read.
+    :type interval: :class:`~biosignaml.time.Interval`
+    :param segment: A 2-tuple with start and finishing data indices, with the end
+      point not included in the returned range.
+    :param maxduration: The maximum duration, in seconds, of a single returned segment.
+    :param maxpoints: The maximum length, in samples, of a single returned segment.
+    :return: An `iterator` returning :class:`~biosignalml.data.DataSegment` segments
+      of the signal data.
 
-    segment read is inclusive...
-
-    read all is segment (0, len(self))
-
+    If both ``maxduration`` and ``maxpoints`` are given their minimum value is used.
     """
 
     if   interval is not None and segment is not None:
       raise Exception("'interval' and 'segment' cannot both be specified")
-    if points and duration is not None:
-      raise Exception("'points' and 'duration' cannot both be specified")
 
-    if duration: points = int(self.rate*duration + 0.5)
-    if points > EDFSignal.MAXPOINTS or points <= 0:
-      points = EDFSignal.MAXPOINTS
+    if maxduration:
+      pts = int(self.rate*maxduration + 0.5)
+      if maxpoints: maxpoints = min(maxpoints, pts)
+      else: maxpoints = pts
+    if maxpoints is None or not (0 < maxpoints <= BSMLSignal.MAXPOINTS):
+      maxpoints = BSMLSignal.MAXPOINTS
 
     # We need to be consistent as to what an interval is....
     # Use model.Interval ??
@@ -120,8 +120,8 @@ class EDFSignal(BSMLSignal):
       #logging.debug('Startpos: %d, len: %d, pts: %d', startpos, length, points)
 
     while length > 0:
-      if points > length: points = length
-      sigdata = self.recording._edffile.physical_signal(self.index, startpos, points)
+      if maxpoints > length: maxpoints = length
+      sigdata = self.recording._edffile.physical_signal(self.index, startpos, maxpoints)
       #logging.debug('READ %d at %d, got %d', points, startpos, sigdata.length)
       if sigdata.length <= 0: break
       yield DataSegment(float(sigdata.startpos)/self.rate, UniformTimeSeries(sigdata.data, self.rate))

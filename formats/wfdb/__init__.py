@@ -45,8 +45,6 @@ _RecordCount   = 0
 class WFDBSignal(BSMLSignal):
 #============================
 
-  MAXPOINTS = 2048
-
   def __init__(self, signum, rec, units, metadata=None):  ## Hmm, URI should be a parameter...
   #-----------------------------------------------------
     BSMLSignal.__init__(self, str(rec.uri) + '/signal/%d' % signum, units, metadata = metadata)
@@ -82,48 +80,44 @@ class WFDBSignal(BSMLSignal):
     return self._length
 
 
-  def read(self, interval=None, segment=None, duration=None, points=0):
-  #--------------------------------------------------------------------
+  def read(self, interval=None, segment=None, maxduration=None, maxpoints=None):
+  #----------------------------------------------------------------------------
     """
-    An `iterator` returning segments of the signal data.
+    Read data from a Signal.
 
-    :return: A :class:~biosignalml.data.DataSegment containing signal data covering the interval.
-    """
+    :param interval: The portion of the signal to read.
+    :type interval: :class:`~biosignaml.time.Interval`
+    :param segment: A 2-tuple with start and finishing data indices, with the end
+      point not included in the returned range.
+    :param maxduration: The maximum duration, in seconds, of a single returned segment.
+    :param maxpoints: The maximum length, in samples, of a single returned segment.
+    :return: An `iterator` returning :class:`~biosignalml.data.DataSegment` segments
+      of the signal data.
 
-    """
-    read interval needs to set offset (in seconds), usually -ve, that first point
-    is ahead of requested interval.
-
-    segment read is inclusive...
-
-    read all is segment (0, len(self))
-
+    If both ``maxduration`` and ``maxpoints`` are given their minimum value is used.
     """
 
     ## Read is of a record's vector/frame...
 
     ## So check state of rec.vector or rec.frame and reposition record as needs be...
 
-
     ## Ideally read frame into 2D np.array and take appropriate slice when
     ## creating TimeSeries...
 
-
     if   interval is not None and segment is not None:
       raise Exception("'interval' and 'segment' cannot both be specified")
-    if points and duration is not None:
-      raise Exception("'points' and 'duration' cannot both be specified")
 
-    if duration: points = int(self.rate*duration + 0.5)
-
-    if points > WFDBSignal.MAXPOINTS or points <= 0:
-      points = WFDBSignal.MAXPOINTS
+    if maxduration:
+      pts = int(self.rate*maxduration + 0.5)
+      if maxpoints: maxpoints = min(maxpoints, pts)
+      else: maxpoints = pts
+    if maxpoints is None or not (0 < maxpoints <= BSMLSignal.MAXPOINTS):
+      maxpoints = BSMLSignal.MAXPOINTS
 
     # We need to be consistent as to what an interval is....
     # Use model.Interval ??
     if interval is not None:
-      segment = (self.rate*interval.start, self.rate*(interval.start+interval.duration) - 1)
-
+      segment = (self.rate*interval.start, self.rate*(interval.start+interval.duration))
     if segment is None:
       startpos = 0
       length = len(self)
