@@ -54,6 +54,11 @@ class Clock(AbstractObject):
 
   """
   Add times to a clock.
+  def time(self, pos):
+  #-------------------
+    """Return the time at index ``pos`` in seconds."""
+    return self.resolution*float(self[pos])
+
 
   :param np.array times: Array of sample times, in seconds.
   """
