@@ -46,14 +46,13 @@ class Clock(AbstractObject):
 
   def __getitem__(self, key):
   #--------------------------
+    """Return the unscaled time at index ``key``."""
     return self._times[key]
 
   def __len__(self):
   #-----------------
     return len(self.__times)
 
-  """
-  Add times to a clock.
   def time(self, pos):
   #-------------------
     """Return the time at index ``pos`` in seconds."""
@@ -83,10 +82,13 @@ class Clock(AbstractObject):
       else: return m
     return m - 1
 
-  :param np.array times: Array of sample times, in seconds.
-  """
   def extend(self, times):
   #-----------------------
+    """
+    Add times to a clock.
+
+    :param np.array times: Array of sample times, in seconds.
+    """
     if self._times[-1] >= times[0]:
       raise DataError('Times must be increasing')
     self._times = np.append(self._times, times)
@@ -104,30 +106,25 @@ class UniformClock(Clock):
     Clock.__init__(self, uri, None)
     self._rate = float(rate)
 
-  '''
-  The time of a single sample, or the array of times of a slice.
-  '''
   def __getitem__(self, key):
   #--------------------------
+    '''
+    The time of a single sample, or the array of times of a slice.
+    '''
     if isinstance(key, slice):
       if key.stop is None: raise TypeError
       return np.arange(key.start if key.start is not None else 0,
                        key.stop, key.step)/self._rate
-    elif isinstance(key, int):
-      return key/self._rate
     else:
-      raise TypeError
+      return key/self._rate
 
-  """
-  A UniformClock runs forever -- give a length of 0.
-  """
   def __len__(self):
   #-----------------
+    """
+    A UniformClock runs forever -- give a length of 0.
+    """
     return 0
 
-  """
-  We can not extend a UniformClock.
-  """
   def index(self, t):
   #------------------
     i = 0
@@ -136,6 +133,9 @@ class UniformClock(Clock):
 
   def extend(self, times):
   #-----------------------
+    """
+    We can not extend a UniformClock.
+    """
     raise DataError('Can not extend a UniformClock')
 
 
@@ -161,45 +161,45 @@ class TimeSeries(object):
   def __len__(self):
   #-----------------
     return len(self.data)
-   
+
   def __str__(self):
   #-----------------
     return '<Time Series: len=%d, times=\n%s\n data=\n%s>' % (len(self), self.times, self.data)
 
-  '''
-  A single value as a (time, data) tuple, or a slice as a 2D array of (time, data) points.
-  '''
   def __getitem__(self, key):
   #--------------------------
+    '''
+    A single value as a (time, data) tuple, or a slice as a 2D array of (time, data) points.
+    '''
     if isinstance(key, slice): return np.column_stack((self.time[key], self.data[key]))
     elif isinstance(key, int): return (self.time[key], self.data[key])
     else:                      raise TypeError
 
-  '''
-  The array of sample times.
-  '''
   @property
   def times(self):
   #---------------
+    '''
+    The array of sample times.
+    '''
     return self.time[:len(self)]
 
-  '''
-  All the (time, data) points as a 2D array.
-  '''
   @property
   def points(self):
   #----------------
+    '''
+    All the (time, data) points as a 2D array.
+    '''
     return np.column_stack((self.times, self.data))
 
-  """
-  Extend a time series.
-
-  :param np.array data: Array of data values.
-  :param np.array times: Array of sample times, in seconds
-    or a :class:`Clock` with times for the entire, extended, time series.
-  """
   def extend(self, times, data):
   #-----------------------------
+    """
+    Extend a time series.
+
+    :param np.array data: Array of data values.
+    :param np.array times: Array of sample times, in seconds
+      or a :class:`Clock` with times for the entire, extended, time series.
+    """
     if self.time[-1] >= times[0]:
       raise DataError('Times must be increasing')
     if isinstance(times, Clock):
@@ -214,14 +214,14 @@ class TimeSeries(object):
       self.time.extend(times)
     self.data = np.append(self.data, data)
 
-  """
-  Join two time series together.
-
-  :param TimeSeries series: The time series to add.
-  :return: The new :class:`TimeSeries` formed by concatenation.
-  """
   def __add__(self, series):
   #-------------------------
+    """
+    Join two time series together.
+
+    :param TimeSeries series: The time series to add.
+    :return: The new :class:`TimeSeries` formed by concatenation.
+    """
     #if isinstance(series, UniformTimeSeries):
     #  return TimeSeries(np.concatenate((self.times, series.times + self.time[-1] + 1.0/series.rate)),
     #                    np.concatenate((self.data, series.data)))
@@ -254,23 +254,23 @@ class UniformTimeSeries(TimeSeries):
   #-----------------
     return '<Time Series, len=%d, rate=%s:\n%s>' % (len(self), self.rate, self.data)
 
-  """
-  Extend a uniform time series.
-
-  :param np.array data: Array of data values.
-  """
   def extend(self, data):
   #----------------------
+    """
+    Extend a uniform time series.
+
+    :param np.array data: Array of data values.
+    """
     self.data = np.append(self.data, data)
 
-  """
-  Join two uniform time series together.
-
-  :param TimeSeries series: The uniform time series to add.
-  :return: The new :class:`UniformTimeSeries` formed by concatenation.
-  """
   def __add__(self, series):
   #-------------------------
+    """
+    Join two uniform time series together.
+
+    :param TimeSeries series: The uniform time series to add.
+    :return: The new :class:`UniformTimeSeries` formed by concatenation.
+    """
     if not isinstance(series, UniformTimeSeries):
       raise TypeError('Can only concatenate with another UniformTimeSeries')
     if self.rate != series.rate:
