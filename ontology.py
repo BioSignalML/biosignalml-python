@@ -1,7 +1,7 @@
 """
 Provide access to the BioSignalML ontology.
 
-Generated from file:///Users/dave/biosignalml/ontologies/bsml/2011-04-biosignalml.ttl at Fri Apr 27 17:25:50 2012
+Generated from file:///Users/dave/biosignalml/ontologies/bsml/2011-04-biosignalml.ttl at Wed Jun 20 17:17:25 2012
 
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
@@ -89,6 +89,8 @@ Measurement units would normally be entities in a specialised units of measure o
   '''The sampling period, in seconds, of a uniformly sampled signal.'''
   rate           = Resource(NS.rate)
   '''The sampling rate, in Hertz, of a uniformly sampled signal.'''
+  resolution     = Resource(NS.resolution)
+  '''The resolution, in seconds, of a clock's timing.'''
 
 # owl:NamedIndividual resources:
   BP             = Resource(NS.BP)
@@ -108,7 +110,7 @@ Measurement units would normally be entities in a specialised units of measure o
 
 # owl:ObjectProperty resources:
   clock          = Resource(NS.clock)
-  '''The sampling coordinates aassociated with a signal's data values.'''
+  '''The sampling coordinates associated with a signal's data values.'''
   format         = Resource(NS.format)
   '''The format used to hold the recording.'''
   preFilter      = Resource(NS.preFilter)
