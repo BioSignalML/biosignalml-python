@@ -25,6 +25,7 @@ Abstract BioSignalML objects.
 
 import logging
 from datetime import datetime
+from collections import OrderedDict
 
 import biosignalml.utils as utils
 import biosignalml.rdf as rdf
@@ -115,38 +116,15 @@ class Recording(core.AbstractObject):
     from biosignalml.timeline import RelativeTimeLine   ## Otherwise circular import...
     core.AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
     self.timeline = RelativeTimeLine(str(uri) + '/timeline')
-    self._signals = { }
-    self._signal_uris = [ ]
-    self._events = { }
+    self._signals = OrderedDict()
+    self._events = OrderedDict()
 
   def signals(self):
   #-----------------
     """
     The recording's signals as a list.
     """
-    return [ self._signals[s] for s in sorted(self._signal_uris) ]
-
-  def set_signal(self, signal):
-  #----------------------------
-    '''
-    Assign a :class:`Signal` to a Recording.
-
-    :param signal: The signal to add to the recording.
-    :type signal: :class:`Signal`
-    :return: The 0-origin index of the signal in the recording.
-    '''
-    sig_uri = str(signal.uri)
-    try:
-      index = self._signal_uris.index(sig_uri)
-    except ValueError:
-      raise Exception, "Signal '%s' not in recording" % signal.uri
-    if signal.recording and str(signal.recording) != str(self.uri):  ## Set from RDF mapping...
-      raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, sig_uri, signal.recording)
-    if self._signals.get(sig_uri, None):
-      raise Exception, "Recording already has signal added"
-    signal.recording = self
-    self._signals[sig_uri] = signal
-    return index
+    return self._signals.values()
 
   def add_signal(self, signal):
   #----------------------------
@@ -157,12 +135,14 @@ class Recording(core.AbstractObject):
     :type signal: :class:`Signal`
     :return: The 0-origin index of the signal in the recording.
     '''
-    #logging.debug("Adding signal: %s", signal.uri)
     sig_uri = str(signal.uri)
-    if sig_uri in self._signal_uris:
+    if sig_uri in self._signals:
       raise Exception, "Signal '%s' already in recording" % signal.uri
-    self._signal_uris.append(sig_uri)
-    return self.set_signal(signal)          # 0-origin index of newly added signal uri
+    if signal.recording and str(signal.recording) != str(self.uri):  ## Set from RDF mapping...
+      raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, sig_uri, signal.recording)
+    signal.recording = self
+    self._signals[sig_uri] = signal
+    return list(self._signals).index(sig_uri)
 
   def new_signal(self, uri, units, id=None, **kwds):
   #-------------------------------------------------
@@ -177,7 +157,7 @@ class Recording(core.AbstractObject):
       raise Exception, "Signal must have 'uri' or 'id' specified"
     if uri is None:
       uri = str(self.uri) + '/signal/%s' % str(id)
-    if uri in self._signal_uris:
+    if str(uri) in self._signals:
       raise Exception, "Signal '%s' already in recording" % uri
     sig = self.SignalClass(uri, units, **kwds)
     self.add_signal(sig)
@@ -194,7 +174,7 @@ class Recording(core.AbstractObject):
     :return: A signal in the recording.
     :rtype: :class:`Signal`
     '''
-    if uri is None: uri = self._signal_uris[index]
+    if uri is None: uri = list(self._signals)[index]
     return self._signals[str(uri)]
 
   def __len__(self):
@@ -259,8 +239,6 @@ class Recording(core.AbstractObject):
     for s in graph.get_subjects(BSML.recording, self.uri):
       if graph.contains(rdf.Statement(s, rdf.RDF.type, BSML.Signal)):  ## UniformSignal ?? get rdf:type ??
         self.add_signal(self.SignalClass.create_from_graph(str(s.uri), graph, units=None))
-      else:
-        self._signal_uris.append(str(s.uri))
     self.graph = graph
     return self
 
