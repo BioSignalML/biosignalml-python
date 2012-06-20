@@ -76,12 +76,11 @@ class Interval(model.core.AbstractObject):
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds) }
 
-  def __init__(self, uri, start, duration, timeline, metadata=None):
-  #-----------------------------------------------------------------
-    model.core.AbstractObject.__init__(self, uri, metadata=metadata)
-    self.start = start
-    self.duration = duration
-    self.timeline = timeline
+  def __init__(self, uri, start, duration, timeline, **kwds):
+  #----------------------------------------------------------
+    model.core.AbstractObject.__init__(self, uri,
+                                       start=start, duration=duration, timeline=timeline,
+                                       **kwds)
 
   @property
   def end(self, timeline=None):     # Needs to use timeline to map
@@ -94,28 +93,28 @@ class Interval(model.core.AbstractObject):
     return Interval(self.make_uri(True), self.start + increment, self.duration, self.timeline)
 
 
-class Instant(Interval):
-#=======================
+class Instant(model.core.AbstractObject):
+#========================================
   '''
   An abstract BioSignalML Instant.
   '''
 
   metaclass = TL.RelativeInstant   #: :attr:`.TL.RelativeInstant`
 
-  attributes = [ 'timeline', 'at' ]
+  attributes = [ 'timeline', 'start' ]
 
   mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
                                                    to_rdf=mapping.get_uri,
                                                    from_rdf=RelativeTimeLine),
-              ('at',       metaclass): PropertyMap(TL.atDuration, XSD.duration,
+              ('start',    metaclass): PropertyMap(TL.atDuration, XSD.duration,
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds) }
 
-  def __init__(self, uri, when, timeline, metadata=None):
-  #------------------------------------------------------
-    Interval.__init__(self, uri, when, 0.0, timeline, metadata=metadata)
-    self.at = when
-
+  def __init__(self, uri, when, timeline, **kwds):
+  #-----------------------------------------------
+    model.core.AbstractObject.__init__(self, uri, start=when, timeline=timeline, **kwds)
+    self.duration = 0.0
+    self.end = self.start
 
   def __add__(self, increment):
   #----------------------------
