@@ -189,7 +189,6 @@ class Recording(core.AbstractObject):
   def add_event(self, event):
   #--------------------------
     self._events[event.uri] = event
-    event.factor = self
 
   def get_event(self, uri):
   #------------------------
