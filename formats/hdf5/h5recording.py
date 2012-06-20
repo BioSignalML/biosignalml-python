@@ -95,7 +95,7 @@ Any clock (i.e. timing) datasets are contained within a 'clock' group in '/recor
 ----------------------------
 
 Clock datasets are numbered, starting from '0'. Attributes are ``uri`` and ``units`` with
-default units of seconds. A clock can optionally have a ``scale'' factor; if so the stored
+default units of seconds. A clock can optionally have a ``scale`` factor; if so the stored
 value of a time point is be multiplied by the scaling factor to obtain a value in the
 specified units.
 
@@ -276,8 +276,8 @@ class H5Recording(object):
   """
   Store signals as HDF5 Recordings.
 
-  The `create` and `open` class methods are intended to be used instead
-  of directly constructing instances.
+  The :meth:`create` and :meth:`open` methods are intended to be used to
+  create instances instead of directly using the constructor.
   """
   def __init__(self, uri, fname, h5=None, **kwds):
   #-----------------------------------------------
