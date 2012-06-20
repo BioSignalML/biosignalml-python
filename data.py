@@ -10,10 +10,15 @@
 
 __docformat__ = 'restructuredtext'
 
-import numpy as np
-from collections import namedtuple
-
 import logging
+import numpy as np
+
+
+from biosignalml.ontology import BSML
+from biosignalml.model.core import AbstractObject
+from biosignalml.model.mapping import PropertyMap
+
+from biosignalml.rdf import XSD
 
 
 class DataError(Exception):
@@ -21,15 +26,22 @@ class DataError(Exception):
   pass
 
 
-class Clock(object):
-#===================
+class Clock(AbstractObject):
+#===========================
   """
   The sample times of a :class:`TimeSeries`.
 
   :param np.array times: Array of sample times, in seconds.
   """
-  def __init__(self, times):
-  #-------------------------
+  metaclass = BSML.SampleClock
+
+  attributes = [ 'resolution' ]
+
+  mapping = { ('resolution', metaclass): PropertyMap(BSML.resolution, XSD.double) }
+
+  def __init__(self, uri, times, resolution=1.0, **kwds):
+  #------------------------------------------------------
+    AbstractObject.__init__(self, uri, resolution=resolution, **kwds)
     self._times = times
 
   def __getitem__(self, key):
