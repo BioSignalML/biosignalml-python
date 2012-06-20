@@ -361,6 +361,11 @@ if __name__ == '__main__':
   print ds[95:106]
 
 
+  c = Clock('http://example.org/clock', [], resolution=0.4)
+  print c.resolution
+  print c.metadata_as_string()
+
+
 #  import pylab
 #  pylab.plot(j.times, j.data)
 #  pylab.show()
