@@ -171,6 +171,10 @@ class H5Clock(object):
     if attrs.get('scale'): return t*float(attrs['scale'])
     else:                  return t
 
+  def time(self, pos):
+  #-------------------
+    return self[pos]
+
 
 class H5Signal(object):
 #======================
