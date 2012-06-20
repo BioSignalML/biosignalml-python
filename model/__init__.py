@@ -326,12 +326,12 @@ class Annotation(core.AbstractObject):
       else:                         utf8 = unicode(text, 'utf-8')
       core.AbstractObject.__init__(self, uri, text=utf8, encoding='utf-8')
 
-  def __init__(self, uri, target=None, annotator=None, set_time=True, tags=None, **kwds):
-  #--------------------------------------------------------------------------------------
+  def __init__(self, uri, target=None, annotator=None, set_time=True, text=None, tags=None, body=None, **kwds):
+  #------------------------------------------------------------------------------------------------------------
     annotated = kwds.pop('annotated', utils.utctime()) if set_time else None
     core.AbstractObject.__init__(self, uri, target=target,
       annotator=annotator, annotated=annotated, **kwds)
-    if kwds.get('text'): self.body = Annotation.TextContent(self.make_uri(True), kwds['text'])
+    self.body = Annotation.TextContent(self.make_uri(True), text) if text else body
     self.tags = tags if tags else []
 
   @classmethod
