@@ -8,10 +8,22 @@
 #
 ######################################################
 
+"""
+Access PhyiosBank recordings.
+
+.. warning::
+
+   The ``wfdb`` library is not thread safe nor does it support concurrent access to multiple
+   recordings from within a thread. The library only allows concurrent access to the same record
+   if the recording is repositioned before each read, using a lock to ensure position/read
+   operations are atomic.
+"""
+
 
 import os
 import wfdb
 import math
+import threading
 import numpy as np
 import dateutil.parser
 import logging
@@ -24,6 +36,10 @@ from biosignalml.utils import file_uri
 from biosignalml.formats import BSMLRecording, BSMLSignal
 
 PHYSIOBANK = 'http://physionet.org/physiobank/database/'
+
+_WFDBLock      = threading.Lock()
+_CurrentRecord = None
+_RecordCount   = 0
 
 
 class WFDBSignal(BSMLSignal):
@@ -117,8 +133,6 @@ class WFDBSignal(BSMLSignal):
       startpos = max(0, int(math.floor(seg[0])))
       length = min(len(self), int(math.ceil(seg[1])) - startpos)
 
-    wfdb.tnextvec(self._signum, startpos)
-
     # Setup offsets into frame for each signal
     siginfo = self._record._siginfo
     offsets = [ (0, siginfo[0].spf) ]    ## This is record wide data...
@@ -128,12 +142,24 @@ class WFDBSignal(BSMLSignal):
       samplesperframe += siginfo[s].spf
 
     v = wfdb.WFDB_SampleArray(samplesperframe)
+    s = self._signum
     while length > 0:
-      if points > length: points = length
-      s = self._signum
-      data = (np.array([ v[n] for n in xrange(offsets[s][0], offsets[s][0]+offsets[s][1])
-                           for i in xrange(points)
-                             if wfdb.getvec(v.cast()) >= 0 ]) - self._baseline)/self._gain
+      if maxpoints > length: maxpoints = length
+      d = []
+      i = maxpoints
+      rpos = startpos
+      while i > 0:
+        global _WFDBLock
+        with _WFDBLock:
+          wfdb.tnextvec(s, rpos)
+          r = wfdb.getframe(v.cast())
+        if r <= 0: i = 0
+        else:
+          for n in xrange(offsets[s][0], offsets[s][0]+offsets[s][1]):
+            d.append(v[n])
+            i -= 1
+            rpos += 1
+      data = (np.array(d)-self._baseline)/self._gain
       if len(data) <= 0: break
       yield DataSegment(float(startpos)/self.rate, UniformTimeSeries(data, self.rate))
       startpos += len(data)
@@ -155,6 +181,12 @@ class WFDBRecording(BSMLRecording):
 
   def initialise(self, fname):
   #---------------------------
+    global _WFDBLock, _CurrentRecord, _RecordCount
+    with _WFDBLock:
+      if _CurrentRecord and _CurrentRecord != fname:
+        raise IOError("WFDB does not allow concurrent access to different recordings")
+      _CurrentRecord = fname
+      _RecordCount += 1
     wfdb.setgvmode(wfdb.WFDB_HIGHRES)
     ## http: url needs .hea extension??
     #logging.debug('Opening: %s (%s)', fname, uri)
@@ -256,9 +288,17 @@ class WFDBRecording(BSMLRecording):
 
         self.add_event(....)
     """
+  def __del__(self):
+  #-----------------
+    self.close()
 
   def close(self):
   #---------------
+    global _WFDBLock, _CurrentRecord, _RecordCount
+    with _WFDBLock:
+      _RecordCount -= 1
+      if _RecordCount <= 0:
+        _CurrentRecord = None
     wfdb.wfdbquit()
 
   def _read_frame(self, signo = -1):
