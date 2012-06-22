@@ -1,7 +1,7 @@
 """
 Provide access to the BioSignalML ontology.
 
-Generated from file:///Users/dave/biosignalml/ontologies/bsml/2011-04-biosignalml.ttl at Wed Jun 20 17:17:25 2012
+Generated from file:///Users/dave/biosignalml/ontologies/bsml/2011-04-biosignalml.ttl at Fri Jun 22 10:57:31 2012
 
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
@@ -85,6 +85,8 @@ Measurement units would normally be entities in a specialised units of measure o
   '''The minimum frequency, in Hertz, contained in the signal.'''
   minValue       = Resource(NS.minValue)
   '''The minimum value of the signal.'''
+  offset         = Resource(NS.offset)
+  '''The temporal offset from the start of a recording of a signal's first sample.'''
   period         = Resource(NS.period)
   '''The sampling period, in seconds, of a uniformly sampled signal.'''
   rate           = Resource(NS.rate)

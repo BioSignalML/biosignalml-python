@@ -50,7 +50,7 @@ class Signal(core.AbstractObject):
 
   attributes = ['label', 'units', 'transducer', 'filter', 'rate',  'clock',
                 'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
-                'index'
+                'index', 'signaltype', 'offset', 'duration',
                ]
   '''Generic attributes of a Signal.'''
 
@@ -64,7 +64,15 @@ class Signal(core.AbstractObject):
               ('maxFrequency', metaclass): PropertyMap(BSML.maxFrequency, XSD.double),
               ('minValue',     metaclass): PropertyMap(BSML.minValue, XSD.double),
               ('maxValue',     metaclass): PropertyMap(BSML.maxValue, XSD.double),
-              ('index',        metaclass): PropertyMap(BSML.index, XSD.integer) }
+              ('index',        metaclass): PropertyMap(BSML.index, XSD.integer),
+              ('signaltype',   metaclass): PropertyMap(BSML.signalType),
+              ('offset',       metaclass): PropertyMap(BSML.offset, XSD.duration,
+                                                       utils.seconds_to_isoduration,
+                                                       utils.isoduration_to_seconds),
+              ('duration',     metaclass): PropertyMap(DCTERMS.extent, XSD.duration,
+                                                       utils.seconds_to_isoduration,
+                                                       utils.isoduration_to_seconds),
+            }
 
 
   def __init__(self, uri, units, metadata=None, **kwds):
