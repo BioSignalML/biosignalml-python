@@ -37,7 +37,7 @@ class AbstractObject(object):
   A general abstract resource with metadata.
 
   :param uri: URI of the resource,
-  :type uri: str
+  :type uri: str, Uri or Resource Node
   :param metadata: Dictionary containing metadata values for the resource.
   :type metadata: dict
   :param kwds: Keyword/value pairs of metadata elements. These have precedence
@@ -78,7 +78,9 @@ class AbstractObject(object):
     '''Dictionary of property values with names not in :attr:`attributes` list.'''
     if metadata is not None:
       self.metadata.update(AbstractObject.set_attributes(self, **metadata))
-    self.uri = uri if isinstance(uri, rdf.Uri) else rdf.Uri(str(uri).strip())
+    self.uri = (uri     if isinstance(uri, rdf.Uri)
+           else uri.uri if isinstance(uri, rdf.Node) and uri.is_resource()
+           else rdf.Uri(str(uri).strip()))
     self.graph_uri = None
 
   def __str__(self):
@@ -91,8 +93,11 @@ class AbstractObject(object):
   def __eq__(self, this):
   #----------------------
     return (isinstance(this, AbstractObject)
-        and str(self.uri) == str(this.uri)
-        and str(self.metaclass.uri) == str(this.metaclass.uri))
+            and str(self.uri) == str(this.uri)
+            and str(self.metaclass.uri) == str(this.metaclass.uri)
+         or isinstance(this, rdf.Node) and str(self.uri) == str(this.uri)
+         or isinstance(this, rdf.Uri)  and str(self.uri) == str(this)
+            )
 
   def __ne__(self, this):
   #----------------------
