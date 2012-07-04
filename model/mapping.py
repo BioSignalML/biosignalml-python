@@ -52,7 +52,7 @@ def get_uri(v):
   '''
   Get the `uri` attribute if it exists, otherwise the object as a string.
   '''
-  return v.uri if hasattr(v, 'uri') else str(v)
+  return v.uri if hasattr(v, 'uri') else Uri(v)
 
 
 class PropertyMap(object):
@@ -126,7 +126,7 @@ class Mapping(object):
   #------------------------------
     if   isinstance(v, Node) or isinstance(v, Uri):
       return Node(v)
-    elif hasattr(v, 'uri'):
+    elif hasattr(v, 'uri') and mapfn in [None, get_uri]:
       if isinstance(v.uri, Node): return Node(v)
       else:                       return Node(Uri(v.uri))
     else:
@@ -153,7 +153,7 @@ class Mapping(object):
             for s in v.metadata_as_stream(): yield s
           else:
             yield Statement(subject, map.property, self._makenode(v, map.datatype, map.to_rdf))
-      elif isinstance(value, AbstractObject):
+      elif isinstance(value, AbstractObject) and map.to_rdf in [None, get_uri]:
         yield Statement(subject, map.property, self._makenode(value, None, None))
         for s in value.metadata_as_stream(): yield s
       else:
