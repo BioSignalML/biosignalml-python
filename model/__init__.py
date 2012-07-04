@@ -455,3 +455,39 @@ class Event(Annotation):
         print self.target.selector
       ################ Need to set selector's time...
     return self
+
+
+if __name__ == '__main__':
+#=========================
+
+  def print_dict(r):
+  #-----------------
+    print '{'
+    for kv in r.__dict__.iteritems(): print '  %s: %s' % kv
+    print '  }'
+
+  def check(instance):
+  #-------------------
+    g = rdf.Graph()
+    instance.save_to_graph(g)
+    copy = instance.__class__.create_from_graph(instance.uri, g)
+    if isinstance(instance, Event):
+#      print_dict(instance.target)
+#      print_dict(copy.target)
+      print instance.metadata_as_string(rdf.Format.TURTLE)
+    #  print copy.metadata_as_string(rdf.Format.TURTLE)
+    assert(instance.metadata_as_string(rdf.Format.TURTLE) == copy.metadata_as_string(rdf.Format.TURTLE))
+    return copy
+
+
+  r1 = Recording('http://example.org/recording')
+  a1 = Annotation.Note('http://example.org/ann1', r1, 'test', 'text')
+  e1 = Event('http://example.org/event', r1, r1.interval(1, 0.5),
+    annotator='test', text='event text')
+
+  r2 = check(r1)
+  a2 = check(a1)
+  e2 = check(e1)
+
+  print e1.time, e2.time
+  assert(e2.time == e1.time)
