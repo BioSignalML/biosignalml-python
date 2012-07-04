@@ -26,6 +26,7 @@ Read and write physical Recordings and Signals.
 import biosignalml
 from biosignalml import BSML
 from biosignalml.utils import file_uri
+import biosignalml.model.mapping as mapping
 
 
 def not_implemented(instance, method):
@@ -123,13 +124,12 @@ class BSMLRecording(biosignalml.Recording):
 
   If no `fname` and no `metadata['source']` then `source` is set to `uri`.
   '''
-
-  attributes = [ 'digest' ]
-
   FORMAT = BSML.RAW
   MIMETYPE = 'application/x-raw'
   EXTENSIONS = [ 'raw' ]
   SignalClass = BSMLSignal
+  attributes = [ 'digest', 'dataset' ]
+  mapping    = { ('dataset', None): mapping.PropertyMap(BSML.dataset) }
 
   def __init__(self, uri=None, fname=None, mode='r', metadata=None, **kwds):
   #-------------------------------------------------------------------------
