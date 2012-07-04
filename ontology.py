@@ -1,7 +1,7 @@
 """
 Provide access to the BioSignalML ontology.
 
-Generated from file:///Users/dave/biosignalml/ontologies/bsml/2011-04-biosignalml.ttl at Fri Jun 22 10:57:31 2012
+Generated from file:///Users/dave/biosignalml/ontologies/bsml/2011-04-biosignalml.ttl at Wed Jul  4 12:23:26 2012
 
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
@@ -18,8 +18,6 @@ class BSML(object):
            or some portion of, a Recording, Signal or Event.'''
   BP_Filter      = Resource(NS.BP_Filter)
   '''A band-pass filter.'''
-  Dataset        = Resource(NS.Dataset)
-  '''A collection of data files or web services that contain Recording or Signal information.'''
   Device         = Resource(NS.Device)
   '''The physical device that saved the output of a sensor into a format able to be stored.'''
   Electrode      = Resource(NS.Electrode)
@@ -51,14 +49,14 @@ Several signals may use the same clock.'''
   Sensor         = Resource(NS.Sensor)
   '''What actually captured a signal -- an electrode, transducer, etc.'''
   Signal         = Resource(NS.Signal)
-  '''A sequence of periodic measurements of some quantity, ordered by some sampling
+  '''A sequence of periodic measurements of some physical quantity, ordered by some sampling
            dimension, normally time. A Signal is part of some Recording.'''
   SignalType     = Resource(NS.SignalType)
   '''The class or type of signal (e.g. EEG, ECG).'''
   Simulation     = Resource(NS.Simulation)
   '''A computer simulation or modelling process that created the Signal or Recording.'''
   Source         = Resource(NS.Source)
-  '''The source (i.e. file, device, simulation, etc) of a Signal or Recording.'''
+  '''The source (i.e. device, simulation, etc) of a Signal or Recording.'''
   TemporalEntity = Resource(NS.TemporalEntity)
   '''Some measurement of time, either as a particular point in time or as some interval.'''
   Transducer     = Resource(NS.Transducer)
@@ -113,6 +111,8 @@ Measurement units would normally be entities in a specialised units of measure o
 # owl:ObjectProperty resources:
   clock          = Resource(NS.clock)
   '''The sampling coordinates associated with a signal's data values.'''
+  dataset        = Resource(NS.dataset)
+  '''The location of actual signal data.'''
   format         = Resource(NS.format)
   '''The format used to hold the recording.'''
   preFilter      = Resource(NS.preFilter)
@@ -123,8 +123,6 @@ Measurement units would normally be entities in a specialised units of measure o
   '''What was used to collect or derive an electrical signal'''
   signalType     = Resource(NS.signalType)
   '''A signal's generic type.'''
-  source         = Resource(NS.source)
-  '''The source of a Recording or Signal.'''
   units          = Resource(NS.units)
   '''The physical units that are represented by a signal's data values.
 
