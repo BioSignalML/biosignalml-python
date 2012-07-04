@@ -461,8 +461,8 @@ class H5Recording(object):
       for u in uri: self._h5['uris'].attrs[str(u)] = dset.ref
     if gain: dset.attrs['gain'] = gain
     if offset: dset.attrs['offset'] = offset
-    if   rate:               dset.attrs['rate'] = rate
-    elif period:             dset.attrs['period'] = period
+    if   rate:               dset.attrs['rate'] = float(rate)
+    elif period:             dset.attrs['period'] = float(period)
     elif clock is not None:  dset.attrs['clock'] = clocktimes.dataset.ref
     if timeunits: dset.attrs['timeunits'] = timeunits
     return dset.name
