@@ -47,6 +47,14 @@ class Format(object):
     '''
     return format
 
+  @staticmethod
+  def name(mimetype):
+  #-----------------
+    return { Format.RDFXML: 'rdfxml',
+             Format.TURTLE: 'turtle',
+             Format.JSON:   'json',
+           }.get(mimetype, 'rdfxml')
+
 
 class NS(librdf.NS):
 #===================
@@ -398,7 +406,7 @@ class Graph(librdf.Model):
     :param format: The string's RDF format.
     :param base: The base URI of the content.
     """
-    parser = librdf.Parser(mime_type=format)
+    parser = librdf.Parser(name=Format.name(format))
     try:
       statements = parser.parse_string_as_stream(string, base)
       if statements: self.add_statements(statements)
@@ -420,7 +428,7 @@ class Graph(librdf.Model):
     :rtype: str
     '''
     if base is None: base = self.uri
-    serialiser = librdf.Serializer(mime_type=format)
+    serialiser = librdf.Serializer(name=Format.name(format))
     for prefix, uri in prefixes.iteritems():
       serialiser.set_namespace(prefix, Uri(uri))
     return serialiser.serialize_model_to_string(self, base_uri=base)
