@@ -103,18 +103,26 @@ class HDF5Recording(BSMLRecording):
   EXTENSIONS = [ 'h5', 'hdf', 'hdf5' ]
   SignalClass = HDF5Signal
 
-  def __init__(self, uri, fname, **kwds):
-  #--------------------------------------
-    self._h5 = H5Recording.open(fname)
-    BSMLRecording.__init__(self, self._h5.uri, fname, **kwds)
-    for n, s in enumerate(self._h5.signals()):
-      self.add_signal(HDF5Signal.create_from_H5Signal(n, s))
+  def __init__(self, uri, fname=None, **kwds):
+  #-------------------------------------------
+    BSMLRecording.__init__(self, uri, fname, **kwds)
+    if fname:
+      self._h5 = H5Recording.open(fname)
+      for n, s in enumerate(self._h5.signals()):
+        self.add_signal(HDF5Signal.create_from_H5Signal(n, s))
+    else:
+      self._h5 = None
 
   @classmethod
   def open(cls, fname):
   #--------------------
     return cls(None, fname)
 
+  def close(self):
+  #---------------
+    if self._h5:
+      self._h5.close()
+      self._h5 = None
 
   def save_metadata(self, format=rdf.Format.TURTLE, prefixes=None):
   #----------------------------------------------------------------
