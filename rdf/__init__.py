@@ -209,6 +209,26 @@ class Resource(Node):
   #----------------------
     return not self.__eq__(this)
 
+  @classmethod
+  def uuid_urn(cls):
+  #-----------------
+    '''
+    Generate a URN resource in the UUID namespace.
+    '''
+    return cls('urn:uuid:%s' % uuid.uuid1())
+
+  @staticmethod
+  def is_uuid_urn(this):
+  #---------------------
+    '''
+    Check if a resource is a URN in the UUID namespace.
+
+    This is implemented as a static method so we can use it
+    to test generic resources.
+    '''
+    return ((isinstance(this, librdf.Node) and this.is_resource()
+          or isinstance(this, librdf.Uri)) and str(this).startswith('urn:uuid:'))
+
 
 class Statement(librdf.Statement):
 #=================================
