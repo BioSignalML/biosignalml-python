@@ -75,10 +75,10 @@ class Signal(core.AbstractObject):
             }
 
 
-  def __init__(self, uri, units, metadata=None, **kwds):
-  #-----------------------------------------------------
+  def __init__(self, uri, units, **kwds):
+  #--------------------------------------
     kwds['units'] = units
-    core.AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
+    core.AbstractObject.__init__(self, uri, **kwds)
     self.recording = None
 
 
@@ -119,10 +119,10 @@ class Recording(core.AbstractObject):
   SignalClass = Signal       #: The class of Signals in the Recording
 
 
-  def __init__(self, uri, metadata=None, **kwds):
-  #----------------------------------------------
+  def __init__(self, uri, **kwds):
+  #-------------------------------
     from biosignalml.timeline import RelativeTimeLine   ## Otherwise circular import...
-    core.AbstractObject.__init__(self, uri, metadata=metadata, **kwds)
+    core.AbstractObject.__init__(self, uri, **kwds)
     self.timeline = RelativeTimeLine(str(uri) + '/timeline')
     self._signals = OrderedDict()
     self._events = OrderedDict()
