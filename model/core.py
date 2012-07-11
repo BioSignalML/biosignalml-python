@@ -118,13 +118,13 @@ class AbstractObject(object):
       elif v != value: self.metadata[attr] = set([v, value])
 
 
-  def initialise(self, *args):
-  #---------------------------
+  def initialise(self, **kwds):
+  #----------------------------
     pass
 
   @classmethod
-  def initialise_class(cls, obj, *args):
-  #-------------------------------------
+  def initialise_class(cls, obj, **kwds):
+  #--------------------------------------
     if obj.__class__ not in cls.__mro__:
       raise TypeError('Object not in superclasses')
     ## Need to go from cls to obj.class in __mro__ and set
@@ -139,7 +139,7 @@ class AbstractObject(object):
             obj._assign(attr, v)
         pos -= 1
     obj.__class__ = cls
-    cls.initialise(obj, *args)
+    cls.initialise(obj, **kwds)
     return obj
 
   def set_attributes(self, **values):
