@@ -163,7 +163,6 @@ class WFDBSignal(BSMLSignal):
 class WFDBRecording(BSMLRecording):
 #==================================
 
-  FORMAT = BSML.WFDB
   MIMETYPE = 'application/x-wfdb'
   EXTENSIONS = [ 'hea' ]
   SignalClass = WFDBSignal

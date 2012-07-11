@@ -124,7 +124,6 @@ class BSMLRecording(biosignalml.Recording):
 
   If no `fname` and no `metadata['source']` then `source` is set to `uri`.
   '''
-  FORMAT = BSML.RAW
   MIMETYPE = 'application/x-raw'
   EXTENSIONS = [ 'raw' ]
   SignalClass = BSMLSignal
@@ -134,7 +133,7 @@ class BSMLRecording(biosignalml.Recording):
   def __init__(self, uri=None, fname=None, mode='r', **kwds):
   #----------------------------------------------------------
     if not uri and fname: uri = file_uri(fname)
-    kwds['format'] = getattr(self, 'FORMAT')
+    kwds['format'] = getattr(self, 'MIMETYPE')
     biosignalml.Recording.__init__(self, uri, **kwds)
 
   @classmethod
@@ -194,7 +193,9 @@ from edf  import EDFRecording
 from wfdb import WFDBRecording
 from hdf5 import HDF5Recording
 
-CLASSES = { str(BSML.EDF):  EDFRecording,
-            str(BSML.WFDB): WFDBRecording,
-            str(BSML.BSML_HDF5): HDF5Recording,
+
+CLASSES = { RAWRecording.MIMETYPE:  RAWRecording,
+            EDFRecording.MIMETYPE:  EDFRecording,
+            WFDBRecording.MIMETYPE: WFDBRecording,
+            HDF5Recording.MIMETYPE: HDF5Recording,
           }
