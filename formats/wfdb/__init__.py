@@ -300,8 +300,8 @@ if __name__ == '__main__':
     print "\nOpening: %s" % record
 
     wf = WFDBRecording(record)
-    print ("  Opened %s: source=%s\n   start=%s, duration=%s\n   Nsigs=%s, framerate=%s, framesize=%s"
-               % (wf.uri, wf.source, wf.starttime, wf.duration, len(wf), wf._framerate, wf._framesize))
+    print ("  Opened %s: dataset=%s\n   start=%s, duration=%s\n   Nsigs=%s, framerate=%s, framesize=%s"
+               % (wf.uri, wf.dataset, wf.starttime, wf.duration, len(wf), wf._framerate, wf._framesize))
 
     s = wf.get_signal(index=0)
     printsig(wf, s)

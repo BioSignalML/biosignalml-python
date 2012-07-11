@@ -23,6 +23,8 @@ Read and write physical Recordings and Signals.
 #
 ######################################################
 
+import os
+
 import biosignalml
 from biosignalml import BSML
 from biosignalml.utils import file_uri
@@ -116,13 +118,6 @@ class BSMLRecording(biosignalml.Recording):
   :type uri: str
   :param mode: Open the recording for reading ('r') or create a new recording ('w').
   :type mode: str
-  :param metadata: Dictionary containing metadata values for the recording.
-  :type metadata: dict
-
-  If `fname` is set but not `metadata['source']` then `source` is set to
-  the full 'file://' path of `fname`; if `uri` is not given it is set to `source`.
-
-  If no `fname` and no `metadata['source']` then `source` is set to `uri`.
   '''
   MIMETYPE = 'application/x-raw'
   EXTENSIONS = [ 'raw' ]
@@ -133,6 +128,7 @@ class BSMLRecording(biosignalml.Recording):
   def __init__(self, uri=None, fname=None, mode='r', **kwds):
   #----------------------------------------------------------
     if not uri and fname: uri = file_uri(fname)
+    if fname: self.dataset = 'file://' + os.path.abspath(fname)
     kwds['format'] = getattr(self, 'MIMETYPE')
     biosignalml.Recording.__init__(self, uri, **kwds)
 
