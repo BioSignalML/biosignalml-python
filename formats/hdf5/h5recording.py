@@ -356,7 +356,8 @@ class H5Recording(object):
 
   def create_signal(self, uri, units, shape=None, data=None,
                           dtype=None, gain=None, offset=None,
-                          rate=None, period=None, timeunits=None, clock=None):
+                          rate=None, period=None, timeunits=None, clock=None,
+                          compression=COMPRESSION):
   #---------------------------------------------------------------------------
     """
     Create a dataset for a signal or group of signals in a HDF5 recording.
@@ -447,7 +448,7 @@ class H5Recording(object):
     try:
       dset = self._h5['/recording/signal'].create_dataset(str(signo),
         data=data, shape=shape, maxshape=maxshape, dtype=dtype,
-        chunks=True, compression=COMPRESSION)
+        chunks=True, compression=compression)
     except Exception, msg:
       raise RuntimeError("Cannot create signal dataset (%s)" % msg)
 
@@ -468,8 +469,9 @@ class H5Recording(object):
     return dset.name
 
 
-  def create_clock(self, uri, units=None, shape=None, times=None, dtype=None, scale=None):
-  #---------------------------------------------------------------------------------------
+  def create_clock(self, uri, units=None, shape=None, times=None, dtype=None, scale=None,
+                                                                  compression=COMPRESSION):
+  #----------------------------------------------------------------------------------------
     """
     Create a clock dataset in a HDF5 recording.
 
@@ -509,7 +511,7 @@ class H5Recording(object):
     try:
       dset = self._h5['/recording/clock'].create_dataset(str(clockno),
         data=times, shape=shape, maxshape=maxshape, dtype=dtype,
-        chunks=True, compression=COMPRESSION)
+        chunks=True, compression=compression)
     except Exception, msg:
       raise RuntimeError("Cannot create clock dataset (%s)" % msg)
 
