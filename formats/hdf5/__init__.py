@@ -98,7 +98,7 @@ class HDF5Signal(BSMLSignal):
 class HDF5Recording(BSMLRecording):
 #==================================
 
-  MIMETYPE = 'application/x-bsml'
+  MIMETYPE = 'application/x-bsml+hdf5'
   EXTENSIONS = [ 'h5', 'hdf', 'hdf5' ]
   SignalClass = HDF5Signal
 
