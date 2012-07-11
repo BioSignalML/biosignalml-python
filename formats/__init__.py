@@ -131,11 +131,11 @@ class BSMLRecording(biosignalml.Recording):
   attributes = [ 'digest', 'dataset' ]
   mapping    = { ('dataset', None): mapping.PropertyMap(BSML.dataset) }
 
-  def __init__(self, uri=None, fname=None, mode='r', metadata=None, **kwds):
-  #-------------------------------------------------------------------------
+  def __init__(self, uri=None, fname=None, mode='r', **kwds):
+  #----------------------------------------------------------
     if not uri and fname: uri = file_uri(fname)
     kwds['format'] = getattr(self, 'FORMAT')
-    biosignalml.Recording.__init__(self, uri, metadata=metadata, **kwds)
+    biosignalml.Recording.__init__(self, uri, **kwds)
 
   @classmethod
   def open(cls, fname, uri=None, mode='r', **kwds):

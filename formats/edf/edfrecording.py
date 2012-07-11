@@ -36,9 +36,9 @@ class EDFRecording(BSMLRecording):
   EXTENSIONS = [ 'edf' ]
   SignalClass = EDFSignal
 
-  def __init__(self, uri, fname=None, metadata=None, **kwds):
-  #----------------------------------------------------------
-    BSMLRecording.__init__(self, uri=uri, fname=fname, metadata=metadata, **kwds)
+  def __init__(self, uri, fname=None, **kwds):
+  #-------------------------------------------
+    BSMLRecording.__init__(self, uri=uri, fname=fname, **kwds)
     self._edffile = None
 
   def initialise(self, fname):
