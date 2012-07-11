@@ -306,7 +306,7 @@ class Annotation(core.AbstractObject):
     label = kwds.get('label', '')
     core.AbstractObject.__init__(self, uri, target=target,
       annotator=annotator, annotated=annotated, **kwds)
-    self.body = Annotation.TextContent(rdf.Resource.uuid_urn(), text, label=makelabel(label, 'ann')) if text else body
+    self.body = Annotation.TextContent(rdf.Resource.uuid_urn(), text, label=makelabel(label, 'text')) if text else body
     self.tags = tags if tags else []
 
   @classmethod
