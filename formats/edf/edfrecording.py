@@ -40,14 +40,15 @@ class EDFRecording(BSMLRecording):
     BSMLRecording.__init__(self, uri=uri, fname=fname, **kwds)
     self._edffile = None
 
-  def initialise(self, fname):
-  #---------------------------
+  def initialise(self, **kwds):
+  #----------------------------
+    fname = str(self.dataset)
     edffile = EDFFile.open(fname)
     if edffile is None:
       raise IOError("Cannot open '%s'", fname)
     self._edffile = edffile
     for s in self.signals():
-      EDFSignal.initialise_class(s, self)
+      EDFSignal.initialise_class(s)
 
   def _set_attributes(self):
   #-------------------------

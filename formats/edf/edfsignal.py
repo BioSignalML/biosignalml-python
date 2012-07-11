@@ -40,8 +40,8 @@ class EDFSignal(BSMLSignal):
     self.initialise(edf)
 
 
-  def initialise(self, rec):
-  #-------------------------
+  def initialise(self):
+  #--------------------
     self._rec_count = rec._edffile.nsamples[self.index]
 
     ##if edf._edffile.edf_type == EDF.EDF:

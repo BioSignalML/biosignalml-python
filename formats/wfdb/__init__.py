@@ -61,8 +61,8 @@ class WFDBSignal(BSMLSignal):
     self.initialise(rec)
 
 
-  def initialise(self, rec):
-  #-------------------------
+  def initialise(self):
+  #--------------------
     signum = self.index
     self._record = rec
     self._signum = signum
@@ -172,8 +172,9 @@ class WFDBRecording(BSMLRecording):
     BSMLRecording.__init__(self, uri=uri, fname=fname, **kwds)
     self._siginfo = None
 
-  def initialise(self, fname):
-  #---------------------------
+  def initialise(self, **kwds):
+  #----------------------------
+    fname = str(self.dataset)
     global _WFDBLock, _CurrentRecord, _RecordCount
     with _WFDBLock:
       if _CurrentRecord and _CurrentRecord != fname:
@@ -190,7 +191,7 @@ class WFDBRecording(BSMLRecording):
       raise IOError("Cannot open header for '%s'" % fname)
     self._nsignals = self._siginfo.nsig
     for s in self.signals():
-      WFDBSignal.initialise_class(s, self)
+      WFDBSignal.initialise_class(s)
 
   def _set_attributes(self):
   #-------------------------
