@@ -340,7 +340,7 @@ class H5Recording(object):
     h5.create_group('recording')
     h5.create_group('recording/signal')
     h5['recording'].attrs['uri'] = str(uri)
-    h5['uris'].attrs[str(uri)] = h5.ref
+    h5['uris'].attrs[str(uri)] = h5['recording'].ref
     return cls(uri, fname, h5, **kwds)
 
 
