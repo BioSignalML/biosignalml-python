@@ -39,8 +39,8 @@ class Clock(AbstractObject):
 
   mapping = { ('resolution', metaclass): PropertyMap(BSML.resolution, XSD.double) }
 
-  def __init__(self, uri, times, resolution=1.0, **kwds):
-  #------------------------------------------------------
+  def __init__(self, uri, times, resolution=None, **kwds):
+  #-------------------------------------------------------
     AbstractObject.__init__(self, uri, resolution=resolution, **kwds)
     self._times = times
 
@@ -56,7 +56,7 @@ class Clock(AbstractObject):
   def time(self, pos):
   #-------------------
     """Return the time at index ``pos`` in seconds."""
-    return self.resolution*float(self[pos])
+    return self.resolution*float(self[pos]) if self.resolution else float(self[pos])
 
   def index(self, t):
   #------------------
