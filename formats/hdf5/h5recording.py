@@ -535,10 +535,18 @@ class H5Recording(object):
     If the dataset is compound (i.e. contains several signals) then the size of the
     supplied data must be a multiple of the number of signals.
     """
-    sig = self.get_signal(uri)
-    if sig is None: raise KeyError("Unknown signal '%s'" % uri)
-    dset = sig.dataset
-    nsignals = len(dset.attrs['uri']) if sig.index is not None else 1
+    if getattr(uri, '__iter__', None):
+      sig = self.get_signal(uri[0])
+      if sig is None or list(sig.dataset.attrs['uri']) != list(uri):
+         raise KeyError("Unknown signal set '%s'" % uri)
+      dset = sig.dataset
+      nsignals = len(dset.attrs['uri'])
+    else:
+      sig = self.get_signal(uri)
+      if sig is None: raise KeyError("Unknown signal '%s'" % uri)
+      dset = sig.dataset
+      nsignals = 1
+
     if not isinstance(data, np.ndarray): data = np.array(data)
 
     if nsignals > 1:         # compound dataset
