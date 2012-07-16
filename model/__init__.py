@@ -26,6 +26,7 @@ Abstract BioSignalML objects.
 import logging
 from datetime import datetime
 from collections import OrderedDict
+import re
 
 import biosignalml.utils as utils
 import biosignalml.rdf as rdf
@@ -365,6 +366,18 @@ class Annotation(core.AbstractObject):
   '''
 
 
+def make_time(s):
+#================
+  from biosignalml.timeline import Instant, Interval
+  try:
+    g = re.match('^t=(.*),(.*)$', s).groups()
+    start = float(g[0])
+    end   = float(g[1])
+    return Instant(None, start) if start == end else Interval(None, start, end=end)
+  except AttributeError, ValueError:
+    return None
+
+
 class Event(Annotation):
 #=======================
   '''
@@ -382,7 +395,7 @@ class Event(Annotation):
     attributes = [ 'time' ]
     mapping = { ('time', None): PropertyMap(RDF.value,
                                   to_rdf=lambda t: 't=%g,%g' % (t.start, t.end),
-#                                 from_rdf=lambda s:
+                                  from_rdf=make_time
                                   ) }
 
     def __init__(self, uri, time=None, **kwds):
@@ -455,8 +468,6 @@ class Event(Annotation):
       self.target = Event.Fragment.create_from_graph(t, graph)
       for s in graph.get_objects(self.target.uri, OA.hasSelector):
         self.target.selector = Event.Selector.create_from_graph(s, graph)
-        print self.target.selector
-      ################ Need to set selector's time...
     return self
 
 
@@ -492,5 +503,6 @@ if __name__ == '__main__':
   a2 = check(a1)
   e2 = check(e1)
 
-  print e1.time, e2.time
+  print e1.time
+  print e2.time
   assert(e2.time == e1.time)
