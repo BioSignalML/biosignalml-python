@@ -76,10 +76,11 @@ class Interval(model.core.AbstractObject):
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds) }
 
-  def __init__(self, uri, start, duration, timeline, **kwds):
-  #----------------------------------------------------------
-    model.core.AbstractObject.__init__(self, uri,
-                                       start=start, duration=duration, timeline=timeline,
+  def __init__(self, uri, start, duration=0, timeline=None, end=None, **kwds):
+  #---------------------------------------------------------------------------
+    model.core.AbstractObject.__init__(self, uri, start=start,
+                                       duration=duration if end is None else (end-start),
+                                       timeline=timeline,
                                        **kwds)
 
   @property
@@ -91,6 +92,16 @@ class Interval(model.core.AbstractObject):
   def __add__(self, increment):
   #----------------------------
     return Interval(self.make_uri(True), self.start + increment, self.duration, self.timeline)
+
+
+  def __eq__(self, interval):
+  #--------------------------
+    return (interval is not None and isinstance(interval, Interval)
+        and self.start == interval.start and self.duration == interval.duration)
+
+  def __str__(self):
+  #-----------------
+    return 'Interval: %g for %g' % (self.start, self.duration)
 
 
 class Instant(model.core.AbstractObject):
@@ -110,8 +121,8 @@ class Instant(model.core.AbstractObject):
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds) }
 
-  def __init__(self, uri, when, timeline, **kwds):
-  #-----------------------------------------------
+  def __init__(self, uri, when, timeline=None, **kwds):
+  #----------------------------------------------------
     model.core.AbstractObject.__init__(self, uri, start=when, timeline=timeline, **kwds)
     self.duration = 0.0
     self.end = self.start
@@ -120,4 +131,12 @@ class Instant(model.core.AbstractObject):
   #----------------------------
     return Instant(self.make_uri(True), self.at + increment, self.timeline)
 
+  def __eq__(self, instant):
+  #-------------------------
+    return (instant is not None and isinstance(instant, Instance)
+        and self.start == instant.start)
+
+  def __str__(self):
+  #-----------------
+    return 'Instant: %g' % self.start
 
