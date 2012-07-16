@@ -244,22 +244,24 @@ class Recording(core.AbstractObject):
     for e in self._events.itervalues(): e.save_to_graph(graph)
 
   @classmethod
-  def create_from_graph(cls, uri, graph, **kwds):
-  #----------------------------------------------
-    '''
+  def create_from_graph(cls, uri, graph, signals=True, **kwds):
+  #------------------------------------------------------------
+    """
     Create a new instance of a Recording, setting attributes from RDF triples in a graph.
 
     :param uri: The URI for the Recording.
     :param graph: A RDF graph.
     :type graph: :class:`~biosignalml.rdf.Graph`
+    :type signals: Set False to not load the Recording's Signals.
     :rtype: :class:`Recording`
-    '''
+    """
     self = cls(uri, **kwds)
 #    self = cls(uri, timeline=graph.get_object(uri, TL.timeline).uri, **kwds)
     self.load_from_graph(graph)
-    for s in graph.get_subjects(BSML.recording, self.uri):
-      if graph.contains(rdf.Statement(s, rdf.RDF.type, BSML.Signal)):  ## UniformSignal ?? get rdf:type ??
-        self.add_signal(self.SignalClass.create_from_graph(str(s.uri), graph, units=None))
+    if signals:
+      for s in sorted(graph.get_subjects(BSML.recording, self.uri), cmp=lambda u,v: cmp(str(u.uri),str(v.uri))):
+        if graph.contains(rdf.Statement(s, rdf.RDF.type, BSML.Signal)):  ## UniformSignal ?? get rdf:type ??
+          self.add_signal(self.SignalClass.create_from_graph(str(s.uri), graph, units=None))
     self.graph = graph
     return self
 
