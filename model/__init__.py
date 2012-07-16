@@ -279,6 +279,7 @@ class Annotation(core.AbstractObject):
               ('annotator', None): PropertyMap(OA.annotator, to_rdf=mapping.get_uri),
               ('body',      None): PropertyMap(OA.hasBody, to_rdf=mapping.get_uri),
               ('tags',      None): PropertyMap(OA.hasSemanticTag),
+              ('_oatype',   None): PropertyMap(RDF.type),
             }
 
   class TextContent(core.AbstractObject):
@@ -306,6 +307,7 @@ class Annotation(core.AbstractObject):
     label = kwds.get('label', '')
     core.AbstractObject.__init__(self, uri, target=target,
       annotator=annotator, annotated=annotated, **kwds)
+    self._oatype = OA.Annotation
     self.body = Annotation.TextContent(rdf.Resource.uuid_urn(), text, label=makelabel(label, 'text')) if text else body
     self.tags = tags if tags else []
 
