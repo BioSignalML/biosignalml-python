@@ -81,7 +81,7 @@ class AbstractObject(object):
     self.uri = (uri     if isinstance(uri, rdf.Uri)
            else uri.uri if isinstance(uri, rdf.Node) and uri.is_resource()
            else rdf.Uri(str(uri).strip()))
-    self.graph_uri = None
+    self.graph = None
 
   def __str__(self):
   #-----------------
@@ -275,7 +275,7 @@ class AbstractObject(object):
     '''
     self = cls(uri, **kwds)
     self.load_from_graph(graph)
-    self.graph_uri = graph.uri
+    self.graph = graph
     return self
 
   @classmethod
