@@ -465,7 +465,6 @@ class Event(Annotation):
     :rtype: :class:`Event`
     '''
     self = super(Event, cls).create_from_graph(uri, graph, **kwds)
-    self.load_from_graph(graph)
     for t in graph.get_objects(self.uri, OA.hasTarget):
       self.target = Event.Fragment.create_from_graph(t, graph)
       for s in graph.get_objects(self.target.uri, OA.hasSelector):
