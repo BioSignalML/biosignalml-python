@@ -437,6 +437,10 @@ class Event(Annotation):
       target=Event.Fragment(rdf.Resource.uuid_urn(), target, time, label=makelabel(label, 'frag'))
              if target is not None else None, **kwds)
 
+  def __str__(self):
+  #-----------------
+    return 'Event at %s: Target=%$s, Text=%s' % (self.time, self.target, self.body.text)
+
   @property
   def time(self):
   #--------------
