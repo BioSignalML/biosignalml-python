@@ -133,7 +133,7 @@ class Instant(model.core.AbstractObject):
 
   def __eq__(self, instant):
   #-------------------------
-    return (instant is not None and isinstance(instant, Instance)
+    return (instant is not None and isinstance(instant, Instant)
         and self.start == instant.start)
 
   def __str__(self):
