@@ -412,9 +412,9 @@ class H5Recording(object):
       data = np.array(data)
     if nsignals > 1:         # compound dataset
       if shape: raise TypeError("A compound dataset can only have scalar type")
-      maxshape = (nsignals, None)
+      maxshape = (None, nsignals)
       npoints = data.size/nsignals if data is not None else 0
-      shape = (nsignals, npoints)
+      shape = (npoints, nsignals)
     elif shape is not None:  # simple dataset, shape of data point given
       maxshape = (None,) + shape
       elsize = reduce((lambda x, y: x * y), shape) if (len(shape) and shape[0]) else 1
@@ -551,7 +551,7 @@ class H5Recording(object):
 
     if nsignals > 1:         # compound dataset
       npoints = data.size/nsignals
-      dpoints = dset.shape[1]
+      dpoints = dset.shape[0]
     else:                    # simple dataset
       if len(dset.shape) == 1: npoints = data.size
       else:                    npoints = data.size/reduce((lambda x, y: x * y), dset.shape[1:])
@@ -560,11 +560,10 @@ class H5Recording(object):
     if clockref and self._h5[clockref].len() < (npoints+dpoints):
       raise ValueError("Clock doesn't have sufficient times")
     try:
+      dset.resize(dpoints + npoints, 0)
       if nsignals > 1:         # compound dataset
-        dset.resize(dpoints + npoints, 1)
-        dset[..., dpoints:] = data.reshape((dset.shape[0], npoints))
+        dset[dpoints:] = data.reshape((npoints, dset.shape[1]))
       else:                    # simple dataset
-        dset.resize(dpoints + npoints, 0)
         dset[dpoints:] = data.reshape((npoints,) + dset.shape[1:])
     except Exception, msg:
       raise RuntimeError("Cannot extend signal dataset '%s' (%s)" % (name, msg))
