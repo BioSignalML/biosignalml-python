@@ -12,7 +12,7 @@ Files are structured as follows::
   Path         Object    Attributes
   ----         ------    ----------
   /            Root      version
-  /metadata    Dataset   format
+  /metadata    Dataset   mimetype
   /uris        Group
   /recording   Group     uri
     ./signal   Group
@@ -42,7 +42,7 @@ software; files will always be compatible withhin minor releases.
 -----------------
 
 This is an optional dataset containing a RDF serialisation of metadata associated with
-the recording and its signals, stored as a UTF-8 string. The ``format`` attribute gives
+the recording and its signals, stored as a UTF-8 string. The ``mimetype`` attribute gives
 the serialisation format, using standard mimetypes for RDF.
 
 
@@ -700,7 +700,7 @@ class H5Recording(object):
     """
     if self._h5.get('/metadata'): del self._h5['/metadata']
     md = self._h5.create_dataset('/metadata', data=metadata.encode('utf-8'))
-    md.attrs['format'] = mimetype
+    md.attrs['mimetype'] = mimetype
 
   def get_metadata(self):
   #----------------------
@@ -713,7 +713,7 @@ class H5Recording(object):
     """
     if self._h5.get('/metadata'):
       md = self._h5['/metadata']
-      return (md[()].decode('utf-8'), md.attrs.get('format'))
+      return (md[()].decode('utf-8'), md.attrs.get('mimetype'))
     else:
       return (None, None)
 
@@ -722,7 +722,7 @@ if __name__ == '__main__':
 #=========================
 
   f = H5Recording.create('/some/uri', 'test.h5', True)
-  f.store_metadata('metadata string', 'format')
+  f.store_metadata('metadata string', 'mimetype')
   f.close()
 
   g = H5Recording.open('test.h5')
