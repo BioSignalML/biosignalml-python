@@ -241,7 +241,7 @@ class H5Signal(object):
 
   def __len__(self):
   #-----------------
-    return self.dataset.len() if self.index is None else self.dataset[self.index].len()
+    return self.dataset.len()
 
   def __getitem__(self, pos):
   #--------------------------
@@ -251,7 +251,7 @@ class H5Signal(object):
     :param pos: A data point index or slice specifying a range.
     :type pos: A Python slice.
     """
-    data = self.dataset[pos] if self.index is None else self.dataset[self.index, pos]
+    data = self.dataset[pos] if self.index is None else self.dataset[pos, self.index]
     if self.offset != 0: data -= self.offset
     if self.gain != 1.0: data = data/float(self.gain)
     return data
