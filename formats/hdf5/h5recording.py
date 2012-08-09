@@ -2,7 +2,7 @@
 BioSignalML format for storing recordings in HDF5 files.
 
 A HDF5 file contains a single Recording, with its signals, clocks, and
-metadata storered as datasets. Signal datasets are either *Simple*, corresponding
+metadata stored as datasets. Signal datasets are either *Simple*, corresponding
 one-to-one with individual Signals, or *Compound*, in which case a dataset contains
 several signals all with the same timing information, as say produced by a
 simulation.
@@ -35,7 +35,7 @@ form 'BSML m.n' --- the first five characters must be 'BSML '; this is followed
 by major and minor version numbers, separated by a period ('.').
 
 Newer major releases will always read files created by prior versions of the
-software; files will always be compatible withhin minor releases.
+software; files will always be compatible within minor releases.
 
 
 /metadata dataset
@@ -50,7 +50,7 @@ the serialisation format, using standard mimetypes for RDF.
 -------------
 
 This group has an attribute for each URI that is an attribute in the recording. It
-is used to ensure URI uniqeness and to lookup datasets. The value of each attribute
+is used to ensure URI uniqueness and to lookup datasets. The value of each attribute
 is a HDF5 reference to the dataset which contains a resource's data.
 
 
