@@ -45,10 +45,10 @@ class RelativeTimeLine(model.core.AbstractObject):
   #----------------------
     return Instant(self.make_uri(), when, self)
 
-  def interval(self, start, duration):
-  #----------------------------------
-    if duration == 0.0: return self.instant(start)
-    else:               return Interval(self.make_uri(), start, duration, self)
+  def interval(self, start, duration=0, end=None):
+  #-----------------------------------------------
+    if duration == 0 and end is None: return self.instant(start)
+    else:                             return Interval(self.make_uri(), start, duration, self, end)
 
 
 

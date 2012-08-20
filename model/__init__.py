@@ -223,12 +223,12 @@ class Recording(core.AbstractObject):
     """
     return self.timeline.instant(when)
 
-  def interval(self, start, duration):
-  #-----------------------------------
+  def interval(self, start, duration=0, end=None):
+  #-----------------------------------------------
     """
     Create an :class:`.Interval` on the recording's timeline.
     """
-    return self.timeline.interval(start, duration)
+    return self.timeline.interval(start, duration, end=end)
 
 
   def save_to_graph(self, graph):
