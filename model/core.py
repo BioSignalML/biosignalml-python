@@ -226,7 +226,7 @@ class AbstractObject(object):
   def metadata_as_stream(self):
   #----------------------------
     '''
-    Add RDF statements about ourselves as a stream.
+    Return a stream of RDF statements about ourselves.
     '''
     if self.metaclass:
       yield rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)
