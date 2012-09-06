@@ -90,8 +90,8 @@ class Signal(core.AbstractObject):
 
   def __init__(self, uri, units, **kwds):
   #--------------------------------------
-    kwds['units'] = units
-    core.AbstractObject.__init__(self, uri, **kwds)
+    core.AbstractObject.__init__(self, uri, units=units, **kwds)
+    self.recording = None
     self.recording = None
 
 
