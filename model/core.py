@@ -142,6 +142,16 @@ class AbstractObject(object):
     cls.initialise(obj, **kwds)
     return obj
 
+  def metaclassof(self, metaclass):
+  #--------------------------------
+    '''
+    Check if an object has a given metaclass in its class hierarchy.
+
+    '''
+    for cls in self.__class__.__mro__:
+      if getattr(cls, 'metaclass', None) == metaclass: return True
+    return False
+
   def set_attributes(self, **values):
   #----------------------------------
     '''
@@ -258,9 +268,11 @@ class AbstractObject(object):
     """
     if graph.contains(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
-        s, attr, v = self.rdfmap.metadata(stmt, self.metaclass) # Need to go up __mro__ from AbstractObject
-        #logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
-        if attr is not None: self._assign(attr, v)
+        for metaclass in reversed([getattr(cls, 'metaclass', None)  # Go up __mro__ from AbstractObject
+                                     for cls in self.__class__.__mro__ if cls != object]):
+          s, attr, v = self.rdfmap.metadata(stmt, metaclass)
+          #logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
+          if attr is not None: self._assign(attr, v)
 
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
