@@ -114,6 +114,7 @@ matrix 'time' values,
 """
 
 from functools import reduce
+import urllib
 
 import h5py
 import numpy as np
@@ -301,6 +302,10 @@ class H5Recording(object):
     :param readonly: bool
     """
     try:
+      if fname.startswith('file:'):
+        f = urllib.urlopen(fname)
+        fname = f.fp.name
+        f.close()
       h5 = h5py.File(fname, 'r' if readonly else 'r+')
     except IOError, msg:
       raise IOError("Cannot open file '%s' (%s)" % (fname, msg))
