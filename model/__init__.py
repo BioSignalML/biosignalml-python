@@ -87,7 +87,6 @@ class Signal(core.AbstractObject):
                                                   utils.isoduration_to_seconds),
             }
 
-
   def __init__(self, uri, units, **kwds):
   #--------------------------------------
     core.AbstractObject.__init__(self, uri, units=units, **kwds)
@@ -396,6 +395,7 @@ class Annotation(core.AbstractObject):
       else:                         utf8 = unicode(text, 'utf-8')
       core.AbstractObject.__init__(self, uri, text=utf8, encoding='utf-8', **kwds)
 
+
   def __init__(self, uri, target=None, annotator=None, set_time=True, text=None, tags=None, body=None, **kwds):
   #------------------------------------------------------------------------------------------------------------
     annotated = kwds.pop('annotated', utils.utctime()) if set_time else None
@@ -459,8 +459,7 @@ class Annotation(core.AbstractObject):
       # Should only have the one body...
     for r in graph.query("select ?t where { <%s> <%s> ?t . ?t a <%s> }"
                          % (self.uri, OA.hasTarget, OA.SpecificResource)):
-      t = r['t']
-      self.target = Annotation.Fragment.create_from_graph(t, graph)
+      self.target = Annotation.Fragment.create_from_graph(r['t'], graph)
       for s in graph.get_objects(self.target.uri, OA.hasSelector):
         self.target.selector = Annotation.Selector.create_from_graph(s, graph)
     return self
