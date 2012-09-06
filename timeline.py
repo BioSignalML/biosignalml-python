@@ -69,10 +69,10 @@ class Interval(model.core.AbstractObject):
   mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
                                                    to_rdf=mapping.get_uri,
                                                    from_rdf=RelativeTimeLine),
-              ('start',    metaclass): PropertyMap(TL.beginsAtDuration, XSD.duration,
+              ('start',    metaclass): PropertyMap(TL.beginsAtDuration, XSD.dayTimeDuration,
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds),
-              ('duration', metaclass): PropertyMap(TL.durationXSD, XSD.duration,
+              ('duration', metaclass): PropertyMap(TL.durationXSD, XSD.dayTimeDuration,
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds) }
 
@@ -117,7 +117,7 @@ class Instant(model.core.AbstractObject):
   mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
                                                    to_rdf=mapping.get_uri,
                                                    from_rdf=RelativeTimeLine),
-              ('start',    metaclass): PropertyMap(TL.atDuration, XSD.duration,
+              ('start',    metaclass): PropertyMap(TL.atDuration, XSD.dayTimeDuration,
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds) }
 
