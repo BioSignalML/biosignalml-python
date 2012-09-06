@@ -126,7 +126,7 @@ class Instant(model.core.AbstractObject):
   def __init__(self, uri, when, timeline=None, **kwds):
   #----------------------------------------------------
     model.core.AbstractObject.__init__(self, uri, start=when, timeline=timeline, **kwds)
-    self.duration = 0.0
+    self.duration = 0
     self.end = self.start
 
   def __add__(self, increment):
