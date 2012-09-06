@@ -240,15 +240,23 @@ class Recording(core.AbstractObject):
 
   def events(self):
   #-----------------
-    return self._events.itervalues()
+    return self._events.values()
 
   def add_event(self, event):
   #--------------------------
-    self._events[event.uri] = event
+    event.recording = self
+    self._events[str(event.uri)] = event
+
+  def new_event(self, uri, etype, **kwds):
+  #---------------------------------------
+    evt = Event(uri, etype, **kwds)
+    self.add_event(evt)
+    return evt
 
   def get_event(self, uri):
   #------------------------
-    return self._events[uri]
+    return self._events[str(uri)]
+
 
   def instant(self, when):
   #----------------------
