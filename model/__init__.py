@@ -144,12 +144,13 @@ class Recording(core.AbstractObject):
 
   metaclass = BSML.Recording  #: :attr:`.BSML.Recording`
 
-  attributes = [ 'label', 'source', 'format', 'comment', 'investigation',
+  attributes = [ 'dataset', 'source', 'format', 'comment', 'investigation',
                  'starttime', 'duration', 'timeline'
                ]
   '''Generic attributes of a Recording.'''
 
   mapping = { ('format',        metaclass): PropertyMap(DCTERMS.format),
+              ('dataset',       metaclass): PropertyMap(BSML.dataset),
               ('source',        metaclass): PropertyMap(DCTERMS.source),
               ('investigation', metaclass): PropertyMap(DCTERMS.subject),
               ('starttime',     metaclass): PropertyMap(DCTERMS.created, XSD.dateTime,
