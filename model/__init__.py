@@ -301,9 +301,9 @@ class Recording(core.AbstractObject):
 #    self = cls(uri, timeline=graph.get_object(uri, TL.timeline).uri, **kwds)
     self.load_from_graph(graph)
     if signals:
-      for s in sorted(graph.get_subjects(BSML.recording, self.uri), cmp=lambda u,v: cmp(str(u.uri),str(v.uri))):
-        if graph.contains(rdf.Statement(s, rdf.RDF.type, BSML.Signal)):  ## UniformSignal ?? get rdf:type ??
-          self.add_signal(self.SignalClass.create_from_graph(str(s.uri), graph, units=None))
+      for r in graph.query("select ?s where { ?s a <%s> . ?s <%s> <%s> } order by ?s"
+                           % (BSML.Signal, BSML.recording, self.uri)):
+        self.add_signal(self.SignalClass.create_from_graph(str(r['s']), graph, units=None))
     self.graph = graph
     return self
 
