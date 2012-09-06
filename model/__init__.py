@@ -92,7 +92,40 @@ class Signal(core.AbstractObject):
   #--------------------------------------
     core.AbstractObject.__init__(self, uri, units=units, **kwds)
     self.recording = None
+
+
+class Event(core.AbstractObject):
+#================================
+  '''
+  An abstract BioSignalML Event.
+  '''
+
+  metaclass = BSML.Event      #: :attr:`.BSML.Event`
+
+  attributes = ['eventtype', 'time', 'duration' ]
+  '''Generic attributes of an Event.'''
+
+  mapping = { ('recording', None): PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
+              ('eventtype', None): PropertyMap(BSML.eventType),
+              ('time',      None): PropertyMap(BSML.offset, XSD.dayTimeDuration,
+                                               utils.seconds_to_isoduration,
+                                               utils.isoduration_to_seconds),
+              ('duration',  None): PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
+                                               utils.seconds_to_isoduration,
+                                               utils.isoduration_to_seconds),
+            }
+
+  def __init__(self, uri, eventtype, time=None, duration=None, end=None, **kwds):
+  #--------------------------------------------------------------------------
+    core.AbstractObject.__init__(self, uri, eventtype=eventtype,
+                                            time=time,
+                                            duration=duration if end is None else (end-time),
+                                            **kwds)
     self.recording = None
+
+  def __str__(self):
+  #-----------------
+    return 'Event %s at %s' % (self.eventtype, self.time)
 
 
 def _get_timeline(tl):      # Stops a circular import
@@ -266,6 +299,18 @@ class Recording(core.AbstractObject):
     return self
 
 
+def _make_time(s):
+#=================
+  from biosignalml.timeline import Instant, Interval
+  try:
+    g = re.match('^t=(.*),(.*)$', s).groups()
+    start = float(g[0])
+    end   = float(g[1])
+    return Instant(None, start) if start == end else Interval(None, start, end=end)
+  except AttributeError, ValueError:
+    return None
+
+
 class Annotation(core.AbstractObject):
 #=====================================
   '''
@@ -284,6 +329,44 @@ class Annotation(core.AbstractObject):
               ('tags',      None): PropertyMap(OA.hasSemanticTag),
               ('_oatype',   None): PropertyMap(RDF.type),
             }
+
+  class Selector(core.AbstractObject):
+  #===================================
+    metaclass = OA.FragmentSelector
+    attributes = [ 'time' ]
+    mapping = { ('time', None): PropertyMap(RDF.value,
+                                  to_rdf=lambda t: 't=%g,%g' % (t.start, t.end),
+                                  from_rdf=_make_time
+                                  ) }
+
+    def __init__(self, uri, time=None, **kwds):
+    #------------------------------------------
+      core.AbstractObject.__init__(self, uri, time=time, **kwds)
+
+
+  class Fragment(core.AbstractObject):
+  #===================================
+    """
+    A temporal fragment giving the event's position.
+    """
+    metaclass = OA.SpecificResource
+    attributes = [ 'source', 'selector' ]
+    mapping = { ('source',   None): PropertyMap(OA.hasSource),
+                ('selector', None): PropertyMap(OA.hasSelector) }
+
+    def __init__(self, uri, source=None, time=None, **kwds):
+    #-------------------------------------------------------
+      label = kwds.get('label', '')
+      core.AbstractObject.__init__(self, uri, source=source,
+        selector=Annotation.Selector(rdf.Resource.uuid_urn(), time, label=makelabel(label, 'time'))
+                 if time is not None else None,
+        **kwds)
+
+    def save_to_graph(self, graph):
+    #------------------------------
+      core.AbstractObject.save_to_graph(self, graph)
+      if self.selector: self.selector.save_to_graph(graph)
+
 
   class TextContent(core.AbstractObject):
   #======================================
@@ -324,6 +407,15 @@ class Annotation(core.AbstractObject):
   #-------------------------------------------------
     return cls(uri, target, annotator, tags=[tag], **kwds)
 
+  @classmethod
+  def Event(cls, uri, target=None, time=None, **kwds):
+  #---------------------------------------------------
+    ##logging.debug('Event: %s (%s)', uri, repr(uri))
+    label = kwds.get('label', '')
+    return cls(uri,
+      target=Annotation.Fragment(rdf.Resource.uuid_urn(), target, time, label=makelabel(label, 'frag'))
+             if target is not None else None, **kwds)
+
   def tag(self, tag):
   #------------------
     self.tags.append(tag)
@@ -338,6 +430,7 @@ class Annotation(core.AbstractObject):
     """
     core.AbstractObject.save_to_graph(self, graph)
     if self.body: self.body.save_to_graph(graph)
+    if isinstance(self.target, Annotation.Fragment): self.target.save_to_graph(graph)
 
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
@@ -355,7 +448,18 @@ class Annotation(core.AbstractObject):
     for b in graph.get_objects(self.uri, OA.hasBody):
       self.body = Annotation.TextContent.create_from_graph(b, graph)
       # Should only have the one body...
+    for r in graph.query("select ?t where { <%s> <%s> ?t . ?t a <%s> }"
+                         % (self.uri, OA.hasTarget, OA.SpecificResource)):
+      t = r['t']
+      self.target = Annotation.Fragment.create_from_graph(t, graph)
+      for s in graph.get_objects(self.target.uri, OA.hasSelector):
+        self.target.selector = Annotation.Selector.create_from_graph(s, graph)
     return self
+
+  @property
+  def time(self):
+  #--------------
+    return self.target.selector.time if getattr(self.target, 'selector', None) else None
 
   '''
   @classmethod
@@ -367,113 +471,6 @@ class Annotation(core.AbstractObject):
     return cls(uri, target=target, type=AO.Qualifier, body=qualifier, annotator=annotator)
   '''
 
-
-def make_time(s):
-#================
-  from biosignalml.timeline import Instant, Interval
-  try:
-    g = re.match('^t=(.*),(.*)$', s).groups()
-    start = float(g[0])
-    end   = float(g[1])
-    return Instant(None, start) if start == end else Interval(None, start, end=end)
-  except AttributeError, ValueError:
-    return None
-
-
-class Event(Annotation):
-#=======================
-  '''
-  An abstract BioSignalML Event.
-  '''
-
-  metaclass = BSML.Event              #: :attr:`.BSML.Event`
-
-  class Selector(core.AbstractObject):
-  #===================================
-    """
-    A temporal fragment given the event's position.
-    """
-    metaclass = OA.FragmentSelector
-    attributes = [ 'time' ]
-    mapping = { ('time', None): PropertyMap(RDF.value,
-                                  to_rdf=lambda t: 't=%g,%g' % (t.start, t.end),
-                                  from_rdf=make_time
-                                  ) }
-
-    def __init__(self, uri, time=None, **kwds):
-    #------------------------------------------
-      core.AbstractObject.__init__(self, uri, time=time, **kwds)
-
-
-  class Fragment(core.AbstractObject):
-  #===================================
-    """
-    A temporal fragment giving the event's position.
-    """
-    metaclass = OA.SpecificResource
-    attributes = [ 'source', 'selector' ]
-    mapping = { ('source',   None): PropertyMap(OA.hasSource),
-                ('selector', None): PropertyMap(OA.hasSelector) }
-
-    def __init__(self, uri, source=None, time=None, **kwds):
-    #-------------------------------------------------------
-      label = kwds.get('label', '')
-      core.AbstractObject.__init__(self, uri, source=source,
-        selector=Event.Selector(rdf.Resource.uuid_urn(), time, label=makelabel(label, 'time'))
-                 if time is not None else None,
-        **kwds)
-
-    def save_to_graph(self, graph):
-    #------------------------------
-      core.AbstractObject.save_to_graph(self, graph)
-      self.selector.save_to_graph(graph)
-
-
-  def __init__(self, uri, target=None, time=None, **kwds):
-  #-------------------------------------------------------
-    ##logging.debug('Event: %s (%s)', uri, repr(uri))
-    label = kwds.get('label', '')
-    Annotation.__init__(self, uri,
-      target=Event.Fragment(rdf.Resource.uuid_urn(), target, time, label=makelabel(label, 'frag'))
-             if target is not None else None, **kwds)
-
-  def __str__(self):
-  #-----------------
-    return 'Event at %s: Target=%$s, Text=%s' % (self.time, self.target, self.body.text)
-
-  @property
-  def time(self):
-  #--------------
-    return self.target.selector.time
-
-  def save_to_graph(self, graph):
-  #------------------------------
-    """
-    Add an Event's metadata to a RDF graph.
-
-    :param graph: A RDF graph.
-    :type graph: :class:`~biosignalml.rdf.Graph`
-    """
-    Annotation.save_to_graph(self, graph)
-    self.target.save_to_graph(graph)
-
-  @classmethod
-  def create_from_graph(cls, uri, graph, **kwds):
-  #----------------------------------------------
-    '''
-    Create a new instance of an Event, setting attributes from RDF triples in a graph.
-
-    :param uri: The URI of the Event.
-    :param graph: A RDF graph.
-    :type graph: :class:`~biosignalml.rdf.Graph`
-    :rtype: :class:`Event`
-    '''
-    self = super(Event, cls).create_from_graph(uri, graph, **kwds)
-    for t in graph.get_objects(self.uri, OA.hasTarget):
-      self.target = Event.Fragment.create_from_graph(t, graph)
-      for s in graph.get_objects(self.target.uri, OA.hasSelector):
-        self.target.selector = Event.Selector.create_from_graph(s, graph)
-    return self
 
 
 if __name__ == '__main__':
