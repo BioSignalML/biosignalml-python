@@ -265,8 +265,8 @@ class Recording(core.AbstractObject):
     """
     return self.timeline.instant(when)
 
-  def interval(self, start, duration=0, end=None):
-  #-----------------------------------------------
+  def interval(self, start, duration=None, end=None):
+  #--------------------------------------------------
     """
     Create an :class:`.Interval` on the recording's timeline.
     """
