@@ -60,7 +60,7 @@ class Signal(core.AbstractObject):
 
   metaclass = BSML.Signal     #: :attr:`.BSML.Signal`
 
-  attributes = ['label', 'units', 'transducer', 'filter', 'rate',  'clock',
+  attributes = ['units', 'transducer', 'filter', 'rate',  'clock',
                 'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
                 'index', 'signaltype', 'offset', 'duration',
                ]
