@@ -496,18 +496,18 @@ if __name__ == '__main__':
     g = rdf.Graph()
     instance.save_to_graph(g)
     copy = instance.__class__.create_from_graph(instance.uri, g)
-    if isinstance(instance, Event):
+#    if isinstance(instance, Event):
 #      print_dict(instance.target)
 #      print_dict(copy.target)
-      print instance.metadata_as_string(rdf.Format.TURTLE)
-    #  print copy.metadata_as_string(rdf.Format.TURTLE)
+#    print instance.metadata_as_string(rdf.Format.TURTLE)
+#    print copy.metadata_as_string(rdf.Format.TURTLE)
     assert(instance.metadata_as_string(rdf.Format.TURTLE) == copy.metadata_as_string(rdf.Format.TURTLE))
     return copy
 
 
   r1 = Recording('http://example.org/recording')
   a1 = Annotation.Note('http://example.org/ann1', r1, 'test', 'text')
-  e1 = Event('http://example.org/event', r1, r1.interval(1, 0.5),
+  e1 = Annotation.Event('http://example.org/event', r1, r1.interval(1, 0.5),
     annotator='test', text='event text')
 
   r2 = check(r1)
@@ -517,3 +517,7 @@ if __name__ == '__main__':
   print e1.time
   print e2.time
   assert(e2.time == e1.time)
+
+  ev1 = r1.new_event('http://ex.org/evt1', a1, time=32.3)
+  print ev1.metadata_as_string(rdf.Format.TURTLE)
+
