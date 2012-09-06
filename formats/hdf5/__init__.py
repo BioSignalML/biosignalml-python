@@ -31,11 +31,17 @@ class HDF5Signal(BSMLSignal):
   #-----------------
     return len(self._h5) if self._h5 else None
 
+  def _set_h5_signal(self, h5):
+  #----------------------------
+    self._h5 = h5
+    if   h5.clock: self.clock = Clock(h5.clock.uri, h5.clock)
+    elif h5.rate:  self.clock = UniformClock(None, h5.rate)
+
   @classmethod
   def create_from_H5Signal(cls, index, signal):
   #--------------------------------------------
     self = cls(signal.uri, signal.units, dict(rate=signal.rate)) ## rate, clock attributes...
-    self._h5 = signal
+    self._set_h5_signal(signal)
     return self
 
   def read(self, interval=None, segment=None, maxduration=None, maxpoints=None):
@@ -94,6 +100,10 @@ class HDF5Signal(BSMLSignal):
       startpos += len(data)
       length -= len(data)
 
+  def initialise(self):
+  #--------------------
+    self._set_h5_signal(self.recording._h5.get_signal(self.uri))
+
 
 class HDF5Recording(BSMLRecording):
 #==================================
@@ -133,3 +143,11 @@ class HDF5Recording(BSMLRecording):
     rdf, format = self._h5,get_metadata()
     if rdf:
       self.load_from_graph(rdf.Graph.create_from_string(self.uri, rdf, format))
+
+  def initialise(self, **kwds):
+  #----------------------------
+    fname = str(self.dataset)
+    self._h5 = H5Recording.open(fname)
+    for s in self.signals():
+      HDF5Signal.initialise_class(s)
+
