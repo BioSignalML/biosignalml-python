@@ -337,7 +337,10 @@ class DataSegment(object):
   @property
   def points(self):
   #----------------
-    return self.dataseries.points + (self.starttime, 0)
+    if self.starttime:
+      return self.dataseries.points + (self.starttime, 0)
+    else:
+      return self.dataseries.points
 
 
 if __name__ == '__main__':
