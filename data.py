@@ -324,6 +324,10 @@ class DataSegment(object):
     if isinstance(key, slice): return s + (self.starttime, 0)
     else:                      return (s[0] + self.starttime, s[1])
 
+  def time(self, index):
+  #---------------------
+    return self.dataseries.time[index] + self.starttime
+
   @property
   def data(self):
   #--------------
