@@ -123,7 +123,7 @@ class UniformClock(Clock):
   def __init__(self, uri, rate):
   #-----------------------------
     Clock.__init__(self, uri, None)
-    self._rate = float(rate)
+    self.rate = float(rate)
 
   def __getitem__(self, key):
   #--------------------------
@@ -133,9 +133,9 @@ class UniformClock(Clock):
     if isinstance(key, slice):
       if key.stop is None: raise TypeError
       return np.arange(key.start if key.start is not None else 0,
-                       key.stop, key.step)/self._rate
+                       key.stop, key.step)/self.rate
     else:
-      return key/self._rate
+      return key/self.rate
 
   def __len__(self):
   #-----------------
@@ -148,7 +148,7 @@ class UniformClock(Clock):
   #------------------
     i = 0
     if t < 0.0: return -1
-    else: return int(math.floor(t*self._rate))
+    else: return int(math.floor(t*self.rate))
 
   def extend(self, times):
   #-----------------------
