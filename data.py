@@ -4,15 +4,14 @@
 #
 #  Copyright (c) 2010 - 2011  David Brooks
 #
-#  $ID$
+#  $ID: 631d8f5 on Thu Sep 6 14:30:52 2012 +1200 by Dave Brooks $
 #
 ######################################################
 
-__docformat__ = 'restructuredtext'
 
+import math
 import logging
 import numpy as np
-
 
 from biosignalml.ontology import BSML
 from biosignalml.model.core import AbstractObject
