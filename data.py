@@ -31,17 +31,24 @@ class Clock(AbstractObject):
   """
   The sample times of a :class:`TimeSeries`.
 
-  :param np.array times: Array of sample times, in seconds.
+  :param np.array times: Array of sample times, in ``resolution`` seconds.
+  :param float resolution: The time, in seconds, represented by a time of 1.0. Optional.
+  :param float rate: Resolution can be given as the reciprocal of ``rate``. Optional.
   """
   metaclass = BSML.SampleClock
 
-  attributes = [ 'resolution' ]
+  # Also have 'frequency' ?? and/or 'period' ??
+  attributes = [ 'resolution', 'rate' ]
 
-  mapping = { ('resolution', metaclass): PropertyMap(BSML.resolution, XSD.double) }
+  mapping = { ('resolution', None): PropertyMap(BSML.resolution, XSD.double),
+              ('rate',       None): PropertyMap(BSML.rate,       XSD.double) }
 
-  def __init__(self, uri, times, resolution=None, **kwds):
-  #-------------------------------------------------------
-    AbstractObject.__init__(self, uri, resolution=resolution, **kwds)
+  def __init__(self, uri, times, resolution=None, rate=None, **kwds):
+  #------------------------------------------------------------------
+    if (resolution is not None and rate is not None
+     and float(resolution)*float(rate) != 1.0):
+      raise DataError("Clock's resolution doesn't match its rate")
+    AbstractObject.__init__(self, uri, resolution=resolution, rate=rate, **kwds)
     self._times = times
 
   def __getitem__(self, key):
@@ -51,12 +58,24 @@ class Clock(AbstractObject):
 
   def __len__(self):
   #-----------------
-    return len(self.__times)
+    return len(self._times)
+
+  def scale(self, time):
+  #---------------------
+    """
+    Convert a stored time value to seconds.
+
+    :param float time: Time measured at the clock's resolution.
+    :return: The time in seconds.
+    """
+    if   self.resolution: return self.resolution*float(time)
+    elif self.rate:       return float(time)/self.rate
+    else:                 return float(time)
 
   def time(self, pos):
   #-------------------
     """Return the time at index ``pos`` in seconds."""
-    return self.resolution*float(self[pos]) if self.resolution else float(self[pos])
+    return self.scale(self[pos])
 
   def index(self, t):
   #------------------
