@@ -76,29 +76,23 @@ class Clock(AbstractObject):
     """Return the time at index ``pos`` in seconds."""
     return self.scale(self[pos])
 
-  def index(self, t):
-  #------------------
+  def index(self, time):
+  #---------------------
     """
     Find the index of a time in the clock.
 
-    :param t: The time to lookup, in seconds.
-    :type t: float
+    :param float time: The time to lookup, in seconds.
     :return: The greatest index such that ``self.time(index) <= t``.
       -1 is returned if ``t`` is before ``self.time(0)``.
     :rtype: int
     """
     i = 0
-    j = len(self) - 1
-    if time < self.time(0): return -1
-    elif time >= self.time(j): return j
-    while i <= j:
+    j = len(self)
+    while i < j:
       m = (i + j)//2
-      v = self.time(m)
-      print i, j, m, v
-      if   v < time: i = m + 1
-      elif v > time: j = m - 1
-      else: return m
-    return m - 1
+      if self.time(m) <= time: i = m + 1
+      else:                    j = m
+    return i - 1
 
   def extend(self, times):
   #-----------------------
