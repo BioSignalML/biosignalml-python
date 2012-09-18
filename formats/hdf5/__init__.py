@@ -29,7 +29,7 @@ class HDF5Signal(BSMLSignal):
 
   def __len__(self):
   #-----------------
-    return len(self._h5) if self._h5 else None
+    return len(self._h5) if self._h5 is not None else 0
 
   def _set_h5_signal(self, h5):
   #----------------------------
