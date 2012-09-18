@@ -22,9 +22,9 @@ from h5recording import H5Recording
 class HDF5Signal(BSMLSignal):
 #============================
 
-  def __init__(self, uri, units, metadata=None, **kwds):
-  #-----------------------------------------------------
-    BSMLSignal.__init__(self, uri, units, metadata=metadata, **kwds)
+  def __init__(self, uri, units, **kwds):
+  #--------------------------------------
+    BSMLSignal.__init__(self, uri, units, **kwds)
     self._h5 = None
 
   def __len__(self):
