@@ -8,11 +8,10 @@
 #
 ######################################################
 
-__docformat__ = 'restructuredtext'
 
+import math
 import logging
 import numpy as np
-
 
 from biosignalml.ontology import BSML
 from biosignalml.model.core import AbstractObject
@@ -31,17 +30,24 @@ class Clock(AbstractObject):
   """
   The sample times of a :class:`TimeSeries`.
 
-  :param np.array times: Array of sample times, in seconds.
+  :param np.array times: Array of sample times, in ``resolution`` seconds.
+  :param float resolution: The time, in seconds, represented by a time of 1.0. Optional.
+  :param float rate: Resolution can be given as the reciprocal of ``rate``. Optional.
   """
   metaclass = BSML.SampleClock
 
-  attributes = [ 'resolution' ]
+  # Also have 'frequency' ?? and/or 'period' ??
+  attributes = [ 'resolution', 'rate' ]
 
-  mapping = { ('resolution', metaclass): PropertyMap(BSML.resolution, XSD.double) }
+  mapping = { ('resolution', None): PropertyMap(BSML.resolution, XSD.double),
+              ('rate',       None): PropertyMap(BSML.rate,       XSD.double) }
 
-  def __init__(self, uri, times, resolution=None, **kwds):
-  #-------------------------------------------------------
-    AbstractObject.__init__(self, uri, resolution=resolution, **kwds)
+  def __init__(self, uri, times, resolution=None, rate=None, **kwds):
+  #------------------------------------------------------------------
+    if (resolution is not None and rate is not None
+     and float(resolution)*float(rate) != 1.0):
+      raise DataError("Clock's resolution doesn't match its rate")
+    AbstractObject.__init__(self, uri, resolution=resolution, rate=rate, **kwds)
     self._times = times
 
   def __getitem__(self, key):
@@ -51,36 +57,42 @@ class Clock(AbstractObject):
 
   def __len__(self):
   #-----------------
-    return len(self.__times)
+    return len(self._times)
+
+  def scale(self, time):
+  #---------------------
+    """
+    Convert a stored time value to seconds.
+
+    :param float time: Time measured at the clock's resolution.
+    :return: The time in seconds.
+    """
+    if   self.resolution: return self.resolution*float(time)
+    elif self.rate:       return float(time)/self.rate
+    else:                 return float(time)
 
   def time(self, pos):
   #-------------------
     """Return the time at index ``pos`` in seconds."""
-    return self.resolution*float(self[pos]) if self.resolution else float(self[pos])
+    return self.scale(self[pos])
 
-  def index(self, t):
-  #------------------
+  def index(self, time):
+  #---------------------
     """
     Find the index of a time in the clock.
 
-    :param t: The time to lookup, in seconds.
-    :type t: float
+    :param float time: The time to lookup, in seconds.
     :return: The greatest index such that ``self.time(index) <= t``.
       -1 is returned if ``t`` is before ``self.time(0)``.
     :rtype: int
     """
     i = 0
-    j = len(self) - 1
-    if time < self.time(0): return -1
-    elif time >= self.time(j): return j
-    while i <= j:
+    j = len(self)
+    while i < j:
       m = (i + j)//2
-      v = self.time(m)
-      print i, j, m, v
-      if   v < time: i = m + 1
-      elif v > time: j = m - 1
-      else: return m
-    return m - 1
+      if self.time(m) <= time: i = m + 1
+      else:                    j = m
+    return i - 1
 
   def extend(self, times):
   #-----------------------
@@ -104,7 +116,7 @@ class UniformClock(Clock):
   def __init__(self, uri, rate):
   #-----------------------------
     Clock.__init__(self, uri, None)
-    self._rate = float(rate)
+    self.rate = float(rate)
 
   def __getitem__(self, key):
   #--------------------------
@@ -114,9 +126,9 @@ class UniformClock(Clock):
     if isinstance(key, slice):
       if key.stop is None: raise TypeError
       return np.arange(key.start if key.start is not None else 0,
-                       key.stop, key.step)/self._rate
+                       key.stop, key.step)/self.rate
     else:
-      return key/self._rate
+      return key/self.rate
 
   def __len__(self):
   #-----------------
@@ -129,7 +141,7 @@ class UniformClock(Clock):
   #------------------
     i = 0
     if t < 0.0: return -1
-    else: return int(math.floor(t*self._rate))
+    else: return int(math.floor(t*self.rate))
 
   def extend(self, times):
   #-----------------------
@@ -305,6 +317,10 @@ class DataSegment(object):
     if isinstance(key, slice): return s + (self.starttime, 0)
     else:                      return (s[0] + self.starttime, s[1])
 
+  def time(self, index):
+  #---------------------
+    return self.dataseries.time[index] + self.starttime
+
   @property
   def data(self):
   #--------------
@@ -318,7 +334,10 @@ class DataSegment(object):
   @property
   def points(self):
   #----------------
-    return self.dataseries.points + (self.starttime, 0)
+    if self.starttime:
+      return self.dataseries.points + (self.starttime, 0)
+    else:
+      return self.dataseries.points
 
 
 if __name__ == '__main__':

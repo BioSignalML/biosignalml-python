@@ -45,10 +45,10 @@ class RelativeTimeLine(model.core.AbstractObject):
   #----------------------
     return Instant(self.make_uri(), when, self)
 
-  def interval(self, start, duration):
-  #----------------------------------
-    if duration == 0.0: return self.instant(start)
-    else:               return Interval(self.make_uri(), start, duration, self)
+  def interval(self, start, duration=None, end=None):
+  #--------------------------------------------------
+    if duration in [0, None] and end is None: return self.instant(start)
+    else:                                     return Interval(self.make_uri(), start, duration, self, end)
 
 
 
@@ -69,15 +69,15 @@ class Interval(model.core.AbstractObject):
   mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
                                                    to_rdf=mapping.get_uri,
                                                    from_rdf=RelativeTimeLine),
-              ('start',    metaclass): PropertyMap(TL.beginsAtDuration, XSD.duration,
+              ('start',    metaclass): PropertyMap(TL.beginsAtDuration, XSD.dayTimeDuration,
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds),
-              ('duration', metaclass): PropertyMap(TL.durationXSD, XSD.duration,
+              ('duration', metaclass): PropertyMap(TL.durationXSD, XSD.dayTimeDuration,
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds) }
 
-  def __init__(self, uri, start, duration=0, timeline=None, end=None, **kwds):
-  #---------------------------------------------------------------------------
+  def __init__(self, uri, start, duration=None, timeline=None, end=None, **kwds):
+  #------------------------------------------------------------------------------
     model.core.AbstractObject.__init__(self, uri, start=start,
                                        duration=duration if end is None else (end-start),
                                        timeline=timeline,
@@ -87,7 +87,7 @@ class Interval(model.core.AbstractObject):
   def end(self, timeline=None):     # Needs to use timeline to map
   #----------------------------
     '''Get the end of the interval.'''
-    return self.start + self.duration
+    return self.start + (self.duration if self.duration is not None else 0)
 
   def __add__(self, increment):
   #----------------------------
@@ -96,8 +96,10 @@ class Interval(model.core.AbstractObject):
 
   def __eq__(self, interval):
   #--------------------------
-    return (interval is not None and isinstance(interval, Interval)
-        and self.start == interval.start and self.duration == interval.duration)
+    if interval is None or not isinstance(interval, Interval): return False
+    d1 = self.duration     if self.duration     is not None else 0
+    d2 = interval.duration if interval.duration is not None else 0
+    return self.start == interval.start and d1 == d2
 
   def __str__(self):
   #-----------------
@@ -117,14 +119,14 @@ class Instant(model.core.AbstractObject):
   mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
                                                    to_rdf=mapping.get_uri,
                                                    from_rdf=RelativeTimeLine),
-              ('start',    metaclass): PropertyMap(TL.atDuration, XSD.duration,
+              ('start',    metaclass): PropertyMap(TL.atDuration, XSD.dayTimeDuration,
                                                    utils.seconds_to_isoduration,
                                                    utils.isoduration_to_seconds) }
 
   def __init__(self, uri, when, timeline=None, **kwds):
   #----------------------------------------------------
     model.core.AbstractObject.__init__(self, uri, start=when, timeline=timeline, **kwds)
-    self.duration = 0.0
+    self.duration = 0
     self.end = self.start
 
   def __add__(self, increment):

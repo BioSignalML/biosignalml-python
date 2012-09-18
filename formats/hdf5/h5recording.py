@@ -2,7 +2,7 @@
 BioSignalML format for storing recordings in HDF5 files.
 
 A HDF5 file contains a single Recording, with its signals, clocks, and
-metadata storered as datasets. Signal datasets are either *Simple*, corresponding
+metadata stored as datasets. Signal datasets are either *Simple*, corresponding
 one-to-one with individual Signals, or *Compound*, in which case a dataset contains
 several signals all with the same timing information, as say produced by a
 simulation.
@@ -12,7 +12,7 @@ Files are structured as follows::
   Path         Object    Attributes
   ----         ------    ----------
   /            Root      version
-  /metadata    Dataset   format
+  /metadata    Dataset   mimetype
   /uris        Group
   /recording   Group     uri
     ./signal   Group
@@ -35,14 +35,14 @@ form 'BSML m.n' --- the first five characters must be 'BSML '; this is followed
 by major and minor version numbers, separated by a period ('.').
 
 Newer major releases will always read files created by prior versions of the
-software; files will always be compatible withhin minor releases.
+software; files will always be compatible within minor releases.
 
 
 /metadata dataset
 -----------------
 
 This is an optional dataset containing a RDF serialisation of metadata associated with
-the recording and its signals, stored as a UTF-8 string. The ``format`` attribute gives
+the recording and its signals, stored as a UTF-8 string. The ``mimetype`` attribute gives
 the serialisation format, using standard mimetypes for RDF.
 
 
@@ -50,7 +50,7 @@ the serialisation format, using standard mimetypes for RDF.
 -------------
 
 This group has an attribute for each URI that is an attribute in the recording. It
-is used to ensure URI uniqeness and to lookup datasets. The value of each attribute
+is used to ensure URI uniqueness and to lookup datasets. The value of each attribute
 is a HDF5 reference to the dataset which contains a resource's data.
 
 
@@ -114,6 +114,7 @@ matrix 'time' values,
 """
 
 from functools import reduce
+import urllib
 
 import h5py
 import numpy as np
@@ -241,7 +242,7 @@ class H5Signal(object):
 
   def __len__(self):
   #-----------------
-    return self.dataset.len() if self.index is None else self.dataset[self.index].len()
+    return self.dataset.len()
 
   def __getitem__(self, pos):
   #--------------------------
@@ -251,7 +252,7 @@ class H5Signal(object):
     :param pos: A data point index or slice specifying a range.
     :type pos: A Python slice.
     """
-    data = self.dataset[pos] if self.index is None else self.dataset[self.index, pos]
+    data = self.dataset[pos] if self.index is None else self.dataset[pos, self.index]
     if self.offset != 0: data -= self.offset
     if self.gain != 1.0: data = data/float(self.gain)
     return data
@@ -301,6 +302,10 @@ class H5Recording(object):
     :param readonly: bool
     """
     try:
+      if fname.startswith('file:'):
+        f = urllib.urlopen(fname)
+        fname = f.fp.name
+        f.close()
       h5 = h5py.File(fname, 'r' if readonly else 'r+')
     except IOError, msg:
       raise IOError("Cannot open file '%s' (%s)" % (fname, msg))
@@ -412,9 +417,9 @@ class H5Recording(object):
       data = np.array(data)
     if nsignals > 1:         # compound dataset
       if shape: raise TypeError("A compound dataset can only have scalar type")
-      maxshape = (nsignals, None)
+      maxshape = (None, nsignals)
       npoints = data.size/nsignals if data is not None else 0
-      shape = (nsignals, npoints)
+      shape = (npoints, nsignals)
     elif shape is not None:  # simple dataset, shape of data point given
       maxshape = (None,) + shape
       elsize = reduce((lambda x, y: x * y), shape) if (len(shape) and shape[0]) else 1
@@ -551,7 +556,7 @@ class H5Recording(object):
 
     if nsignals > 1:         # compound dataset
       npoints = data.size/nsignals
-      dpoints = dset.shape[1]
+      dpoints = dset.shape[0]
     else:                    # simple dataset
       if len(dset.shape) == 1: npoints = data.size
       else:                    npoints = data.size/reduce((lambda x, y: x * y), dset.shape[1:])
@@ -560,11 +565,10 @@ class H5Recording(object):
     if clockref and self._h5[clockref].len() < (npoints+dpoints):
       raise ValueError("Clock doesn't have sufficient times")
     try:
+      dset.resize(dpoints + npoints, 0)
       if nsignals > 1:         # compound dataset
-        dset.resize(dpoints + npoints, 1)
-        dset[..., dpoints:] = data.reshape((dset.shape[0], npoints))
+        dset[dpoints:] = data.reshape((npoints, dset.shape[1]))
       else:                    # simple dataset
-        dset.resize(dpoints + npoints, 0)
         dset[dpoints:] = data.reshape((npoints,) + dset.shape[1:])
     except Exception, msg:
       raise RuntimeError("Cannot extend signal dataset '%s' (%s)" % (name, msg))
@@ -700,7 +704,7 @@ class H5Recording(object):
     """
     if self._h5.get('/metadata'): del self._h5['/metadata']
     md = self._h5.create_dataset('/metadata', data=metadata.encode('utf-8'))
-    md.attrs['format'] = mimetype
+    md.attrs['mimetype'] = mimetype
 
   def get_metadata(self):
   #----------------------
@@ -713,7 +717,7 @@ class H5Recording(object):
     """
     if self._h5.get('/metadata'):
       md = self._h5['/metadata']
-      return (md[()].decode('utf-8'), md.attrs.get('format'))
+      return (md[()].decode('utf-8'), md.attrs.get('mimetype'))
     else:
       return (None, None)
 
@@ -722,7 +726,7 @@ if __name__ == '__main__':
 #=========================
 
   f = H5Recording.create('/some/uri', 'test.h5', True)
-  f.store_metadata('metadata string', 'format')
+  f.store_metadata('metadata string', 'mimetype')
   f.close()
 
   g = H5Recording.open('test.h5')
