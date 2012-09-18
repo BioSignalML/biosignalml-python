@@ -25,6 +25,8 @@ class BSML(object):
             electrical activity can be measured.'''
   Event          = Resource(NS.Event)
   '''Something that has occurred in time, possibly for some duration.'''
+  EventType      = Resource(NS.EventType)
+  '''Something which is the class or type of an Event.'''
   Filter         = Resource(NS.Filter)
   '''The class of filter that has been applied to a signal during data collection.'''
   Format         = Resource(NS.Format)
@@ -85,6 +87,10 @@ Measurement units would normally be entities in a specialised units of measure o
   '''The minimum value of the signal.'''
   offset         = Resource(NS.offset)
   '''The temporal offset from the start of a recording of a signal's first sample.'''
+  time           = Resource(NS.time)
+  '''The temporal offset from the start of a recording of some event.'''
+  eventType      = Resource(NS.eventType)
+  '''The class or type of an Event.'''
   period         = Resource(NS.period)
   '''The sampling period, in seconds, of a uniformly sampled signal.'''
   rate           = Resource(NS.rate)
