@@ -202,6 +202,10 @@ class Resource(Node):
     self.label = label
     self.description = desc
 
+  def __str__(self):
+  #-----------------
+    return self.label if self.label else str(self.uri)
+
   def __eq__(self, this):
   #----------------------
     return (isinstance(this, librdf.Node) and this.is_resource()
