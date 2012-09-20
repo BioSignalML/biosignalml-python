@@ -1,4 +1,4 @@
-######################################################
+ ######################################################
 #
 #  BioSignalML Management in Python
 #
@@ -23,21 +23,22 @@ from edffile import EDF
 class EDFSignal(BSMLSignal):
 #===========================
 
-  def __init__(self, signum, edf):
-  #-------------------------------
+  def __init__(self, signum, recording):
+  #-------------------------------------
+    edffile = recording._edffile
     BSMLSignal.__init__(self,
-      str(edf.uri) + '/signal/%d' % signum,
-      units.to_UNITS(edf._edffile.units[signum]),
-      metadata = { 'label': edf._edffile.label[signum],
-                   'transducer': edf._edffile.transducer[signum],
-                   'filter': edf._edffile.prefilter[signum],
-                   'rate': edf._edffile.rate[signum],
-                   'maxFrequency': edf._edffile.rate[signum]/2.0,
-                   'minValue': edf._edffile._physmin[signum],
-                   'maxValue': edf._edffile._physmax[signum],
-                   'index': signum,
-                 } )
-    self.initialise(edf)
+      str(recording.uri) + '/signal/%d' % signum,
+      units.to_UNITS(edffile.units[signum]),
+      **dict(recording  = recording,
+             label      = edffile.label[signum],
+             transducer = edffile.transducer[signum],
+             filter     = edffile.prefilter[signum],
+             rate       = edffile.rate[signum],
+             minValue   = edffile._physmin[signum],
+             maxValue   = edffile._physmax[signum],
+             index = signum,
+            ))
+    self.initialise()
 
 
   def initialise(self):
