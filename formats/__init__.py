@@ -52,9 +52,9 @@ class BSMLSignal(biosignalml.Signal):
 
   MAXPOINTS = 50000     #: Maximum number of sample points returned by a single :meth:`read`.
 
-  def __init__(self, uri, units, metadata=None, **kwds):
-  #-----------------------------------------------------
-    biosignalml.Signal.__init__(self, uri, units, metadata=metadata, **kwds)
+  def __init__(self, uri, units, **kwds):
+  #--------------------------------------
+    biosignalml.Signal.__init__(self, uri, units, **kwds)
 
   def read(self, interval=None, segment=None, maxduration=None, maxpoints=None):
   #-----------------------------------------------------------------------------
