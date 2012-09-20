@@ -302,6 +302,7 @@ class Recording(core.AbstractObject):
       for r in graph.query("select ?s where { ?s a <%s> . ?s <%s> <%s> } order by ?s"
                            % (BSML.Signal, BSML.recording, self.uri)):
         self.add_signal(self.SignalClass.create_from_graph(str(r['s']), graph, units=None))
+    # Do we load events? There may be a lot of them...
     self.graph = graph
     return self
 
