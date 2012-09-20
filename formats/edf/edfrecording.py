@@ -78,8 +78,8 @@ class EDFRecording(BSMLRecording):
   @classmethod
   def open(cls, fname, uri=None, **kwds):
   #--------------------------------------
-    self = cls(uri=uri, fname=fname, **kwds)
-    self.initialise(fname)
+    self = cls(uri=uri, dataset=fname, **kwds)
+    self.initialise()
     self._set_attributes()
     return self
 
