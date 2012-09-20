@@ -60,7 +60,7 @@ class Signal(core.AbstractObject):
 
   metaclass = BSML.Signal     #: :attr:`.BSML.Signal`
 
-  attributes = ['units', 'transducer', 'filter', 'rate',  'clock',
+  attributes = ['recording', 'units', 'transducer', 'filter', 'rate',  'clock',
                 'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
                 'index', 'signaltype', 'offset', 'duration',
                ]
@@ -90,7 +90,6 @@ class Signal(core.AbstractObject):
   def __init__(self, uri, units, **kwds):
   #--------------------------------------
     core.AbstractObject.__init__(self, uri, units=units, **kwds)
-    self.recording = None
 
 
 class Event(core.AbstractObject):
@@ -193,7 +192,7 @@ class Recording(core.AbstractObject):
     sig_uri = str(signal.uri)
     if sig_uri in self._signals:
       raise Exception, "Signal '%s' already in recording" % signal.uri
-    if signal.recording and str(signal.recording) != str(self.uri):  ## Set from RDF mapping...
+    if signal.recording and str(signal.recording.uri) != str(self.uri):  ## Set from RDF mapping...
       raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, sig_uri, signal.recording)
     signal.recording = self
     self._signals[sig_uri] = signal
