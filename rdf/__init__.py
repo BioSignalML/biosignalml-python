@@ -199,8 +199,8 @@ class Resource(Node):
       super(Resource, self).__init__(node=uri)
     else:
       super(Resource, self).__init__(uri=Uri(uri))
-    self.label = label
-    self.description = desc
+    self._label = label
+    self._description = desc
 
   def __str__(self):
   #-----------------
@@ -216,6 +216,16 @@ class Resource(Node):
   def __ne__(self, this):
   #----------------------
     return not self.__eq__(this)
+
+  @property
+  def label(self):
+  #---------------
+    return getattr(self, '_label', '')
+
+  @property
+  def description(self):
+  #---------------------
+    return getattr(self, '_description', '')
 
   @classmethod
   def uuid_urn(cls):
