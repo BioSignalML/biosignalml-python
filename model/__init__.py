@@ -192,8 +192,11 @@ class Recording(core.AbstractObject):
     sig_uri = str(signal.uri)
     if sig_uri in self._signals:
       raise Exception, "Signal '%s' already in recording" % signal.uri
-    if signal.recording and str(signal.recording.uri) != str(self.uri):  ## Set from RDF mapping...
-      raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, sig_uri, signal.recording)
+    if signal.recording:     ## Set from RDF mapping...
+      if isinstance(signal.recording, Recording): rec_uri = signal.recording.uri
+      else:                                       rec_uri = signal.recording
+      if str(rec_uri) != str(self.uri):
+        raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, sig_uri, rec_uri)
     signal.recording = self
     self._signals[sig_uri] = signal
     return list(self._signals).index(sig_uri)
