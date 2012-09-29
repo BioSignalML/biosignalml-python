@@ -31,7 +31,7 @@ import re
 import biosignalml.utils as utils
 import biosignalml.rdf as rdf
 from biosignalml.ontology import BSML
-from biosignalml.rdf import XSD, RDF, DCTERMS, TL, OA, CNT
+from biosignalml.rdf import XSD, RDF, RDFS, DCTERMS, TL
 
 import mapping
 from mapping import PropertyMap
@@ -310,139 +310,74 @@ class Recording(core.AbstractObject):
     return self
 
 
-def _make_time(s):
-#=================
-  from biosignalml.timeline import Instant, Interval
-  try:
-    g = re.match('^t=(.*),(.*)$', s).groups()
-    start = float(g[0])
-    end   = float(g[1])
-    return Instant(None, start) if start == end else Interval(None, start, end=end)
-  except AttributeError, ValueError:
-    return None
-
-
 class Annotation(core.AbstractObject):
 #=====================================
   '''
   An abstract BioSignalML Annotation.
+
+  An Annotation is a comment about something made by someone. In BioSignalML
+  we use the following model:::
+
+    <annotation> a bsml:Annotation ;
+      bsml:about <target> ;
+      rdfs:comment "a comment" ;        # Optional if there are tags
+      bsml:tag <a/semantic/tag> ;       # Zero or more
+      dcterms:creator <someone> ;
+      dcterms:created "2012-09-29T09:30:23Z"^^xsd:dateTime ;
+      .
+
+  The <target> may refer to instant or interval on a recording or signal
+  by including a media fragment with the URI (see
+  http://www.w3.org/TR/media-frags/#URIquery-vs-fragments).
+
+
+  Do we have 'time' as an attribute and map to/from media fragments?
+
+  Best to let caller do this?? And utils package to have helper functions.
+
   '''
   metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation`
 
-  attributes = [ 'target', 'tags', 'body', 'annotated', 'annotator' ]
+  attributes = [ 'about', 'comment', 'tags', 'creator', 'created' ]
 
-  mapping = { ('target',    None): PropertyMap(OA.hasTarget, to_rdf=mapping.get_uri),
-              ('annotated', None): PropertyMap(OA.annotated, XSD.dateTime,
+  mapping = { ('about',   None): PropertyMap(BSML.about, to_rdf=mapping.get_uri),
+              ('comment', None): PropertyMap(RDFS.comment),
+              ('tags',    None): PropertyMap(BSML.tag),
+              ('creator', None): PropertyMap(DCTERMS.creator, to_rdf=mapping.get_uri),
+              ('created', None): PropertyMap(DCTERMS.created, XSD.dateTime,
                                                utils.datetime_to_isoformat,
                                                utils.isoformat_to_datetime),
-              ('annotator', None): PropertyMap(OA.annotator, to_rdf=mapping.get_uri),
-              ('body',      None): PropertyMap(OA.hasBody, to_rdf=mapping.get_uri),
-              ('tags',      None): PropertyMap(OA.hasSemanticTag),
-              ('_oatype',   None): PropertyMap(RDF.type),
             }
 
-  class Selector(core.AbstractObject):
-  #===================================
-    metaclass = OA.FragmentSelector
-    attributes = [ 'time' ]
-    mapping = { ('time', None): PropertyMap(RDF.value,
-                                  to_rdf=lambda t: 't=%g,%g' % (t.start, t.end),
-                                  from_rdf=_make_time
-                                  ) }
 
-    def __init__(self, uri, time=None, **kwds):
-    #------------------------------------------
-      core.AbstractObject.__init__(self, uri, time=time, **kwds)
-
-
-  class Fragment(core.AbstractObject):
-  #===================================
-    """
-    A temporal fragment giving the event's position.
-    """
-    metaclass = OA.SpecificResource
-    attributes = [ 'source', 'selector' ]
-    mapping = { ('source',   None): PropertyMap(OA.hasSource),
-                ('selector', None): PropertyMap(OA.hasSelector) }
-
-    def __init__(self, uri, source=None, time=None, **kwds):
-    #-------------------------------------------------------
-      label = kwds.get('label', '')
-      core.AbstractObject.__init__(self, uri, source=source,
-        selector=Annotation.Selector(rdf.Resource.uuid_urn(), time, label=makelabel(label, 'time'))
-                 if time is not None else None,
-        **kwds)
-
-    def save_to_graph(self, graph):
-    #------------------------------
-      core.AbstractObject.save_to_graph(self, graph)
-      if self.selector: self.selector.save_to_graph(graph)
-
-
-  class TextContent(core.AbstractObject):
-  #======================================
-    '''
-    The text of an Annotation.
-    '''
-
-    metaclass = CNT.ContentAsText
-
-    attributes = [ 'text', 'encoding' ]
-
-    mapping = { ('text',     None): PropertyMap(CNT.chars),
-                ('encoding', None): PropertyMap(CNT.characterEncoding) }
-
-    def __init__(self, uri, text='', **kwds):
-    #----------------------------------------
-      if isinstance(text, unicode): utf8 = text.encode('utf-8')
-      else:                         utf8 = unicode(text, 'utf-8')
-      core.AbstractObject.__init__(self, uri, text=utf8, encoding='utf-8', **kwds)
-
-
-  def __init__(self, uri, target=None, annotator=None, set_time=True, text=None, tags=None, body=None, **kwds):
-  #------------------------------------------------------------------------------------------------------------
-    annotated = kwds.pop('annotated', utils.utctime()) if set_time else None
+  def __init__(self, uri, about=None, text=None, tags=None, creator=None, set_time=True, **kwds):
+  #----------------------------------------------------------------------------------------------
+    created = kwds.pop('created', utils.utctime()) if set_time else None
     label = kwds.get('label', '')
-    core.AbstractObject.__init__(self, uri, target=target,
-      annotator=annotator, annotated=annotated, **kwds)
-    self._oatype = OA.Annotation
-    self.body = Annotation.TextContent(rdf.Resource.uuid_urn(), text, label=makelabel(label, 'text')) if text else body
+    core.AbstractObject.__init__(self, uri, about=about, comment=text, creator=creator, created=created, **kwds)
     self.tags = tags if tags else []
+    self._time = None
 
   @classmethod
-  def Note(cls, uri, target, annotator, text, **kwds):
-  #---------------------------------------------------
-    return cls(uri, target, annotator, text=text, **kwds)
+  def Note(cls, uri, about, text, **kwds):
+  #---------------------------------------
+    return cls(uri, about, text=text, **kwds)
 
   @classmethod
-  def Tag(cls, uri, target, annotator, tag, **kwds):
-  #-------------------------------------------------
-    return cls(uri, target, annotator, tags=[tag], **kwds)
+  def Tag(cls, uri, about, tag, **kwds):
+  #-------------------------------------
+    return cls(uri, about, tags=[tag], **kwds)
 
   @classmethod
-  def Event(cls, uri, target=None, time=None, **kwds):
-  #---------------------------------------------------
-    ##logging.debug('Event: %s (%s)', uri, repr(uri))
-    label = kwds.get('label', '')
-    return cls(uri,
-      target=Annotation.Fragment(rdf.Resource.uuid_urn(), target, time, label=makelabel(label, 'frag'))
-             if target is not None else None, **kwds)
+  def Event(cls, uri, about, time, **kwds):
+  #----------------------------------------
+    self = cls(uri, '%s#t=%g,%g' % (about.uri, time.start, time.end), **kwds)
+    self._time= time
+    return self
 
   def tag(self, tag):
   #------------------
     self.tags.append(tag)
-
-  def save_to_graph(self, graph):
-  #------------------------------
-    """
-    Add an Annotation's metadata to a RDF graph.
-
-    :param graph: A RDF graph.
-    :type graph: :class:`~biosignalml.rdf.Graph`
-    """
-    core.AbstractObject.save_to_graph(self, graph)
-    if self.body: self.body.save_to_graph(graph)
-    if isinstance(self.target, Annotation.Fragment): self.target.save_to_graph(graph)
 
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
@@ -457,31 +392,12 @@ class Annotation(core.AbstractObject):
     '''
     self = cls(uri, set_time=False, **kwds)
     self.load_from_graph(graph)
-    for b in graph.get_objects(self.uri, OA.hasBody):
-      self.body = Annotation.TextContent.create_from_graph(b, graph)
-      # Should only have the one body...
-    for r in graph.query("select ?t where { <%s> <%s> ?t . ?t a <%s> }"
-                         % (self.uri, OA.hasTarget, OA.SpecificResource)):
-      self.target = Annotation.Fragment.create_from_graph(r['t'], graph)
-      for s in graph.get_objects(self.target.uri, OA.hasSelector):
-        self.target.selector = Annotation.Selector.create_from_graph(s, graph)
     return self
 
   @property
   def time(self):
   #--------------
-    return self.target.selector.time if getattr(self.target, 'selector', None) else None
-
-  '''
-  @classmethod
-  def Graph(cls, uri, target, graph, annotator):
-    return cls(uri, target=target, type=AO.GraphAnnotation, body=graph, annotator=annotator)
-
-  @classmethod
-  def Qualifier(cls, uri, target, qualifier, annotator):
-    return cls(uri, target=target, type=AO.Qualifier, body=qualifier, annotator=annotator)
-  '''
-
+    return self._time
 
 
 if __name__ == '__main__':
@@ -499,8 +415,8 @@ if __name__ == '__main__':
     instance.save_to_graph(g)
     copy = instance.__class__.create_from_graph(instance.uri, g)
 #    if isinstance(instance, Event):
-#      print_dict(instance.target)
-#      print_dict(copy.target)
+#      print_dict(instance.about)
+#      print_dict(copy.about)
 #    print instance.metadata_as_string(rdf.Format.TURTLE)
 #    print copy.metadata_as_string(rdf.Format.TURTLE)
     assert(instance.metadata_as_string(rdf.Format.TURTLE) == copy.metadata_as_string(rdf.Format.TURTLE))
@@ -508,18 +424,22 @@ if __name__ == '__main__':
 
 
   r1 = Recording('http://example.org/recording')
-  a1 = Annotation.Note('http://example.org/ann1', r1, 'test', 'text')
+  a1 = Annotation.Note('http://example.org/ann1', r1, 'comment', 'dave')
   e1 = Annotation.Event('http://example.org/event', r1, r1.interval(1, 0.5),
-    annotator='test', text='event text')
+     creator='dave', text='event text')
+  print e1.metadata_as_string(rdf.Format.TURTLE)
 
   r2 = check(r1)
   a2 = check(a1)
+  print a2.metadata_as_string(rdf.Format.TURTLE)
+
   e2 = check(e1)
+  print e2.metadata_as_string(rdf.Format.TURTLE)
 
   print e1.time
   print e2.time
-  assert(e2.time == e1.time)
+#  assert(e2.time == e1.time)
 
-  ev1 = r1.new_event('http://ex.org/evt1', a1, time=32.3)
-  print ev1.metadata_as_string(rdf.Format.TURTLE)
+#  ev1 = r1.new_event('http://ex.org/evt1', a1, time=32.3)
+#  print ev1.metadata_as_string(rdf.Format.TURTLE)
 
