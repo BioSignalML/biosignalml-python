@@ -12,6 +12,8 @@ class BSML(object):
   URI = "http://www.biosignalml.org/ontologies/2011/04/biosignalml#"
   NS = Namespace(URI)
 
+  prefix = NS.prefix
+
 # owl:Class resources:
   Annotation     = Resource(NS.Annotation)
   '''A general note, comment, or qualitative measure about the whole of,
