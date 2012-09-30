@@ -423,8 +423,11 @@ if __name__ == '__main__':
     return copy
 
 
-  r1 = Recording('http://example.org/recording')
-  a1 = Annotation.Note('http://example.org/ann1', r1, 'comment', 'dave')
+  r1 = Recording('http://example.org/recording', duration='1806')
+  print r1.metadata_as_string(rdf.Format.TURTLE)
+
+
+  a1 = Annotation.Note('http://example.org/ann1', r1, 'comment', creator='dave')
   e1 = Annotation.Event('http://example.org/event', r1, r1.interval(1, 0.5),
      creator='dave', text='event text')
   print e1.metadata_as_string(rdf.Format.TURTLE)
