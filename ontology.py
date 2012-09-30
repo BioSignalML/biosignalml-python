@@ -46,6 +46,8 @@ class BSML(object):
   Recording      = Resource(NS.Recording)
   '''A collection of Signals held as a named entity, all pertaining to one thing
           (the subject) and which have been recorded in the same session.'''
+  RecordingGraph = Resource(NS.RecordingGraph)
+  '''A RDF graph containing Recording metadata, used for managing provenance.'''
   SampleClock    = Resource(NS.SampleClock)
   '''An increasing sequence of sample coordinates.
 
