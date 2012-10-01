@@ -4,8 +4,6 @@
 #
 #  Copyright (c) 2010  David Brooks
 #
-#  $ID$
-#
 ######################################################
 
 class TurtleObject(object):
