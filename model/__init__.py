@@ -392,6 +392,16 @@ class Annotation(core.AbstractObject):
     '''
     self = cls(uri, set_time=False, **kwds)
     self.load_from_graph(graph)
+    mtag = str(self.about).rfind('#t=')
+    if mtag >= 0:
+      from biosignalml.timeline import Instant, Interval
+      try:
+        times = re.match('(.*?)(,(.*))?$', str(self.about)[mtag+3:]).groups()
+        start = float(times[0]) if times[0] else 0.0
+        end = float(times[2])
+        self._time = Instant(None, start) if start == end else Interval(None, start, end=end)
+      except ValueError:
+        pass
     return self
 
   @property
