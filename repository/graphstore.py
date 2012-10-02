@@ -13,95 +13,145 @@ import RDF as librdf
 from tornado.options import options
 
 from biosignalml import BSML
-from biosignalml.rdf import RDF, DCTERMS, PRV
+import biosignalml.model as model
+from biosignalml.model.mapping import PropertyMap
+
+from biosignalml.rdf import RDF, DCTERMS, PRV, XSD
 from biosignalml.rdf import Uri, Node, Resource, BlankNode, Graph, Statement
 from biosignalml.rdf import Format
 
-from provenance import Provenance
+import biosignalml.utils as utils
 
 
-class Repository(object):
+PROVENANCE_PATH = '/provenance'     #: Relative to a graph store's URI
+
+
+class DataItem(model.core.AbstractObject):
+#=========================================
+  metaclass = PRV.DataItem
+  attributes = [ 'type', 'createdby', 'subject', 'precededby' ]
+  mapping = { ('createdby',  None): PropertyMap(PRV.createdBy),
+              ('subject',    None): PropertyMap(DCTERMS.subject),
+              ('precededby', None): PropertyMap(PRV.precededBy),
+              ('type',       None): PropertyMap(RDF.type) }
+
+class DataCreation(model.core.AbstractObject):
+#=============================================
+  metaclass = PRV.DataCreation
+  attributes = [ 'performedby', 'completed' ]
+  mapping = { ('performedby', None): PropertyMap(PRV.performedBy),
+              ('completed',   None): PropertyMap(PRV.completedAt, XSD.dateTime,
+                                                 utils.datetime_to_isoformat,
+                                                 utils.isoformat_to_datetime) }
+
+class GraphStore(object):
 #========================
   '''
-  An RDF repository storing triples in named graphs and tracking graph provenance.
+  An RDF repository storing triples in named graphs with provenance.
 
-  :param base_uri:
-  :param store_uri:
+  :param base_uri: The URI of the store.
+  :param graphtype: The class of graphs for we manage provenance for.
+  :param sparqlstore: The :class:`~biosignalml.rdf.sparqlstore.SparqlStore` in which RDF is stored.
   '''
-  def __init__(self, base_uri, triplestore):
-  #-----------------------------------------
-    self.uri = base_uri
-    self._triplestore = triplestore
-    self._provenance = Provenance(self.uri + '/provenance')
+  def __init__(self, base_uri, graphtype, sparqlstore):
+  #----------------------------------------------------
+    self.uri = Uri(base_uri)
+    self._graphtype = graphtype
+    self._sparqlstore = sparqlstore
+    self._provenance_uri = self.uri + PROVENANCE_PATH
 
-  def __del__(self):
-  #-----------------
-    logging.debug('Repository shutdown')
-    del self._provenance
-    del self._triplestore
-
-  def provenance_uri(self):
-  #------------------------
-    return self._provenance.uri
-
-  def graph_has_provenance(self, graph):
-  #-------------------------------------
-    ''' Check a URI is that of a recording graph for which we have provenance.'''
-    return self._triplestore.ask(
-      '''graph <%(pgraph)s> { <%(obj)s> a bsml:RecordingGraph }
-         graph <%(obj)s> { ?s ?p ?o }''',
-      params=dict(pgraph=self._provenance.uri, obj=graph),
+  def has_provenance(self, graph_uri):
+  #-----------------------------------
+    ''' Check a URI is that of a graph for which we have current provenance.'''
+    return self._sparqlstore.ask(
+      '''graph <%(pgraph)s> { <%(graph)s> a <%(gtype)s> MINUS { [] prv:precededBy <%(graph)s> }}
+         graph <%(graph)s> { [] a [] }''',
+      params=dict(pgraph=self._provenance_uri, graph=graph_uri, gtype=self._graphtype),
       prefixes=dict(bsml=BSML.prefix))
 
 
-  def get_current_resources(self, rtype):
-  #--------------------------------------
-    """
-    Return a list of URI's in a given class that are in recording graphs which have provenance.
+#  def add_graph(self, graph, rdf, format=rdf.Format.RDFXML):
+#  #---------------------------------------------------------
+#    self._sparqlstore.extend_graph(graph, rdf, format=format)
 
-    :param rtype: The class of resource to find.
-    :rtype: list[:class:`~biosignalml.rdf.Uri`]
+#  def replace_graph(self, graph, rdf, format=rdf.Format.RDFXML):
+#  #-------------------------------------------------------------
+#    self._sparqlstore.replace_graph(graph, rdf, format=format)
+
+#  def delete_graph(self, graph):
+  #-----------------------------
+    ## 'DCTERMS.dateRemoved' is not a DCTERMS Terms property...
+    ## self.append(Statement(graph, DCTERMS.dateRemoved, datetime_to_isoformat(utctime()) ))
+    ## ANd need to update the store...
+#    self._sparqlstore.delete_graph(graph)
+    ## Follow graph with another DataItem that is not of 'graphtype'
+#    pass
+
+
+  def add_resource_graph(self, uri, rtype, rdf, creator, format=Format.RDFXML):
+  #----------------------------------------------------------------------------
+    current = self.get_resources(rtype, condition='<%s> a ?r' % uri)
+    predecessor = current[0] if current else None
+    graph_uri = self.uri.make_uri()
+    prov = DataItem(graph_uri, type=self._graphtype,
+      subject=uri, precededby=predecessor,
+      createdby=DataCreation(self.uri.make_uri(), performedby=creator,
+                             completed=utils.utctime() ))
+    self._sparqlstore.extend_graph(self._provenance_uri, prov.metadata_as_graph().serialise())
+    self._sparqlstore.replace_graph(graph_uri, rdf, format=format)
+
+
+  def get_resources(self, rtype, rvars='?r', condition='', prefixes=None):
+  #-----------------------------------------------------------------------
     """
-    return [ Uri(r['r']['value']) for r in self._triplestore.select(
-      '?r',
-      '''graph <%(pgraph)s> { ?g a bsml:RecordingGraph MINUS { [] prv:precededBy ?g }}
-         graph ?g { ?r a <%(rtype)s> }''',
-      params=dict(pgraph=self._provenance.uri, rtype=rtype),
-      prefixes=dict(bsml=BSML.prefix, prv=PRV.prefix),
-      distinct=True,
-      order='?r')
+    Find resources of the given type and the most recent graphs that
+    hold them.
+
+    The resources found can be restricted by an optional SPARQL graph pattern.
+
+    :param rtype: The type of resource to find.
+    :param rvars (str): Space separated SPARQL variables identifying the resource
+       in the query along with any other variables to return values of. The first variable
+       is assumed to taht of the resource. Optional, defaults to `?r`.
+    :param condition (str): A SPARQL graph pattern for selecting resources. Optional.
+    :param prefixes (dict): Optional namespace prefixes for the SPARQL query.
+    :return: A list of (graph_uri, resource_uri, optional_variable) tuples.
+    :rtype: list[tuple(:class:`~biosignalml.rdf.Uri`, :class:`~biosignalml.rdf.Uri`)]
+    """
+    pfxdict = dict(bsml=BSML.prefix, prv=PRV.prefix)
+    if prefixes: pfxdict.update(prefixes)
+    variables = [ var[1:] for var in rvars.split() ]
+    NOVALUE = { 'value': None }  # For optional result variables
+    return [ (Uri(r['g']['value']), Uri(r[variables[0]]['value']))
+              + tuple([r.get(v, NOVALUE)['value'] for v in variables[1:]])
+      for r in self._sparqlstore.select('?g %(rvars)s',
+        '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
+           graph ?g { ?%(rvar)s a <%(rtype)s> . %(cond)s }''',
+        params=dict(pgraph=self._provenance_uri, gtype=self._graphtype,
+                    rtype=rtype, rvars=rvars, rvar=variables[0], cond=condition),
+        prefixes=pfxdict,
+        distinct=True,
+        order='?g %s' % rvars)
       ]
 
-  def get_current_resource_and_graph(self, uri, rtype):
-  #----------------------------------------------------
-    """
-    Return the resource and graph URIS where the graph has provenance, contains a specific object,
-     and the resource is of the given type.
 
-    :param uri: The URI of an object.
-    :param rtype: The class of resource the graph has to have.
-    :rtype: tuple(:class:`~biosignalml.rdf.Uri`, :class:`~biosignalml.rdf.Uri`)
-    """
-    for r in self._triplestore.select(
-      '?r ?g',
-      '''graph <%(pgraph)s> { ?g a bsml:RecordingGraph MINUS { [] prv:precededBy ?g }}
-         graph ?g { ?r a <%(rtype)s> . <%(obj)s> a [] }''',
-      params=dict(pgraph=self._provenance.uri, rtype=rtype, obj=uri),
-      prefixes=dict(bsml=BSML.prefix, prv=PRV.prefix)
-      ): return (Uri(r['r']['value']), Uri(r['g']['value']))
-    return (None, None)
+  def has_resource(self, uri, rtype):
+  #----------------------------------
+    '''
+    Is there some graph containing a resource of the given type?
+    '''
+    return self._sparqlstore.ask(
+      '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
+         graph ?g { <%(uri)s> a <%(rtype)s> }''',
+      params=dict(pgraph=self._provenance_uri, rtype=rtype, uri=uri, gtype=self._graphtype))
 
-  def has_current_resource(self, uri, rtype):
-  #------------------------------------------
-    return self._triplestore.ask(
-      '''graph <%(pgraph)s> { ?g a bsml:RecordingGraph MINUS { [] prv:precededBy ?g }}
-         graph ?g { <%(obj)s> a <%(rtype)s> }''',
-      params=dict(pgraph=self._provenance.uri, rtype=rtype, obj=uri))
+
+
 
 
   def update(self, uri, triples):
   #------------------------------
-    self._triplestore.update(uri, triples)
+    self._sparqlstore.update(uri, triples)
 
 
   def replace_graph(self, uri, rdf, format=Format.RDFXML):
@@ -114,45 +164,46 @@ class Repository(object):
     # add version statement to graph ??
     # What about actual recording file(s)? They should also be renamed...
 
-    self._triplestore.replace_graph(uri, rdf, format=format)
+    self._sparqlstore.replace_graph(uri, rdf, format=format)
 
     #  Generate provenance....
 
 
     #for k, v in provenance.iter_items():
     #  self._provenance.add(self.uri, content-type, hexdigest, ...)
-    #self._triplestore.insert(self._provenace, triples...)
+    #self._sparqlstore.insert(self._provenace, triples...)
 
 
   def extend_graph(self, uri, rdf, format=Format.RDFXML):
   #---------------------------------------------------
-    self._triplestore.extend_graph(uri, rdf, format=format)
+    self._sparqlstore.extend_graph(uri, rdf, format=format)
 
 
   def delete_graph(self, uri):
   #---------------------------
-    self._triplestore.delete_graph(uri)
+    self._sparqlstore.delete_graph(uri)
     #self._provenance.delete_graph(uri)
     ## Should this set provenance...
 
 
+
   def query(self, sparql, header=False, html=False, abbreviate=False):
   #-------------------------------------------------------------------
-    return QueryResults(self, sparql, header, html, abbreviate)
+    return QueryResults(self._sparqlstore, sparql, base, header, html, abbreviate)
 
 
   def construct(self, template, where, params=None, graph=None, format=Format.RDFXML, prefixes=None):
   #--------------------------------------------------------------------------------------------------
-    return self._triplestore.construct(template, where, params, graph, format, prefixes)
+    return self._sparqlstore.construct(template, where, params, graph, format, prefixes)
 
 
   def describe(self, uri, format=Format.RDFXML):
   #---------------------------------------------
-    return self._triplestore.describe(uri, format)
+    return self._sparqlstore.describe(uri, format)
 
   def ask(self, query, graph=None):
   #--------------------------------
-    return self._triplestore.ask(query, graph)
+    return self._sparqlstore.ask(query, graph)
 
   def get_subjects(self, prop, obj, graph=None, ordered=False):
   #------------------------------------------------------------
@@ -161,7 +212,7 @@ class Repository(object):
     elif not isinstance(obj, Node):
       obj = '"%s"' % obj
     return [ r['s']['value'] for r in
-                  self._triplestore.select('?s', '?s <%(prop)s> %(obj)s',
+                  self._sparqlstore.select('?s', '?s <%(prop)s> %(obj)s',
                                             params = dict(prop=prop, obj=obj),
                                             graph = graph,
                                             order = '?s' if ordered else None) ]
@@ -172,7 +223,7 @@ class Repository(object):
     Get objects of all statements that match a given subject/predicate.
     """
     objects = []
-    for r in self._triplestore.select('?o', '<%(subj)s> <%(prop)s> ?o',
+    for r in self._sparqlstore.select('?o', '<%(subj)s> <%(prop)s> ?o',
                                       params = dict(subj = subj, prop=prop),
                                       graph = graph):
       if   r['o']['type'] == 'uri':           objects.append(Resource(Uri(r['o']['value'])))
@@ -255,16 +306,16 @@ class SparqlHead(object):
 class QueryResults(object):
 #==========================
 
-  def __init__(self, repo, sparql, header=False, html=False, abbreviate=False):
-  #----------------------------------------------------------------------------
-    self._repobase = repo.uri
+  def __init__(self, sparqlstore, sparql, base, header=False, html=False, abbreviate=False):
+  #-----------------------------------------------------------------------------------------
+    self._repobase = base
     self._set_prefixes(sparql)
     self._header = header
     self._html = html
     self._abbreviate = abbreviate
     #logging.debug('SPARQL: %s', sparql)
     try:
-      self._results = json.loads(repo._triplestore.query(sparql, Format.JSON))
+      self._results = json.loads(sparqlstore.query(sparql, Format.JSON))
     except Exception, msg:
       self._results = { 'error': str(msg) }
 
