@@ -212,9 +212,6 @@ class GraphStore(object):
 #  #--------------------------------------------------------------------------------------------------
 #    return self._sparqlstore.construct(template, where, params, graph, format, prefixes)
 
-  def describe(self, uri, format=Format.RDFXML):
-  #---------------------------------------------
-    return self._sparqlstore.describe(uri, format)
 
   def ask(self, query, graph=None):
   #--------------------------------
