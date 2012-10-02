@@ -250,15 +250,14 @@ class GraphStore(object):
     return self.get_objects(uri, RDF.type, graph)
 
 
-  def describe(self, uri, graph=None, format=Format.RDFXML):
-  #---------------------------------------------------------
+  def describe(self, uri, graph, format=Format.RDFXML):
+  #----------------------------------------------------
 
     def description(uri, graph, format):
     #-----------------------------------
-      return self.construct('?s ?p ?o', '?s ?p ?o FILTER (?p != <http://4store.org/fulltext#stem>'
-                                                     + (' && (?s = <%(uri)s> || ?o = <%(uri)s>))'
-                                                              % dict(uri=uri)) if uri else '',
-                             graph=graph, format=format)
+      return self._sparqlstore.construct('?s ?p ?o',
+                             '?s ?p ?o FILTER (?s = <%(uri)s> || ?o = <%(uri)s>)',
+                             params=dict(uri=uri), graph=graph, format=format)
     class Closure(Graph):
     #--------------------
       def __init__(self, rdf, base, format):
@@ -280,8 +279,8 @@ class GraphStore(object):
             if node != stmt.subject: self.add_urn(stmt.subject)
             if node != stmt.object: self.add_urn(stmt.object)
 
-    ttl = description(uri, graph, format)
-    return Closure(ttl, self.uri, format).serialise(format, base = self.uri + '/')  # Need '/' for Tabulator...
+    rdf = description(uri, graph, format)
+    return Closure(rdf, self.uri, format).serialise(format, base = self.uri + '/')  # Need '/' for Tabulator...
 
 
 
