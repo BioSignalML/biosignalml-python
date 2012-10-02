@@ -141,6 +141,7 @@ class BSMLStore(GraphStore):
     :param graph_uri: An optional URI of the graph to query.
     :rtype: :class:`~biosignalml.Signal`
     '''
+    # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Signal, graph_uri)
     return Signal.create_from_graph(uri, graph, units=None)  # units set from graph...
@@ -163,6 +164,7 @@ class BSMLStore(GraphStore):
     :param graph_uri: An optional URI of the graph to query.
     :rtype: :class:`~biosignalml.Event`
     '''
+    # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Event, graph_uri)
     return Event.create_from_graph(uri, graph, eventtype=None)  # eventtype set from graph...
@@ -175,6 +177,7 @@ class BSMLStore(GraphStore):
     :param uri: The URI of an Annotation.
     :rtype: :class:`~biosignalml.Annotation`
     '''
+    # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Annotation, graph_uri)
     return Annotation.create_from_graph(uri, graph)

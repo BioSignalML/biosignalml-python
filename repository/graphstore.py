@@ -161,6 +161,8 @@ class GraphStore(object):
               'graph <%(graph)s> { <%(uri)s> a <%(rtype)s> . <%(uri)s> ?p ?o }',
               params=dict(graph=graph_uri, uri=uri, rtype=rtype), format=Format.RDFXML)
 
+    ## Virtuoso has a MaxRows limit in its INI file with a default of 10000.
+    ## This has been increased to 50000
     return Graph.create_from_string(uri, rdf, Format.RDFXML)
 
 
