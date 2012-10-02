@@ -213,12 +213,12 @@ class GraphStore(object):
 #    return self._sparqlstore.construct(template, where, params, graph, format, prefixes)
 
 
-  def ask(self, query, graph=None):
-  #--------------------------------
+  def ask(self, query, graph):
+  #---------------------------
     return self._sparqlstore.ask(query, graph)
 
-  def get_subjects(self, prop, obj, graph=None, ordered=False):
-  #------------------------------------------------------------
+  def get_subjects(self, prop, obj, graph, ordered=False):
+  #-------------------------------------------------------
     if isinstance(obj, Resource) or isinstance(obj, Uri):
       obj = '<%s>' % obj
     elif not isinstance(obj, Node):
@@ -229,8 +229,8 @@ class GraphStore(object):
                                             graph = graph,
                                             order = '?s' if ordered else None) ]
 
-  def get_objects(self, subj, prop, graph=None):
-  #---------------------------------------------
+  def get_objects(self, subj, prop, graph):
+  #----------------------------------------
     """
     Get objects of all statements that match a given subject/predicate.
     """
