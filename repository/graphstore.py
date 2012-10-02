@@ -15,6 +15,7 @@ from tornado.options import options
 from biosignalml import BSML
 import biosignalml.model as model
 from biosignalml.model.mapping import PropertyMap
+from biosignalml.utils import xmlescape
 
 from biosignalml.rdf import RDF, DCTERMS, PRV, XSD
 from biosignalml.rdf import Uri, Node, Resource, BlankNode, Graph, Statement

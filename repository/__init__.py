@@ -13,7 +13,6 @@ from tornado.options import options
 import biosignalml.formats
 
 from biosignalml import BSML, Recording, Signal, Event, Annotation
-from biosignalml.utils import xmlescape
 
 from biosignalml.rdf import DCTERMS
 from biosignalml.rdf import Format
