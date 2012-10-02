@@ -201,9 +201,9 @@ class GraphStore(object):
 
 
 
-  def query(self, sparql, header=False, html=False, abbreviate=False):
-  #-------------------------------------------------------------------
-    return QueryResults(self._sparqlstore, sparql, base, header, html, abbreviate)
+  def query(self, sparql, header=False, abbreviate=False, htmlbase=None):
+  #----------------------------------------------------------------------
+    return QueryResults(self._sparqlstore, sparql, header, abbreviate, htmlbase)
 
 
 
@@ -308,13 +308,12 @@ class SparqlHead(object):
 class QueryResults(object):
 #==========================
 
-  def __init__(self, sparqlstore, sparql, base, header=False, html=False, abbreviate=False):
-  #-----------------------------------------------------------------------------------------
-    self._repobase = base
+  def __init__(self, sparqlstore, sparql, header=False, abbreviate=False, htmlbase=None):
+  #--------------------------------------------------------------------------------------
     self._set_prefixes(sparql)
     self._header = header
-    self._html = html
     self._abbreviate = abbreviate
+    self._htmlbase = htmlbase
     #logging.debug('SPARQL: %s', sparql)
     try:
       self._results = json.loads(sparqlstore.query(sparql, Format.JSON))
@@ -352,7 +351,7 @@ class QueryResults(object):
         GT = '&gt;'
       else:
         LT = GT = ''
-      if value.startswith(self._repobase):
+      if value.startswith(self._htmlbase):
         result['html'] = ('%s<a href="%s" uri="%s" class="cluetip">%s</a>%s'
                        % (LT,
                           '/repository/' + value[len(options.resource_prefix):],
@@ -392,7 +391,7 @@ class QueryResults(object):
       rows = self._results.get('results', {}).get('bindings', [ ])
       if self._header: yield cols
       for r in rows:
-        if self._html: yield [ self._add_html(r[c]) for c in cols ]
-        else:          yield [                r[c]  for c in cols ]
+        if self._htmlbase: yield [ self._add_html(r[c]) for c in cols ]
+        else:              yield [                r[c]  for c in cols ]
     else:
       yield self._results
