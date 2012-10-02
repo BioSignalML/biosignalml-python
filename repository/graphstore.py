@@ -146,7 +146,21 @@ class GraphStore(object):
       params=dict(pgraph=self._provenance_uri, rtype=rtype, uri=uri, gtype=self._graphtype))
 
 
+  def get_resource_as_graph(self, uri, rtype, graph_uri=None):
+  #-----------------------------------------------------------
+    if graph_uri is None:
+      ### Following can give an error from Virtuoso...
+      rdf = self._sparqlstore.construct('<%(uri)s> ?p ?o',
+              '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
+                 graph ?g { <%(uri)s> a <%(rtype)s> . <%(uri)s> ?p ?o }''',
+              params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
+              prefixes=dict(prv=PRV.prefix), format=Format.RDFXML)
+    else:
+      rdf = self._sparqlstore.construct('<%(uri)s> ?p ?o',
+              'graph <%(graph)s> { <%(uri)s> a <%(rtype)s> . <%(uri)s> ?p ?o }',
+              params=dict(graph=graph_uri, uri=uri, rtype=rtype), format=Format.RDFXML)
 
+    return Graph.create_from_string(uri, rdf, Format.RDFXML)
 
 
   def update(self, uri, triples):
@@ -192,10 +206,10 @@ class GraphStore(object):
     return QueryResults(self._sparqlstore, sparql, base, header, html, abbreviate)
 
 
-  def construct(self, template, where, params=None, graph=None, format=Format.RDFXML, prefixes=None):
-  #--------------------------------------------------------------------------------------------------
-    return self._sparqlstore.construct(template, where, params, graph, format, prefixes)
 
+#  def construct(self, template, where, params=None, graph=None, format=Format.RDFXML, prefixes=None):
+#  #--------------------------------------------------------------------------------------------------
+#    return self._sparqlstore.construct(template, where, params, graph, format, prefixes)
 
   def describe(self, uri, format=Format.RDFXML):
   #---------------------------------------------
@@ -232,18 +246,6 @@ class GraphStore(object):
       elif r['o']['type'] == 'typed-literal': objects.append(r['o']['value']) ## check datatype and convert...
     return objects
 
-  def make_graph(self, uri, template, where=None, params=None, graph=None, prefixes=None):
-  #---------------------------------------------------------------------------------------
-    '''
-    Construct a RDF graph from a query against the repository/
-
-    :param uri: URI of the resulting graph.
-    :rtype: :class:`~biosignalml.rdf.Graph`
-    '''
-    if where is None: where = template
-    rdf = self.construct(template, where, params=params, graph=graph, format=Format.RDFXML, prefixes=prefixes)
-    ##logging.debug("Statements: %s", rdf)  ###
-    return Graph.create_from_string(uri, rdf, Format.RDFXML)
 
   def get_types(self, uri, graph):
   #------------------------------
