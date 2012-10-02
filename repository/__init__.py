@@ -57,7 +57,7 @@ class BSMLStore(GraphStore):
     return self.get_resources(BSML.Recording)
 
   def add_recording_graph(self, uri, rdf, creator, format=Format.RDFXML):
-  #------------------------------------------------------------
+  #----------------------------------------------------------------------
     self.add_resource_graph(uri, BSML.Recording, rdf, creator, format=format)
 
 
@@ -90,8 +90,10 @@ class BSMLStore(GraphStore):
       rclass = biosignalml.formats.CLASSES.get(
                  str(self.get_objects(rec_uri, DCTERMS.format, graph=graph_uri))[0],
                  Recording)
-      graph = self.make_graph(graph_uri, '?s ?p ?o', graph=graph_uri)
-      return rclass.create_from_graph(rec_uri, graph, signals=False)
+      graph = self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)
+      rec = rclass.create_from_graph(rec_uri, graph, signals=False)
+      rec.graph_uri = graph_uri
+      return rec
     else:
       return None
 
@@ -108,9 +110,12 @@ class BSMLStore(GraphStore):
     """
     rec = self.get_recording(uri)
     if rec is not None:
-      for r in rec.graph.query("select ?s where { ?s a <%s> . ?s <%s> <%s> } order by ?s"
-                               % (BSML.Signal, BSML.recording, rec.uri)):
-        rec.add_signal(rec.SignalClass.create_from_graph(str(r['s']), rec.graph, units=None))
+      for r in self._sparqlstore.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
+        params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix), distinct=True,
+        graph=rec.graph_uri, order='?s'):
+        sig_uri = r['s']['value']
+        sig_graph = self.get_resource_as_graph(sig_uri, BSML.Recording, rec.graph_uri)
+        rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
     return rec
 
 #  def store_recording(self, recording):   #### Use add_recording_graph()
@@ -137,12 +142,7 @@ class BSMLStore(GraphStore):
     :rtype: :class:`~biosignalml.Signal`
     '''
     if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
-    graph = self.make_graph(graph_uri, '<%(uri)s> ?p ?o',
-                            where = '<%(uri)s> a  bsml:Signal . <%(uri)s> ?p ?o',
-                            params = dict(uri=uri),
-                            prefixes = dict(bsml=BSML.NS.prefix),
-                            graph = graph_uri
-                            )
+    graph = self.get_resource_as_graph(uri, BSML.Signal, graph_uri)
     return Signal.create_from_graph(uri, graph, units=None)  # units set from graph...
 
 #  def signal(self, sig, properties):              # In context of signal's recording...
@@ -164,12 +164,7 @@ class BSMLStore(GraphStore):
     :rtype: :class:`~biosignalml.Event`
     '''
     if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
-    graph = self.make_graph(graph_uri, '<%(uri)s> ?p ?o',
-                            where = '<%(uri)s> a  bsml:Event . <%(uri)s> ?p ?o',
-                            params = dict(uri=uri),
-                            prefixes = dict(bsml=BSML.prefix),
-                            graph = graph_uri
-                            )
+    graph = self.get_resource_as_graph(uri, BSML.Event, graph_uri)
     return Event.create_from_graph(uri, graph, eventtype=None)  # eventtype set from graph...
 
   def get_annotation(self, uri, graph_uri=None):
@@ -181,13 +176,7 @@ class BSMLStore(GraphStore):
     :rtype: :class:`~biosignalml.Annotation`
     '''
     if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
-    if graph_uri is None: return None
-    graph = self.make_graph(uri, '<%(uri)s> ?p ?o',
-                            where = '<%(uri)s> a bsml:Annotation . <%(uri)s> ?p ?o',
-                            params = dict(uri=uri),
-                            prefixes = dict(bsml=BSML.prefix),
-                            graph = graph_uri
-                            )
+    graph = self.get_resource_as_graph(uri, BSML.Annotation, graph_uri)
     return Annotation.create_from_graph(uri, graph)
 
 #  def get_annotation_by_content(self, uri, graph_uri=None):
