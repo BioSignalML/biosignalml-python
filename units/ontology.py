@@ -700,9 +700,7 @@ class UNITS(object):
   LitrePerMinute = Resource(EXTRA.LitrePerMinute, label="l/min", desc="litre per minute")
   '''litre per minute (l/min)'''
 
-  PBANK = Namespace("http://www.biosignalml.org/ontologies/examples/physiobank#")
-
-  AnnotationData = Resource(PBANK.AnnotationData, label='annotation', desc='annotation')
+  AnnotationData = Resource(EXTRA.AnnotationData, label='annotation', desc='annotation')
 
 
 RESOURCES = { str(o.uri): o for o in UNITS.__dict__.itervalues() if isinstance(o, Resource) }
