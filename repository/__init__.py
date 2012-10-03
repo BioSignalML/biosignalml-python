@@ -112,8 +112,9 @@ class BSMLStore(GraphStore):
         params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix), distinct=True,
         graph=rec.graph_uri, order='?s'):
         sig_uri = r['s']['value']
-        sig_graph = self.get_resource_as_graph(sig_uri, BSML.Recording, rec.graph_uri)
+        sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph_uri)
         rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
+        rec.initialise()    ## This will open files...
     return rec
 
 #  def store_recording(self, recording):   #### Use add_recording_graph()
