@@ -12,6 +12,7 @@ _direct = {
   'lpm':    'LitrePerMinute',
   'mv':     'Millivolt',
   'uV-mrs': 'Microvolt',
+  'annotation': 'AnnotationData',
   }
 
 _units = {
