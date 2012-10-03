@@ -42,14 +42,13 @@ class SparqlStore(object):
   #--------------------------------------------
     ioloop = tornado.ioloop.IOLoop()
     client = tornado.httpclient.AsyncHTTPClient(ioloop)
+    endpoint = self._href + endpoint
     self._response = None
     def callback(response):
       self._response = response
       ioloop.stop()
-    client.fetch(self._href + endpoint,
-                 callback,
-                 method=method, connect_timeout=20,
-                 **kwds)
+    client.fetch(endpoint, callback,
+                 method=method, connect_timeout=20, **kwds)
     ioloop.start()
     response = self._response
     client.close()
@@ -71,7 +70,7 @@ class SparqlStore(object):
     """
     Perform a SPARQL query.
     """
-    #logging.debug('4s %s: %s', format, sparql)
+    #logging.debug('SPARQL %s: %s', format, sparql)
     try:
       return self._request(self.ENDPOINTS[0], 'POST',
                            body=urllib.urlencode({'query': self.map_prefixes(prefixes) + sparql}),
