@@ -88,14 +88,12 @@ class BSMLStore(GraphStore):
     #logging.debug('Graph: %s', graph_uri)
     if graph_uri is not None:
       rclass = biosignalml.formats.CLASSES.get(
-                 str(self.get_objects(rec_uri, DCTERMS.format, graph=graph_uri))[0],
+                 str(self.get_objects(rec_uri, DCTERMS.format, graph=graph_uri)[0]),
                  Recording)
       graph = self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)
       rec = rclass.create_from_graph(rec_uri, graph, signals=False)
       rec.graph_uri = graph_uri
       return rec
-    else:
-      return None
 
   def get_recording_with_signals(self, uri):
   #-----------------------------------------
