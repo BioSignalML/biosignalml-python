@@ -1,8 +1,6 @@
 from biosignalml.rdf import Resource, NS
 
-from ontology import UOME
-
-UNITS = NS('http://www.biosignalml.org/ontologies/units#')
+from ontology import UNITS
 
 
 _direct = {
@@ -95,7 +93,7 @@ def to_UNITS(units):
     except KeyError:
       try: uome = 'Per'.join([_mult(u) for u in units.split('/')])
       except KeyError: return None
-    return getattr(UOME, uome, None)
+    return getattr(UNITS, uome, None)
   return None
 
 if __name__ == '__main__':

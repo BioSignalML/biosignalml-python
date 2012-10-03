@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Provide access to the OUME List ontology.
+Provide access to the UOME List ontology.
 
 Generated from http://www.sbpax.org/uome/list.owl at Tue May 15 11:54:58 2012
 """
 
 from biosignalml.rdf import Uri, Resource, NS as Namespace
 
-class UOME(object):
+class UNITS(object):
   uri = Uri("http://www.sbpax.org/uome/list.owl#")
   NS = Namespace(str(uri))
 
@@ -699,3 +699,10 @@ class UOME(object):
 
   LitrePerMinute = Resource(EXTRA.LitrePerMinute, label="l/min", desc="litre per minute")
   '''litre per minute (l/min)'''
+
+  PBANK = Namespace("http://www.biosignalml.org/ontologies/examples/physiobank#")
+
+  AnnotationData = Resource(PBANK.AnnotationData, label='annotation', desc='annotation')
+
+
+RESOURCES = { str(o.uri): o for o in UNITS.__dict__.itervalues() if isinstance(o, Resource) }
