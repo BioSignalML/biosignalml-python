@@ -237,6 +237,8 @@ class Virtuoso(SparqlStore):
 
      DB.DBA.RDF_OBJ_FT_RULE_ADD (null, null, 'All');
 
+  5. Define additional namespace prefixes as required.
+
   """
 
   ENDPOINTS = [ '/sparql/', '/sparql/', '/sparql-graph-crud/' ]
