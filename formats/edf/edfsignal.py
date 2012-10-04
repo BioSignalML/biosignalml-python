@@ -117,7 +117,7 @@ class EDFSignal(BSMLSignal):
       length = len(self)
     else:
       startpos = max(0, int(math.floor(segment[0])))
-      length = min(len(self)-startpos, int(math.ceil(segment[1])))
+      length = min(len(self), int(math.ceil(segment[1]))) - startpos
       #logging.debug('Startpos: %d, len: %d, pts: %d', startpos, length, points)
 
     while length > 0:

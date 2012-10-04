@@ -74,6 +74,7 @@ class HDF5Signal(BSMLSignal):
     # Use model.Interval ??
     if interval is not None:
       segment = (self.clock.index(interval.start), self.clock.index(interval.end))
+
     if segment is None:
       startpos = 0
       length = len(self)
@@ -82,7 +83,7 @@ class HDF5Signal(BSMLSignal):
       else:                        seg = (segment[1], segment[0])
       ##startpos = max(0, int(math.floor(seg[0])))
       startpos = max(0, seg[0])
-      length = min(len(self), seg[1] - startpos + 1)
+      length = min(len(self), seg[1]) - startpos
 
     while length > 0:
       if maxpoints > length: maxpoints = length
