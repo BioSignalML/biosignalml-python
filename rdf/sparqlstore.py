@@ -112,8 +112,8 @@ class SparqlStore(object):
     :rtype: list
     '''
     if params is None: params = {}
-    return json.loads(
-      self.query('select%(distinct)s %(fields)s where { %(graph)s { %(where)s } }%(order)s%(limit)s'
+    return json.loads(self.query(
+              'select%(distinct)s %(fields)s where {\n %(graph)s {\n %(where)s }\n }%(order)s%(limit)s'
                  % dict(distinct=' distinct' if distinct else '',
                         fields=fields % params,
                         graph=('graph <%s>' % graph) if graph else '',
