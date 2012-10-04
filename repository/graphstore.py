@@ -144,7 +144,8 @@ class GraphStore(object):
     return self._sparqlstore.ask(
       '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
          graph ?g { <%(uri)s> a <%(rtype)s> }''',
-      params=dict(pgraph=self._provenance_uri, rtype=rtype, uri=uri, gtype=self._graphtype))
+      params=dict(pgraph=self._provenance_uri, rtype=rtype, uri=uri, gtype=self._graphtype),
+      prefixes=dict(prv=PRV.prefix))
 
 
   def get_resource_as_graph(self, uri, rtype, graph_uri=None):
