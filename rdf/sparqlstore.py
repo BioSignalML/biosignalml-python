@@ -221,6 +221,23 @@ class SparqlStore(object):
 
 class Virtuoso(SparqlStore):
 #===========================
+  """
+  Specifics for a Virtuoso SPARQL endpoint.
+
+  A newly installed Virtuoso system requires:
+
+  1. Permissions set on the database directory (INSTALL_DIR/var/lib/virtuoso/db)
+     to allow write access by the user running Virtuoso.
+
+  2. The INI file edited to increase limits for BufferSizes and MaxRows.
+
+  3. The SPARQL_UPDATE role to be given to the SPARQL user.
+
+  4. Full text search enabling using ISQL:::
+
+     DB.DBA.RDF_OBJ_FT_RULE_ADD (null, null, 'All');
+
+  """
 
   ENDPOINTS = [ '/sparql/', '/sparql/', '/sparql-graph-crud/' ]
 
