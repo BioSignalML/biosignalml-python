@@ -137,8 +137,6 @@ Measurement units would normally be entities in a specialised units of measure o
   '''The physical units that are represented by a signal's data values.
 
 Specification of units allows for consistency checking and automatic conversion.'''
-  about          = Resource(NS.about)
-  '''The resource commented upon and tagged by an Annotation.'''
   tag            = Resource(NS.tag)
-  '''The tag applied to a resource by an annotation.'''
+  '''A tag applied to a resource by an annotation.'''
 

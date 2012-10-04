@@ -340,7 +340,7 @@ class Annotation(core.AbstractObject):
 
   attributes = [ 'about', 'comment', 'tags', 'creator', 'created' ]
 
-  mapping = { ('about',   None): PropertyMap(BSML.about, to_rdf=mapping.get_uri),
+  mapping = { ('about',   None): PropertyMap(DCTERMS.subject, to_rdf=mapping.get_uri),
               ('comment', None): PropertyMap(RDFS.comment),
               ('tags',    None): PropertyMap(BSML.tag),
               ('creator', None): PropertyMap(DCTERMS.creator, to_rdf=mapping.get_uri),
