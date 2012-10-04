@@ -206,6 +206,7 @@ class BSMLStore(GraphStore):
     '''
     return [ r[1]
       for r in self.get_resources(BSML.Annotation, rvars='?r ?tm',
-        condition='?r bsml:about <%s> . optional { ?r dct:created ?tm }' % uri,
-        prefixes = dict(bsml=BSML.prefix, dct=DCTERMS.prefix)
+        condition='?r dct:subject <%s> . optional { ?r dct:created ?tm }' % uri,
+        prefixes = dict(dct=DCTERMS.prefix),
+        graph = graph_uri
         ) ]
