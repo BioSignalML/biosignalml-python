@@ -70,7 +70,8 @@ def isoduration_to_seconds(d):
     td = isoduration.parse_duration(d)
     return td.days*86400 + td.seconds + td.microseconds/1000000.0
   except:
-    return 0
+    try: return float(d)    ## Virtuoso strips "PT" etc on import...
+    except: return 0
 
 def utctime():
 #=============
