@@ -102,8 +102,8 @@ class GraphStore(object):
     self._sparqlstore.replace_graph(graph_uri, rdf, format=format)
 
 
-  def get_resources(self, rtype, rvars='?r', condition='', prefixes=None):
-  #-----------------------------------------------------------------------
+  def get_resources(self, rtype, rvars='?r', condition='', prefixes=None, graph=None):
+  #-----------------------------------------------------------------------------------
     """
     Find resources of the given type and the most recent graphs that
     hold them.
@@ -116,6 +116,8 @@ class GraphStore(object):
        is assumed to taht of the resource. Optional, defaults to `?r`.
     :param condition (str): A SPARQL graph pattern for selecting resources. Optional.
     :param prefixes (dict): Optional namespace prefixes for the SPARQL query.
+    :param graph: The URI of a specific graph to search in, instead of finding
+       the most recent. Optional.
     :return: A list of (graph_uri, resource_uri, optional_variable) tuples.
     :rtype: list[tuple(:class:`~biosignalml.rdf.Uri`, :class:`~biosignalml.rdf.Uri`)]
     """
@@ -123,17 +125,29 @@ class GraphStore(object):
     if prefixes: pfxdict.update(prefixes)
     variables = [ var[1:] for var in rvars.split() ]
     NOVALUE = { 'value': None }  # For optional result variables
-    return [ (Uri(r['g']['value']), Uri(r[variables[0]]['value']))
-              + tuple([r.get(v, NOVALUE)['value'] for v in variables[1:]])
-      for r in self._sparqlstore.select('?g %(rvars)s',
-        '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
-           graph ?g { ?%(rvar)s a <%(rtype)s> . %(cond)s }''',
-        params=dict(pgraph=self._provenance_uri, gtype=self._graphtype,
-                    rtype=rtype, rvars=rvars, rvar=variables[0], cond=condition),
-        prefixes=pfxdict,
-        distinct=True,
-        order='?g %s' % rvars)
-      ]
+    if graph is None:
+      return [ (Uri(r['g']['value']), Uri(r[variables[0]]['value']))
+                + tuple([r.get(v, NOVALUE)['value'] for v in variables[1:]])
+        for r in self._sparqlstore.select('?g %(rvars)s',
+          '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
+             graph ?g { ?%(rvar)s a <%(rtype)s> . %(cond)s }''',
+          params=dict(pgraph=self._provenance_uri, gtype=self._graphtype,
+                      rtype=rtype, rvars=rvars, rvar=variables[0], cond=condition),
+          prefixes=pfxdict,
+          distinct=True,
+          order='?g %s' % rvars)
+        ]
+    else:
+      return [ (Uri(graph), Uri(r[variables[0]]['value']))
+                + tuple([r.get(v, NOVALUE)['value'] for v in variables[1:]])
+        for r in self._sparqlstore.select('%(rvars)s',
+          '?%(rvar)s a <%(rtype)s> . %(cond)s',
+          params=dict(rtype=rtype, rvars=rvars, rvar=variables[0], cond=condition),
+          prefixes=pfxdict,
+          distinct=True,
+          graph=graph,
+          order=rvars)
+        ]
 
 
   def has_resource(self, uri, rtype):
