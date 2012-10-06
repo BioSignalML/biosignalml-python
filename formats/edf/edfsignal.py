@@ -109,7 +109,7 @@ class EDFSignal(BSMLSignal):
         if length == 0: length = 1   #  Always get at least one data point
       else:
         length = len(self)
-      segment = (start, length)
+      segment = (start, start+length)
     #logging.debug('Segment: %s', segment)
 
     if segment is None:
@@ -118,7 +118,7 @@ class EDFSignal(BSMLSignal):
     else:
       startpos = max(0, int(math.floor(segment[0])))
       length = min(len(self), int(math.ceil(segment[1]))) - startpos
-      #logging.debug('Startpos: %d, len: %d, pts: %d', startpos, length, points)
+    #logging.debug('Startpos: %d, len: %d', startpos, length)
 
     while length > 0:
       if maxpoints > length: maxpoints = length
