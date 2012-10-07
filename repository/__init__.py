@@ -228,6 +228,7 @@ class BSMLStore(GraphStore):
     Get an Annotation from the repository.
 
     :param uri: The URI of an Annotation.
+    :param graph_uri: An optional URI of the graph to query.
     :rtype: :class:`~biosignalml.Annotation`
     '''
     # The following line works around a Virtuoso problem
@@ -256,11 +257,12 @@ class BSMLStore(GraphStore):
     Return a list of all Annotations about a subject.
 
     :param uri: The URI of the subject.
-    :rtype: list of URIs to oa:Annotations
+    :param graph_uri: An optional URI of the graph to query.
+    :rtype: list of bsml:Annotation URIs
     '''
     return [ r[1]
-      for r in self.get_resources(BSML.Annotation, rvars='?r ?tm',
-        condition='?r dct:subject <%s> . optional { ?r dct:created ?tm }' % uri,
+      for r in self.get_resources(BSML.Annotation, rvars='?r',
+        condition='?r dct:subject <%s>' % uri,
         prefixes = dict(dct=DCTERMS.prefix),
         graph = graph_uri
         ) ]
