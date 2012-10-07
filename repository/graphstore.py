@@ -110,10 +110,11 @@ class GraphStore(object):
 
     The resources found can be restricted by an optional SPARQL graph pattern.
 
-    :param rtype: The type of resource to find.
+    :param rtype: The type of resource to find. The SPARQL variable used for the
+       resource is always '?r'.
     :param rvars (str): Space separated SPARQL variables identifying the resource
        in the query along with any other variables to return values of. The first variable
-       is assumed to taht of the resource. Optional, defaults to `?r`.
+       is usually that of the resource. Optional, defaults to `?r`.
     :param condition (str): A SPARQL graph pattern for selecting resources. Optional.
     :param prefixes (dict): Optional namespace prefixes for the SPARQL query.
     :param graph: The URI of a specific graph to search in, instead of finding
@@ -130,9 +131,9 @@ class GraphStore(object):
                 + tuple([r.get(v, NOVALUE)['value'] for v in variables[1:]])
         for r in self._sparqlstore.select('?g %(rvars)s',
           '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
-             graph ?g { ?%(rvar)s a <%(rtype)s> . %(cond)s }''',
+             graph ?g { ?r a <%(rtype)s> . %(cond)s }''',
           params=dict(pgraph=self._provenance_uri, gtype=self._graphtype,
-                      rtype=rtype, rvars=rvars, rvar=variables[0], cond=condition),
+                      rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           distinct=True,
           order='?g %s' % rvars)
@@ -141,8 +142,8 @@ class GraphStore(object):
       return [ (Uri(graph), Uri(r[variables[0]]['value']))
                 + tuple([r.get(v, NOVALUE)['value'] for v in variables[1:]])
         for r in self._sparqlstore.select('%(rvars)s',
-          '?%(rvar)s a <%(rtype)s> . %(cond)s',
-          params=dict(rtype=rtype, rvars=rvars, rvar=variables[0], cond=condition),
+          '?r a <%(rtype)s> . %(cond)s',
+          params=dict(rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           distinct=True,
           graph=graph,
