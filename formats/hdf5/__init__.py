@@ -83,7 +83,7 @@ class HDF5Signal(BSMLSignal):
       else:                        seg = (segment[1], segment[0])
       ##startpos = max(0, int(math.floor(seg[0])))
       startpos = max(0, seg[0])
-      length = min(len(self), seg[1]) - startpos
+      length = min(len(self), seg[1]+1) - startpos
 
     while length > 0:
       if maxpoints > length: maxpoints = length
