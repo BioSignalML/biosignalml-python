@@ -153,6 +153,22 @@ class BSMLStore(GraphStore):
 #      return r
 #    else: return None
 
+  def signals(self, rec_uri, graph_uri=None):
+  #------------------------------------------
+    '''
+    Return a list of all Signals of a recording.
+
+    :param uri: The URI of the recording.
+    :param graph_uri: An optional URI of the graph to query.
+    :rtype: list of bsml:Signal URIs
+    '''
+    return [ r[1]
+      for r in self.get_resources(BSML.Signal, rvars='?r',
+        condition='?r bsml:recording <%s>' % rec_uri,
+        prefixes = dict(bsml=BSML.prefix),
+        graph = graph_uri
+        ) ]
+
 
   def get_event(self, uri, graph_uri=None):
   #-----------------------------------------
@@ -167,6 +183,44 @@ class BSMLStore(GraphStore):
     if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Event, graph_uri)
     return Event.create_from_graph(uri, graph, eventtype=None)  # eventtype set from graph...
+
+  def events(self, rec_uri, eventtype=None, graph_uri=None):
+  #---------------------------------------------------------
+    '''
+    Return a list of all Events associated with a recording.
+
+    :param uri: The URI of the recording.
+    :param eventtype: The type of events to find. Optional.
+    :param graph_uri: An optional URI of the graph to query.
+    :rtype: list of bsml:Event URIs
+    '''
+
+    if eventtype is None:
+      condition =  '?r bsml:recording <%s>' % rec_uri
+    else:
+      condition = ('?r bsml:recording <%s> . ?r bsml:eventType <%s>'
+                                  % (rec_uri, eventtype))
+    return [ r[1]
+      for r in self.get_resources(BSML.Event, rvars='?r', condition=condition,
+        prefixes=dict(bsml=BSML.prefix), graph=graph_uri)
+      ]
+
+  def eventtypes(self, rec_uri, graph_uri=None):
+  #---------------------------------------------
+    '''
+    Return a list of all types of Events associated with a recording.
+
+    :param uri: The URI of the recording.
+    :param graph_uri: An optional URI of the graph to query.
+    :rtype: list of bsml:Event URIs
+    '''
+    return [ r[1]
+      for r in self.get_resources(BSML.Event, rvars='?et',
+        condition = '?r bsml:recording <%s> . ?r bsml:eventType ?et' % rec_uri,
+        prefixes = dict(bsml=BSML.prefix),
+        graph = graph_uri
+        ) ]
+
 
   def get_annotation(self, uri, graph_uri=None):
   #---------------------------------------------
