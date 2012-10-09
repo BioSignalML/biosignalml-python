@@ -193,7 +193,7 @@ class Mapping(object):
       if dtype: v = datatypes.get(dtype, str)(v)
     return from_rdf(v) if from_rdf else v
 
-  def metadata(self, statement, metaclass):
+  def metadata(self, metaclass, statement):
   #----------------------------------------
     """
     Given a RDF statement and a metaclass, lookup the statement's predicate

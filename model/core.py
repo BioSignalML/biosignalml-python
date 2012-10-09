@@ -266,13 +266,15 @@ class AbstractObject(object):
     :param graph: A graph of RDF statements.
     :type graph: :class:`biosignalml.rdf.Graph`
     """
-    if graph.contains(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)):
+    if self.metaclass is not None and graph.contains(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
-        for metaclass in reversed([getattr(cls, 'metaclass', None)  # Go up __mro__ from AbstractObject
-                                     for cls in self.__class__.__mro__ if cls != object]):
-          s, attr, v = self.rdfmap.metadata(stmt, metaclass)
-          #logging.debug("%s: %s='%s'", self.uri, attr, v)  ###
-          if attr is not None: self._assign(attr, v)
+        for metaclass in [getattr(cls, 'metaclass', None)
+                            for cls in self.__class__.__mro__ if cls != object]:
+          s, attr, v = self.rdfmap.metadata(metaclass, stmt)
+          #logging.debug("%s: %s = '%s'", self.uri, attr, v)  ###
+          if attr is not None:
+            self._assign(attr, v)
+            break
 
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
