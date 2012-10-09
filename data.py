@@ -39,8 +39,8 @@ class Clock(AbstractObject):
   # Also have 'frequency' ?? and/or 'period' ??
   attributes = [ 'resolution', 'rate' ]
 
-  mapping = { ('resolution', None): PropertyMap(BSML.resolution, XSD.double),
-              ('rate',       None): PropertyMap(BSML.rate,       XSD.double) }
+  mapping = { 'resolution': PropertyMap(BSML.resolution, XSD.double),
+              'rate':       PropertyMap(BSML.rate,       XSD.double) }
 
   def __init__(self, uri, times, resolution=None, rate=None, **kwds):
   #------------------------------------------------------------------

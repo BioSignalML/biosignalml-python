@@ -55,9 +55,9 @@ class AbstractObject(object):
   attributes = [ 'uri', 'label', 'comment', 'description' ]
   '''List of generic attributes all resources have.'''
 
-  mapping = { ('label',           None): PropertyMap(RDFS.label),
-              ('comment',         None): PropertyMap(RDFS.comment),
-              ('description',     None): PropertyMap(DCTERMS.description) }
+  mapping = { 'label':       PropertyMap(RDFS.label),
+              'comment':     PropertyMap(RDFS.comment),
+              'description': PropertyMap(DCTERMS.description) }
 
   rdfmap = None
   '''The :class:`~biosignalml.model.mapping.Mapping` used to map between RDF properties and attributes.'''
@@ -67,7 +67,7 @@ class AbstractObject(object):
     if cls.__dict__.get('rdfmap') is None:
       rdfmap = Mapping()
       for c in reversed(cls.__mro__):
-        if c.__dict__.get('mapping'): rdfmap.update(c.mapping)
+        if c.__dict__.get('mapping'): rdfmap.update(c.metaclass, c.mapping)
       cls.rdfmap = rdfmap
     return object.__new__(cls)
 

@@ -103,22 +103,22 @@ class Mapping(object):
   having the name, or a Resource object, meaning the map is only for attributes of
   instances of the resource class and its subclasses.
   """
-  def __init__(self, usermap=None):
-  #--------------------------------
+  def __init__(self, metaclass=None, usermap=None):
+  #------------------------------------------------
     self.mapping = { }        #: The mapping dictionary to convert to RDF.
     self.reversemap = { }     #: The reverse mapping from RDF.
-    if usermap: self.update(usermap)
+    if usermap is not None: self.update(metaclass, usermap)
 
-  def update(self, usermap):
-  #-------------------------
+  def update(self, metaclass, usermap):
+  #------------------------------------
     """
     Update a mapping.
 
     :param usermap: A mapping dictionary.
     :type usermap: dict
     """
-    self.mapping.update(usermap)
-    self.reversemap = { (str(m.property), k[1]): ReverseEntry(k[0], m.datatype, m.from_rdf)
+    for k, v in usermap.iteritems(): self.mapping[(metaclass, k)] = v
+    self.reversemap = { (k[0], str(m.property)): ReverseEntry(k[1], m.datatype, m.from_rdf)
                           for k, m in self.mapping.iteritems() }
 
   @staticmethod
@@ -178,9 +178,9 @@ class Mapping(object):
       metaclasses = [ c.metaclass for c in resource.__class__.__mro__ if c.__dict__.get('metaclass') ]
       metadict = getattr(resource, 'metadata', { })
       for k, m in self.mapping.iteritems():
-        if k[1] is None or k[1] in metaclasses:  ## Or do we need str() before lookup ??
-          for s in self._statements(subject, m, getattr(resource, k[0], None)): yield s
-          for s in self._statements(subject, m, metadict.get(k[0], None)): yield s
+        if k[0] is None or k[0] in metaclasses:  ## Or do we need str() before lookup ??
+          for s in self._statements(subject, m, getattr(resource, k[1], None)): yield s
+          for s in self._statements(subject, m, metadict.get(k[1], None)): yield s
 
   @staticmethod
   def _makevalue(node, dtype, from_rdf):
@@ -205,8 +205,8 @@ class Mapping(object):
       Python value for the attribute.
 
     """
-    m = self.reversemap.get((str(statement.predicate.uri), metaclass), None)
-    if m is None: m = self.reversemap.get((str(statement.predicate.uri), None), ReverseEntry(None, None, None))
+    m = self.reversemap.get((metaclass, str(statement.predicate.uri)), None)
+    if m is None: m = self.reversemap.get((None, str(statement.predicate.uri)), ReverseEntry(None, None, None))
     return (statement.subject.uri, m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf))
 
   def get_value_from_graph(self, resource, attr, graph):
@@ -216,8 +216,8 @@ class Mapping(object):
     about the resource using the property is in the graph, translate and return
     its object's value.
     """
-    m = self.mapping.get((attr, resource.metaclass), None)
-    if m is None: m = self.mapping.get((attr, None))
+    m = self.mapping.get((resource.metaclass, attr), None)
+    if m is None: m = self.mapping.get((None, attr))
     if m:
       return self._makevalue(graph.get_object(resource.uri, m.property), m.datatype, m.from_rdf)
 
@@ -232,9 +232,9 @@ if __name__ == '__main__':
 
   class MyRecording(Recording):
   #----------------------------
-    mapping = { ('xx', None): PropertyMap(rdf.DCTERMS.subject),
-                ('yy', None): PropertyMap('http://example.org/onto#subject'),
-                ('zz', None): PropertyMap('http://example.org/onto#annotation'),
+    mapping = { 'xx': PropertyMap(rdf.DCTERMS.subject),
+                'yy': PropertyMap('http://example.org/onto#subject'),
+                'zz': PropertyMap('http://example.org/onto#annotation'),
      }
 
 

@@ -66,15 +66,15 @@ class Interval(model.core.AbstractObject):
 
   attributes = [ 'timeline', 'start', 'duration' ]
 
-  mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
-                                                   to_rdf=mapping.get_uri,
-                                                   from_rdf=RelativeTimeLine),
-              ('start',    metaclass): PropertyMap(TL.beginsAtDuration, XSD.dayTimeDuration,
-                                                   utils.seconds_to_isoduration,
-                                                   utils.isoduration_to_seconds),
-              ('duration', metaclass): PropertyMap(TL.durationXSD, XSD.dayTimeDuration,
-                                                   utils.seconds_to_isoduration,
-                                                   utils.isoduration_to_seconds) }
+  mapping = { 'timeline': PropertyMap(TL.timeline,
+                                      to_rdf=mapping.get_uri,
+                                      from_rdf=RelativeTimeLine),
+              'start':    PropertyMap(TL.beginsAtDuration, XSD.dayTimeDuration,
+                                      utils.seconds_to_isoduration,
+                                      utils.isoduration_to_seconds),
+              'duration': PropertyMap(TL.durationXSD, XSD.dayTimeDuration,
+                                      utils.seconds_to_isoduration,
+                                      utils.isoduration_to_seconds) }
 
   def __init__(self, uri, start, duration=None, timeline=None, end=None, **kwds):
   #------------------------------------------------------------------------------
@@ -116,12 +116,12 @@ class Instant(model.core.AbstractObject):
 
   attributes = [ 'timeline', 'start' ]
 
-  mapping = { ('timeline', metaclass): PropertyMap(TL.timeline,
-                                                   to_rdf=mapping.get_uri,
-                                                   from_rdf=RelativeTimeLine),
-              ('start',    metaclass): PropertyMap(TL.atDuration, XSD.dayTimeDuration,
-                                                   utils.seconds_to_isoduration,
-                                                   utils.isoduration_to_seconds) }
+  mapping = { 'timeline': PropertyMap(TL.timeline,
+                                      to_rdf=mapping.get_uri,
+                                      from_rdf=RelativeTimeLine),
+              'start':    PropertyMap(TL.atDuration, XSD.dayTimeDuration,
+                                      utils.seconds_to_isoduration,
+                                      utils.isoduration_to_seconds) }
 
   def __init__(self, uri, when, timeline=None, **kwds):
   #----------------------------------------------------

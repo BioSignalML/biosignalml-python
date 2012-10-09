@@ -66,25 +66,25 @@ class Signal(core.AbstractObject):
                ]
   '''Generic attributes of a Signal.'''
 
-  mapping = { ('recording',    None): PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
-              ('units',        None): PropertyMap(BSML.units, to_rdf=mapping.get_uri),
-##            ('transducer',   None): PropertyMap(BSML.transducer),
-              ('filter',       None): PropertyMap(BSML.preFilter),
-              ('rate',         None): PropertyMap(BSML.rate, XSD.double),
-              ('clock',        None): PropertyMap(BSML.clock, to_rdf=mapping.get_uri),
-              ('minFrequency', None): PropertyMap(BSML.minFrequency, XSD.double),
-              ('maxFrequency', None): PropertyMap(BSML.maxFrequency, XSD.double),
-              ('minValue',     None): PropertyMap(BSML.minValue, XSD.double),
-              ('maxValue',     None): PropertyMap(BSML.maxValue, XSD.double),
-              ('dataBits',     None): PropertyMap(BSML.dataBits, XSD.integer),
-              ('index',        None): PropertyMap(BSML.index, XSD.integer),
-              ('signaltype',   None): PropertyMap(BSML.signalType),
-              ('offset',       None): PropertyMap(BSML.offset, XSD.dayTimeDuration,
-                                                  utils.seconds_to_isoduration,
-                                                  utils.isoduration_to_seconds),
-              ('duration',     None): PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
-                                                  utils.seconds_to_isoduration,
-                                                  utils.isoduration_to_seconds),
+  mapping = { 'recording':    PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
+              'units':        PropertyMap(BSML.units, to_rdf=mapping.get_uri),
+##            'transducer':   PropertyMap(BSML.transducer),
+              'filter':       PropertyMap(BSML.preFilter),
+              'rate':         PropertyMap(BSML.rate, XSD.double),
+              'clock':        PropertyMap(BSML.clock, to_rdf=mapping.get_uri),
+              'minFrequency': PropertyMap(BSML.minFrequency, XSD.double),
+              'maxFrequency': PropertyMap(BSML.maxFrequency, XSD.double),
+              'minValue':     PropertyMap(BSML.minValue, XSD.double),
+              'maxValue':     PropertyMap(BSML.maxValue, XSD.double),
+              'dataBits':     PropertyMap(BSML.dataBits, XSD.integer),
+              'index':        PropertyMap(BSML.index, XSD.integer),
+              'signaltype':   PropertyMap(BSML.signalType),
+              'offset':       PropertyMap(BSML.offset, XSD.dayTimeDuration,
+                                          utils.seconds_to_isoduration,
+                                          utils.isoduration_to_seconds),
+              'duration':     PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
+                                          utils.seconds_to_isoduration,
+                                          utils.isoduration_to_seconds),
             }
 
   def __init__(self, uri, units, **kwds):
@@ -103,14 +103,14 @@ class Event(core.AbstractObject):
   attributes = ['eventtype', 'time', 'duration' ]
   '''Generic attributes of an Event.'''
 
-  mapping = { ('recording', None): PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
-              ('eventtype', None): PropertyMap(BSML.eventType),
-              ('time',      None): PropertyMap(BSML.offset, XSD.dayTimeDuration,
-                                               utils.seconds_to_isoduration,
-                                               utils.isoduration_to_seconds),
-              ('duration',  None): PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
-                                               utils.seconds_to_isoduration,
-                                               utils.isoduration_to_seconds),
+  mapping = { 'recording': PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
+              'eventtype': PropertyMap(BSML.eventType),
+              'time':      PropertyMap(BSML.offset, XSD.dayTimeDuration,
+                                       utils.seconds_to_isoduration,
+                                       utils.isoduration_to_seconds),
+              'duration':  PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
+                                       utils.seconds_to_isoduration,
+                                       utils.isoduration_to_seconds),
             }
 
   def __init__(self, uri, eventtype, time=None, duration=None, end=None, **kwds):
@@ -147,20 +147,20 @@ class Recording(core.AbstractObject):
                ]
   '''Generic attributes of a Recording.'''
 
-  mapping = { ('format',        metaclass): PropertyMap(DCTERMS.format),
-              ('dataset',       metaclass): PropertyMap(BSML.dataset),
-              ('source',        metaclass): PropertyMap(DCTERMS.source),
-              ('investigation', metaclass): PropertyMap(DCTERMS.subject),
-              ('starttime',     metaclass): PropertyMap(DCTERMS.created, XSD.dateTime,
-                                                        utils.datetime_to_isoformat,
-                                                        utils.isoformat_to_datetime),
-              ('duration',      metaclass): PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
-                                                        utils.seconds_to_isoduration,
-                                                        utils.isoduration_to_seconds),
-##            ('digest',        metaclass): PropertyMap(BSML.digest),
-              ('timeline',      metaclass): PropertyMap(TL.timeline,
-                                                        to_rdf=mapping.get_uri,
-                                                        from_rdf=_get_timeline) }
+  mapping = { 'format':        PropertyMap(DCTERMS.format),
+              'dataset':       PropertyMap(BSML.dataset),
+              'source':        PropertyMap(DCTERMS.source),
+              'investigation': PropertyMap(DCTERMS.subject),
+              'starttime':     PropertyMap(DCTERMS.created, XSD.dateTime,
+                                           utils.datetime_to_isoformat,
+                                           utils.isoformat_to_datetime),
+              'duration':      PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
+                                           utils.seconds_to_isoduration,
+                                           utils.isoduration_to_seconds),
+##            'digest':        PropertyMap(BSML.digest),
+              'timeline':      PropertyMap(TL.timeline,
+                                           to_rdf=mapping.get_uri,
+                                           from_rdf=_get_timeline) }
 
   SignalClass = Signal       #: The class of Signals in the Recording
 
@@ -340,13 +340,13 @@ class Annotation(core.AbstractObject):
 
   attributes = [ 'about', 'comment', 'tags', 'creator', 'created' ]
 
-  mapping = { ('about',   None): PropertyMap(DCTERMS.subject, to_rdf=mapping.get_uri),
-              ('comment', None): PropertyMap(RDFS.comment),
-              ('tags',    None): PropertyMap(BSML.tag),
-              ('creator', None): PropertyMap(DCTERMS.creator, to_rdf=mapping.get_uri),
-              ('created', None): PropertyMap(DCTERMS.created, XSD.dateTime,
-                                               utils.datetime_to_isoformat,
-                                               utils.isoformat_to_datetime),
+  mapping = { 'about':   PropertyMap(DCTERMS.subject, to_rdf=mapping.get_uri),
+              'comment': PropertyMap(RDFS.comment),
+              'tags':    PropertyMap(BSML.tag),
+              'creator': PropertyMap(DCTERMS.creator, to_rdf=mapping.get_uri),
+              'created': PropertyMap(DCTERMS.created, XSD.dateTime,
+                                     utils.datetime_to_isoformat,
+                                     utils.isoformat_to_datetime),
             }
 
 

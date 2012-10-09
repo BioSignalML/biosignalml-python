@@ -31,17 +31,17 @@ class DataItem(model.core.AbstractObject):
 #=========================================
   metaclass = PRV.DataItem
   attributes = [ 'type', 'createdby', 'subject', 'precededby' ]
-  mapping = { ('createdby',  None): PropertyMap(PRV.createdBy),
-              ('subject',    None): PropertyMap(DCTERMS.subject),
-              ('precededby', None): PropertyMap(PRV.precededBy),
-              ('type',       None): PropertyMap(RDF.type) }
+  mapping = { 'createdby':  PropertyMap(PRV.createdBy),
+              'subject':    PropertyMap(DCTERMS.subject),
+              'precededby': PropertyMap(PRV.precededBy),
+              'type':       PropertyMap(RDF.type) }
 
 class DataCreation(model.core.AbstractObject):
 #=============================================
   metaclass = PRV.DataCreation
   attributes = [ 'performedby', 'completed' ]
-  mapping = { ('performedby', None): PropertyMap(PRV.performedBy),
-              ('completed',   None): PropertyMap(PRV.completedAt, XSD.dateTime,
+  mapping = { 'performedby': PropertyMap(PRV.performedBy),
+              'completed':   PropertyMap(PRV.completedAt, XSD.dateTime,
                                                  utils.datetime_to_isoformat,
                                                  utils.isoformat_to_datetime) }
 

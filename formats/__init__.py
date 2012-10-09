@@ -123,7 +123,7 @@ class BSMLRecording(biosignalml.Recording):
   EXTENSIONS = [ 'raw' ]
   SignalClass = BSMLSignal
   attributes = [ 'digest', 'dataset' ]
-  mapping    = { ('dataset', None): mapping.PropertyMap(BSML.dataset) }
+  mapping    = { 'dataset': mapping.PropertyMap(BSML.dataset) }
 
   def __init__(self, uri=None, fname=None, mode='r', **kwds):
   #----------------------------------------------------------
