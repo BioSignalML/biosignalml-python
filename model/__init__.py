@@ -371,8 +371,9 @@ class Annotation(core.AbstractObject):
   @classmethod
   def Event(cls, uri, about, time, **kwds):
   #----------------------------------------
+    assert(time.end >= time.start)
     self = cls(uri, '%s#t=%g,%g' % (about.uri, time.start, time.end), **kwds)
-    self._time= time
+    self._time = time
     return self
 
   def tag(self, tag):

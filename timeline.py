@@ -78,6 +78,7 @@ class Interval(model.core.AbstractObject):
 
   def __init__(self, uri, start, duration=None, timeline=None, end=None, **kwds):
   #------------------------------------------------------------------------------
+    assert(end is None or start <= end)
     model.core.AbstractObject.__init__(self, uri, start=start,
                                        duration=duration if end is None else (end-start),
                                        timeline=timeline,
