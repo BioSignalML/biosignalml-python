@@ -14,7 +14,7 @@ import biosignalml.formats
 
 from biosignalml import BSML, Recording, Signal, Event, Annotation
 
-from biosignalml.rdf import DCTERMS
+from biosignalml.rdf import DCTERMS, PRV
 from biosignalml.rdf import Format
 
 from graphstore import GraphStore
@@ -268,7 +268,8 @@ class BSMLStore(GraphStore):
     '''
     return [ r[1]
       for r in self.get_resources(BSML.Annotation, rvars='?r',
-        condition='?r dct:subject <%s>' % uri,
-        prefixes = dict(dct=DCTERMS.prefix),
+        condition='''?r dct:subject ?s . filter(regex(str(?s), "^%s(#.*)?$", "i")) .
+              minus { [] prv:preceededBy ?r }''' % uri,
+        prefixes = dict(dct=DCTERMS.prefix, prv=PRV.prefix),
         graph = graph_uri
         ) ]
