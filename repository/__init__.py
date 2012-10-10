@@ -47,6 +47,12 @@ class BSMLStore(GraphStore):
     return (self.has_resource(rec, BSML.Recording)
         and self.has_resource(uri, BSML.Signal))
 
+  def extend_recording(self, recording, abstractobject):
+  #-----------------------------------------------------
+    self._sparqlstore.extend_graph(recording.graph_uri,
+      abstractobject.metadata_as_string(format=Format.RDFXML),
+      format=Format.RDFXML)
+
   def recordings(self):
   #--------------------
     """
