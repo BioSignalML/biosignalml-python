@@ -100,30 +100,33 @@ class Event(core.AbstractObject):
 
   metaclass = BSML.Event      #: :attr:`.BSML.Event`
 
-  attributes = ['eventtype', 'time', 'duration' ]
+  attributes = ['eventtype', 'time', 'recording' ]
   '''Generic attributes of an Event.'''
 
   mapping = { 'recording': PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
               'eventtype': PropertyMap(BSML.eventType),
-              'time':      PropertyMap(BSML.offset, XSD.dayTimeDuration,
-                                       utils.seconds_to_isoduration,
-                                       utils.isoduration_to_seconds),
-              'duration':  PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
-                                       utils.seconds_to_isoduration,
-                                       utils.isoduration_to_seconds),
+              'time':      PropertyMap(BSML.time),
             }
 
-  def __init__(self, uri, eventtype, time=None, duration=None, end=None, **kwds):
-  #--------------------------------------------------------------------------
+  def __init__(self, uri, eventtype, time=None, **kwds):
+  #-----------------------------------------------------
     core.AbstractObject.__init__(self, uri, eventtype=eventtype,
                                             time=time,
-                                            duration=duration if end is None else (end-time),
                                             **kwds)
-    self.recording = None
 
   def __str__(self):
   #-----------------
     return 'Event %s at %s' % (self.eventtype, self.time)
+
+  @classmethod
+  def create_from_graph(cls, uri, graph, **kwds):
+  #----------------------------------------------
+    from biosignalml.timeline import TemporalEntity  # Prevent a circular import
+    self = cls(uri, None, **kwds)
+    self.load_from_graph(graph)
+    if self.time is not None:
+      self.time = TemporalEntity.create_from_graph(self.time, graph)
+    return self
 
 
 def _get_timeline(tl):      # Stops a circular import
@@ -248,9 +251,9 @@ class Recording(core.AbstractObject):
     event.recording = self
     self._events[str(event.uri)] = event
 
-  def new_event(self, uri, etype, **kwds):
-  #---------------------------------------
-    evt = Event(uri, etype, **kwds)
+  def new_event(self, uri, etype, at, duration=None, **kwds):
+  #----------------------------------------------------------
+    evt = Event(uri, etype, self.interval(at, duration), **kwds)
     self.add_event(evt)
     return evt
 
@@ -338,11 +341,12 @@ class Annotation(core.AbstractObject):
   '''
   metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation`
 
-  attributes = [ 'about', 'comment', 'tags', 'creator', 'created' ]
+  attributes = [ 'about', 'comment', 'tags', 'time', 'creator', 'created' ]
 
   mapping = { 'about':   PropertyMap(DCTERMS.subject, to_rdf=mapping.get_uri),
               'comment': PropertyMap(RDFS.comment),
               'tags':    PropertyMap(BSML.tag),
+              'time':    PropertyMap(BSML.time),
               'creator': PropertyMap(DCTERMS.creator, to_rdf=mapping.get_uri),
               'created': PropertyMap(DCTERMS.created, XSD.dateTime,
                                      utils.datetime_to_isoformat,
@@ -350,31 +354,24 @@ class Annotation(core.AbstractObject):
             }
 
 
-  def __init__(self, uri, about=None, text=None, tags=None, creator=None, set_time=True, **kwds):
-  #----------------------------------------------------------------------------------------------
-    created = kwds.pop('created', utils.utctime()) if set_time else None
+  def __init__(self, uri, about=None, comment=None, tags=None, time=None, creator=None, timestamp=True, **kwds):
+  #-------------------------------------------------------------------------------------------------------------
+    if time is not None: assert(time.end >= time.start)   ###
+    created = kwds.pop('created', utils.utctime()) if timestamp else None
     label = kwds.get('label', '')
-    core.AbstractObject.__init__(self, uri, about=about, comment=text, creator=creator, created=created, **kwds)
+    core.AbstractObject.__init__(self, uri, about=about, comment=comment, time=time,
+      creator=creator, created=created, **kwds)
     self.tags = tags if tags else []
-    self._time = None
 
   @classmethod
-  def Note(cls, uri, about, text, **kwds):
-  #---------------------------------------
-    return cls(uri, about, text=text, **kwds)
+  def Note(cls, uri, about, text, time=None, **kwds):
+  #--------------------------------------------------
+    return cls(uri, about, comment=text, time=time, **kwds)
 
   @classmethod
-  def Tag(cls, uri, about, tag, **kwds):
-  #-------------------------------------
-    return cls(uri, about, tags=[tag], **kwds)
-
-  @classmethod
-  def Event(cls, uri, about, time, **kwds):
-  #----------------------------------------
-    assert(time.end >= time.start)
-    self = cls(uri, '%s#t=%g,%g' % (about.uri, time.start, time.end), **kwds)
-    self._time = time
-    return self
+  def Tag(cls, uri, about, tag, time=None, **kwds):
+  #------------------------------------------------
+    return cls(uri, about, tags=[tag], time=time, **kwds)
 
   def tag(self, tag):
   #------------------
@@ -391,24 +388,12 @@ class Annotation(core.AbstractObject):
     :type graph: :class:`~biosignalml.rdf.Graph`
     :rtype: :class:`Annotation`
     '''
-    self = cls(uri, set_time=False, **kwds)
+    from biosignalml.timeline import TemporalEntity  # Prevent a circular import
+    self = cls(uri, timestamp=False, **kwds)
     self.load_from_graph(graph)
-    mtag = str(self.about).rfind('#t=')
-    if mtag >= 0:
-      from biosignalml.timeline import Instant, Interval
-      try:
-        times = re.match('(.*?)(,(.*))?$', str(self.about)[mtag+3:]).groups()
-        start = float(times[0]) if times[0] else 0.0
-        end = float(times[2])
-        self._time = Instant(None, start) if start == end else Interval(None, start, end=end)
-      except ValueError:
-        pass
+    if self.time is not None:
+      self.time = TemporalEntity.create_from_graph(self.time, graph)
     return self
-
-  @property
-  def time(self):
-  #--------------
-    return self._time
 
 
 if __name__ == '__main__':
@@ -433,17 +418,20 @@ if __name__ == '__main__':
 #      print_dict(copy.about)
 #    print instance.metadata_as_string(rdf.Format.TURTLE)
 #    print copy.metadata_as_string(rdf.Format.TURTLE)
-    assert(instance.metadata_as_string(rdf.Format.TURTLE) == copy.metadata_as_string(rdf.Format.TURTLE))
+    if instance.metadata_as_string(rdf.Format.TURTLE) != copy.metadata_as_string(rdf.Format.TURTLE):
+      print "INPUT:", instance.metadata_as_string(rdf.Format.TURTLE)
+      print "RESULT:", copy.metadata_as_string(rdf.Format.TURTLE)
+      raise AssertionError
     return copy
 
 
-#  r1 = Recording('http://example.org/recording', duration='1806')
+  r1 = Recording('http://example.org/recording', duration='1806')
+#  r1 = 'http://example.org/rec1'
 #  print r1.metadata_as_string(rdf.Format.TURTLE)
 
 #  a1 = Annotation.Note('http://example.org/ann1', r1, 'comment', creator='dave')
-#  e1 = Annotation.Event('http://example.org/event', r1, r1.interval(1, 0.5),
-#     creator='dave', text='event text')
-  r1 = 'http://example.org/rec1'
+  e1 = Annotation.Note('http://example.org/event', r1, 'event', r1.interval(1, 0.5),
+     creator='dave')
   t1 = Annotation.Tag('http://example.org/tag1', r1, 'tag')
 #  print t1.metadata_as_string(rdf.Format.TURTLE)
 #  for t in t1.tags: print (str(t))
@@ -452,17 +440,15 @@ if __name__ == '__main__':
 #  a2 = check(a1)
 #  print a2.metadata_as_string(rdf.Format.TURTLE)
 
-#  e2 = check(e1)
-#  print e2.metadata_as_string(rdf.Format.TURTLE)
+  e2 = check(e1)
+  print e2.metadata_as_string(rdf.Format.TURTLE)
 
 #  assert(e2.time == e1.time)
 
+#  t2 = check(t1)
+#  print t2.metadata_as_string(rdf.Format.TURTLE)
+#  for t in t2.tags: print (str(t))
 
-  t2 = check(t1)
-  print t2.metadata_as_string(rdf.Format.TURTLE)
-
-  for t in t2.tags: print (str(t))
-
-#  ev1 = r1.new_event('http://ex.org/evt1', a1, time=32.3)
-  #print ev1.metadata_as_string(rdf.Format.TURTLE)
+  ev1 = r1.new_event('http://ex.org/evt1', 'etype', 32.3, 10)
+  print ev1.metadata_as_string(rdf.Format.TURTLE)
 

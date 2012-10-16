@@ -24,7 +24,8 @@ RelativeTimeLine, Instant and Interval objects.
 ######################################################
 
 
-from biosignalml.rdf import TL, XSD
+import biosignalml.rdf as rdf
+from biosignalml.rdf import RDF, RDFS, DCTERMS, XSD, TL
 
 import biosignalml.utils as utils
 import biosignalml.model as model
@@ -52,10 +53,22 @@ class RelativeTimeLine(model.core.AbstractObject):
 
 
 
-from biosignalml.rdf import RDF, RDFS, DCTERMS, XSD
+class TemporalEntity(model.core.AbstractObject):  # Declare forward
+#===============================================
+  '''
+  An abstract Temporal Entity.
 
-class Interval(model.core.AbstractObject):
-#=========================================
+  The superclass of Intervals and Instants.
+  '''
+  attributes = [ 'timeline', 'start' ]
+
+  mapping = { 'timeline': PropertyMap(TL.timeline,
+                                      to_rdf=mapping.get_uri,
+                                      from_rdf=RelativeTimeLine) }
+
+
+class Interval(TemporalEntity):
+#==============================
   '''
   An abstract BioSignalML Interval.
 
@@ -64,36 +77,32 @@ class Interval(model.core.AbstractObject):
 
   metaclass = TL.RelativeInterval  #: :attr:`.TL.RelativeInterval`
 
-  attributes = [ 'timeline', 'start', 'duration' ]
+  attributes = [ 'duration' ]
 
-  mapping = { 'timeline': PropertyMap(TL.timeline,
-                                      to_rdf=mapping.get_uri,
-                                      from_rdf=RelativeTimeLine),
-              'start':    PropertyMap(TL.beginsAtDuration, XSD.dayTimeDuration,
+  mapping = { 'start':    PropertyMap(TL.start, XSD.dayTimeDuration,
                                       utils.seconds_to_isoduration,
                                       utils.isoduration_to_seconds),
-              'duration': PropertyMap(TL.durationXSD, XSD.dayTimeDuration,
+              'duration': PropertyMap(TL.duration, XSD.dayTimeDuration,
                                       utils.seconds_to_isoduration,
                                       utils.isoduration_to_seconds) }
 
   def __init__(self, uri, start, duration=None, timeline=None, end=None, **kwds):
   #------------------------------------------------------------------------------
     assert(end is None or start <= end)
-    model.core.AbstractObject.__init__(self, uri, start=start,
-                                       duration=duration if end is None else (end-start),
-                                       timeline=timeline,
-                                       **kwds)
+    super(Interval, self).__init__(uri, start=start,
+                                   duration=duration if end is None else (end-start),
+                                   timeline=timeline,
+                                   **kwds)
 
   @property
   def end(self, timeline=None):     # Needs to use timeline to map
   #----------------------------
     '''Get the end of the interval.'''
-    return self.start + (self.duration if self.duration is not None else 0)
+    return self.start + (self.duration if self.duration is not None else None)
 
   def __add__(self, increment):
   #----------------------------
     return Interval(self.make_uri(True), self.start + increment, self.duration, self.timeline)
-
 
   def __eq__(self, interval):
   #--------------------------
@@ -107,26 +116,21 @@ class Interval(model.core.AbstractObject):
     return 'Interval: %g for %g' % (self.start, self.duration)
 
 
-class Instant(model.core.AbstractObject):
-#========================================
+class Instant(TemporalEntity):
+#=============================
   '''
   An abstract BioSignalML Instant.
   '''
 
   metaclass = TL.RelativeInstant   #: :attr:`.TL.RelativeInstant`
 
-  attributes = [ 'timeline', 'start' ]
-
-  mapping = { 'timeline': PropertyMap(TL.timeline,
-                                      to_rdf=mapping.get_uri,
-                                      from_rdf=RelativeTimeLine),
-              'start':    PropertyMap(TL.atDuration, XSD.dayTimeDuration,
-                                      utils.seconds_to_isoduration,
-                                      utils.isoduration_to_seconds) }
+  mapping = { 'start': PropertyMap(TL.at, XSD.dayTimeDuration,
+                                   utils.seconds_to_isoduration,
+                                   utils.isoduration_to_seconds) }
 
   def __init__(self, uri, when, timeline=None, **kwds):
   #----------------------------------------------------
-    model.core.AbstractObject.__init__(self, uri, start=when, timeline=timeline, **kwds)
+    super(Instant, self).__init__(uri, start=when, timeline=timeline, **kwds)
     self.duration = 0
     self.end = self.start
 
@@ -143,3 +147,23 @@ class Instant(model.core.AbstractObject):
   #-----------------
     return 'Instant: %g' % self.start
 
+
+class TemporalEntity(model.core.AbstractObject):
+#===============================================
+
+  @classmethod
+  def create_from_graph(cls, uri, graph, **kwds):
+  #----------------------------------------------
+    """
+    We can't call the 'create_from_graph()' for the appropriate
+    class as leads to recursion...
+    """
+    self = None
+    if   graph.contains(rdf.Statement(uri, RDF.type, Interval.metaclass)):
+      self = Interval(uri, None, **kwds)
+    elif graph.contains(rdf.Statement(uri, RDF.type, Instant.metaclass)):
+      self = Instant(uri, None, **kwds)
+    if self is not None:
+      self.load_from_graph(graph)
+      self.graph = graph
+    return self
