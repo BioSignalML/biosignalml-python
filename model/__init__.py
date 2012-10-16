@@ -414,6 +414,8 @@ class Annotation(core.AbstractObject):
 if __name__ == '__main__':
 #=========================
 
+  logging.getLogger().setLevel('DEBUG')
+
   def print_dict(r):
   #-----------------
     print '{'
@@ -424,6 +426,7 @@ if __name__ == '__main__':
   #-------------------
     g = rdf.Graph()
     instance.save_to_graph(g)
+#    print g.serialise(format=rdf.Format.TURTLE)
     copy = instance.__class__.create_from_graph(instance.uri, g)
 #    if isinstance(instance, Event):
 #      print_dict(instance.about)
@@ -434,23 +437,32 @@ if __name__ == '__main__':
     return copy
 
 
-  r1 = Recording('http://example.org/recording', duration='1806')
+#  r1 = Recording('http://example.org/recording', duration='1806')
 #  print r1.metadata_as_string(rdf.Format.TURTLE)
 
-  a1 = Annotation.Note('http://example.org/ann1', r1, 'comment', creator='dave')
-  e1 = Annotation.Event('http://example.org/event', r1, r1.interval(1, 0.5),
-     creator='dave', text='event text')
-#  print e1.metadata_as_string(rdf.Format.TURTLE)
+#  a1 = Annotation.Note('http://example.org/ann1', r1, 'comment', creator='dave')
+#  e1 = Annotation.Event('http://example.org/event', r1, r1.interval(1, 0.5),
+#     creator='dave', text='event text')
+  r1 = 'http://example.org/rec1'
+  t1 = Annotation.Tag('http://example.org/tag1', r1, 'tag')
+#  print t1.metadata_as_string(rdf.Format.TURTLE)
+#  for t in t1.tags: print (str(t))
 
-  r2 = check(r1)
-  a2 = check(a1)
+#  r2 = check(r1)
+#  a2 = check(a1)
 #  print a2.metadata_as_string(rdf.Format.TURTLE)
 
-  e2 = check(e1)
-  print e2.metadata_as_string(rdf.Format.TURTLE)
+#  e2 = check(e1)
+#  print e2.metadata_as_string(rdf.Format.TURTLE)
 
-  assert(e2.time == e1.time)
+#  assert(e2.time == e1.time)
 
-  ev1 = r1.new_event('http://ex.org/evt1', a1, time=32.3)
-  print ev1.metadata_as_string(rdf.Format.TURTLE)
+
+  t2 = check(t1)
+  print t2.metadata_as_string(rdf.Format.TURTLE)
+
+  for t in t2.tags: print (str(t))
+
+#  ev1 = r1.new_event('http://ex.org/evt1', a1, time=32.3)
+  #print ev1.metadata_as_string(rdf.Format.TURTLE)
 
