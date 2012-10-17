@@ -441,7 +441,7 @@ if __name__ == '__main__':
 #  print a2.metadata_as_string(rdf.Format.TURTLE)
 
   e2 = check(e1)
-  print e2.metadata_as_string(rdf.Format.TURTLE)
+#  print e2.metadata_as_string(rdf.Format.TURTLE)
 
 #  assert(e2.time == e1.time)
 
@@ -449,6 +449,12 @@ if __name__ == '__main__':
 #  print t2.metadata_as_string(rdf.Format.TURTLE)
 #  for t in t2.tags: print (str(t))
 
-  ev1 = r1.new_event('http://ex.org/evt1', 'etype', 32.3, 10)
-  print ev1.metadata_as_string(rdf.Format.TURTLE)
+  ev1 = r1.new_event('http://ex.org/evt1', 'etype', 32.0, 10)
+#  print ev1.metadata_as_string(rdf.Format.TURTLE)
+  ev2 = check(ev1)
+
+  ev1 = r1.new_event('http://ex.org/evt1', 'etype', 32.0)
+#  print ev1.metadata_as_string(rdf.Format.TURTLE)
+  ev2 = check(ev1)
+
 
