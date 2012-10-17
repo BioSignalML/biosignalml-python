@@ -251,9 +251,9 @@ class Recording(core.AbstractObject):
     event.recording = self
     self._events[str(event.uri)] = event
 
-  def new_event(self, uri, etype, at, duration=None, **kwds):
-  #----------------------------------------------------------
-    evt = Event(uri, etype, self.interval(at, duration), **kwds)
+  def new_event(self, uri, etype, at, duration=None, end=None, **kwds):
+  #--------------------------------------------------------------------
+    evt = Event(uri, etype, self.interval(at, duration, end), **kwds)
     self.add_event(evt)
     return evt
 
