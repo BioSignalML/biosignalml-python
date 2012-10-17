@@ -453,6 +453,15 @@ class Graph(librdf.Model):
     '''
     for s in statements: self.append(s)
 
+  def append_graph(self, graph):
+  #-----------------------------
+    '''
+    Add statements from anothe graph to this graph.
+
+    :param graph: A :class:`Graph` containing statements.
+    '''
+    for s in graph: self.append(s)
+
   def contains(self, statement):
   #-----------------------------
     '''
