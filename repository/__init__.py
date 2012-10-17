@@ -64,7 +64,7 @@ class BSMLStore(GraphStore):
 
   def add_recording_graph(self, uri, rdf, creator, format=Format.RDFXML):
   #----------------------------------------------------------------------
-    self.add_resource_graph(uri, BSML.Recording, rdf, creator, format=format)
+    return self.add_resource_graph(uri, BSML.Recording, rdf, creator, format=format)
 
 
   def get_recording_and_graph_uri(self, uri):

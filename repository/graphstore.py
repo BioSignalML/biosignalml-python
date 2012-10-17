@@ -100,6 +100,7 @@ class GraphStore(object):
                              completed=utils.utctime() ))
     self._sparqlstore.extend_graph(self._provenance_uri, prov.metadata_as_graph().serialise())
     self._sparqlstore.replace_graph(graph_uri, rdf, format=format)
+    return graph_uri
 
 
   def get_resources(self, rtype, rvars='?r', condition='', prefixes=None, graph=None):
