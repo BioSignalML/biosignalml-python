@@ -188,7 +188,10 @@ class BSMLStore(GraphStore):
     # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Event, graph_uri)
-    return Event.create_from_graph(uri, graph, eventtype=None)  # eventtype set from graph...
+    for tm in graph.get_objects(uri, BSML.time):  ## This could be improved...
+      graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Instant, graph_uri))
+      graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Interval, graph_uri))
+    return Event.create_from_graph(uri, graph)
 
   def events(self, rec_uri, eventtype=None, timetype=None, graph_uri=None):
   #------------------------------------------------------------------------
@@ -242,6 +245,9 @@ class BSMLStore(GraphStore):
     # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Annotation, graph_uri)
+    for tm in graph.get_objects(uri, BSML.time):  ## This could be improved...
+      graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Instant, graph_uri))
+      graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Interval, graph_uri))
     return Annotation.create_from_graph(uri, graph)
 
 #  def get_annotation_by_content(self, uri, graph_uri=None):
