@@ -190,8 +190,8 @@ class BSMLStore(GraphStore):
     graph = self.get_resource_as_graph(uri, BSML.Event, graph_uri)
     return Event.create_from_graph(uri, graph, eventtype=None)  # eventtype set from graph...
 
-  def events(self, rec_uri, eventtype=None, graph_uri=None):
-  #---------------------------------------------------------
+  def events(self, rec_uri, eventtype=None, timetype=None, graph_uri=None):
+  #------------------------------------------------------------------------
     '''
     Return a list of all Events associated with a recording.
 
@@ -206,6 +206,8 @@ class BSMLStore(GraphStore):
     else:
       condition = ('?r bsml:recording <%s> . ?r bsml:eventType <%s>'
                                   % (rec_uri, eventtype))
+    if timetype is not None:
+      condition += ' . ?r bsml:time ?tm . ?tm a <%s>' % timetype
     return [ r[1]
       for r in self.get_resources(BSML.Event, rvars='?r', condition=condition,
         prefixes=dict(bsml=BSML.prefix), graph=graph_uri)
