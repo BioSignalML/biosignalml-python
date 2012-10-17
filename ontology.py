@@ -75,6 +75,9 @@ Several signals may use the same clock.'''
 
 Measurement units would normally be entities in a specialised units of measure ontology.'''
 
+  Instant        = Resource(NS.Instant)    ## owl:sameAS tl:relativeInstant
+  Interval       = Resource(NS.Interval)   ## owl:sameAS tl:relativeInterval
+
 # owl:DatatypeProperty resources:
   dataBits       = Resource(NS.dataBits)
   '''The binary-bit resolution of the analogue-to-digital convertor or

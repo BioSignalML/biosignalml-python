@@ -24,6 +24,8 @@ RelativeTimeLine, Instant and Interval objects.
 ######################################################
 
 
+from biosignalml import BSML
+
 import biosignalml.rdf as rdf
 from biosignalml.rdf import RDF, RDFS, DCTERMS, XSD, TL
 
@@ -75,7 +77,7 @@ class Interval(TemporalEntity):
   We assume intervals are topologically semi-open -- ``end`` is just outside.
   '''
 
-  metaclass = TL.RelativeInterval  #: :attr:`.TL.RelativeInterval`
+  metaclass = BSML.Interval #: :attr:`.BSML.Interval` owl:sameAs tl:RelativeInterval
 
   attributes = [ 'duration' ]
 
@@ -122,7 +124,7 @@ class Instant(TemporalEntity):
   An abstract BioSignalML Instant.
   '''
 
-  metaclass = TL.RelativeInstant   #: :attr:`.TL.RelativeInstant`
+  metaclass = BSML.Instant  #: :attr:`.BSML.Instant` owl:sameAs tl:RelativeInstant
 
   mapping = { 'start': PropertyMap(TL.at, XSD.dayTimeDuration,
                                    utils.seconds_to_isoduration,
