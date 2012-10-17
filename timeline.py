@@ -133,7 +133,7 @@ class Instant(TemporalEntity):
   def __init__(self, uri, when, timeline=None, **kwds):
   #----------------------------------------------------
     super(Instant, self).__init__(uri, start=when, timeline=timeline, **kwds)
-    self.duration = 0
+    self.duration = None
     self.end = self.start
 
   def __add__(self, increment):
