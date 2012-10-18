@@ -216,18 +216,20 @@ class BSMLStore(GraphStore):
         prefixes=dict(bsml=BSML.prefix), graph=graph_uri)
       ]
 
-  def eventtypes(self, rec_uri, graph_uri=None):
-  #---------------------------------------------
+  def eventtypes(self, rec_uri, counts=False, graph_uri=None):
+  #-----------------------------------------------------------
     '''
     Return a list of all types of Events associated with a recording.
 
     :param uri: The URI of the recording.
+    :param counts: Optionally return a count of each type of event.
     :param graph_uri: An optional URI of the graph to query.
-    :rtype: list of bsml:Event URIs
+    :rtype: list of bsml:Event URIs if no counts, otherwise tuple(URI, count).
     '''
-    return [ r[1]
-      for r in self.get_resources(BSML.Event, rvars='?et',
+    return [ tuple(r[1:3]) if counts else r[1]
+      for r in self.get_resources(BSML.Event, rvars='?et count(?et) as ?count',
         condition = '?r bsml:recording <%s> . ?r bsml:eventType ?et' % rec_uri,
+        group = '?et',
         prefixes = dict(bsml=BSML.prefix),
         graph = graph_uri
         ) ]
