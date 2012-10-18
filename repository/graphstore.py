@@ -103,8 +103,8 @@ class GraphStore(object):
     return graph_uri
 
 
-  def get_resources(self, rtype, rvars='?r', condition='', prefixes=None, graph=None):
-  #-----------------------------------------------------------------------------------
+  def get_resources(self, rtype, rvars='?r', condition='', group=None, prefixes=None, graph=None):
+  #-----------------------------------------------------------------------------------------------
     """
     Find resources of the given type and the most recent graphs that
     hold them.
@@ -117,6 +117,7 @@ class GraphStore(object):
        in the query along with any other variables to return values of. The first variable
        is usually that of the resource. Optional, defaults to `?r`.
     :param condition (str): A SPARQL graph pattern for selecting resources. Optional.
+    :param group (str): Variables to group the results by. Optional.
     :param prefixes (dict): Optional namespace prefixes for the SPARQL query.
     :param graph: The URI of a specific graph to search in, instead of finding
        the most recent. Optional.
@@ -125,11 +126,12 @@ class GraphStore(object):
     """
     pfxdict = dict(bsml=BSML.prefix, prv=PRV.prefix)
     if prefixes: pfxdict.update(prefixes)
-    variables = [ var[1:] for var in rvars.split() ]
+    varlist = [ var for var in rvars.split() if var[0] == '?' ]
+    retvars = [ var[1:] for var in varlist ]
     NOVALUE = { 'value': None }  # For optional result variables
     if graph is None:
-      return [ (Uri(r['g']['value']), Uri(r[variables[0]]['value']))
-                + tuple([r.get(v, NOVALUE)['value'] for v in variables[1:]])
+      return [ (Uri(r['g']['value']), Uri(r[retvars[0]]['value']))
+                + tuple([r.get(v, NOVALUE)['value'] for v in retvars[1:]])
         for r in self._sparqlstore.select('?g %(rvars)s',
           '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
              graph ?g { ?r a <%(rtype)s> . %(cond)s }''',
@@ -137,18 +139,19 @@ class GraphStore(object):
                       rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           distinct=True,
-          order='?g %s' % rvars)
+          group=group,
+          order='?g %s' % ' '.join(varlist))
         ]
     else:
-      return [ (Uri(graph), Uri(r[variables[0]]['value']))
-                + tuple([r.get(v, NOVALUE)['value'] for v in variables[1:]])
+      return [ (Uri(graph), Uri(r[retvars[0]]['value']))
+                + tuple([r.get(v, NOVALUE)['value'] for v in retvars[1:]])
         for r in self._sparqlstore.select('%(rvars)s',
           '?r a <%(rtype)s> . %(cond)s',
           params=dict(rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           distinct=True,
           graph=graph,
-          order=rvars)
+          order=' '.join(varlist))
         ]
 
 
