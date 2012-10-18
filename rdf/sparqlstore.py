@@ -89,8 +89,8 @@ class SparqlStore(object):
                                  Format.JSON, prefixes)
                                 )['boolean']
 
-  def select(self, fields, where, params=None, graph=None, distinct=False, order=None, limit=None, prefixes=None):
-  #---------------------------------------------------------------------------------------------------------------
+  def select(self, fields, where, params=None, graph=None, distinct=False, group=None, order=None, limit=None, prefixes=None):
+  #---------------------------------------------------------------------------------------------------------------------------
     '''
     Get all items from a graph or repository.
 
@@ -100,8 +100,9 @@ class SparqlStore(object):
     :type where: str
     :param params: A dictionary of string format substitutions applied to the `where` argument.
     :param graph: The URI of an optional graph to query within.
-    :param order: The variable(s) to optional order the results.
     :param distinct: Ensure result sets are distinct.
+    :param group: The variable(s) to optional group the results by.
+    :param order: The variable(s) to optional order the results.
     :param limit: Optionally limit the number of result sets.
     :type limit: str
     :param prefixes: A dictionary of namespace prefixes to use in the SPARQL query
@@ -113,11 +114,12 @@ class SparqlStore(object):
     '''
     if params is None: params = {}
     return json.loads(self.query(
-              'select%(distinct)s %(fields)s where {\n %(graph)s {\n %(where)s }\n }%(order)s%(limit)s'
+              'select%(distinct)s %(fields)s where {\n %(graph)s {\n %(where)s }\n }%(group)s%(order)s%(limit)s'
                  % dict(distinct=' distinct' if distinct else '',
                         fields=fields % params,
                         graph=('graph <%s>' % graph) if graph else '',
                         where=where % params,
+                        group=(' group by %s' % group) if group else '',
                         order=(' order by %s' % order) if order else '',
                         limit=(' limit %s' % limit) if limit else ''),
                  Format.JSON, prefixes)
