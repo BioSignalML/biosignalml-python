@@ -232,7 +232,7 @@ if __name__ == '__main__':
 
   class MyRecording(Recording):
   #----------------------------
-    mapping = { 'xx': PropertyMap(rdf.DCTERMS.subject),
+    mapping = { 'xx': PropertyMap(rdf.DCT.subject),
                 'yy': PropertyMap('http://example.org/onto#subject'),
                 'zz': PropertyMap('http://example.org/onto#annotation'),
      }

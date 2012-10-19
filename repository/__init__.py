@@ -14,7 +14,7 @@ import biosignalml.formats
 
 from biosignalml import BSML, Recording, Signal, Event, Annotation
 
-from biosignalml.rdf import DCTERMS, PRV
+from biosignalml.rdf import DCT, PRV
 from biosignalml.rdf import Format
 
 from graphstore import GraphStore
@@ -94,7 +94,7 @@ class BSMLStore(GraphStore):
     #logging.debug('Graph: %s', graph_uri)
     if graph_uri is not None:
       rclass = biosignalml.formats.CLASSES.get(
-                 str(self.get_objects(rec_uri, DCTERMS.format, graph=graph_uri)[0]),
+                 str(self.get_objects(rec_uri, DCT.format, graph=graph_uri)[0]),
                  Recording)
       graph = self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)
       rec = rclass.create_from_graph(rec_uri, graph, signals=False)
@@ -280,6 +280,6 @@ class BSMLStore(GraphStore):
       for r in self.get_resources(BSML.Annotation, rvars='?r',
         condition='''?r dct:subject ?s . filter(regex(str(?s), "^%s(#.*)?$", "i")) .
               minus { [] prv:preceededBy ?r }''' % uri,
-        prefixes = dict(dct=DCTERMS.prefix, prv=PRV.prefix),
+        prefixes = dict(dct=DCT.prefix, prv=PRV.prefix),
         graph = graph_uri
         ) ]

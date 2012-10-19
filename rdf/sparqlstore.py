@@ -294,14 +294,14 @@ def FourStore(SparqlStore):
     self.extend_graph('system:config',
      """@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
         @prefix dc:   <http://purl.org/dc/elements/1.1/> .
-        @prefix dcterms: <http://purl.org/dc/terms/> .
+        @prefix dct: <http://purl.org/dc/terms/> .
         @prefix text: <http://4store.org/fulltext#> .
         @prefix cnt: <http://www.w3.org/2011/content#> .
 
         rdfs:label      text:index text:stem .
         rdfs:comment    text:index text:stem .
         dc:description  text:index text:stem .
-        dcterms:description text:index text:stem .
+        dct:description text:index text:stem .
         cnt:chars       text:index text:stem .""")
 
 

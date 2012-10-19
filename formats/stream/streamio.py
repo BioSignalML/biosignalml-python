@@ -18,7 +18,7 @@ import math
 from time import sleep
 
 
-from biosignalml.rdf  import RDF, DCTERMS, Graph, Uri
+from biosignalml.rdf  import RDF, DCT, Graph, Uri
 from biosignalml      import BSML, Recording
 from biosignalml.data import TimeSeries
 
@@ -71,7 +71,7 @@ class Stream(object):
     ## logging.debug('INFO: %s', self._info.serialise('turtle'))  ?????
     if self.uri == None:
       self.uri = self._infoGraph.get_property(Uri('stream'), BSML.recording).uri
-      self._rdfFormat = self._infoGraph.get_literal_string(Uri('stream/metadata'), DCTERMS.format)
+      self._rdfFormat = self._infoGraph.get_literal_string(Uri('stream/metadata'), DCT.format)
       ## ****** Does having a sigcount make sense, as number of signals
       ## ****** can change...
       #?? self._sigcount = self._infoGraph.get_literal_integer(Uri('stream'), BSML.signalcount)
@@ -443,16 +443,16 @@ class StreamSink(Stream):
   #-----------------------------------------------------------------
     Stream.__init__(self, recordingURI)
     self._blocksink = blockio.BlockSink(sink)
-    ##self._infoGraph.append((Uri('/stream'),   DCTERMS.version, '1.0')) ## ????????????
+    ##self._infoGraph.append((Uri('/stream'),   DCT.version, '1.0')) ## ????????????
     self._infoGraph.append((Uri('stream'),   RDF.type,       BSML.SignalStream))
     self._infoGraph.append((Uri('stream'),   BSML.recording, Uri(recordingURI)))
-    self._infoGraph.append((Uri('stream/metadata'), DCTERMS.format,     self._rdfFormat))
+    self._infoGraph.append((Uri('stream/metadata'), DCT.format,     self._rdfFormat))
 ##?     self._infoGraph.append_integer((Uri('stream'), BSML.signalcount, len(signalURIs)))
 
     #info = ['@prefix xsd: <http://www.w3.org/2001/XMLSchema-datatypes#> .',
     #        '<#stream> a <%s> .'      % (str(BSML.SignalStream.uri)),
     #        '<#stream> <%s> <%s> .'   % (str(BSML.recording.uri), str()),
-    #        '<#metadata> <%s> "%s" .' % (str(DCTERMS.format.uri), self._rdfFormat),
+    #        '<#metadata> <%s> "%s" .' % (str(DCT.format.uri), self._rdfFormat),
     #        '<#stream> <%s> "%d"^^xsd:int .' % (str(BSML.signalcount.uri), len(signalURIs)),
     #       ]
 ## Does sending signal count and signal URIs make sense, given the

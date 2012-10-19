@@ -27,7 +27,7 @@ import logging
 
 import biosignalml.rdf as rdf
 from biosignalml import BSML
-from biosignalml.rdf import RDFS, DCTERMS, PRV
+from biosignalml.rdf import RDFS, DCT, PRV
 from mapping import Mapping, PropertyMap
 
 
@@ -57,7 +57,7 @@ class AbstractObject(object):
 
   mapping = { 'label':       PropertyMap(RDFS.label),
               'comment':     PropertyMap(RDFS.comment),
-              'description': PropertyMap(DCTERMS.description),
+              'description': PropertyMap(DCT.description),
               'preceededBy': PropertyMap(PRV.preceededBy),
             }
 

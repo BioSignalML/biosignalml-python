@@ -27,7 +27,7 @@ RelativeTimeLine, Instant and Interval objects.
 from biosignalml import BSML
 
 import biosignalml.rdf as rdf
-from biosignalml.rdf import RDF, RDFS, DCTERMS, XSD, TL
+from biosignalml.rdf import RDF, RDFS, DCT, XSD, TL
 
 import biosignalml.utils as utils
 import biosignalml.model as model

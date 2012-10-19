@@ -144,11 +144,11 @@ class HypnogramFile(MinervaFile):
     return sleeplist
 
 
-#      ann.setProperty(DCTERMS.source, new File(file).toURI())
-#      ann.setProperty(DCTERMS.creator, "%s Version: %d".format(creator_name, creator_version))
-#      ann.setProperty(DCTERMS.created, study_date)
+#      ann.setProperty(DCT.source, new File(file).toURI())
+#      ann.setProperty(DCT.creator, "%s Version: %d".format(creator_name, creator_version))
+#      ann.setProperty(DCT.created, study_date)
 #      ann.setProperty(TL.beginsAtDateTime, Time.getCalendarDateTime(starttime, 0))
-#      ann.setProperty(DCTERMS.description, "Study: " + study_id)
+#      ann.setProperty(DCT.description, "Study: " + study_id)
 
 #    for (evt <- eventset.events) {
 #      val signal = recording.getSignal(evt.channel.toString)

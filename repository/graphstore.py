@@ -17,7 +17,7 @@ import biosignalml.model as model
 from biosignalml.model.mapping import PropertyMap
 from biosignalml.utils import xmlescape
 
-from biosignalml.rdf import RDF, DCTERMS, PRV, XSD
+from biosignalml.rdf import RDF, DCT, PRV, XSD
 from biosignalml.rdf import Uri, Node, Resource, BlankNode, Graph, Statement
 from biosignalml.rdf import Format
 
@@ -32,7 +32,7 @@ class DataItem(model.core.AbstractObject):
   metaclass = PRV.DataItem
   attributes = [ 'type', 'createdby', 'subject', 'precededby' ]
   mapping = { 'createdby':  PropertyMap(PRV.createdBy),
-              'subject':    PropertyMap(DCTERMS.subject),
+              'subject':    PropertyMap(DCT.subject),
               'precededby': PropertyMap(PRV.precededBy),
               'type':       PropertyMap(RDF.type) }
 
@@ -81,8 +81,8 @@ class GraphStore(object):
 
 #  def delete_graph(self, graph):
   #-----------------------------
-    ## 'DCTERMS.dateRemoved' is not a DCTERMS Terms property...
-    ## self.append(Statement(graph, DCTERMS.dateRemoved, datetime_to_isoformat(utctime()) ))
+    ## 'DCT.dateRemoved' is not a DCT Terms property...
+    ## self.append(Statement(graph, DCT.dateRemoved, datetime_to_isoformat(utctime()) ))
     ## ANd need to update the store...
 #    self._sparqlstore.delete_graph(graph)
     ## Follow graph with another DataItem that is not of 'graphtype'
@@ -193,7 +193,7 @@ class GraphStore(object):
 
   def replace_graph(self, uri, rdf, format=Format.RDFXML):
   #-------------------------------------------------------
-    #### graph.append(Statement(graph.uri, DCTERMS._provenance, self._provenance.add(graph.uri)))
+    #### graph.append(Statement(graph.uri, DCT._provenance, self._provenance.add(graph.uri)))
 
     # If graph already present then rename (to new uuid()) and add
     # provenance...

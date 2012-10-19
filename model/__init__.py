@@ -31,7 +31,7 @@ import re
 import biosignalml.utils as utils
 import biosignalml.rdf as rdf
 from biosignalml.ontology import BSML
-from biosignalml.rdf import XSD, RDF, RDFS, DCTERMS, TL
+from biosignalml.rdf import XSD, RDF, RDFS, DCT, TL
 
 import mapping
 from mapping import PropertyMap
@@ -82,7 +82,7 @@ class Signal(core.AbstractObject):
               'offset':       PropertyMap(BSML.offset, XSD.dayTimeDuration,
                                           utils.seconds_to_isoduration,
                                           utils.isoduration_to_seconds),
-              'duration':     PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
+              'duration':     PropertyMap(DCT.extent, XSD.dayTimeDuration,
                                           utils.seconds_to_isoduration,
                                           utils.isoduration_to_seconds),
             }
@@ -150,14 +150,14 @@ class Recording(core.AbstractObject):
                ]
   '''Generic attributes of a Recording.'''
 
-  mapping = { 'format':        PropertyMap(DCTERMS.format),
+  mapping = { 'format':        PropertyMap(DCT.format),
               'dataset':       PropertyMap(BSML.dataset),
-              'source':        PropertyMap(DCTERMS.source),
-              'investigation': PropertyMap(DCTERMS.subject),
-              'starttime':     PropertyMap(DCTERMS.created, XSD.dateTime,
+              'source':        PropertyMap(DCT.source),
+              'investigation': PropertyMap(DCT.subject),
+              'starttime':     PropertyMap(DCT.created, XSD.dateTime,
                                            utils.datetime_to_isoformat,
                                            utils.isoformat_to_datetime),
-              'duration':      PropertyMap(DCTERMS.extent, XSD.dayTimeDuration,
+              'duration':      PropertyMap(DCT.extent, XSD.dayTimeDuration,
                                            utils.seconds_to_isoduration,
                                            utils.isoduration_to_seconds),
 ##            'digest':        PropertyMap(BSML.digest),
@@ -325,8 +325,8 @@ class Annotation(core.AbstractObject):
       bsml:about <target> ;
       rdfs:comment "a comment" ;        # Optional if there are tags
       bsml:tag <a/semantic/tag> ;       # Zero or more
-      dcterms:creator <someone> ;
-      dcterms:created "2012-09-29T09:30:23Z"^^xsd:dateTime ;
+      dct:creator <someone> ;
+      dct:created "2012-09-29T09:30:23Z"^^xsd:dateTime ;
       .
 
   The <target> may refer to instant or interval on a recording or signal
@@ -343,12 +343,12 @@ class Annotation(core.AbstractObject):
 
   attributes = [ 'about', 'comment', 'tags', 'time', 'creator', 'created' ]
 
-  mapping = { 'about':   PropertyMap(DCTERMS.subject, to_rdf=mapping.get_uri),
+  mapping = { 'about':   PropertyMap(DCT.subject, to_rdf=mapping.get_uri),
               'comment': PropertyMap(RDFS.comment),
               'tags':    PropertyMap(BSML.tag),
               'time':    PropertyMap(BSML.time),
-              'creator': PropertyMap(DCTERMS.creator, to_rdf=mapping.get_uri),
-              'created': PropertyMap(DCTERMS.created, XSD.dateTime,
+              'creator': PropertyMap(DCT.creator, to_rdf=mapping.get_uri),
+              'created': PropertyMap(DCT.created, XSD.dateTime,
                                      utils.datetime_to_isoformat,
                                      utils.isoformat_to_datetime),
             }
