@@ -89,8 +89,8 @@ class SparqlStore(object):
                                  Format.JSON, prefixes)
                                 )['boolean']
 
-  def select(self, fields, where, params=None, graph=None, distinct=False, group=None, order=None, limit=None, prefixes=None):
-  #---------------------------------------------------------------------------------------------------------------------------
+  def select(self, fields, where, params=None, graph=None, distinct=True, group=None, order=None, limit=None, prefixes=None):
+  #--------------------------------------------------------------------------------------------------------------------------
     '''
     Get all items from a graph or repository.
 
@@ -100,7 +100,7 @@ class SparqlStore(object):
     :type where: str
     :param params: A dictionary of string format substitutions applied to the `where` argument.
     :param graph: The URI of an optional graph to query within.
-    :param distinct: Ensure result sets are distinct.
+    :param distinct: Ensure result sets are distinct. Defaults to True.
     :param group: The variable(s) to optional group the results by.
     :param order: The variable(s) to optional order the results.
     :param limit: Optionally limit the number of result sets.
