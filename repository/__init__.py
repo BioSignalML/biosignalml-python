@@ -14,8 +14,8 @@ import biosignalml.formats
 
 from biosignalml import BSML, Recording, Signal, Event, Annotation
 
-from biosignalml.rdf import DCT, PRV
-from biosignalml.rdf import Format
+from biosignalml.rdf import DCT, PRV, Format
+import biosignalml.rdf.sparqlstore as sparqlstore
 
 from graphstore import GraphStore
 
@@ -114,10 +114,9 @@ class BSMLStore(GraphStore):
     """
     rec = self.get_recording(uri)
     if rec is not None:
-      for r in self._sparqlstore.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
-        params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix), distinct=True,
-        graph=rec.graph_uri, order='?s'):
-        sig_uri = r['s']['value']
+      for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
+          params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix), graph=rec.graph_uri, order='?s'):
+        sig_uri = sparqlstore.get_result_value(r, 's')
         sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph_uri)
         rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
         rec.initialise()    ## This will open files...
@@ -261,11 +260,10 @@ class BSMLStore(GraphStore):
 #    :rtype: :class:`~biosignalml.Annotation`
 #    '''
 #    if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
-#    for r in self._sparqlstore.select('?a', 'graph <%(g)s> { ?a a oa:Annotation . ?a oa:hasBody <%(u)s> }',
-#                                      params = dict(g=graph_uri, u=uri),
-#                                      prefixes = dict(oa = OA.prefix),
-#                                      ):
-#      return self.get_annotation(r['a']['value'], graph_uri)
+#    for r in self.select('?a', 'graph <%(g)s> { ?a a oa:Annotation . ?a oa:hasBody <%(u)s> }',
+#                         params = dict(g=graph_uri, u=uri),
+#                         prefixes = dict(oa = OA.prefix)):
+#      return self.get_annotation(sparqlstore.get_result_value(r, 'a'), graph_uri)
 
   def annotations(self, uri, graph_uri=None):
   #------------------------------------------

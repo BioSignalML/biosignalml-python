@@ -20,6 +20,7 @@ from biosignalml.utils import xmlescape
 from biosignalml.rdf import RDF, DCT, PRV, XSD
 from biosignalml.rdf import Uri, Node, Resource, BlankNode, Graph, Statement
 from biosignalml.rdf import Format
+import biosignalml.rdf.sparqlstore as sparqlstore
 
 import biosignalml.utils as utils
 
@@ -128,28 +129,24 @@ class GraphStore(object):
     if prefixes: pfxdict.update(prefixes)
     varlist = [ var for var in rvars.split() if var[0] == '?' ]
     retvars = [ var[1:] for var in varlist ]
+    gv = sparqlstore.get_result_value   ## Shorten code
     NOVALUE = { 'value': None }  # For optional result variables
     if graph is None:
-      return [ (Uri(r['g']['value']), Uri(r[retvars[0]]['value']))
-                + tuple([r.get(v, NOVALUE)['value'] for v in retvars[1:]])
-        for r in self._sparqlstore.select('?g %(rvars)s',
+      return [ (gv(r, 'g'), gv(r, retvars[0])) + tuple([gv(r, v) for v in retvars[1:]])
+        for r in self.select('?g %(rvars)s',
           '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
              graph ?g { ?r a <%(rtype)s> . %(cond)s }''',
           params=dict(pgraph=self._provenance_uri, gtype=self._graphtype,
                       rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
-          distinct=True,
           group=group,
           order='?g %s' % ' '.join(varlist))
         ]
     else:
-      return [ (Uri(graph), Uri(r[retvars[0]]['value']))
-                + tuple([r.get(v, NOVALUE)['value'] for v in retvars[1:]])
-        for r in self._sparqlstore.select('%(rvars)s',
-          '?r a <%(rtype)s> . %(cond)s',
+      return [ (Uri(graph), gv(r, retvars[0])) + tuple([gv(r, v) for v in retvars[1:]])
+        for r in self.select('%(rvars)s', '?r a <%(rtype)s> . %(cond)s',
           params=dict(rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
-          distinct=True,
           graph=graph,
           order=' '.join(varlist))
         ]
@@ -250,32 +247,23 @@ class GraphStore(object):
       obj = '<%s>' % obj
     elif not isinstance(obj, Node):
       obj = '"%s"' % obj
-    return [ r['s']['value'] for r in
-                  self._sparqlstore.select('?s', '?s <%(prop)s> %(obj)s',
-                                            params = dict(prop=prop, obj=obj),
-                                            graph = graph,
-                                            order = '?s' if ordered else None) ]
+    return [ sparqlstore.get_result_value(r, 's')
+      for r in self.select('?s', '?s <%(prop)s> %(obj)s',
+        params = dict(prop=prop, obj=obj), graph = graph, order = '?s' if ordered else None) ]
 
-  def get_objects(self, subj, prop, graph):
-  #----------------------------------------
+  def get_objects(self, subj, prop, graph, ordered=False):
+  #-------------------------------------------------------
     """
     Get objects of all statements that match a given subject/predicate.
     """
-    objects = []
-    for r in self._sparqlstore.select('?o', '<%(subj)s> <%(prop)s> ?o',
-                                      params = dict(subj = subj, prop=prop),
-                                      graph = graph):
-      if   r['o']['type'] == 'uri':           objects.append(Resource(Uri(r['o']['value'])))
-      elif r['o']['type'] == 'bnode':         objects.append(BlankNode(r['o']['value']))
-      elif r['o']['type'] == 'literal':       objects.append(r['o']['value'])
-      elif r['o']['type'] == 'typed-literal': objects.append(r['o']['value']) ## check datatype and convert...
-    return objects
+    return [ sparqlstore.get_result_value(r, 'o')
+      for r in self.select('?o', '<%(subj)s> <%(prop)s> ?o',
+        params = dict(subj=subj, prop=prop), graph = graph, order = '?s' if ordered else None) ]
 
 
   def get_types(self, uri, graph):
   #------------------------------
     return self.get_objects(uri, RDF.type, graph)
-
 
   def describe(self, uri, graph, format=Format.RDFXML):
   #----------------------------------------------------
@@ -356,52 +344,31 @@ class QueryResults(object):
         self._prefixes[h[1][0]] = h[1][1]
     #logging.debug('PFX: %s', self._prefixes)
 
-  def abbreviate_uri(self, uri):
-  #-----------------------------
+  def _abbreviate_uri(self, uri):
+  #------------------------------
     for name, prefix in self._prefixes.iteritems():
       if uri.startswith(prefix): return '%s:%s' % (name, uri[len(prefix):])
-    if self._base and uri.startswith(self._base): return '<%s>' % uri[len(self._base):]
-    return '<%s>' % uri
+    return '%s' % uri
 
-  def _add_html(self, result):
-  #---------------------------
-    rtype = result.get('type')
-    value = result.get('value')
-    if   rtype == 'uri':
-      uri = self.abbreviate_uri(value) if self._abbreviate else uri
-      if uri[0] == '<':
-        uri = uri[1:-1]
-        LT = '&lt;'
-        GT = '&gt;'
+  def _add_html(self, result, column):
+  #-----------------------------------
+    value = sparqlstore.get_result_value(result, column)
+    if  isinstance(value, Uri):
+      value = str(value)
+      if self._base and value.startswith(self._base): uri = value[len(self._base):]
+      elif self._abbreviate:                          uri = self._abbreviate_uri(value) 
+      else:                                           uri = value
+      (LT, GT) = ('&lt;', '&gt;') if value == uri else ('', '')
+      if not value.startswith(self._htmlbase):
+        return '%s%s%s' % (LT, uri, GT)
       else:
-        LT = GT = ''
-      if value.startswith(self._htmlbase):
-        result['html'] = ('%s<a href="%s" uri="%s" class="cluetip">%s</a>%s'
-                       % (LT,
-                          '/repository/' + value[len(options.resource_prefix):],
-                          value, uri,
-                          GT))
+        return ('%s<a href="%s" uri="%s" class="cluetip">%s</a>%s'
+              % (LT, '/repository/' + value[len(options.resource_prefix):],
+                                   value, uri,                 GT))
 ############### '/repository/' is web-server path to view objects in repository
-      ## Following needs work...
 #      elif value.startswith('http://physionet.org/'): ########### ... URI to a Signal, Recording, etc...
-#        result['html'] = ('%s<a href="%s" uri="%s" class="cluetip">%s</a>%s'
-#                       % (LT,
-#                          '/repository/' + value.replace(':', '%3A', 1),
-#                          value, uri,
-#                          GT))
-#                 ## '/repository/' is web-server path to view objects in repository
-      else:
-        result['html'] = '%s%s%s' % (LT, uri, GT)
-    elif rtype == 'bnode':
-      result['html'] = '_:' + value
-    #elif rtype == 'literal':
-    #  return value              ## set @lang, ^^datatype (or convert to data type) ??
-    #elif rtype == 'typed-literal':
-    #  return value
-    else:
-      result['html'] = xmlescape(value)
+    return xmlescape(str(value))
 
-    return result
 
   def __iter__(self):
   #------------------
@@ -415,7 +382,7 @@ class QueryResults(object):
       rows = self._results.get('results', {}).get('bindings', [ ])
       if self._header: yield cols
       for r in rows:
-        if self._htmlbase: yield [ self._add_html(r[c]) for c in cols ]
-        else:              yield [                r[c]  for c in cols ]
+        if self._htmlbase: yield { c: self._add_html(r, c)  for c in cols }
+        else:              yield { c: sparqlstore.get_result_value(r, c) for c in cols }
     else:
       yield self._results

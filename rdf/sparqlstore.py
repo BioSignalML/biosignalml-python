@@ -18,6 +18,36 @@ import tornado.httpclient
 import biosignalml.rdf as rdf
 
 
+def get_result_value(result, column):
+#====================================
+  """
+  Use a type information returned from a SPARQL query to cast a variable's
+  value to an appropriate Python class.
+
+  :param result (dict): A dictionary containing a result row as converted
+    from a JSON formatted result set.
+  :param column (str): The name of a variable in the result set.
+  :return: The `value` field, cast according to the `type` and `datatype` fields.
+  """
+  from biosignalml.utils import isoduration_to_seconds
+  NONE = { 'value': '', 'type': 'literal', 'datatype': '' }
+  r = result.get(column, NONE)
+  rtype = r['type']
+  value = r['value']
+  if   rtype == 'uri':
+    return rdf.Uri(value)
+  elif rtype == 'bnode':
+    return rdf.BlankNode(value)
+  elif rtype == 'typed-literal':
+    dt = r['datatype']
+    if dt == 'http://www.w3.org/2001/XMLSchema#dayTimeDuration':
+      return isoduration_to_seconds(value)
+    elif dt == 'http://www.w3.org/2001/XMLSchema#integer':
+      return int(value)
+    ## Extend...
+  return value
+
+
 class StoreException(Exception):
 #===============================
   pass
