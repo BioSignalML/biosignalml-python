@@ -239,6 +239,11 @@ class GraphStore(object):
   #---------------------------
     return self._sparqlstore.ask(query, graph)
 
+  def select(self, fields, where, **kwds):
+  #---------------------------------------
+    return self._sparqlstore.select(fields, where, **kwds)
+
+
   def get_subjects(self, prop, obj, graph, ordered=False):
   #-------------------------------------------------------
     if isinstance(obj, Resource) or isinstance(obj, Uri):
