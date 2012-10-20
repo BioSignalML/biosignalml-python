@@ -15,7 +15,7 @@ import logging
 import tornado.ioloop
 import tornado.httpclient
 
-from biosignalml.rdf import Format
+import biosignalml.rdf as rdf
 
 
 class StoreException(Exception):
@@ -65,8 +65,8 @@ class SparqlStore(object):
     return '\n'.join(['PREFIX %s: <%s>' % kv for kv in prefixes.iteritems()] + ['']) if prefixes else ''
 
 
-  def query(self, sparql, format=Format.RDFXML, prefixes=None):
-  #------------------------------------------------------------
+  def query(self, sparql, format=rdf.Format.RDFXML, prefixes=None):
+  #----------------------------------------------------------------
     """
     Perform a SPARQL query.
     """
@@ -75,7 +75,7 @@ class SparqlStore(object):
       return self._request(self.ENDPOINTS[0], 'POST',
                            body=urllib.urlencode({'query': self.map_prefixes(prefixes) + sparql}),
                            headers={'Content-type': 'application/x-www-form-urlencoded',
-                                    'Accept': Format.mimetype(format)} )
+                                    'Accept': rdf.Format.mimetype(format)} )
     except Exception, msg:
       logging.error('SPARQL: %s, %s', msg, self.map_prefixes(prefixes) + sparql)
       raise
@@ -86,7 +86,7 @@ class SparqlStore(object):
     return json.loads(self.query('ask where { %(graph)s { %(where)s } }'
                                  % dict(graph=('graph <%s>' % str(graph)) if graph else '',
                                         where=where % params),
-                                 Format.JSON, prefixes)
+                                 rdf.Format.JSON, prefixes)
                                 )['boolean']
 
   def select(self, fields, where, params=None, graph=None, distinct=True, group=None, order=None, limit=None, prefixes=None):
@@ -122,11 +122,11 @@ class SparqlStore(object):
                         group=(' group by %s' % group) if group else '',
                         order=(' order by %s' % order) if order else '',
                         limit=(' limit %s' % limit) if limit else ''),
-                 Format.JSON, prefixes)
+                 rdf.Format.JSON, prefixes)
         ).get('results', {}).get('bindings', [])
 
-  def construct(self, template, where, params=None, graph=None, format=Format.RDFXML, prefixes=None):
-  #--------------------------------------------------------------------------------------------------
+  def construct(self, template, where, params=None, graph=None, format=rdf.Format.RDFXML, prefixes=None):
+  #------------------------------------------------------------------------------------------------------
     if params is None: params = {}
     return self.query('construct { %(tplate)s } where { %(graph)s { %(where)s } }'
                       % dict(tplate=template % params,
@@ -134,8 +134,8 @@ class SparqlStore(object):
                              where=where % params),
                       format, prefixes)
 
-  def describe(self, uri, format=Format.RDFXML, prefixes=None):
-  #------------------------------------------------------------
+  def describe(self, uri, format=rdf.Format.RDFXML, prefixes=None):
+  #----------------------------------------------------------------
     return self.query('describe <%(uri)s>' % { 'uri': uri }, format, prefixes)
 
 
@@ -198,15 +198,15 @@ class SparqlStore(object):
     self.insert_triples(graph, triples, prefixes)  ###### DUPLICATES BECAUSE OF 4STORE BUG...
 
 
-  def extend_graph(self, graph, rdf, format=Format.RDFXML):
+  def extend_graph(self, graph, rdf, format=rdf.Format.RDFXML):
   #--------------------------------------------------------
     '''
     Extend an existing graph, creating one if not present.
     '''
     raise NotImplemented("SparqlStore.extend_graph()")
 
-  def replace_graph(self, graph, rdf, format=Format.RDFXML):
-  #---------------------------------------------------------
+  def replace_graph(self, graph, rdf, format=rdf.Format.RDFXML):
+  #-------------------------------------------------------------
     '''
     Replace an existing graph, creating one if not present.
     '''
@@ -245,15 +245,15 @@ class Virtuoso(SparqlStore):
 
   ENDPOINTS = [ '/sparql/', '/sparql/', '/sparql-graph-crud/' ]
 
-  def extend_graph(self, graph, rdf, format=Format.RDFXML):
-  #--------------------------------------------------------
+  def extend_graph(self, graph, rdf, format=rdf.Format.RDFXML):
+  #------------------------------------------------------------
     self._request(self.ENDPOINTS[2] + "?graph-uri=%s" % graph, 'POST',
-                  body=rdf, headers={'Content-Type': Format.mimetype(format)})
+                  body=rdf, headers={'Content-Type': rdf.Format.mimetype(format)})
 
-  def replace_graph(self, graph, rdf, format=Format.RDFXML):
-  #---------------------------------------------------------
+  def replace_graph(self, graph, rdf, format=rdf.Format.RDFXML):
+  #-------------------------------------------------------------
     self._request(self.ENDPOINTS[2] + "?graph-uri=%s" % graph, 'PUT',
-                  body=rdf, headers={'Content-Type': Format.mimetype(format)})
+                  body=rdf, headers={'Content-Type': rdf.Format.mimetype(format)})
 
   def delete_graph(self, graph):
   #-----------------------------
@@ -266,19 +266,19 @@ def FourStore(SparqlStore):
 
   ENDPOINTS = [ '/sparql/', '/update/', '/data/' ]
 
-  def extend_graph(self, graph, rdf, format=Format.RDFXML):
-  #--------------------------------------------------------
+  def extend_graph(self, graph, rdf, format=rdf.Format.RDFXML):
+  #------------------------------------------------------------
     self._request(self.ENDPOINTS[2], 'POST',
                   body=urllib.urlencode({'data': rdf,
                                          'graph': str(graph),
-                                         'mime-type': Format.mimetype(format),
+                                         'mime-type': rdf.Format.mimetype(format),
                                         }),
                   headers={'Content-type': 'application/x-www-form-urlencoded'})
 
-  def replace_graph(self, graph, rdf, format=Format.RDFXML):
-  #---------------------------------------------------------
+  def replace_graph(self, graph, rdf, format=rdf.Format.RDFXML):
+  #-------------------------------------------------------------
     self._request(self.ENDPOINTS[2] + "?graph=%s" % graph, 'PUT',
-                  body=rdf, headers={'Content-Type': Format.mimetype(format)})
+                  body=rdf, headers={'Content-Type': rdf.Format.mimetype(format)})
 
   def delete_graph(self, graph):
   #-----------------------------
