@@ -72,24 +72,6 @@ class GraphStore(object):
       prefixes=dict(bsml=BSML.prefix))
 
 
-#  def add_graph(self, graph, rdf, format=rdf.Format.RDFXML):
-#  #---------------------------------------------------------
-#    self._sparqlstore.extend_graph(graph, rdf, format=format)
-
-#  def replace_graph(self, graph, rdf, format=rdf.Format.RDFXML):
-#  #-------------------------------------------------------------
-#    self._sparqlstore.replace_graph(graph, rdf, format=format)
-
-#  def delete_graph(self, graph):
-  #-----------------------------
-    ## 'DCT.dateRemoved' is not a DCT Terms property...
-    ## self.append(Statement(graph, DCT.dateRemoved, datetime_to_isoformat(utctime()) ))
-    ## ANd need to update the store...
-#    self._sparqlstore.delete_graph(graph)
-    ## Follow graph with another DataItem that is not of 'graphtype'
-#    pass
-
-
   def add_resource_graph(self, uri, rtype, rdf, creator, format=Format.RDFXML):
   #----------------------------------------------------------------------------
     current = self.get_resources(rtype, condition='filter(?r = <%s>)' % uri)
@@ -99,8 +81,8 @@ class GraphStore(object):
       subject=uri, precededby=predecessor,
       createdby=DataCreation(self.uri.make_uri(), performedby=creator,
                              completed=utils.utctime() ))
-    self._sparqlstore.extend_graph(self._provenance_uri, prov.metadata_as_graph().serialise())
-    self._sparqlstore.replace_graph(graph_uri, rdf, format=format)
+    self.extend_graph(self._provenance_uri, prov.metadata_as_graph().serialise())
+    self.replace_graph(graph_uri, rdf, format=format)
     return graph_uri
 
 
