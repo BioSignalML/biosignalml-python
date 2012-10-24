@@ -105,6 +105,22 @@ class AbstractObject(object):
   #----------------------
     return not self.__eq__(this)
 
+  @staticmethod
+  def _equal_values(v1, v2):
+  #-------------------------
+    # This is an attempt to circimvent an issue with Virtuouso whereby
+    # the value of "PT30M6.6S"^^<http://www.w3.org/2001/XMLSchema#dayTimeDuration
+    # is seen as two different values, one of
+    # "1806.6"^^<http://www.w3.org/2001/XMLSchema#dayTimeDuration, the other of
+    # "PT30M6.599999S"^^<http://www.w3.org/2001/XMLSchema#dayTimeDuration
+    EPSILON = 10**-9
+    try:
+      f1 = float(v1)
+      f2 = float(v2)
+      return f1 == f2 or abs((f1 - f2)/(f1 + f2)) < EPSILON
+    except Exception:
+      return v1 == v2
+
   def _assign(self, attr, value):
   #------------------------------
     if attr in self.__dict__:
@@ -112,12 +128,12 @@ class AbstractObject(object):
       if v in [None, '']: setattr(self, attr, value)
       elif isinstance(v, set): v.add(value)
       elif isinstance(v, list): v.append(value)
-      elif v != value: setattr(self, attr, set([v, value]))
+      elif not self._equal_values(v, value): setattr(self, attr, set([v, value]))
     elif attr is not None:
       v = self.metadata.get(attr)
       if v in [None, '']: self.metadata[attr] = value
       elif isinstance(v, set): v.add(value)
-      elif v != value: self.metadata[attr] = set([v, value])
+      elif not self._equal_values(v != value): self.metadata[attr] = set([v, value])
 
 
   def initialise(self, **kwds):
