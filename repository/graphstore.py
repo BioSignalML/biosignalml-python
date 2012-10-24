@@ -326,11 +326,12 @@ class QueryResults(object):
         self._prefixes[h[1][0]] = h[1][1]
     #logging.debug('PFX: %s', self._prefixes)
 
-  def _abbreviate_uri(self, uri):
-  #------------------------------
+  def abbreviate_uri(self, uri):
+  #-----------------------------
+    uri = str(uri)
     for name, prefix in self._prefixes.iteritems():
       if uri.startswith(prefix): return '%s:%s' % (name, uri[len(prefix):])
-    return '%s' % uri
+    return uri
 
   def _add_html(self, result, column):
   #-----------------------------------
@@ -338,7 +339,7 @@ class QueryResults(object):
     if  isinstance(value, Uri):
       value = str(value)
       if self._base and value.startswith(self._base): uri = value[len(self._base):]
-      elif self._abbreviate:                          uri = self._abbreviate_uri(value) 
+      elif self._abbreviate:                          uri = self.abbreviate_uri(value)
       else:                                           uri = value
       (LT, GT) = ('&lt;', '&gt;') if value == uri else ('', '')
       if not value.startswith(self._htmlbase):
