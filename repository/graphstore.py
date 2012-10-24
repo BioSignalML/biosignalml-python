@@ -343,14 +343,14 @@ class QueryResults(object):
       else:                                           uri = value
       (LT, GT) = ('&lt;', '&gt;') if value == uri else ('', '')
       if not value.startswith(self._htmlbase):
-        return '%s%s%s' % (LT, uri, GT)
+        return (value, '%s%s%s' % (LT, uri, GT))
       else:
-        return ('%s<a href="%s" uri="%s" class="cluetip">%s</a>%s'
+        return (value, '%s<a href="%s" uri="%s" class="cluetip">%s</a>%s'
               % (LT, '/repository/' + value[len(options.resource_prefix):],
                                    value, uri,                 GT))
 ############### '/repository/' is web-server path to view objects in repository
 #      elif value.startswith('http://physionet.org/'): ########### ... URI to a Signal, Recording, etc...
-    return xmlescape(str(value))
+    return (value, xmlescape(str(value)))
 
 
   def __iter__(self):
