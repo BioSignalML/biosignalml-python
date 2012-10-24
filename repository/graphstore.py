@@ -32,7 +32,7 @@ class DataItem(model.core.AbstractObject):
 #=========================================
   metaclass = PRV.DataItem
   attributes = [ 'type', 'createdby', 'subject', 'precededby' ]
-  mapping = { 'createdby':  PropertyMap(PRV.createdBy),
+  mapping = { 'createdby':  PropertyMap(PRV.createdBy, subelement=True),
               'subject':    PropertyMap(DCT.subject),
               'precededby': PropertyMap(PRV.precededBy),
               'type':       PropertyMap(RDF.type) }

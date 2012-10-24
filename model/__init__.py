@@ -105,7 +105,7 @@ class Event(core.AbstractObject):
 
   mapping = { 'recording': PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
               'eventtype': PropertyMap(BSML.eventType),
-              'time':      PropertyMap(BSML.time),
+              'time':      PropertyMap(BSML.time, subelement=True),
             }
 
   def __init__(self, uri, eventtype, time=None, **kwds):
@@ -163,7 +163,7 @@ class Recording(core.AbstractObject):
 ##            'digest':        PropertyMap(BSML.digest),
               'timeline':      PropertyMap(TL.timeline,
                                            to_rdf=mapping.get_uri,
-                                           from_rdf=_get_timeline) }
+                                           from_rdf=_get_timeline, subelement=True) }
 
   SignalClass = Signal       #: The class of Signals in the Recording
 
@@ -346,7 +346,7 @@ class Annotation(core.AbstractObject):
   mapping = { 'about':   PropertyMap(DCT.subject, to_rdf=mapping.get_uri),
               'comment': PropertyMap(RDFS.comment),
               'tags':    PropertyMap(BSML.tag),
-              'time':    PropertyMap(BSML.time),
+              'time':    PropertyMap(BSML.time, subelement=True),
               'creator': PropertyMap(DCT.creator, to_rdf=mapping.get_uri),
               'created': PropertyMap(DCT.created, XSD.dateTime,
                                      utils.datetime_to_isoformat,

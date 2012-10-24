@@ -70,14 +70,16 @@ class PropertyMap(object):
     to the object for a RDF statement,
   :param to_rdf: An optional function to convert from the object for a RDF
     statement to an attribute value.
+  :param subelement (bool): If True, AbstractObjects referenced by properties
+    are recursively output when generating RDF statements.
   """
-  def __init__(self, property, datatype=None, to_rdf=None, from_rdf=None):
-  #-----------------------------------------------------------------------
+  def __init__(self, property, datatype=None, to_rdf=None, from_rdf=None, subelement=False):
+  #-----------------------------------------------------------------------------------------
     self.property = property
     self.datatype = datatype
     self.to_rdf = to_rdf
     self.from_rdf = from_rdf
-
+    self.subelement = subelement
 
 ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf')
 #===========
@@ -150,12 +152,14 @@ class Mapping(object):
         for v in value:
           if isinstance(v, AbstractObject):
             yield Statement(subject, map.property, self._makenode(v, None, None))
-            for s in v.metadata_as_stream(): yield s
+            if map.subelement:
+              for s in v.metadata_as_stream(): yield s
           else:
             yield Statement(subject, map.property, self._makenode(v, map.datatype, map.to_rdf))
       elif isinstance(value, AbstractObject) and map.to_rdf in [None, get_uri]:
         yield Statement(subject, map.property, self._makenode(value, None, None))
-        for s in value.metadata_as_stream(): yield s
+        if map.subelement:
+          for s in value.metadata_as_stream(): yield s
       else:
         yield Statement(subject, map.property, self._makenode(value, map.datatype, map.to_rdf))
 
