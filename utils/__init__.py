@@ -110,7 +110,10 @@ def chop(s, n):
 def trimdecimal(v):
 #=================
   s = str(v)
-  return s.rstrip('0')[:-1] if '.' in s else s
+  if '.' in s:
+    s = s.rstrip('0')
+    if s[-1] == '.': return s[:-1]
+  return s
 
 def maketime(secs):
 #=================
