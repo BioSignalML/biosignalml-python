@@ -140,6 +140,17 @@ Measurement units would normally be entities in a specialised units of measure o
   '''The physical units that are represented by a signal's data values.
 
 Specification of units allows for consistency checking and automatic conversion.'''
+
   tag            = Resource(NS.tag)
-  '''A tag applied to a resource by an annotation.'''
+  '''
+  A semantic tag applied to a resource by an annotation.
+
+  Tags are effectively conytolled keywords.
+  '''
+
+  ErrorTAG       = Resource(NS.ErrorTAG)
+  '''
+  A tag to indicate that an annotation relates to an error or
+  inconsistency.
+  '''
 
