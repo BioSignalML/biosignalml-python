@@ -20,7 +20,7 @@ Files are structured as follows::
       ./1      Dataset   uri, units, gain/offset, rate/period/clock, timeunits
        .
     ./clock    Group
-      /0       Dataset   uri, units, scale
+      /0       Dataset   uri, units, rate, scale
        .
 
 
@@ -95,9 +95,9 @@ Any clock (i.e. timing) datasets are contained within a 'clock' group in '/recor
 ----------------------------
 
 Clock datasets are numbered, starting from '0'. Attributes are ``uri`` and ``units`` with
-default units of seconds. A clock can optionally have a ``scale`` factor; if so the stored
-value of a time point is be multiplied by the scaling factor to obtain a value in the
-specified units.
+default units of seconds. A clock can optionally have either a ``rate'' or ``scale`` factor
+(= 1/rate); if so the stored value of a time point is be multiplied by the scaling factor to
+obtain a value in the specified units.
 
 
 Signals and Timing
@@ -169,8 +169,9 @@ class H5Clock(object):
     """
     t = self.dataset[pos]
     attrs = self.dataset.attrs
-    if attrs.get('scale'): return t*float(attrs['scale'])
-    else:                  return t
+    if   attrs.get('scale'): return t*float(attrs['scale'])
+    elif attrs.get('rate'):  return t/float(attrs['rate'])
+    else:                    return t
 
   def time(self, pos):
   #-------------------
@@ -474,7 +475,8 @@ class H5Recording(object):
     return dset.name
 
 
-  def create_clock(self, uri, units=None, shape=None, times=None, dtype=None, scale=None,
+  def create_clock(self, uri, units=None, shape=None, times=None, dtype=None,
+                                                                  rate=None, scale=None,
                                                                   compression=COMPRESSION):
   #----------------------------------------------------------------------------------------
     """
@@ -489,8 +491,8 @@ class H5Recording(object):
     :param dtype: The datatype in which to store time points. Must be specified if
                   no ``times`` are given.
     :type dtype: :class:`numpy.dtype`
-    :param scale: A scaling factor to obtain time units from time points. Optional.
-    :type scale: float
+    :param rate (float): The sample rate of time points. Optional.
+    :param scale (float): A scaling factor to obtain time units from time points. Optional.
     :return: The name of the clock dataset created.
     :rtype: str
     """
@@ -522,6 +524,8 @@ class H5Recording(object):
 
     dset.attrs['uri'] = str(uri)
     if units: dset.attrs['units'] = str(units)
+    if scale and rate: raise RuntimeError("Cannot specify both 'rate' and 'scale' for a clock")
+    if rate: dset.attrs['rate'] = float(rate)
     if scale: dset.attrs['scale'] = float(scale)
     self._h5['uris'].attrs[str(uri)] = dset.ref
     return dset.name
