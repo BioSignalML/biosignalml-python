@@ -75,7 +75,8 @@ class GraphStore(object):
   def add_resource_graph(self, uri, rtype, rdf, creator, format=Format.RDFXML):
   #----------------------------------------------------------------------------
     current = self.get_resources(rtype, condition='filter(?r = <%s>)' % uri)
-    predecessor = current[0] if current else None
+    predecessor = current[0][0] if current else None
+    #print "Preceeded by", predecessor
     graph_uri = self.uri.make_uri()
     prov = DataItem(graph_uri, type=self._graphtype,
       subject=uri, precededby=predecessor,
