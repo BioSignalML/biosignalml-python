@@ -71,7 +71,7 @@ class Signal(core.AbstractObject):
 ##            'transducer':   PropertyMap(BSML.transducer),
               'filter':       PropertyMap(BSML.preFilter),
               'rate':         PropertyMap(BSML.rate, XSD.double),
-              'clock':        PropertyMap(BSML.clock, to_rdf=mapping.get_uri),
+              'clock':        PropertyMap(BSML.clock, to_rdf=mapping.get_uri, subelement=True),
               'minFrequency': PropertyMap(BSML.minFrequency, XSD.double),
               'maxFrequency': PropertyMap(BSML.maxFrequency, XSD.double),
               'minValue':     PropertyMap(BSML.minValue, XSD.double),
