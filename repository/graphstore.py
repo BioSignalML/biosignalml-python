@@ -318,7 +318,7 @@ class QueryResults(object):
   def _set_prefixes(self, sparql):
   #-------------------------------
     self._base = None
-    self._prefixes = { }
+    self._prefixes = { }   ### Start with a copy of standard prefixes...
     header = SparqlHead.parse(sparql)
     for h in header:
       if h[0] == 'base':
