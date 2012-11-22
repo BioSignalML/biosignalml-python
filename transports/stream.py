@@ -133,6 +133,10 @@ class BlockType(object):
   contains discontinuous segments they will be returned in separate blocks.
   """
 
+  INFO = 'I'
+
+  RDF  = 'R'
+
   DATA = 'D'
   """
   Time series data.
@@ -145,6 +149,11 @@ class BlockType(object):
 
     **uri** (*string*)
       The URI of the signal whose data is in the block.
+
+      REQUIRED.
+
+    **info** (*integer*)
+      The index into arrays describing the signal that were in the latest Info block.
 
       REQUIRED.
 
@@ -314,11 +323,35 @@ class ErrorBlock(StreamBlock):
 
   .. todo:: Document parameters.
   """
-  def __init__(self, number, errblock, msg):
-  #-------------------------------------------
+  def __init__(self, errblock, msg):
+  #---------------------------------
     header = errblock.header.copy()
     header['type'] = errblock.type
-    StreamBlock.__init__(self, number, BlockType.ERROR, header, bytearray(msg))
+    StreamBlock.__init__(self, 0, BlockType.ERROR, header, bytearray(msg))
+
+
+class InfoBlock(StreamBlock):
+#============================
+  """
+  An info message block.
+
+  .. todo:: Document parameters.
+  """
+  def __init__(self, **header):
+  #----------------------------
+    StreamBlock.__init__(self, 0, BlockType.INFO, header, '')
+
+
+class RDFBlock(StreamBlock):
+#===========================
+  """
+  An RDF message block.
+
+  .. todo:: Document parameters.
+  """
+  def __init__(self, rdf, mimetype):
+  #---------------------------------
+    StreamBlock.__init__(self, 0, BlockType.RDF, {'mimetype': mimetype}, bytearray(rdf))
 
 
 class SignalDataBlock(StreamBlock):
@@ -588,8 +621,8 @@ class SignalData(object):
   :param dtype: The requested data type which to use for stream data values.
   :param ctype: The requested data type which to use for stream time values.
   '''
-  def __init__(self, uri, start, data, rate=None, clock=None, dtype=None, ctype=None):
-  #-----------------------------------------------------------------------------------
+  def __init__(self, uri, start, data, info=None, rate=None, clock=None, dtype=None, ctype=None):
+  #----------------------------------------------------------------------------------------------
     if rate is None and clock is None:
       raise StreamException('Data must have either a rate or a clock')
     elif rate is not None and clock is not None:
@@ -601,6 +634,7 @@ class SignalData(object):
     if clock and len(clock) != len(data):
       raise StreamException('Clock and data have different lengths')
     self.uri = uri
+    self.info = info
     self.start = start
     self.data = data
     self.rate = rate
@@ -636,6 +670,7 @@ class SignalData(object):
                'count': len(self.data),
                'dtype': dtype.descr[0][1]
              }
+    if self.info is not None: header['info'] = self.info
     if self.data.ndim > 1: header['dims'] = self.data.shape[1]
     if self.rate: header['rate'] = self.rate
     if self.clock:
