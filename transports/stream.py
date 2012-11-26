@@ -487,6 +487,7 @@ class BlockParser(object):
             datalen -= 1
             self._length = 0
             self._state = BlockParser._HDRLEN
+            self._checksum.update('V')
 
       elif self._state == BlockParser._HDRLEN:                  # Getting header length
         while datalen > 0 and chr(data[pos]).isdigit():
