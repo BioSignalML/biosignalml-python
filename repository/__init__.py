@@ -122,14 +122,17 @@ class BSMLStore(GraphStore):
         rec.initialise()    ## This will open files...
     return rec
 
-#  def store_recording(self, recording):   #### Use add_recording_graph()
-#  #------------------------------------
-#    """
-#    Store a recording's metadata in the repository.
-#
-#    :param recording: The :class:`~biosignalml.Recording` to store.
-#    """
-#    self.replace_graph(recording.uri, recording.metadata_as_graph().serialise())
+
+  def store_recording(self, recording, creator=None):
+  #--------------------------------------------------
+    """
+    Store a recording's metadata in the repository.
+
+    :param recording: The :class:`~biosignalml.Recording` to store.
+    :param creator: Who or what is storing the recording.
+    """
+    return self.add_recording_graph(recording.uri,
+      recording.metadata_as_graph().serialise(Format.RDFXML), creator, Format.RDFXML)
 
 
 #  def signal_recording(self, uri):
