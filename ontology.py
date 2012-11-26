@@ -107,19 +107,21 @@ Measurement units would normally be entities in a specialised units of measure o
 
 # owl:NamedIndividual resources:
   BP             = Resource(NS.BP)
-  BSML_HDF5      = Resource(NS.BSML_HDF5)
-  '''A HDF5-based container for BioSignalML recordings.'''
   ECG            = Resource(NS.ECG)
-  EDF            = Resource(NS.EDF)
-  EDFplus        = Resource(NS.EDFplus)
   EEG            = Resource(NS.EEG)
-  FieldML        = Resource(NS.FieldML)
-  MFER           = Resource(NS.MFER)
-  RAW            = Resource(NS.RAW)
-  '''Raw, binary data with unknown format.'''
-  SCP_ECG        = Resource(NS.SCP_ECG)
-  SDF            = Resource(NS.SDF)
-  WFDB           = Resource(NS.WFDB)
+
+### Replaced by mimetype strings...
+##  BSML_HDF5      = Resource(NS.BSML_HDF5)
+##  '''A HDF5-based container for BioSignalML recordings.'''
+##  EDF            = Resource(NS.EDF)
+##  EDFplus        = Resource(NS.EDFplus)
+##  FieldML        = Resource(NS.FieldML)
+##  MFER           = Resource(NS.MFER)
+##  RAW            = Resource(NS.RAW)
+##  '''Raw, binary data with unknown format.'''
+##  SCP_ECG        = Resource(NS.SCP_ECG)
+##  SDF            = Resource(NS.SDF)
+##  WFDB           = Resource(NS.WFDB)
 
 # owl:ObjectProperty resources:
   clock          = Resource(NS.clock)
