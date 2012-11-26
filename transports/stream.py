@@ -32,8 +32,8 @@ expression notation, a block is defined as::
   <length>   ::= <INTEGER>            /* The length of the content part.           */
   <content>  ::= [#x00-#xFF]*         /* A sequence of bytes.                      */
 
-  <checksum> ::= [0-9a-fA-F]{32}      /* An optional, 32 character MD5 hex digest of the */
-                                      /* block, including opening '#' and closing '##'.  */
+  <checksum> ::= [0-9a-fA-F]{40}      /* An optional, 40 character SHA1 hex digest of the */
+                                      /* block, including opening '#' and closing '##'.   */
   <INTEGER> ::= [0-9]+
   <LF>      ::= #x0A
 
@@ -263,6 +263,7 @@ class Checksum(object):
   IGNORE  =  3     #: Ignore any block checksums
   NONE    =  4     #: Blocks don't have checksums
 
+CHECKSUM_LENGTH = 20  #: Size of SHA1 digest
 
 class StreamBlock(object):
 #=========================
@@ -309,7 +310,7 @@ class StreamBlock(object):
     b.extend(self.content)
     b.extend('##')
     if check != Checksum.NONE:
-      checksum = hashlib.md5()
+      checksum = hashlib.sha1()
       checksum.update(b)
       b.extend(checksum.hexdigest())
     b.extend('\n')
@@ -453,7 +454,7 @@ class BlockParser(object):
         if next >= 0:
           pos += (next + 1)
           datalen -= (next + 1)
-          self._checksum = hashlib.md5()
+          self._checksum = hashlib.sha1()
           self._checksum.update('#')
           self._state = BlockParser._TYPE
         else:
@@ -562,7 +563,7 @@ class BlockParser(object):
 
       elif self._state == BlockParser._CHECKSUM:                # Checking for checksum
         if chr(data[pos]) != '\n' and self._check != Checksum.NONE:
-          self._length = 32     # 32 checksum characters (hex digest)
+          self._length = 2*CHECKSUM_LENGTH   # Size of hex digest
           self._state = BlockParser._CHECKDATA
         else:
           self._state = BlockParser._BLOCKEND
