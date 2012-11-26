@@ -768,12 +768,6 @@ class SignalDataStream(BlockStream):
     if maxsize > 0:          header['maxsize'] = maxsize
     self._request = StreamBlock(0, BlockType.DATA_REQ, header, '')
 
-  def __iter__(self):
-  #------------------
-    for block in BlockStream.__iter__(self):
-      logging.debug('RECV: %s', block)
-      if block.type == BlockType.DATA: yield block.signaldata()
-
 
 class TestBlock(StreamBlock):
 #============================
