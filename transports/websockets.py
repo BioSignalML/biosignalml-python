@@ -78,7 +78,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
 
     :param block: The block to send.
     :param check: Set to :attr:`~biosignalml.transports.stream.Checksum.STRICT`
-      to append a MD5 checksum to the block.
+      to append a SHA1 checksum to the block.
     '''
     while not self._opened: sleep(0.01)   # Wait until connected
     ##logging.debug('SEND: %s', block)
@@ -88,7 +88,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   def handshake_headers_getter(self):
   #----------------------------------
     headers = ws4py.client.threadedclient.WebSocketClient.handshake_headers(self)
-    headers.append(('Cookies', 'chocolate??'))
+    headers.append(('Cookies', 'chocolate??'))   ### TESTING
     return headers
 
 
