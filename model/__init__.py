@@ -210,7 +210,7 @@ class Recording(core.AbstractObject):
     Create a new Signal and add it to the Recording.
 
     :param uri: The URI for the signal.
-    :param sigclass: The class of Signal to create.
+    :param units: The units signal values are in.
     :return: A Signal of type `sigclass`.
     '''
     if uri is None and id is None:
