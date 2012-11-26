@@ -375,6 +375,7 @@ class SignalDataBlock(StreamBlock):
     start = self.header.get('start', 0)
     count = self.header.get('count', 0)
     dims = self.header.get('dims', 1)
+    info = self.header.get('info', None)
     dtype = self.header.get('dtype', None)
     rate = self.header.get('rate', None)
     ctype = self.header.get('ctype', None)
@@ -401,7 +402,7 @@ class SignalDataBlock(StreamBlock):
         data = np.frombuffer(self.content[datastart:], dtype=dt)
       else:
         data = np.reshape(np.frombuffer(self.content[datastart:], dtype=dt), (count, dims))
-    return SignalData(uri, start, data, rate, clock)
+    return SignalData(uri, start, data, info=info, rate=rate, clock=clock, dtype=dtype, ctype=ctype)
 
 
 class BlockParser(object):
