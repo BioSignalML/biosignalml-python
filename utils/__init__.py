@@ -173,7 +173,7 @@ def num(n):
 
 def file_uri(f):
 #===============
-  return f if f.startswith('file:') else 'file://' + os.path.abspath(f)
+  return f if f[0:5] in ['file:', 'http:'] else 'file://' + os.path.abspath(f)
 
 
 def hexdump(s, prompt='', offset=0):
