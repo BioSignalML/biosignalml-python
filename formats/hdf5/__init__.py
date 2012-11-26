@@ -140,6 +140,21 @@ class HDF5Recording(BSMLRecording):
       self._h5.close()
       self._h5 = None
 
+  def new_signal(self, uri, units, id=None, **kwds):
+  #-------------------------------------------------
+    '''
+    Create a new Signal and add it to the Recording.
+
+    :param uri: The URI for the signal.
+    :param units: The units signal values are in.
+    :rtype: :class:`HDF5Signal`
+    '''
+    sig = BSMLRecording.new_signal(self, uri, units, id=id, **kwds)
+    if self._h5:
+      if sig.clock: self._h5.create_clock(sig.clock.uri)
+      sig._h5 = self._h5.create_signal(sig.uri, units, rate=sig.rate, clock=sig.clock)
+    return sig
+
   def save_metadata(self, format=rdf.Format.TURTLE, prefixes=None):
   #----------------------------------------------------------------
     self._h5.store_metadata(self.metadata_as_string(format=format, prefixes=prefixes),
