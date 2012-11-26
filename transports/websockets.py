@@ -146,7 +146,7 @@ class WebStreamWriter(object):
 
   def write_block(self, block):
   #----------------------------
-    self._ws.send_block(block.streamblock())
+    self._ws.send_block(block)
 
   @staticmethod
   def got_response(block):
