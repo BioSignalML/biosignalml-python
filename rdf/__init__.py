@@ -367,11 +367,12 @@ class Graph(librdf.Model):
 
   @classmethod
   def create_from_string(cls, uri, string, format):
-  #-----------------------------------------------
+  #------------------------------------------------
     """
     Create a new Graph from RDF statements in a string.
 
-    :param uri: The URI of the resulting graph.
+    :param uri: The URI of the resulting graph. This is also
+      use as the base URI when parsing.
     :param string: The RDF to parse and add.
     :type string: str
     :param format: The string's RDF format.
