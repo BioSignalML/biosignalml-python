@@ -280,7 +280,7 @@ class StreamBlock(object):
     self.number = number
     self.type = type
     self.header = header
-    self.content = content
+    self.content = bytearray(content)
 
   @classmethod
   def makeblock(cls, number, type, header, content):
