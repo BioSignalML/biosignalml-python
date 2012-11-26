@@ -125,42 +125,44 @@ class BSMLRecording(biosignalml.Recording):
   attributes = [ 'digest', 'dataset' ]
   mapping    = { 'dataset': mapping.PropertyMap(BSML.dataset) }
 
-  def __init__(self, uri=None, fname=None, mode='r', **kwds):
-  #----------------------------------------------------------
-    if not uri and fname: uri = file_uri(fname)
-    if fname: self.dataset = 'file://' + os.path.abspath(fname)
+  def __init__(self, uri=None, dataset=None, mode='r', **kwds):
+  #------------------------------------------------------------
+    if dataset:
+      dataset = file_uri(dataset)
+      if not uri: uri = dataset
+    kwds['dataset'] = dataset
     kwds['format'] = getattr(self, 'MIMETYPE')
     biosignalml.Recording.__init__(self, uri, **kwds)
 
   @classmethod
-  def open(cls, fname, uri=None, mode='r', **kwds):
+  def open(cls, dataset, uri=None, mode='r', **kwds):
   #------------------------------------------------
     '''
     Open a Recording.
 
-    :param fname: Name of filesystem object holding the recording.
-    :type fname: str
+    :param dataset: Name of filesystem object holding the recording.
+    :type dataset: str
     :param uri: URI of the recording.
     :type uri: str
     :param mode: Open the recording for reading ('r') or create a new recording ('w').
     :type mode: str
     :return: a biosignal Recording.
     '''
-    return cls(uri=uri, fname=fname, mode=mode, **kwds)
+    return cls(uri=uri, dataset=dataset, mode=mode, **kwds)
 
   @classmethod
-  def create(cls, fname, uri=None, **kwds):
+  def create(cls, dataset, uri=None, **kwds):
   #----------------------------------------
     '''
     Create a Recording.
 
-    :param fname: Name of filesystem object holding a Recording.
-    :type fname: str
+    :param dataset: Name of filesystem object holding a Recording.
+    :type dataset: str
     :param uri: URI of the Recording.
     :type uri: str
     :return: a new biosignal Recording (with no Signals).
     '''
-    return cls.open(uri=uri, fname=fname, mode='w', **kwds)
+    return cls.open(uri=uri, dataset=dataset, mode='w', **kwds)
 
   def close(self):
   #---------------
