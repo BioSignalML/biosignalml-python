@@ -62,7 +62,7 @@ class HDF5Signal(BSMLSignal):
     """
 
     if   interval is not None and segment is not None:
-      raise Exception("'interval' and 'segment' cannot both be specified")
+      raise ValueError("'interval' and 'segment' cannot both be specified")
     if maxduration:
       pts = int(self.rate*maxduration + 0.5)
       if maxpoints: maxpoints = min(maxpoints, pts)
@@ -119,20 +119,29 @@ class HDF5Recording(BSMLRecording):
   EXTENSIONS = [ 'h5', 'hdf', 'hdf5' ]
   SignalClass = HDF5Signal
 
-  def __init__(self, uri, fname=None, **kwds):
-  #-------------------------------------------
-    BSMLRecording.__init__(self, uri, fname, **kwds)
-    if fname:
-      self._h5 = H5Recording.open(fname)
+  def __init__(self, uri, dataset=None, **kwds):
+  #---------------------------------------------
+    ## What about self.load_metadata() ???? Do kwds override ??
+    BSMLRecording.__init__(self, uri, dataset, **kwds)
+    if dataset:
+      self._h5 = self._openh5(dataset)
+      if uri is not None and str(uri) != str(self._h5.uri):
+        raise TypeError("Wrong URI in HDF5 recording")
+      ## What about self.load_metadata() ???? Do kwds override ??
       for n, s in enumerate(self._h5.signals()):
         self.add_signal(HDF5Signal.create_from_H5Signal(n, s))
     else:
       self._h5 = None
 
+  def _openh5(self, fname):
+  #------------------------
+    try:            return H5Recording.open(fname)
+    except IOError: return H5Recording.create(self.uri, fname)
+
   @classmethod
-  def open(cls, fname):
-  #--------------------
-    return cls(None, fname)
+  def open(cls, dataset):
+  #----------------------
+    return cls(None, dataset)
 
   def close(self):
   #---------------
@@ -168,8 +177,8 @@ class HDF5Recording(BSMLRecording):
 
   def initialise(self, **kwds):
   #----------------------------
-    fname = str(self.dataset)
-    self._h5 = H5Recording.open(fname)
-    for s in self.signals():
-      HDF5Signal.initialise_class(s)
+    if self.dataset is not None:
+      self._h5 = self._openh5(str(self.dataset))
+      for s in self.signals():
+        HDF5Signal.initialise_class(s)
 
