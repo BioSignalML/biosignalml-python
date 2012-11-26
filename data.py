@@ -48,21 +48,21 @@ class Clock(AbstractObject):
      and float(resolution)*float(rate) != 1.0):
       raise DataError("Clock's resolution doesn't match its rate")
     AbstractObject.__init__(self, uri, resolution=resolution, rate=rate, **kwds)
-    self._times = times
+    self.times = times
 
   def __getitem__(self, key):
   #--------------------------
     """Return the unscaled time at index ``key``."""
-    return self._times[key]
+    return self.times[key]
 
   def __len__(self):
   #-----------------
-    return len(self._times)
+    return len(self.times)
 
   def scale(self, time):
   #---------------------
     """
-    Convert a stored time value to seconds.
+    Convert a time value to seconds.
 
     :param float time: Time measured at the clock's resolution.
     :return: The time in seconds.
@@ -101,9 +101,9 @@ class Clock(AbstractObject):
 
     :param np.array times: Array of sample times, in seconds.
     """
-    if self._times[-1] >= times[0]:
+    if self.times[-1] >= times[0]:
       raise DataError('Times must be increasing')
-    self._times = np.append(self._times, times)
+    self.times = np.append(self.times, times)
 
 
 class UniformClock(Clock):
