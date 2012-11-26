@@ -99,6 +99,18 @@ class HDF5Signal(BSMLSignal):
   #--------------------
     self._set_h5_signal(self.recording._h5.get_signal(self.uri))
 
+  def append(self, timeseries):
+  #----------------------------
+    '''
+    Append data to a Signal.
+
+    :param timeseries: The data points (and times) to append.
+    :type timeseries: :class:`~biosignalml.data.TimeSeries`
+    '''
+    if self.clock and not isinstance(self.clock, UniformClock):
+      self.recording._h5.extend_clock(self.clock.uri, timeseries.time.times)
+    self.recording._h5.extend_signal(self.uri, timeseries.data)
+
 
 class HDF5Recording(BSMLRecording):
 #==================================
