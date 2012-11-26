@@ -45,7 +45,7 @@ class BSMLStore(GraphStore):
   #-------------------------------------------
     ''' Check a URI refers to a Signal in a given Recording. '''
     return (self.has_resource(rec, BSML.Recording)
-        and self.has_resource(uri, BSML.Signal))
+        and self.has_resource(sig, BSML.Signal))
 
   def extend_recording(self, recording, abstractobject):
   #-----------------------------------------------------
