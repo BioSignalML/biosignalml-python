@@ -12,24 +12,22 @@ UNIT_PREFIXES = [ rdf.UOME.prefix,
                   "http://www.biosignalml.org/ontologies/examples/unit#"
                 ]
 
+BASE_UNITS = { 'Metre':         'length',
+               'Kilogram':      'mass',
+               'Second':        'time',
+               'Ampere':        'current',
+               'Candela':       'luminosity',
+               'Mole':          'substance',
+               'Kelvin':        'temperature',
+               'Dimensionless': 'dimensionless',
+             }
+
+
 def strip_prefix(uri):
 #=====================
   for p in UNIT_PREFIXES:
     if uri.startswith(p): return(uri[len(p):])
-  raise ValueError("URI doesn't have a standard unit's prefix")  
-
-
-_UNIT_REGISTRY = pint.UnitRegistry(None)
-_Quantity      = _UNIT_REGISTRY.Quantity
-
-_UNIT_REGISTRY.add_unit('Metre',    _Quantity(None, pint.UnitsContainer({'length': 1})))
-_UNIT_REGISTRY.add_unit('Kilogram', _Quantity(None, pint.UnitsContainer({'mass': 1})))
-_UNIT_REGISTRY.add_unit('Second',   _Quantity(None, pint.UnitsContainer({'time': 1})))
-_UNIT_REGISTRY.add_unit('Ampere',   _Quantity(None, pint.UnitsContainer({'current': 1})))
-_UNIT_REGISTRY.add_unit('Candela',  _Quantity(None, pint.UnitsContainer({'luminosity': 1})))
-_UNIT_REGISTRY.add_unit('Mole',     _Quantity(None, pint.UnitsContainer({'substance': 1})))
-_UNIT_REGISTRY.add_unit('Kelvin',   _Quantity(None, pint.UnitsContainer({'temperature': 1})))
-_UNIT_REGISTRY.add_unit('Dimensionless', _Quantity(None, pint.UnitsContainer({'dimensionless': 1})))
+  raise ValueError("URI doesn't have a standard unit prefix")  
 
 
 class UnitTerm(object):
@@ -63,6 +61,9 @@ class UnitStore(object):
     self._store = store
     self._graph = graph
     self._cache = { }
+    self._registry = pint.UnitRegistry(None)
+    for u, t in BASE_UNITS.iteritems():
+      self._registry.add_unit(u, self._registry.Quantity(None, pint.UnitsContainer({t: 1})))
 
   def contains(self, uri):
   #------------------------
@@ -99,8 +100,9 @@ class UnitStore(object):
         raise KeyError("URI is not in units' ontologies")
       derivation = self.get_derivation(uri)
       if derivation is None:
-        _UNIT_REGISTRY.add_unit(name, _Quantity(None, None)) # Dimensionless
-        unit = _UNIT_REGISTRY[name]
+        if name not in BASE_UNITS:
+          self._registry.add_unit(name, self._registry.Quantity(None, None)) # Dimensionless
+        unit = self._registry[name]
       else:
         kind = derivation.kind
         if   kind == str(UOME_CORE.ScalingExpression):
@@ -114,42 +116,68 @@ class UnitStore(object):
         elif kind == str(UOME_CORE.QuotientExpression):
           unit = self.get_unit(derivation.unit1) / self.get_unit(derivation.unit2)
         elif kind == str(UOME_CORE.EquivalenzExpression):
-          _UNIT_REGISTRY.add_unit(name, self.get_unit(derivation.unit1))
-          unit = _UNIT_REGISTRY[name]
+          self._registry.add_unit(name, self.get_unit(derivation.unit1))
+          unit = self._registry[name]
         else:
           raise ValueError("Invalid unit's derivation")
       self._cache[uri] = unit
     return unit
 
 
+
+class UnitConversion(object):
+#============================
+
+  def __init__(self, store):
+  #-------------------------
+    self._store = UnitStore(store, UNITS_GRAPH)
+
+  def mapping(self, uri1, uri2):
+  #-----------------------------
+    ratio = self._store.get_unit(uri1)/self._store.get_unit(uri2)
+    if ratio.unitless: return lambda x: x*ratio.magnitude + 0.0   #: (scale, offset)
+    else: raise TypeError("Units cannot be converted between")
+
+
 if __name__ == '__main__':
 #=========================
   
+  store = UnitConversion(sparqlstore.Virtuoso('http://localhost:8890'))
+
   def test(u):
   #-----------
-    print u, '\n  ', repr(store.get_unit(u))
+    print u, '\n  ', repr(store._store.get_unit(u))
 
-  store = UnitStore(sparqlstore.Virtuoso('http://localhost:8890'), UNITS_GRAPH)
   test('http://www.sbpax.org/uome/list.owl#Centimetre')
   test('http://www.sbpax.org/uome/list.owl#RadianPerSecond')
   test('http://www.sbpax.org/uome/list.owl#RadianPerSecondSquared')
   test('http://www.biosignalml.org/ontologies/examples/unit#MillimetresOfWater')
   test('http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
 
-  d = store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#DecilitrePerMinute')
-  c = store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
+  d = store._store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#DecilitrePerMinute')
+  c = store._store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
   x = d/c
   print repr(x), x.unitless, x.dimensionless, x.magnitude
 
-  r = store.get_unit('http://www.sbpax.org/uome/list.owl#Radian')
-  x = d/r
-  print repr(x), x.unitless, x.dimensionless, x.magnitude
+  r = store._store.get_unit('http://www.sbpax.org/uome/list.owl#Radian')
+  a = store._store.get_unit('http://www.sbpax.org/uome/list.owl#DegreeOfArc')
+  x = r/a
+  print "Radian/Degree:", repr(x), x.unitless, x.dimensionless, x.magnitude
 ## Can convert if unitless
 
-  dl = store.get_unit('http://www.sbpax.org/uome/list.owl#Decilitre')
+  dl = store._store.get_unit('http://www.sbpax.org/uome/list.owl#Decilitre')
   print repr(dl/d)
 
-  dl = store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#Decilitre')
+  try:
+    dl = store._store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#Decilitre')
+  except Exception, msg:
+    print msg
+
+
+
+  f = store.mapping('http://www.biosignalml.org/ontologies/examples/unit#DecilitrePerMinute',
+                    'http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
+  print f(12)
 
 """
 
