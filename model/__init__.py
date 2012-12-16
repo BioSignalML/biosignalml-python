@@ -121,7 +121,7 @@ class Event(core.AbstractObject):
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
   #----------------------------------------------
-    from biosignalml.timeline import TemporalEntity  # Prevent a circular import
+    from biosignalml.data.time import TemporalEntity  # Prevent a circular import
     self = cls(uri, None, **kwds)
     self.load_from_graph(graph)
     if self.time is not None:
@@ -131,7 +131,7 @@ class Event(core.AbstractObject):
 
 def _get_timeline(tl):      # Stops a circular import
 #--------------------
-  from biosignalml.timeline import RelativeTimeLine
+  from biosignalml.data.time import RelativeTimeLine
   return RelativeTimeLine(tl)
 
 
@@ -170,7 +170,7 @@ class Recording(core.AbstractObject):
 
   def __init__(self, uri, **kwds):
   #-------------------------------
-    from biosignalml.timeline import RelativeTimeLine   ## Otherwise circular import...
+    from biosignalml.data.time import RelativeTimeLine   ## Otherwise circular import...
     core.AbstractObject.__init__(self, uri, **kwds)
     self.timeline = RelativeTimeLine(str(uri) + '/timeline')
     self._signals = OrderedDict()
@@ -388,7 +388,7 @@ class Annotation(core.AbstractObject):
     :type graph: :class:`~biosignalml.rdf.Graph`
     :rtype: :class:`Annotation`
     '''
-    from biosignalml.timeline import TemporalEntity  # Prevent a circular import
+    from biosignalml.data.time import TemporalEntity  # Prevent a circular import
     self = cls(uri, timestamp=False, **kwds)
     self.load_from_graph(graph)
     if self.time is not None:

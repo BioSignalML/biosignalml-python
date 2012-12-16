@@ -72,7 +72,7 @@ import biosignalml.rdf as rdf
 
 from biosignalml            import BSML
 from biosignalml.data       import TimeSeries, UniformTimeSeries, DataSegment
-from biosignalml.timeline   import Interval
+from biosignalml.data.time  import Interval
 from biosignalml.formats    import BSMLRecording, BSMLSignal
 from biosignalml.transports import StreamException
 
@@ -125,7 +125,7 @@ class Recording(BSMLRecording):
 #==============================
 
   SignalClass = Signal      #: The class of signals in the recording.
-  FORMAT = BSML.BSML_HDF5   #: Stored in :class:`~biosignalml.formats.hdf5.HDF5Recording` format.
+  MIMETYPE = 'application/x-bsml+hdf5'  #: Stored in :class:`~biosignalml.formats.hdf5.HDF5Recording` format.
 
   def __init__(self, *args, **kwds):
   #---------------------------------
