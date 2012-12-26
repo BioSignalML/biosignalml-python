@@ -166,10 +166,25 @@ class HDF5Recording(BSMLRecording):
     """
     Open a BioSignalML HDF5 file to obtain a HDF5 Recording.
 
-    :param dataset: The file path or URI of the BioSignalML HDF5 file. 
+    :param dataset: The file path or URI of the BioSignalML HDF5 file.
     :param kwds: Other :class:`~biosignalml.Recording` attributes to set.
     """
     return cls(None, dataset, **kwds)
+
+  @classmethod
+  def create(cls, uri, dataset, **kwds):
+  #-------------------------------------
+    """
+    Create a new recording and its BioSignalML HDF5 file.
+
+    :param uri: The recording's URI.
+    :param dataset: The file path or URI of the BioSignalML HDF5 file.
+    :param kwds: Other :class:`~biosignalml.Recording` attributes to set.
+    """
+    self = cls(uri, None, **kwds)
+    self.dataset = dataset
+    self._h5 = H5Recording.create(uri, str(dataset))
+    return self
 
   def close(self):
   #---------------
