@@ -268,14 +268,14 @@ class AbstractObject(object):
     for r in self._associations: r.save_to_graph(graph)
     return graph
 
-  def metadata_as_string(self, format=rdf.Format.RDFXML, base=None, prefixes={ }):
+  def metadata_as_string(self, format=rdf.Format.RDFXML, base=None, prefixes=None):
   #-------------------------------------------------------------------------------
     """
     Return metadata as a serialised RDF string.
     """
     namespaces = { 'bsml': BSML.URI }
     namespaces.update(rdf.NAMESPACES)
-    namespaces.update(prefixes)
+    if prefixes: namespaces.update(prefixes)
     return self.metadata_as_graph().serialise(base=base, format=format, prefixes=namespaces)
 
   def load_from_graph(self, graph):
