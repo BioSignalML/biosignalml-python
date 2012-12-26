@@ -82,8 +82,8 @@ import repository
 class Signal(BSMLSignal):
 #========================
 
-  def __init__(self, uri, units, **kwds):
-  #--------------------------------------
+  def __init__(self, uri, units=None, **kwds):
+  #-------------------------------------------
     repository = kwds.pop('repository', None)
     BSMLSignal.__init__(self, uri, units, **kwds)
     self.repository = repository
@@ -93,8 +93,8 @@ class Signal(BSMLSignal):
     # Ensure all metadata has been POSTed
     pass
 
-  def read(self, interval=None, segment=None, maxpoints=0):
-  #--------------------------------------------------------
+  def read(self, interval=None, segment=None, maxpoints=0, dtype=None):
+  #--------------------------------------------------------------------
     params = { }
     if interval:
       if isinstance(interval, Interval):
@@ -107,11 +107,12 @@ class Signal(BSMLSignal):
       params['offset'] = segment[0]
       params['count'] = segment[1]
     if maxpoints: params['maxsize'] = maxpoints
+    if dtype is not None: params['dtype'] = dtype
     for sd in self.repository.get_data(str(self.uri), **params):
-      if str(sd.uri) != str(self.uri):
+      if sd.uri != str(self.uri):
         raise StreamExeception("Received signal '%s' different from requested '%s'" % (sd.uri, self.uri))
       if sd.rate is not None: yield DataSegment(sd.start, UniformTimeSeries(sd.data, sd.rate))
-      else:                   yield DataSegment(sd.start, TimeSeries(sd.clock, sd.data))
+      else:                   yield DataSegment(sd.start, TimeSeries(sd.data, sd.clock))
 
   def append(self, timeseries):
   #----------------------------
@@ -173,7 +174,7 @@ class Repository(repository.RemoteRepository):
     rec = self.get_recording(uri, **kwds)
     if rec is not None:
       for sig in rec.graph.get_subjects(BSML.recording, rdf.Uri(uri)):
-        rec.set_signal(
+        rec.add_signal(
           self.RecordingClass.SignalClass.create_from_graph(
             sig.uri, self.get_metadata(sig.uri), units=None, repository=self))
     return rec
@@ -203,4 +204,24 @@ class Repository(repository.RemoteRepository):
       sig = self.RecordingClass.SignalClass.create_from_graph(uri, self.get_metadata(uri), repository=self)
       sig.recording = self.get_recording(sig.recording)
       return sig
+
+
+if __name__ == "__main__":
+#=========================
+
+##  logging.getLogger().setLevel('DEBUG')
+
+  repo = Repository('http://devel.biosignalml.org')
+
+  rec_uri = 'http://devel.biosignalml.org/fph/icon/120312170352/FLW0002'
+  sig_uri = rec_uri + '/signal/2'
+
+  rec = repo.get_recording_with_signals(rec_uri)
+  for s in sorted(rec.signals(), key=lambda s: str(s.uri)):
+    print s.uri, s.label
+#    for d in s.read(): print d
+
+  sig = repo.get_signal(sig_uri)
+  for d in sig.read(dtype='f4'):
+    print d
 

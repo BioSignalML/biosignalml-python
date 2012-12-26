@@ -12,7 +12,8 @@ import logging
 import httplib2
 
 import biosignalml.rdf as rdf
-from biosignalml.transports import WebStreamReader, SignalData, WebStreamWriter, StreamException
+from biosignalml.transports import BlockType, SignalData
+from biosignalml.transports import WebStreamReader, WebStreamWriter, StreamException
 
 
 class RemoteRepository(object):
@@ -78,8 +79,10 @@ class RemoteRepository(object):
     duration
     offset
     count
+    dtype
     '''
-    return WebStreamReader(self._sd_uri, uri, **kwds)
+    for block in WebStreamReader(self._sd_uri, uri, **kwds):
+      if block.type == BlockType.DATA: yield block.signaldata()
 
 
   def put_data(self, uri, timeseries):
