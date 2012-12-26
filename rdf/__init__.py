@@ -50,10 +50,20 @@ class Format(object):
   @staticmethod
   def name(mimetype):
   #-----------------
+    """ Get the name of a format from its mimetype."""
     return { Format.RDFXML: 'rdfxml',
              Format.TURTLE: 'turtle',
              Format.JSON:   'json',
            }.get(mimetype, 'rdfxml')
+
+  @staticmethod
+  def format(name):
+  #-----------------
+    """ Get the RDF format from its name."""
+    return { 'rdfxml': Format.RDFXML,
+             'turtle': Format.TURTLE,
+             'json':   Format.JSON,
+           }.get(name, Format.RDFXML)
 
 
 class NS(librdf.NS):
