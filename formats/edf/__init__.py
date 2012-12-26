@@ -12,4 +12,3 @@
 from edffile import EDF, EDFFile, InvalidSignalId
 from edfrecording import EDFRecording
 from edfsignal import EDFSignal
-from edfsource import EDFSource
