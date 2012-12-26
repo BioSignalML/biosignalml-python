@@ -31,7 +31,7 @@ MAXBUFFERS = 100   ## Has to allow for short output data records and long signal
 class EDFRecording(BSMLRecording):
 #=================================
 
-  MIMETYPE = 'application/x-edf'
+  MIMETYPE = 'application/x-edf'  ## EDF+ as well...   #### look at self.edf_type ??
   EXTENSIONS = [ 'edf' ]
   SignalClass = EDFSignal
 
@@ -53,11 +53,11 @@ class EDFRecording(BSMLRecording):
   def _set_attributes(self):
   #-------------------------
     if self._edffile is None: return
-    self.set_attributes(format = BSML.EDF,   ## EDF+ as well...   #### look at self.edf_type
-                        starttime = self._edffile.start_datetime,
+    self.set_attributes(starttime = self._edffile.start_datetime,
                         duration = self._edffile.duration,
                         investigation = self._edffile.patient,
                         description = self._edffile.recording,
+                        ## EDF+ as well...   #### look at self.edf_type
 ##                      version = self._edffile.version,    ## Or a comment field ??
                         )
     if self._edffile.edf_type != EDF.EDF:
