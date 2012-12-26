@@ -105,3 +105,18 @@ class RemoteRepository(object):
     finally:
       if stream: stream.close()
 
+
+if __name__ == "__main__":
+#=========================
+
+  repo = RemoteRepository('http://devel.biosignalml.org')
+
+  rec_uri = 'http://devel.biosignalml.org/fph/icon/120312170352/FLW0002'
+
+  sig_uri = rec_uri + '/signal/0'
+
+  for d in repo.get_data(rec_uri):
+    print d
+
+  for d in repo.get_data(sig_uri):
+    print d
