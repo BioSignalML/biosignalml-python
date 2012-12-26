@@ -156,13 +156,13 @@ class TimeSeries(object):
   """
   A series of data values with times.
 
-  :param np.array times: Array of sample times, in seconds or a :class:`Clock` with times.
   :param np.array data: Array of data values.
+  :param np.array times: Array of sample times, in seconds or a :class:`Clock` with times.
 
   append(self, data, clock=None)
   extend(self, timeseries)
   """
-  def __init__(self, times, data):
+  def __init__(self, data, times):
   #-------------------------------
     if len(times) != len(data):
       raise DataError('Number of sample times and data points are different')
@@ -239,8 +239,8 @@ class TimeSeries(object):
     #                    np.concatenate((self.data, series.data)))
     if self.time[-1] >= series.times[0]:  # Using 'times' allows a DataSeries to be added
       raise DataError('Times must be increasing')
-    return TimeSeries(np.concatenate((self.times, series.times)),
-                      np.concatenate((self.data, series.data)))
+    return TimeSeries(np.concatenate((self.data, series.data)),
+                      np.concatenate((self.times, series.times)))
 
 
 class UniformTimeSeries(TimeSeries):
@@ -347,7 +347,7 @@ if __name__ == '__main__':
 
   t = np.linspace(0.0, 2.0*math.pi, 101)
 
-  sw = TimeSeries(t, np.sin(t))
+  sw = TimeSeries(np.sin(t), t)
 
   uts = UniformTimeSeries(np.cos(t), 1000)
 

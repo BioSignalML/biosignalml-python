@@ -91,7 +91,7 @@ class HDF5Signal(BSMLSignal):
       if isinstance(self.clock, UniformClock):
         yield DataSegment(self.clock[startpos], UniformTimeSeries(data, self.clock.rate))
       else:
-        yield DataSegment(0, TimeSeries(self.clock[startpos: startpos+maxpoints], data))
+        yield DataSegment(0, TimeSeries(data, self.clock[startpos: startpos+maxpoints]))
       startpos += len(data)
       length -= len(data)
 
