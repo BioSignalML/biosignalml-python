@@ -426,8 +426,11 @@ class EDFFile(object):
     (recno, lastrec), (startratio, endratio) = self._get_range(interval)
     dtype = 'short' if scaling == None else 'float32'
     while recno <= lastrec:
-      if recno == lastrec: proportion = endratio - startratio
-      else:                proportion = 1.0 - startratio
+      if recno == lastrec:
+        if endratio == startratio: return
+        proportion = endratio - startratio
+      else:
+        proportion = 1.0 - startratio
       for chan, signo in enumerate(signals):
         self._file.seek(self._hdrsize + recno*self._recsize
                       + self._offsets[signo] + 2*int(self.nsamples[signo]*startratio))
@@ -444,7 +447,7 @@ class EDFFile(object):
           else:
             (scale, offset) = self.scaling[signo]
           data = scale * raw.astype(dtype) + offset
-          yield RecordData(chan, sigstart, self.rate[signo], data)
+        yield RecordData(signo, sigstart, self.rate[signo], data)
       recno += 1
       startratio = 0.0
 
