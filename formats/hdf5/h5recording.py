@@ -20,7 +20,7 @@ Files are structured as follows::
       ./1      Dataset   uri, units, gain/offset, rate/period/clock, timeunits
        .
     ./clock    Group
-      /0       Dataset   uri, units, rate, scale
+      /0       Dataset   uri, units, rate/period
        .
 
 
@@ -95,7 +95,7 @@ Any clock (i.e. timing) datasets are contained within a 'clock' group in '/recor
 ----------------------------
 
 Clock datasets are numbered, starting from '0'. Attributes are ``uri`` and ``units`` with
-default units of seconds. A clock can optionally have either a ``rate'' or ``scale`` factor
+default units of seconds. A clock can optionally have either a ``rate'' or ``period``
 (= 1/rate); if so the stored value of a time point is be multiplied by the scaling factor to
 obtain a value in the specified units.
 
@@ -169,9 +169,9 @@ class H5Clock(object):
     """
     t = self.dataset[pos]
     attrs = self.dataset.attrs
-    if   attrs.get('scale'): return t*float(attrs['scale'])
-    elif attrs.get('rate'):  return t/float(attrs['rate'])
-    else:                    return t
+    if   attrs.get('period'): return t*float(attrs['period'])
+    elif attrs.get('rate'):   return t/float(attrs['rate'])
+    else:                     return t
 
   def time(self, pos):
   #-------------------
@@ -281,8 +281,8 @@ class H5Recording(object):
   The :meth:`create` and :meth:`open` methods are intended to be used to
   create instances instead of directly using the constructor.
   """
-  def __init__(self, uri, fname, h5=None, **kwds):
-  #-----------------------------------------------
+  def __init__(self, uri, h5=None):
+  #--------------------------------
     self.uri = uri
     self._h5 = h5
 
@@ -318,11 +318,12 @@ class H5Recording(object):
         raise ValueError("File '%s' not compatible with version %s" % (fname, VERSION))
     except Exception:
       raise ValueError("Invalid file format")
-    if (not h5.get('/uris')
-     or not h5.get('/recording/signal')
-     or not h5['recording'].attrs.get('uri')):
+    if not (h5.get('/uris')
+        and h5.get('/recording/signal')
+        and h5['recording'].attrs.get('uri')
+        and h5[h5['uris'].attrs.get(h5['recording'].attrs['uri'])] == h5[h5['recording'].ref]):
       raise TypeError("'%s' is not a BioSignalML file" % fname)
-    return cls(h5['recording'].attrs['uri'], fname, h5, **kwds)
+    return cls(h5['recording'].attrs['uri'], h5)
 
 
   @classmethod
@@ -337,6 +338,7 @@ class H5Recording(object):
     :param replace: If True replace any existing file (default = False).
     :param replace: bool
     """
+    if fname.startswith('file://'): fname = fname[7:]
     try:
       h5 = h5py.File(fname, 'w' if replace else 'w-')
     except IOError, msg:
@@ -347,7 +349,7 @@ class H5Recording(object):
     h5.create_group('recording/signal')
     h5['recording'].attrs['uri'] = str(uri)
     h5['uris'].attrs[str(uri)] = h5['recording'].ref
-    return cls(uri, fname, h5, **kwds)
+    return cls(uri, h5)
 
 
   def close(self):
@@ -363,7 +365,7 @@ class H5Recording(object):
   def create_signal(self, uri, units, shape=None, data=None,
                           dtype=None, gain=None, offset=None,
                           rate=None, period=None, timeunits=None, clock=None,
-                          compression=COMPRESSION):
+                          compression=COMPRESSION, **kwds):
   #---------------------------------------------------------------------------
     """
     Create a dataset for a signal or group of signals in a HDF5 recording.
@@ -476,7 +478,7 @@ class H5Recording(object):
 
 
   def create_clock(self, uri, units=None, shape=None, times=None, dtype=None,
-                                                                  rate=None, scale=None,
+                                                                  rate=None, period=None,
                                                                   compression=COMPRESSION):
   #----------------------------------------------------------------------------------------
     """
@@ -492,7 +494,7 @@ class H5Recording(object):
                   no ``times`` are given.
     :type dtype: :class:`numpy.dtype`
     :param rate (float): The sample rate of time points. Optional.
-    :param scale (float): A scaling factor to obtain time units from time points. Optional.
+    :param period (float): The interval, in time units, between time points. Optional.
     :return: The name of the clock dataset created.
     :rtype: str
     """
@@ -524,9 +526,9 @@ class H5Recording(object):
 
     dset.attrs['uri'] = str(uri)
     if units: dset.attrs['units'] = str(units)
-    if scale and rate: raise RuntimeError("Cannot specify both 'rate' and 'scale' for a clock")
+    if period and rate: raise RuntimeError("Cannot specify both 'rate' and 'period' for a clock")
     if rate: dset.attrs['rate'] = float(rate)
-    if scale: dset.attrs['scale'] = float(scale)
+    if period: dset.attrs['period'] = float(period)
     self._h5['uris'].attrs[str(uri)] = dset.ref
     return dset.name
 
@@ -544,6 +546,7 @@ class H5Recording(object):
     If the dataset is compound (i.e. contains several signals) then the size of the
     supplied data must be a multiple of the number of signals.
     """
+    if len(data) == 0: return
     if getattr(uri, '__iter__', None):
       sig = self.get_signal(uri[0])
       if sig is None or list(sig.dataset.attrs['uri']) != list(uri):
@@ -560,11 +563,10 @@ class H5Recording(object):
 
     if nsignals > 1:         # compound dataset
       npoints = data.size/nsignals
-      dpoints = dset.shape[0]
     else:                    # simple dataset
       if len(dset.shape) == 1: npoints = data.size
       else:                    npoints = data.size/reduce((lambda x, y: x * y), dset.shape[1:])
-      dpoints = dset.len()
+    dpoints = dset.shape[0]
     clockref = dset.attrs.get('clock')
     if clockref and self._h5[clockref].len() < (npoints+dpoints):
       raise ValueError("Clock doesn't have sufficient times")
@@ -575,7 +577,7 @@ class H5Recording(object):
       else:                    # simple dataset
         dset[dpoints:] = data.reshape((npoints,) + dset.shape[1:])
     except Exception, msg:
-      raise RuntimeError("Cannot extend signal dataset '%s' (%s)" % (name, msg))
+      raise RuntimeError("Cannot extend signal dataset '%s' (%s)" % (uri, msg))
 
 
   def extend_clock(self, uri, times):
@@ -587,18 +589,19 @@ class H5Recording(object):
     :param times: Time points with which to extend the clock.
     :type times: :class:`numpy.ndarray` or an iterable.
     """
+    if len(times) == 0: return
     clock = self.get_clock(uri)
-    if clock is None: raise KeyError("Unknown clock '%s'" % name)
+    if clock is None: raise KeyError("Unknown clock '%s'" % uri)
     dset = clock.dataset
     if not isinstance(times, np.ndarray): times = np.array(times)
     if len(dset.shape) == 1: npoints = times.size
     else:                    npoints = times.size/reduce((lambda x, y: x * y), dset.shape[1:])
-    dpoints = dset.len()
+    dpoints = dset.shape[0]
     try:
       dset.resize(dpoints + npoints, 0)
       dset[dpoints:] = times.reshape((npoints,) + dset.shape[1:])
     except Exception, msg:
-      raise RuntimeError("Cannot extend clock dataset '%s' (%s)" % (name, msg))
+      raise RuntimeError("Cannot extend clock dataset '%s' (%s)" % (uri, msg))
 
 
   def get_dataset_by_name(self, name):
@@ -606,7 +609,7 @@ class H5Recording(object):
     """
     Find a dataset from its name.
 
-    :param uri: The name of the dataset.
+    :param name: The name of the dataset.
     :return: A :class:`h5py.Dataset`.
     """
     obj = self._h5.get(name)
