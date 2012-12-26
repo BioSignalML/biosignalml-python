@@ -34,8 +34,8 @@ class EDFSignal(BSMLSignal):
              transducer = edffile.transducer[signum],
              filter     = edffile.prefilter[signum],
              rate       = edffile.rate[signum],
-             minValue   = edffile._physmin[signum],
-             maxValue   = edffile._physmax[signum],
+#             minValue   = edffile._physmin[signum],
+#             maxValue   = edffile._physmax[signum],
              index = signum,
             ))
     self.initialise()
