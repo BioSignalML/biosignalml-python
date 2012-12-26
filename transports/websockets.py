@@ -113,9 +113,9 @@ class WebStreamReader(stream.SignalDataStream):
     returned. A value of -1 means to return the complete time series of the signal(s).
   :type duration: float
   """
-  def __init__(self, endpoint, uri, start=None, offset=None, duration=-1, count=None, maxsize=-1):
-  #------------------------------------------------------------------------------------------------
-    stream.SignalDataStream.__init__(self, endpoint, uri, start, offset, duration, count, maxsize)
+  def __init__(self, endpoint, uri, start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None):
+  #-----------------------------------------------------------------------------------------------------------
+    stream.SignalDataStream.__init__(self, endpoint, uri, start, offset, duration, count, maxsize, dtype)
     try:
       self._ws = StreamClient(endpoint, self._request, self._receiveQ, protocols=['biosignalml-ssf'])
       self._ws.connect()
