@@ -21,7 +21,13 @@ from h5recording import H5Recording
 
 class HDF5Signal(BSMLSignal):
 #============================
+  """
+  A :class:`~biosignalml.Signal` in a HDF5 Recording.
 
+  :param uri: The signal's URI.
+  :param units: The physical units of the signal's data.
+  :param kwds: Other :class:`~biosignalml.Signal` attributes to set.
+  """
   def __init__(self, uri, units, **kwds):
   #--------------------------------------
     BSMLSignal.__init__(self, uri, units, **kwds)
@@ -29,6 +35,9 @@ class HDF5Signal(BSMLSignal):
 
   def __len__(self):
   #-----------------
+    """
+    Get the number of data points in a signal.
+    """
     return len(self._h5) if self._h5 is not None else 0
 
   def _set_h5_signal(self, h5):
@@ -40,6 +49,10 @@ class HDF5Signal(BSMLSignal):
   @classmethod
   def create_from_H5Signal(cls, index, signal):
   #--------------------------------------------
+    """
+    Create a new signal from a signal dataset in a
+    BioSignalML HDF5 file.
+    """
     self = cls(signal.uri, signal.units, rate=signal.rate, clock=signal.clock)
     self._set_h5_signal(signal)
     return self
@@ -47,7 +60,7 @@ class HDF5Signal(BSMLSignal):
   def read(self, interval=None, segment=None, maxduration=None, maxpoints=None):
   #-----------------------------------------------------------------------------
     """
-    Read data from a Signal.
+    Read data from a signal.
 
     :param interval: The portion of the signal to read.
     :type interval: :class:`~biosignaml.time.Interval`
@@ -60,7 +73,6 @@ class HDF5Signal(BSMLSignal):
 
     If both ``maxduration`` and ``maxpoints`` are given their minimum value is used.
     """
-
     if   interval is not None and segment is not None:
       raise ValueError("'interval' and 'segment' cannot both be specified")
     if maxduration:
@@ -97,12 +109,15 @@ class HDF5Signal(BSMLSignal):
 
   def initialise(self):
   #--------------------
+    """
+    Set signal attributes once the HDF5 file of its recording is opened.
+    """
     self._set_h5_signal(self.recording._h5.get_signal(self.uri))
 
   def append(self, timeseries):
   #----------------------------
     '''
-    Append data to a Signal.
+    Append data to a signal.
 
     :param timeseries: The data points (and times) to append.
     :type timeseries: :class:`~biosignalml.data.TimeSeries`
@@ -114,10 +129,17 @@ class HDF5Signal(BSMLSignal):
 
 class HDF5Recording(BSMLRecording):
 #==================================
+  """
+  A HDF5 :class:`~biosignalml.Recording`.
 
-  MIMETYPE = 'application/x-bsml+hdf5'
-  EXTENSIONS = [ 'h5', 'hdf', 'hdf5' ]
-  SignalClass = HDF5Signal
+  :param uri: The recording's URI.
+  :param dataset: The file path or URI of the BioSignalML HDF5 file for the recording.
+  :param kwds: :class:`~biosignalml.Recording` attributes to set.
+  """
+
+  MIMETYPE = 'application/x-bsml+hdf5'   #: The mimetype for BioSignalML HDF5 files
+  EXTENSIONS = [ 'h5', 'hdf', 'hdf5' ]   #: File extensions to try when opening a file
+  SignalClass = HDF5Signal               #: The class of Signals HDF5Recording
 
   def __init__(self, uri, dataset=None, **kwds):
   #---------------------------------------------
@@ -139,44 +161,67 @@ class HDF5Recording(BSMLRecording):
     except IOError: return H5Recording.create(self.uri, fname)
 
   @classmethod
-  def open(cls, dataset):
-  #----------------------
-    return cls(None, dataset)
+  def open(cls, dataset, **kwds):
+  #------------------------------
+    """
+    Open a BioSignalML HDF5 file to obtain a HDF5 Recording.
+
+    :param dataset: The file path or URI of the BioSignalML HDF5 file. 
+    :param kwds: Other :class:`~biosignalml.Recording` attributes to set.
+    """
+    return cls(None, dataset, **kwds)
 
   def close(self):
   #---------------
+    """ Close a recording`. """
     if self._h5:
       self._h5.close()
       self._h5 = None
 
   def new_signal(self, uri, units, id=None, **kwds):
   #-------------------------------------------------
-    '''
-    Create a new Signal and add it to the Recording.
+    """
+    Create a new signal and add it to the recording.
 
     :param uri: The URI for the signal.
-    :param units: The units signal values are in.
+    :param units: The physical units of the signal's data.
     :rtype: :class:`HDF5Signal`
-    '''
+    :param kwds: Other :class:`~biosignalml.Signal` attributes to set.
+    """
     sig = BSMLRecording.new_signal(self, uri, units, id=id, **kwds)
     if self._h5:
       if sig.clock: self._h5.create_clock(sig.clock.uri)
-      sig._h5 = self._h5.create_signal(sig.uri, units, rate=sig.rate, clock=sig.clock)
+      sig._h5 = self._h5.create_signal(sig.uri, units, **kwds)
     return sig
 
   def save_metadata(self, format=rdf.Format.TURTLE, prefixes=None):
   #----------------------------------------------------------------
+    """
+    Save all metadata associated with the recording in its
+    BioSignalML HDF5 file.
+
+    :param format: The :class:`~biosignalml.rdf.Format` in which to serialise RDF.
+    :param prefixes: An optional dictionary of namespace abbreviations and URIs.
+    """
     self._h5.store_metadata(self.metadata_as_string(format=format, prefixes=prefixes),
                         rdf.Format.mimetype(format))
 
   def load_metadata(self):
   #-----------------------
+    """
+    Set metadata attributes of the recording from its associated
+    BioSignalML HDF5 file.
+    """
     rdf, format = self._h5,get_metadata()
     if rdf:
       self.load_from_graph(rdf.Graph.create_from_string(self.uri, rdf, format))
 
   def initialise(self, **kwds):
   #----------------------------
+    """
+    Set recording and associated signal attributes
+    once the recording's dataset is known.
+    """
     if self.dataset is not None:
       self._h5 = self._openh5(str(self.dataset))
       for s in self.signals():
