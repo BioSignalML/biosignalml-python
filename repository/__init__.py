@@ -67,7 +67,7 @@ class BSMLStore(GraphStore):
     return self.add_resource_graph(uri, BSML.Recording, rdf, creator, format=format)
 
 
-  def get_recording_and_graph_uri(self, uri):
+  def get_graph_and_recording_uri(self, uri):
   #------------------------------------------
     """
     Get URIs of the Graph and Recording that contain the object.
@@ -90,7 +90,7 @@ class BSMLStore(GraphStore):
     :rtype: :class:`~biosignalml.Recording`
     '''
     #logging.debug('Getting: %s', uri)
-    graph_uri, rec_uri = self.get_recording_and_graph_uri(uri)
+    graph_uri, rec_uri = self.get_graph_and_recording_uri(uri)
     #logging.debug('Graph: %s', graph_uri)
     if graph_uri is not None:
       rclass = biosignalml.formats.CLASSES.get(
@@ -149,7 +149,7 @@ class BSMLStore(GraphStore):
     :rtype: :class:`~biosignalml.Signal`
     '''
     # The following line works around a Virtuoso problem
-    if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
+    if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Signal, graph_uri)
     return Signal.create_from_graph(uri, graph, units=None)  # units set from graph...
 
@@ -188,7 +188,7 @@ class BSMLStore(GraphStore):
     :rtype: :class:`~biosignalml.Event`
     '''
     # The following line works around a Virtuoso problem
-    if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
+    if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Event, graph_uri)
     for tm in graph.get_objects(uri, BSML.time):  ## This could be improved...
       graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Instant, graph_uri))
@@ -247,7 +247,7 @@ class BSMLStore(GraphStore):
     :rtype: :class:`~biosignalml.Annotation`
     '''
     # The following line works around a Virtuoso problem
-    if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
+    if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Annotation, graph_uri)
     for tm in graph.get_objects(uri, BSML.time):  ## This could be improved...
       graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Instant, graph_uri))
@@ -262,7 +262,7 @@ class BSMLStore(GraphStore):
 #    :param uri: The URI of the body of an Annotation.
 #    :rtype: :class:`~biosignalml.Annotation`
 #    '''
-#    if graph_uri is None: graph_uri = self.get_recording_and_graph_uri(uri)[0]
+#    if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
 #    for r in self.select('?a', 'graph <%(g)s> { ?a a oa:Annotation . ?a oa:hasBody <%(u)s> }',
 #                         params = dict(g=graph_uri, u=uri),
 #                         prefixes = dict(oa = OA.prefix)):
