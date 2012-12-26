@@ -256,6 +256,7 @@ class GraphStore(object):
       return self._sparqlstore.construct('?s ?p ?o',
                              '?s ?p ?o FILTER (?s = <%(uri)s> || ?o = <%(uri)s>)',
                              params=dict(uri=uri), graph=graph, format=format)
+
     class Closure(Graph):
     #--------------------
       def __init__(self, rdf, base, format):
@@ -277,8 +278,8 @@ class GraphStore(object):
             if node != stmt.subject: self.add_urn(stmt.subject)
             if node != stmt.object: self.add_urn(stmt.object)
 
-    rdf = description(uri, graph, format)
-    return Closure(rdf, self.uri, format).serialise(format, base = self.uri + '/')  # Need '/' for Tabulator...
+    rdf = description(uri, graph, Format.RDFXML) # Virtuoso returns bad Turtle typed literals...
+    return Closure(rdf, self.uri, Format.RDFXML).serialise(format, base = self.uri + '/')  # Need '/' for Tabulator...
 
 
 
