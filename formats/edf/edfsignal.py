@@ -28,7 +28,7 @@ class EDFSignal(BSMLSignal):
     edffile = recording._edffile
     BSMLSignal.__init__(self,
       str(recording.uri) + '/signal/%d' % signum,
-      units.to_UNITS(edffile.units[signum]),
+      units.units(edffile.units[signum]),
       **dict(recording  = recording,
              label      = edffile.label[signum],
              transducer = edffile.transducer[signum],

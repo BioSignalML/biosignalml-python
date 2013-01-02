@@ -86,15 +86,19 @@ def _mult(u):
   return ''.join([_power(v) for v in u.split('*')])
 
 
-def to_UNITS(units):
-#==================
-  if units:
+def units(s):
+#============
+  """
+  Convert an abbreviated unit-of-measure into a URI from a unit's ontology.
+  """
+  if s:
     try:
-      uome = _direct[units]
+      uome = _direct[s]
     except KeyError:
-      try: uome = 'Per'.join([_mult(u) for u in units.split('/')])
+      try: uome = 'Per'.join([_mult(u) for u in s.split('/')])
       except KeyError: return None
-    return getattr(UNITS, uome, None)
+    resource = getattr(UNITS, uome, None)
+    if resource: return resource.uri
   return None
 
 if __name__ == '__main__':
@@ -104,7 +108,7 @@ if __name__ == '__main__':
 
   def convert(u):
     try:
-      o = to_UNITS(u)
+      o = units(u)
       if o: print '%s --> %s' % (u, o)
       else: print 'Cannot convert: %s' % u
     except Exception, msg:
