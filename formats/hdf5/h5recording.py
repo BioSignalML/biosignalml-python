@@ -164,6 +164,12 @@ class H5Clock(object):
     self.dataset = dataset
 
   @property
+  def name(self):
+  #--------------
+    """The name of the clock's dataset."""
+    return self.dataset.name
+
+  @property
   def uri(self):
   #-------------
     """The URI of the clock."""
@@ -213,6 +219,12 @@ class H5Signal(object):
     self.index = index
     self.gain = self.dataset.attrs.get('gain', 1.0)
     self.offset = self.dataset.attrs.get('offset', 0)
+
+  @property
+  def name(self):
+  #--------------
+    """The name of the signal's dataset."""
+    return self.dataset.name
 
   @property
   def uri(self):
