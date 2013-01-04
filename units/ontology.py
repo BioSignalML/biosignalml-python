@@ -689,7 +689,7 @@ class UNITS(object):
   '''year (a)'''
 
 
-  EXTRA = Namespace("http://www.biosignalml.org/ontologies/unit#")
+  EXTRA = Namespace("http://www.biosignalml.org/ontologies/examples/unit#")
 
   Beat           = Resource(EXTRA.Beat, label="beat", desc="beat")
   '''beat (beat)'''
@@ -697,8 +697,23 @@ class UNITS(object):
   BeatsPerMinute = Resource(EXTRA.BeatsPerMinute, label="bpm", desc="beats per minute")
   '''beats per minute (bpm)'''
 
+  Centilitre = Resource(EXTRA.Centilitre, label="cl", desc="centilitre")
+  '''centilitre (cl)'''
+
   LitrePerMinute = Resource(EXTRA.LitrePerMinute, label="l/min", desc="litre per minute")
   '''litre per minute (l/min)'''
+
+  DecilitrePerMinute = Resource(EXTRA.DecilitrePerMinute, label="dl/min", desc="decilitre per minute")
+  '''decilitre per minute (dl/min)'''
+
+  CentilitrePerMinute = Resource(EXTRA.CentilitrePerMinute, label="cl/min", desc="centilitre per minute")
+  '''centilitre per minute (cl/min)'''
+
+  CentimetresOfWater = Resource(EXTRA.CentimetresOfWater, label="cmH2O", desc="centimetres of water")
+  '''centimetres of water (cmH2O)'''
+
+  MillimetresOfWater = Resource(EXTRA.MillimetresOfWater, label="mmH2O", desc="millimetres of water")
+  '''millimetres of water (mmH2O)'''
 
   AnnotationData = Resource(EXTRA.AnnotationData, label='annotation', desc='annotation')
 

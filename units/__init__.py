@@ -55,6 +55,8 @@ _units = {
   'bar':   'bar',
   'BPM':   'BeatsPerMinute',
   'bpm':   'BeatsPerMinute',
+  'M':     'molar',
+  'mol':   'mole',
   }
 
 _powers_prefix = {
@@ -156,6 +158,7 @@ if __name__ == '__main__':
   test('mmHg')
   test('cmH2O')
   test('bpm')
+  test('clpm')
   test('')
   test(u'\u00b5V')
   '''

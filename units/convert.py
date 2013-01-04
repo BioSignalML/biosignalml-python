@@ -205,6 +205,10 @@ if __name__ == '__main__':
                     'http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
   print f(12)
 
+  f = store.mapping('http://www.sbpax.org/uome/list.owl#Nanomolar',
+                    'http://www.sbpax.org/uome/list.owl#Micromolar')
+  print '1200 nM =', f(1200), 'uM'
+
 """
 
 
