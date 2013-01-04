@@ -104,8 +104,8 @@ class Signal(BSMLSignal):
     # Ensure all metadata has been POSTed
     pass
 
-  def read(self, interval=None, segment=None, maxpoints=0, dtype=None):
-  #--------------------------------------------------------------------
+  def read(self, interval=None, segment=None, maxpoints=0, dtype=None, units=None):
+  #--------------------------------------------------------------------------------
     params = { }
     if interval:
       if isinstance(interval, Interval):
@@ -119,6 +119,7 @@ class Signal(BSMLSignal):
       params['count'] = segment[1]
     if maxpoints: params['maxsize'] = maxpoints
     if dtype is not None: params['dtype'] = dtype
+    if units is not None: params['units'] = units
     for sd in self.repository.get_data(str(self.uri), **params):
       if sd.uri != str(self.uri):
         raise StreamExeception("Received signal '%s' different from requested '%s'" % (sd.uri, self.uri))
