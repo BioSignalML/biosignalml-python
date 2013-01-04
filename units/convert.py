@@ -47,7 +47,7 @@ def strip_prefix(uri):
 #=====================
   for p in UNIT_PREFIXES:
     if uri.startswith(p): return(uri[len(p):])
-  raise ValueError("URI doesn't have a standard unit prefix")  
+  raise ValueError("'%s' doesn't have a standard unit prefix" % uri)
 
 
 class UnitTerm(object):
@@ -56,7 +56,7 @@ class UnitTerm(object):
   def __init__(self, kind):
   #------------------------
     self.kind = str(kind)
-      
+
   def set_property(self, p, v):
   #----------------------------
     p = str(p)
@@ -117,7 +117,7 @@ class UnitStore(object):
     if unit is None:
       name = strip_prefix(uri)
       if not self.contains(uri):
-        raise KeyError("URI is not in units' ontologies")
+        raise KeyError("'%s' is not defined in units ontologies" % uri)
       derivation = self.get_derivation(uri)
       if derivation is None:
         if name not in BASE_UNITS:
@@ -144,25 +144,29 @@ class UnitStore(object):
     return unit
 
 
-
-class UnitConversion(object):
-#============================
+class UnitConvertor(object):
+#===========================
 
   def __init__(self, store):
   #-------------------------
     self._store = UnitStore(store, UNITS_GRAPH)
 
-  def mapping(self, uri1, uri2):
-  #-----------------------------
-    ratio = self._store.get_unit(uri1)/self._store.get_unit(uri2)
+  def mapping(self, from_units, to_units):
+  #---------------------------------------
+    """
+    Convert between compatible units.
+
+    :return: A function mapping values in `drom_units` to `to_units`.
+    """
+    ratio = self._store.get_unit(from_units)/self._store.get_unit(to_units)
     if ratio.unitless: return lambda x: x*ratio.magnitude + 0.0   #: (scale, offset)
-    else: raise TypeError("Units cannot be converted between")
+    else: raise TypeError("Cannot convert between %s and %s" % (from_units, to_units))
 
 
 if __name__ == '__main__':
 #=========================
-  
-  store = UnitConversion(sparqlstore.Virtuoso('http://localhost:8890'))
+
+  store = UnitConvertor(sparqlstore.Virtuoso('http://localhost:8890'))
 
   def test(u):
   #-----------
@@ -170,9 +174,13 @@ if __name__ == '__main__':
 
   test('http://www.sbpax.org/uome/list.owl#Centimetre')
   test('http://www.sbpax.org/uome/list.owl#RadianPerSecond')
+
   test('http://www.sbpax.org/uome/list.owl#RadianPerSecondSquared')
   test('http://www.biosignalml.org/ontologies/examples/unit#MillimetresOfWater')
   test('http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
+
+  #import sys
+  #sys.exit()
 
   d = store._store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#DecilitrePerMinute')
   c = store._store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
@@ -192,8 +200,6 @@ if __name__ == '__main__':
     dl = store._store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#Decilitre')
   except Exception, msg:
     print msg
-
-
 
   f = store.mapping('http://www.biosignalml.org/ontologies/examples/unit#DecilitrePerMinute',
                     'http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
