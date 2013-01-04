@@ -102,6 +102,8 @@ Measurement units would normally be entities in a specialised units of measure o
   '''The sampling period, in seconds, of a uniformly sampled signal.'''
   rate           = Resource(NS.rate)
   '''The sampling rate, in Hertz, of a uniformly sampled signal.'''
+  period         = Resource(NS.period)
+  '''The sampling period, in seconds, of a uniformly sampled signal.'''
   resolution     = Resource(NS.resolution)
   '''The resolution, in seconds, of a clock's timing.'''
 
