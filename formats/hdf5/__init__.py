@@ -192,7 +192,7 @@ class HDF5Recording(BSMLRecording):
     :param kwds: Other :class:`~biosignalml.Recording` attributes to set.
     """
     self = cls(uri, None, **kwds)
-    self.dataset = dataset
+###    self.dataset = dataset    ### Only set dataset in metadata when storing into a repository??
     self._h5 = H5Recording.create(uri, str(dataset), **kwds)
     return self
 
