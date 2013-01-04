@@ -667,7 +667,7 @@ class SignalData(object):
   def _convert(data, dtype):
   #-------------------------
     if dtype is not None and dtype != data.dtype:
-      logging.debug('Convert %s to %s for %d', data.dtype, dtype, len(data))
+      #logging.debug('Convert %s to %s for %d', data.dtype, dtype, len(data))
       if dtype.kind in ['u', 'i']: return bytearray(np.array(data + 0.5, dtype=dtype))
       else:                        return bytearray(np.array(data,       dtype=dtype))
     else:                          return bytearray(data)
