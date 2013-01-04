@@ -55,9 +55,9 @@ class UniformSignal(Signal, data.UniformTimeSeries):
 #===================================================
 
   @classmethod
-  def create(cls, uri, units, rate):
-  #---------------------------------
-    self = cls(uri, units, rate=rate)
+  def create(cls, uri, units, rate=None, period=None):
+  #---------------------------------------------------
+    self = cls(uri, units, rate=rate, period=period)
 
 
 ## from client import Repository   ## Needs to be after Signal has been declared

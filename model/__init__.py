@@ -58,7 +58,7 @@ class Signal(core.AbstractObject):
 
   metaclass = BSML.Signal     #: :attr:`.BSML.Signal`
 
-  attributes = ['recording', 'units', 'transducer', 'filter', 'rate',  'clock',
+  attributes = ['recording', 'units', 'transducer', 'filter', '_rate',  '_period', 'clock',
                 'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
                 'index', 'signaltype', 'offset', 'duration',
                ]
@@ -68,7 +68,8 @@ class Signal(core.AbstractObject):
               'units':        PropertyMap(BSML.units, to_rdf=mapping.get_uri),
 ##            'transducer':   PropertyMap(BSML.transducer),
               'filter':       PropertyMap(BSML.preFilter),
-              'rate':         PropertyMap(BSML.rate, XSD.double),
+              '_rate':        PropertyMap(BSML.rate, XSD.double),
+              '_period':      PropertyMap(BSML.period, XSD.double),
               'clock':        PropertyMap(BSML.clock, to_rdf=mapping.get_uri, subelement=True),
               'minFrequency': PropertyMap(BSML.minFrequency, XSD.double),
               'maxFrequency': PropertyMap(BSML.maxFrequency, XSD.double),
@@ -87,7 +88,25 @@ class Signal(core.AbstractObject):
 
   def __init__(self, uri, units, **kwds):
   #--------------------------------------
+    rate = kwds.pop('rate', None)
+    period = kwds.pop('period', None)
+    if rate is not None and period is not None and float(rate) != 1.0/float(period):
+      raise ValueError("Signal's sampling rate doesn't match its period")
+    kwds['_rate'] = rate
+    kwds['_period'] = period
     core.AbstractObject.__init__(self, uri, units=units, **kwds)
+
+  @property
+  def rate(self):
+  #==============
+    if   self._rate   is not None: return float(self._rate)
+    elif self._period is not None: return 1.0/float(self._period)
+
+  @property
+  def period(self):
+  #================
+    if   self._period is not None: return float(self._period)
+    elif self._rate   is not None: return 1.0/float(self._rate)
 
 
 class Event(core.AbstractObject):
