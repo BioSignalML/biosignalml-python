@@ -424,8 +424,7 @@ class H5Recording(object):
     :type period: float
     :param timeunits: The units 'time' is measured in. Optional, default is seconds.
     :param clock: The URI of a clock dataset containing sample times. Optional.
-    :return: The name of the signal dataset created.
-    :rtype: str
+    :return: The `H5Signal` created.
 
     Only one of ``rate``, ``period``, or ``clock`` can be given.
 
@@ -506,7 +505,7 @@ class H5Recording(object):
     elif period:             dset.attrs['period'] = float(period)
     elif clock is not None:  dset.attrs['clock'] = clocktimes.dataset.ref
     if timeunits: dset.attrs['timeunits'] = timeunits
-    return dset.name
+    return H5Signal(dset, None)
 
 
   def create_clock(self, uri, units=None, shape=None, times=None, dtype=None,
@@ -527,8 +526,7 @@ class H5Recording(object):
     :type dtype: :class:`numpy.dtype`
     :param rate (float): The sample rate of time points. Optional.
     :param period (float): The interval, in time units, between time points. Optional.
-    :return: The name of the clock dataset created.
-    :rtype: str
+    :return: The `H5Clock` created.
     """
     if self._h5['uris'].attrs.get(str(uri)):
       raise KeyError("A clock already has URI '%s'" % uri)
@@ -562,7 +560,7 @@ class H5Recording(object):
     if rate: dset.attrs['rate'] = float(rate)
     if period: dset.attrs['period'] = float(period)
     self._h5['uris'].attrs[str(uri)] = dset.ref
-    return dset.name
+    return H5Clock(dset)
 
 
   def extend_signal(self, uri, data):
