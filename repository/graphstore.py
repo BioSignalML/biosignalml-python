@@ -215,17 +215,13 @@ class GraphStore(object):
     ## Should this set provenance...
 
 
-
-  def query(self, sparql, header=False, abbreviate=False, htmlbase=None):
-  #----------------------------------------------------------------------
-    return QueryResults(self._sparqlstore, sparql, header, abbreviate, htmlbase)
-
-
+  def query(self, sparql, header=False):
+  #-------------------------------------
+    return QueryResults(self._sparqlstore, sparql, header)
 
 #  def construct(self, template, where, params=None, graph=None, format=Format.RDFXML, prefixes=None):
 #  #--------------------------------------------------------------------------------------------------
 #    return self._sparqlstore.construct(template, where, params, graph, format, prefixes)
-
 
   def ask(self, query, graph):
   #---------------------------
@@ -316,21 +312,24 @@ class SparqlHead(object):
 class QueryResults(object):
 #==========================
 
-  def __init__(self, sparqlstore, sparql, header=False, abbreviate=False, htmlbase=None):
-  #--------------------------------------------------------------------------------------
+  def __init__(self, sparqlstore, sparql, header=False):
+  #-----------------------------------------------------
+    self._base = None
     self._set_prefixes(sparql)
     self._header = header
-    self._abbreviate = abbreviate
-    self._htmlbase = htmlbase
     #logging.debug('SPARQL: %s', sparql)
     try:
       self._results = json.loads(sparqlstore.query(sparql, Format.JSON))
     except Exception, msg:
       self._results = { 'error': str(msg) }
 
+  @property
+  def base(self):
+  #--------------
+    return self._base
+
   def _set_prefixes(self, sparql):
   #-------------------------------
-    self._base = None
     self._prefixes = { }   ### Start with a copy of standard prefixes...
     header = SparqlHead.parse(sparql)
     for h in header:
@@ -347,26 +346,6 @@ class QueryResults(object):
       if uri.startswith(prefix): return '%s:%s' % (name, uri[len(prefix):])
     return uri
 
-  def _add_html(self, result, column):
-  #-----------------------------------
-    value = sparqlstore.get_result_value(result, column)
-    if  isinstance(value, Uri):
-      value = str(value)
-      if self._base and value.startswith(self._base): uri = value[len(self._base):]
-      elif self._abbreviate:                          uri = self.abbreviate_uri(value)
-      else:                                           uri = value
-      (LT, GT) = ('&lt;', '&gt;') if value == uri else ('', '')
-      if not value.startswith(self._htmlbase):
-        return (value, '%s%s%s' % (LT, uri, GT))
-      else:
-        return (value, '%s<a href="%s" uri="%s" class="cluetip">%s</a>%s'
-              % (LT, '/repository/' + value[len(options.resource_prefix):],
-                                   value, uri,                 GT))
-############### '/repository/' is web-server path to view objects in repository
-#      elif value.startswith('http://physionet.org/'): ########### ... URI to a Signal, Recording, etc...
-    return (value, xmlescape(str(value)))
-
-
   def __iter__(self):
   #------------------
     #logging.debug('DATA: %s', self._results)
@@ -379,7 +358,6 @@ class QueryResults(object):
       rows = self._results.get('results', {}).get('bindings', [ ])
       if self._header: yield cols
       for r in rows:
-        if self._htmlbase: yield { c: self._add_html(r, c)  for c in cols }
-        else:              yield { c: sparqlstore.get_result_value(r, c) for c in cols }
+        yield { c: sparqlstore.get_result_value(r, c) for c in cols }
     else:
       yield self._results
