@@ -20,12 +20,8 @@
 
 import logging
 
-from tornado.options import options
-
 import biosignalml.formats
-
 from biosignalml import BSML, Recording, Signal, Event, Annotation
-
 from biosignalml.rdf import DCT, PRV, Format
 import biosignalml.rdf.sparqlstore as sparqlstore
 
