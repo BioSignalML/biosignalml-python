@@ -493,7 +493,7 @@ class H5Recording(object):
 
     if nsignals == 1:
       dset.attrs['uri'] = str(uri)
-      dset.attrs['units'] = str(units)
+      if units is not None: dset.attrs['units'] = str(units)
       self._h5['uris'].attrs[str(uri)] = dset.ref
     else:
       dset.attrs.create('uri',   [str(u) for u in uri],   dtype=DTYPE_STRING)
