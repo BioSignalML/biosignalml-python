@@ -208,6 +208,9 @@ class Recording(core.AbstractObject):
     :param signal: The signal to add to the recording.
     :type signal: :class:`Signal`
     :return: The 0-origin index of the signal in the recording.
+
+    .. note:: If indices are to be useful they must be a permanent attribute and held in RDF.
+
     '''
     sig_uri = str(signal.uri)
     if sig_uri in self._signals:

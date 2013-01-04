@@ -122,6 +122,8 @@ class WebStreamReader(stream.SignalDataStream):
   :param duration: The duration, in seconds, of the :class:`~biosignalml.transports.stream.TimeSeries`
     returned. A value of -1 means to return the complete time series of the signal(s).
   :type duration: float
+
+  ..todo:: Document extra parameters...
   """
   def __init__(self, endpoint, uri, start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None, units=None):
   #-----------------------------------------------------------------------------------------------------------------------

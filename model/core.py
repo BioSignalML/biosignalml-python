@@ -327,7 +327,8 @@ class AbstractObject(object):
   def set_from_graph(self, attr, graph):
   #-------------------------------------
     '''
-    Set an attribute from RDF statement in the form `(uri, attr, value)`.
+    Set an attribute from RDF an statement in the form `(uri, attr, value)`
+    contained in a graph.
     '''
     v = self.rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
