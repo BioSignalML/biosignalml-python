@@ -193,7 +193,7 @@ class HDF5Recording(BSMLRecording):
     """
     self = cls(uri, None, **kwds)
     self.dataset = dataset
-    self._h5 = H5Recording.create(uri, str(dataset))
+    self._h5 = H5Recording.create(uri, str(dataset), **kwds)
     return self
 
   def close(self):
