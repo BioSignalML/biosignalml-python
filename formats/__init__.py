@@ -1,11 +1,8 @@
-'''
-Read and write physical Recordings and Signals.
-'''
 ######################################################
 #
 #  BioSignalML Management in Python
 #
-#  Copyright (c) 2010-2012  David Brooks
+#  Copyright (c) 2010-2013  David Brooks
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -19,9 +16,11 @@ Read and write physical Recordings and Signals.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-#  $ID: 60c35bd on Tue May 1 11:33:00 2012 +1200 by Dave Brooks $
-#
 ######################################################
+
+'''
+Read and write physical Recordings and Signals.
+'''
 
 import os
 

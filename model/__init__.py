@@ -2,7 +2,7 @@
 #
 #  BioSignalML Management in Python
 #
-#  Copyright (c) 2010-2011  David Brooks
+#  Copyright (c) 2010-2013  David Brooks
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-#
-#  $ID: bbd3c04 on Wed Jun 8 16:47:09 2011 +1200 by Dave Brooks $
 #
 ######################################################
 '''

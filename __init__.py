@@ -19,8 +19,6 @@ BioSignalML data model.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-#  $ID: bbd3c04 on Wed Jun 8 16:47:09 2011 +1200 by Dave Brooks $
-#
 ######################################################
 
 
