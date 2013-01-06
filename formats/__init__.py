@@ -170,18 +170,6 @@ class BSMLRecording(biosignalml.Recording):
     '''
     pass
 
-  def rdf_metadata(self, format='turtle', prefixes={}):
-  #----------------------------------------------------
-    """
-    Get a Recording's metadata as RDF.
-
-    :param format: The RDF format with which to serialise metadata. Options are 'turtle'
-      and 'rdfxml'.
-    :type format: str
-    :return: The RDF as a string.
-    :rtype: str
-    """
-    not_implemented(self, 'save_metadata')
 
 
 from raw  import RAWRecording
