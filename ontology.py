@@ -1,7 +1,7 @@
 """
 Provide access to the BioSignalML ontology.
 
-Generated from file:///Users/dave/biosignalml/ontologies/bsml/2011-04-biosignalml.ttl at Wed Jul  4 12:23:26 2012
+Generated from file:///Users/dave/biosignalml/ontologies/bsml/2011-04-biosignalml.ttl at Sun Jan  6 22:39:53 2013
 
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
@@ -11,7 +11,6 @@ from biosignalml.rdf import Resource, NS as Namespace
 class BSML(object):
   URI = "http://www.biosignalml.org/ontologies/2011/04/biosignalml#"
   NS = Namespace(URI)
-
   prefix = NS.prefix
 
 # owl:Class resources:
@@ -25,6 +24,8 @@ class BSML(object):
   Electrode      = Resource(NS.Electrode)
   '''An electrical conductor in contact with non-conducting material, through which
             electrical activity can be measured.'''
+  ErrorTAG       = Resource(NS.ErrorTAG)
+  '''A tag to indicate that an annotation relates to some form of error.'''
   Event          = Resource(NS.Event)
   '''Something that has occurred in time, possibly for some duration.'''
   EventType      = Resource(NS.EventType)
@@ -35,6 +36,10 @@ class BSML(object):
   '''The particular storage format used to encode a Recording (e.g. EDF+, WFDB, SCP-ECG, MFER).'''
   HP_Filter      = Resource(NS.HP_Filter)
   '''A high-pass filter.'''
+  Instant        = Resource(NS.Instant)
+  '''A particular point in time.'''
+  Interval       = Resource(NS.Interval)
+  '''A period in time.'''
   LP_Filter      = Resource(NS.LP_Filter)
   '''A low-pass filter.'''
   Notch_Filter   = Resource(NS.Notch_Filter)
@@ -75,9 +80,6 @@ Several signals may use the same clock.'''
 
 Measurement units would normally be entities in a specialised units of measure ontology.'''
 
-  Instant        = Resource(NS.Instant)    ## owl:sameAS tl:relativeInstant
-  Interval       = Resource(NS.Interval)   ## owl:sameAS tl:relativeInterval
-
 # owl:DatatypeProperty resources:
   dataBits       = Resource(NS.dataBits)
   '''The binary-bit resolution of the analogue-to-digital convertor or
@@ -93,43 +95,28 @@ Measurement units would normally be entities in a specialised units of measure o
   minValue       = Resource(NS.minValue)
   '''The minimum value of the signal.'''
   offset         = Resource(NS.offset)
-  '''The temporal offset from the start of a recording of a signal's first sample.'''
-  time           = Resource(NS.time)
-  '''The temporal offset from the start of a recording of some event.'''
-  eventType      = Resource(NS.eventType)
-  '''The class or type of an Event.'''
+  '''The temporal offset, from the beginning of a recording, to a signal's first sample.'''
   period         = Resource(NS.period)
   '''The sampling period, in seconds, of a uniformly sampled signal.'''
   rate           = Resource(NS.rate)
   '''The sampling rate, in Hertz, of a uniformly sampled signal.'''
-  period         = Resource(NS.period)
-  '''The sampling period, in seconds, of a uniformly sampled signal.'''
   resolution     = Resource(NS.resolution)
   '''The resolution, in seconds, of a clock's timing.'''
+  time           = Resource(NS.time)
+  '''The temporal offset, from the beginning of a recording, to the start of some event.'''
 
 # owl:NamedIndividual resources:
   BP             = Resource(NS.BP)
   ECG            = Resource(NS.ECG)
   EEG            = Resource(NS.EEG)
 
-### Replaced by mimetype strings...
-##  BSML_HDF5      = Resource(NS.BSML_HDF5)
-##  '''A HDF5-based container for BioSignalML recordings.'''
-##  EDF            = Resource(NS.EDF)
-##  EDFplus        = Resource(NS.EDFplus)
-##  FieldML        = Resource(NS.FieldML)
-##  MFER           = Resource(NS.MFER)
-##  RAW            = Resource(NS.RAW)
-##  '''Raw, binary data with unknown format.'''
-##  SCP_ECG        = Resource(NS.SCP_ECG)
-##  SDF            = Resource(NS.SDF)
-##  WFDB           = Resource(NS.WFDB)
-
 # owl:ObjectProperty resources:
   clock          = Resource(NS.clock)
   '''The sampling coordinates associated with a signal's data values.'''
   dataset        = Resource(NS.dataset)
   '''The location of actual signal data.'''
+  eventType      = Resource(NS.eventType)
+  '''The class or type of an Event.'''
   format         = Resource(NS.format)
   '''The format used to hold the recording.'''
   preFilter      = Resource(NS.preFilter)
@@ -140,21 +127,11 @@ Measurement units would normally be entities in a specialised units of measure o
   '''What was used to collect or derive an electrical signal'''
   signalType     = Resource(NS.signalType)
   '''A signal's generic type.'''
+  tag            = Resource(NS.tag)
+  '''A semantic tag given to a resource by an annotation.
+
+      Tags are effectively controlled keywords.'''
   units          = Resource(NS.units)
   '''The physical units that are represented by a signal's data values.
 
 Specification of units allows for consistency checking and automatic conversion.'''
-
-  tag            = Resource(NS.tag)
-  '''
-  A semantic tag applied to a resource by an annotation.
-
-  Tags are effectively conytolled keywords.
-  '''
-
-  ErrorTAG       = Resource(NS.ErrorTAG)
-  '''
-  A tag to indicate that an annotation relates to an error or
-  inconsistency.
-  '''
-
