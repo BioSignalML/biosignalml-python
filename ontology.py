@@ -32,8 +32,6 @@ class BSML(object):
   '''Something which is the class or type of an Event.'''
   Filter         = Resource(NS.Filter)
   '''The class of filter that has been applied to a signal during data collection.'''
-  Format         = Resource(NS.Format)
-  '''The particular storage format used to encode a Recording (e.g. EDF+, WFDB, SCP-ECG, MFER).'''
   HP_Filter      = Resource(NS.HP_Filter)
   '''A high-pass filter.'''
   Instant        = Resource(NS.Instant)
