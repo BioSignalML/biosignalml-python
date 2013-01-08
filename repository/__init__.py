@@ -109,8 +109,8 @@ class BSMLStore(GraphStore):
       rec.graph_uri = graph_uri
       return rec
 
-  def get_recording_with_signals(self, uri):
-  #-----------------------------------------
+  def get_recording_with_signals(self, uri, open_dataset=True):
+  #------------------------------------------------------------
     """
     Get the Recording with its Signals from the graph
       that an object is in.
@@ -118,6 +118,7 @@ class BSMLStore(GraphStore):
     :param uri: The URI of some object.
     :param graph_uri: The URI of a named graph containing statements
       about the object.
+    :param open_dataset: Try to open the recording's dataset. Optional, default True.
     :rtype: :class:`~biosignalml.Recording`
     """
     rec = self.get_recording(uri)
@@ -127,7 +128,7 @@ class BSMLStore(GraphStore):
         sig_uri = sparqlstore.get_result_value(r, 's')
         sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph_uri)
         rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
-        rec.initialise()    ## This will open files...
+        rec.initialise(open_dataset=open_dataset)    ## This will open files...
     return rec
 
 
