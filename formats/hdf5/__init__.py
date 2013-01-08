@@ -122,7 +122,8 @@ class HDF5Signal(BSMLSignal):
     """
     Set signal attributes once the HDF5 file of its recording is opened.
     """
-    self._set_h5_signal(self.recording._h5.get_signal(self.uri))
+    if self.recording._h5 is not None:
+      self._set_h5_signal(self.recording._h5.get_signal(self.uri))
 
   def append(self, timeseries):
   #----------------------------
@@ -167,8 +168,9 @@ class HDF5Recording(BSMLRecording):
 
   def _openh5(self, fname):
   #------------------------
-    try:            return H5Recording.open(fname)
-    except IOError: return H5Recording.create(self.uri, fname)
+    return H5Recording.open(fname)
+    #try:            return H5Recording.open(fname)
+    #except IOError: return H5Recording.create(self.uri, fname)
 
   @classmethod
   def open(cls, dataset, **kwds):
@@ -247,7 +249,7 @@ class HDF5Recording(BSMLRecording):
     Set recording and associated signal attributes
     once the recording's dataset is known.
     """
-    if self.dataset is not None:
+    if self.dataset is not None and kwds.get('open_dataset', True):
       self._h5 = self._openh5(str(self.dataset))
       for s in self.signals():
         HDF5Signal.initialise_class(s)
