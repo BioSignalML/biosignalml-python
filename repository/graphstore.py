@@ -162,6 +162,7 @@ class GraphStore(object):
   def get_resource_as_graph(self, uri, rtype, graph_uri=None):
   #-----------------------------------------------------------
     if graph_uri is None:
+      graph_uri = uri
       ### Following can give an error from Virtuoso...
       rdf = self._sparqlstore.construct('<%(uri)s> ?p ?o',
               '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
@@ -175,7 +176,7 @@ class GraphStore(object):
 
     ## Virtuoso has a MaxRows limit in its INI file with a default of 10000.
     ## This has been increased to 50000
-    return Graph.create_from_string(uri, rdf, Format.RDFXML)
+    return Graph.create_from_string(graph_uri, rdf, Format.RDFXML)
 
 
   def update(self, uri, triples):
