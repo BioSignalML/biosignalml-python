@@ -196,9 +196,6 @@ class GraphStore(object):
     return Graph.create_from_string(graph_uri, rdf, Format.RDFXML)
 
 
-  def update(self, uri, triples):
-  #------------------------------
-    self._sparqlstore.update(uri, triples)
   def get_resource_graph_uri(self, uri):
   #-------------------------------------
      for r in self.select('?g',
@@ -208,6 +205,9 @@ class GraphStore(object):
        return sparqlstore.get_result_value(r, 'g')
 
 
+  def insert_triples(self, graph_uri, triples, prefixes=None):
+  #-----------------------------------------------------------
+    self._sparqlstore.insert_triples(graph_uri, triples, prefixes)
 
 
   def replace_graph(self, uri, rdf, format=Format.RDFXML):
