@@ -167,6 +167,15 @@ class GraphStore(object):
         prefixes=dict(prv=PRV.prefix))
 
 
+  def has_graph(self, uri):
+  #------------------------
+    '''
+    Is there a graph wuth the given URI?
+    '''
+    return self._sparqlstore.ask('graph <%(pgraph)s> { <%(uri)s> a <%(gtype)s> }',
+      params=dict(pgraph=self._provenance_uri, uri=uri, gtype=self._graphtype))
+
+
   def get_resource_as_graph(self, uri, rtype, graph_uri=None):
   #-----------------------------------------------------------
     if graph_uri is None:
@@ -190,6 +199,15 @@ class GraphStore(object):
   def update(self, uri, triples):
   #------------------------------
     self._sparqlstore.update(uri, triples)
+  def get_resource_graph_uri(self, uri):
+  #-------------------------------------
+     for r in self.select('?g',
+       '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
+          graph ?g { <%(uri)s> a [] }''',
+         params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri)):
+       return sparqlstore.get_result_value(r, 'g')
+
+
 
 
   def replace_graph(self, uri, rdf, format=Format.RDFXML):
