@@ -147,16 +147,24 @@ class GraphStore(object):
         ]
 
 
-  def has_resource(self, uri, rtype):
-  #----------------------------------
+  def has_resource(self, uri, rtype=None, graph=None):
+  #---------------------------------------------------
     '''
-    Is there some graph containing a resource of the given type?
+    Is there some graph containing a resource, optionally of the given type?
     '''
-    return self._sparqlstore.ask(
-      '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
-         graph ?g { <%(uri)s> a <%(rtype)s> }''',
-      params=dict(pgraph=self._provenance_uri, rtype=rtype, uri=uri, gtype=self._graphtype),
-      prefixes=dict(prv=PRV.prefix))
+    if rtype is None: rtype = '[]'
+    else:             rtype = '<%s>' % rtype
+    if graph is None:
+      return self._sparqlstore.ask(
+        '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
+           graph ?g { <%(uri)s> a %(rtype)s }''',
+        params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
+        prefixes=dict(prv=PRV.prefix))
+    else:
+      return self._sparqlstore.ask(
+        '''graph <%(graph)s> { <%(uri)s> a %(rtype)s }''',
+        params=dict(graph=graph, uri=uri, rtype=rtype),
+        prefixes=dict(prv=PRV.prefix))
 
 
   def get_resource_as_graph(self, uri, rtype, graph_uri=None):

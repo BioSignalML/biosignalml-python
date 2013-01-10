@@ -44,10 +44,10 @@ class BSMLStore(GraphStore):
     ''' Check a URI refers to a Recording. '''
     return self.has_resource(uri, BSML.Recording)
 
-  def has_signal(self, uri):
-  #-------------------------
+  def has_signal(self, uri, graph_uri=None):
+  #-----------------------------------------
     ''' Check a URI refers to a Signal. '''
-    return self.has_resource(uri, BSML.Signal)
+    return self.has_resource(uri, BSML.Signal, graph_uri)
 
   def has_signal_in_recording(self, sig, rec):
   #-------------------------------------------
@@ -87,8 +87,8 @@ class BSMLStore(GraphStore):
     r = self.get_resources(BSML.Recording, condition='<%s> a []' % uri)
     return r[0] if r else (None, None)
 
-  def get_recording(self, uri):
-  #----------------------------
+  def get_recording(self, uri, graph_uri=None):
+  #--------------------------------------------
     '''
     Get the Recording from the graph that an object is in.
 
@@ -98,7 +98,8 @@ class BSMLStore(GraphStore):
     :rtype: :class:`~biosignalml.Recording`
     '''
     #logging.debug('Getting: %s', uri)
-    graph_uri, rec_uri = self.get_graph_and_recording_uri(uri)
+    if graph_uri is None: graph_uri, rec_uri = self.get_graph_and_recording_uri(uri)
+    else: rec_uri = uri
     #logging.debug('Graph: %s', graph_uri)
     if graph_uri is not None:
       rclass = biosignalml.formats.CLASSES.get(
@@ -109,8 +110,8 @@ class BSMLStore(GraphStore):
       rec.graph_uri = graph_uri
       return rec
 
-  def get_recording_with_signals(self, uri, open_dataset=True):
-  #------------------------------------------------------------
+  def get_recording_with_signals(self, uri, open_dataset=True, graph_uri=None):
+  #----------------------------------------------------------------------------
     """
     Get the Recording with its Signals from the graph
       that an object is in.
@@ -121,7 +122,7 @@ class BSMLStore(GraphStore):
     :param open_dataset: Try to open the recording's dataset. Optional, default True.
     :rtype: :class:`~biosignalml.Recording`
     """
-    rec = self.get_recording(uri)
+    rec = self.get_recording(uri, graph_uri)
     if rec is not None:
       for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
           params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix), graph=rec.graph_uri, order='?s'):
