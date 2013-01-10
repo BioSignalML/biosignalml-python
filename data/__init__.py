@@ -57,7 +57,7 @@ class Clock(AbstractObject):
      and float(resolution)*float(rate) != 1.0):
       raise DataError("Clock's resolution doesn't match its rate")
     AbstractObject.__init__(self, uri, resolution=resolution, rate=rate, **kwds)
-    self.times = times
+    self.times = np.asarray(times)
 
   def __getitem__(self, key):
   #--------------------------
@@ -175,7 +175,7 @@ class TimeSeries(object):
   #-------------------------------
     if len(times) != len(data):
       raise DataError('Number of sample times and data points are different')
-    self.data = data
+    self.data = np.asarray(data)
     if isinstance(times, Clock): self.time = times
     else:                        self.time = Clock(None, times)
 
@@ -267,7 +267,7 @@ class UniformTimeSeries(TimeSeries):
       raise DataError('No sampling rate nor period specified')
     elif rate is not None and period is not None:
       raise DataError('Only one of rate or period can be specified')
-    self.data = data
+    self.data = np.asarray(data)
     self.rate = rate if rate else 1.0/period
     self.time = UniformClock(None, self.rate)
 
