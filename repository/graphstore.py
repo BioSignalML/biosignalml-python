@@ -241,8 +241,11 @@ class GraphStore(object):
     return self._sparqlstore.select(fields, where, **kwds)
 
 
-  def get_subjects(self, prop, obj, graph, ordered=False):
-  #-------------------------------------------------------
+  def get_subjects(self, prop, obj, graph=None, ordered=False):
+  #------------------------------------------------------------
+    """
+    Get subjects of all statements that match a given predicate/object.
+    """
     if isinstance(obj, Resource) or isinstance(obj, Uri):
       obj = '<%s>' % obj
     elif not isinstance(obj, Node):
@@ -251,8 +254,8 @@ class GraphStore(object):
       for r in self.select('?s', '?s <%(prop)s> %(obj)s',
         params = dict(prop=prop, obj=obj), graph = graph, order = '?s' if ordered else None) ]
 
-  def get_objects(self, subj, prop, graph, ordered=False):
-  #-------------------------------------------------------
+  def get_objects(self, subj, prop, graph=None, ordered=False):
+  #------------------------------------------------------------
     """
     Get objects of all statements that match a given subject/predicate.
     """
@@ -261,12 +264,12 @@ class GraphStore(object):
         params = dict(subj=subj, prop=prop), graph = graph, order = '?s' if ordered else None) ]
 
 
-  def get_types(self, uri, graph):
-  #------------------------------
+  def get_types(self, uri, graph=None):
+  #------------------------------------
     return self.get_objects(uri, RDF.type, graph)
 
-  def describe(self, uri, graph, format=Format.RDFXML):
-  #----------------------------------------------------
+  def describe(self, uri, graph=None, format=Format.RDFXML):
+  #---------------------------------------------------------
 
     def description(uri, graph, format):
     #-----------------------------------
