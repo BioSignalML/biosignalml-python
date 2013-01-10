@@ -128,10 +128,10 @@ class Signal(BSMLSignal):
 
   def append(self, timeseries):
   #----------------------------
-    if isinstance(timeseries, np.ndarray) and self.rate:
-      return self.repository.put_data(str(self.uri), UniformTimeSeries(timeseries, self.rate))
-    else:
+    if isinstance(timeseries, TimeSeries):
       return self.repository.put_data(str(self.uri), timeseries)
+    elif self.rate:
+      return self.repository.put_data(str(self.uri), UniformTimeSeries(timeseries, self.rate))
 
 
 class Recording(BSMLRecording):
