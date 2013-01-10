@@ -70,14 +70,15 @@ class RemoteRepository(object):
     except Exception, msg:
       raise
     if response.status not in [200, 201]: raise Exception(content)
+    return response.get('location')
 
   def put_metadata(self, uri, graph):
   #----------------------------------
-    self._send_metadata(uri, graph, 'PUT')
+    return self._send_metadata(uri, graph, 'PUT')
 
   def post_metadata(self, uri, graph):
   #----------------------------------
-    self._send_metadata(uri, graph, 'POST')
+    return self._send_metadata(uri, graph, 'POST')
 
 
   def get_data(self, uri, **kwds):

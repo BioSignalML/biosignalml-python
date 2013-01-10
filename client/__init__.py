@@ -196,7 +196,7 @@ class Repository(repository.RemoteRepository):
     try:
       rec = self.RecordingClass(uri, repository=self, **kwds)
       # Will have default metadata with attributes set from any metadata keyword dict
-      self.put_metadata(rec.uri, rec.metadata_as_graph())
+      rec.graph = rdf.Graph(self.put_metadata(rec.uri, rec.metadata_as_graph()))
       # Format = HDF5 (BSML ??)
       # then when server processes PUT for a new BSML recording it will create an empty HDF5 container
       return rec
