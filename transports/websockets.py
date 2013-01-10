@@ -94,7 +94,6 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
     ##logging.debug('SEND: %s', block)
     self.send(block.bytes(), True)
 
-
   def handshake_headers_getter(self):
   #----------------------------------
     headers = ws4py.client.threadedclient.WebSocketClient.handshake_headers(self)
@@ -159,6 +158,10 @@ class WebStreamWriter(object):
   def write_block(self, block):
   #----------------------------
     self._ws.send_block(block)
+
+  def write_signal_data(self, signaldata):
+  #---------------------------------------
+    self._ws.send_block(signaldata.streamblock())
 
   @staticmethod
   def got_response(block):

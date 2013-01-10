@@ -104,7 +104,7 @@ class RemoteRepository(object):
         blen = min(count, MAXPOINTS)
         if hasattr(timeseries, 'clock'):
           params['clock'] = timeseries.clock[pos:pos+blen]
-        stream.write_block(SignalData(uri, timeseries.time[pos], timeseries.data[pos:pos+blen], **params))
+        stream.write_signal_data(SignalData(uri, timeseries.time[pos], timeseries.data[pos:pos+blen], **params))
         pos += blen
         count -= blen
     except Exception, msg:
