@@ -117,13 +117,24 @@ class HDF5Signal(BSMLSignal):
       startpos += len(data)
       length -= len(data)
 
-  def initialise(self):
-  #--------------------
+  def initialise(self, **kwds):
+  #----------------------------
     """
     Set signal attributes once the HDF5 file of its recording is opened.
+
+    Creates a signal dataset in the HDF5 file if it doesn't exist.
     """
     if self.recording._h5 is not None:
-      self._set_h5_signal(self.recording._h5.get_signal(self.uri))
+      rec_h5 = self.recording._h5
+      h5 = rec_h5.get_signal(self.uri)
+      if h5 is not None:
+        self._set_h5_signal(h5)
+      elif kwds.pop('create', False):
+        if self.clock:
+          rec_h5.create_clock(self.clock.uri)
+          kwds['clock'] = self.clock.uri
+        kwds['rate'] = getattr(self, 'rate', None)
+        self._h5 = rec_h5.create_signal(self.uri, self.units, **kwds)
 
   def append(self, timeseries):
   #----------------------------
@@ -156,21 +167,19 @@ class HDF5Recording(BSMLRecording):
   #---------------------------------------------
     ## What about self.load_metadata() ???? Do kwds override ??
     BSMLRecording.__init__(self, uri, dataset, **kwds)
+    newfile = kwds.pop('create', False)
     if dataset:
-      self._h5 = self._openh5(dataset)
-      if uri is not None and str(uri) != str(self._h5.uri):
-        raise TypeError("Wrong URI in HDF5 recording")
-      ## What about self.load_metadata() ???? Do kwds override ??
-      for n, s in enumerate(self._h5.signals()):
-        self.add_signal(HDF5Signal.create_from_H5Signal(n, s))
+      if newfile:
+        self._h5 = H5Recording.create(uri, str(dataset), **kwds)
+      else:
+        self._h5 = H5Recording.open(fname, **kwds)
+        if uri is not None and str(uri) != str(self._h5.uri):
+          raise TypeError("Wrong URI in HDF5 recording")
+        ## What about self.load_metadata() ???? Do kwds override ??
+        for n, s in enumerate(self._h5.signals()):
+          self.add_signal(HDF5Signal.create_from_H5Signal(n, s))
     else:
       self._h5 = None
-
-  def _openh5(self, fname):
-  #------------------------
-    return H5Recording.open(fname)
-    #try:            return H5Recording.open(fname)
-    #except IOError: return H5Recording.create(self.uri, fname)
 
   @classmethod
   def open(cls, dataset, **kwds):
@@ -193,10 +202,8 @@ class HDF5Recording(BSMLRecording):
     :param dataset: The file path or URI of the BioSignalML HDF5 file.
     :param kwds: Other :class:`~biosignalml.Recording` attributes to set.
     """
-    self = cls(uri, None, **kwds)
+    return cls(uri, dataset, create=True, **kwds)
 ###    self.dataset = dataset    ### Only set dataset in metadata when storing into a repository??
-    self._h5 = H5Recording.create(uri, str(dataset), **kwds)
-    return self
 
   def close(self):
   #---------------
@@ -249,8 +256,17 @@ class HDF5Recording(BSMLRecording):
     Set recording and associated signal attributes
     once the recording's dataset is known.
     """
-    if self.dataset is not None and kwds.get('open_dataset', True):
-      self._h5 = self._openh5(str(self.dataset))
+    if self.dataset is not None and kwds.pop('open_dataset', True):
+      dataset = str(self.dataset)
+      try:
+        self._h5 = H5Recording.open(dataset, **kwds)
+        if kwds.pop('create_signals', False): kwds['create'] = True
+      except IOError:
+        if not kwds.pop('create', False): raise
+        H5Recording.create(self.uri, dataset, **kwds)
+        self._h5 = H5Recording.open(dataset, **kwds)
+        kwds['create'] = True
+
       for s in self.signals():
-        HDF5Signal.initialise_class(s)
+        HDF5Signal.initialise_class(s, **kwds)
 
