@@ -187,7 +187,7 @@ class SparqlStore(object):
     ##logging.debug('UPD: %s', sparql)
     try:
       return self._request(self.ENDPOINTS[1], 'POST',
-                           body=urllib.urlencode({'update': sparql + self.map_prefixes(prefixes)}),
+                           body=urllib.urlencode({self.UPDATE_PARAMETER: sparql + self.map_prefixes(prefixes)}),
                            headers={'Content-type': 'application/x-www-form-urlencoded'})
     except Exception, msg:
       logging.error('SPARQL: %s, %s', msg, sparql + self.map_prefixes(prefixes))
@@ -200,10 +200,10 @@ class SparqlStore(object):
     Insert a list of triples into a graph.
     '''
     if len(triples) == 0: return
-    sparql = ('insert data { graph <%(graph)s> { %(triples)s } }'
+##    sparql = ('insert data { graph <%(graph)s> { %(triples)s } }'   # 4store
+    sparql = ('insert data in <%(graph)s> { %(triples)s }'            # Virtuoso
                 % { 'graph': str(graph),
                     'triples': ' . '.join([' '.join(list(s)) for s in triples ]) })
-    ##logging.debug('Insert: %s', sparql)
     content = self.update(sparql, prefixes)
     if 'error' in content: raise Exception(content)
 
@@ -213,7 +213,8 @@ class SparqlStore(object):
     Delete a list of triples from a graph.
     '''
     if len(triples) == 0: return
-    sparql = ('delete data { graph <%(graph)s> { %(triples)s } }'
+#    sparql = ('delete data { graph <%(graph)s> { %(triples)s } }'
+    sparql = ('delete from graph <%(graph)s> { %(triples)s }'
                 % { 'graph': graph,
                     'triples': ' . '.join([' '.join(list(s)) for s in triples ]) })
     content = self.update(sparql, prefixes)
@@ -230,7 +231,8 @@ class SparqlStore(object):
     ##logging.debug('UPDATE: %s', triples)
     for s, p, o in sorted(triples):
       if (s, p) != last:
-        sparql = ('delete { graph <%(g)s> { %(s)s %(p)s ?o } } where { %(s)s %(p)s ?o }'
+#        sparql = ('delete { graph <%(g)s> { %(s)s %(p)s ?o } } where { %(s)s %(p)s ?o }'
+        sparql = ('delete from graph <%(g)s> { %(s)s %(p)s ?o } from <%(g)s> where { %(s)s %(p)s ?o }'
                     % {'g': str(graph), 's': s, 'p': p} )
         content = self.update(sparql, prefixes)
         if 'error' in content: raise Exception(content)
@@ -289,6 +291,7 @@ class Virtuoso(SparqlStore):
   """
 
   ENDPOINTS = [ '/sparql/', '/sparql/', '/sparql-graph-crud/' ]
+  UPDATE_PARAMETER = 'query'
 
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
@@ -310,6 +313,7 @@ def FourStore(SparqlStore):
 #==========================
 
   ENDPOINTS = [ '/sparql/', '/update/', '/data/' ]
+  UPDATE_PARAMETER = 'update'
 
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
