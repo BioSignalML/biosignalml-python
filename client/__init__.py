@@ -27,7 +27,7 @@ by providing wrappers around connections to metadata and data endpoints.
 To create a new recording and signals::
 
   # Connect to a repository (which is identified by a web address):
-  repository = Repository.connect("http://demo.biosignalml.org")
+  repository = Repository("http://demo.biosignalml.org")
 
   # Create a new recording in the repository, specifying a URI to identify it:
   recording = repository.new_recording("http//example.org/recording/demo/1",
@@ -55,7 +55,7 @@ To create a new recording and signals::
 
 And to get back signal data::
 
-  repository = Repository.connect("http://demo.biosignalml.org")
+  repository = Repository("http://demo.biosignalml.org")
 
   # Retrieve the recording and all metadata about its signals:
   recording = repository.get_recording_with_signals("http//example.org/recording/demo/1")
