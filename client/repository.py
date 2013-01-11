@@ -32,13 +32,13 @@ class RemoteRepository(object):
   A connection to a repository for both metadata and data.
   '''
 
-  def __init__(self, uri, md_endpoint='/metadata/', sd_endpoint='/stream/data/'):
-  #------------------------------------------------------------------------------
+  def __init__(self, uri, md_endpoint=None, sd_endpoint=None):
+  #-----------------------------------------------------------
     self.uri = uri
-    self._md_uri = uri + md_endpoint
-    self._sd_uri = uri + sd_endpoint
+    self._md_uri = uri + md_endpoint if md_endpoint is not None else ''
+    self._sd_uri = uri + sd_endpoint if sd_endpoint is not None else ''
     self._http = httplib2.Http()
-    self.metadata = self.get_metadata('')
+    self.metadata = self.get_metadata(uri)
 
   def close(self):
   #---------------
