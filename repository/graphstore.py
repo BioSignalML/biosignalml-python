@@ -49,6 +49,22 @@ class DataItem(model.core.AbstractObject):
               'precededby': PropertyMap(PRV.precededBy),
               'type':       PropertyMap(RDF.type) }
 
+  @classmethod
+  def create_from_graph(cls, uri, graph, **kwds):
+  #----------------------------------------------
+    self = cls(uri, None, **kwds)
+    self.load_from_graph(graph)
+    if self.createdby is not None:
+      self.createdby = DataCreation.create_from_graph(self.createdby, graph)
+
+    self.followedby = None
+    for s in graph.get_subjects(PRV.precededBy, self.uri):
+      self.followedby = s
+      break
+
+    return self
+
+
 class DataCreation(model.core.AbstractObject):
 #=============================================
   metaclass = PRV.DataCreation
@@ -82,6 +98,18 @@ class GraphStore(object):
          graph <%(graph)s> { [] a [] }''',
       params=dict(pgraph=self._provenance_uri, graph=graph_uri, gtype=self._graphtype),
       prefixes=dict(bsml=BSML.prefix))
+
+
+  def get_provenance(self, graph_uri):
+  #-----------------------------------
+    ''' Return the provenance of a graph.'''
+    rdf = self._sparqlstore.construct('<%(uri)s> ?p ?o . ?cr ?cp ?co . ',
+            '''graph <%(pgraph)s> { <%(uri)s> a <%(gtype)s> . <%(uri)s> ?p ?o .
+                                    <%(uri)s> prv:createdBy ?cr . ?cr ?cp ?co .
+                                    optional { ?ltr prv:precededBy <%(uri)s> } }''',
+            params=dict(pgraph=self._provenance_uri, uri=graph_uri, gtype=self._graphtype),
+            prefixes=dict(prv=PRV.prefix), format=Format.RDFXML)
+    return DataItem.create_from_string(graph_uri, rdf, Format.RDFXML)
 
 
   def add_resource_graph(self, uri, rtype, rdf, creator, format=Format.RDFXML):
