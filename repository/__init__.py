@@ -57,7 +57,7 @@ class BSMLStore(GraphStore):
 
   def extend_recording(self, recording, abstractobject):
   #-----------------------------------------------------
-    self._sparqlstore.extend_graph(recording.graph_uri,
+    self._sparqlstore.extend_graph(recording.graph.uri,
       abstractobject.metadata_as_string(format=Format.RDFXML),
       format=Format.RDFXML)
 
@@ -107,7 +107,6 @@ class BSMLStore(GraphStore):
                  Recording)
       graph = self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)
       rec = rclass.create_from_graph(rec_uri, graph, signals=False)
-      rec.graph_uri = graph_uri
       return rec
 
   def get_recording_with_signals(self, uri, open_dataset=True, graph_uri=None):
@@ -125,9 +124,9 @@ class BSMLStore(GraphStore):
     rec = self.get_recording(uri, graph_uri)
     if rec is not None:
       for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
-          params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix), graph=rec.graph_uri, order='?s'):
+          params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix), graph=rec.graph.uri, order='?s'):
         sig_uri = sparqlstore.get_result_value(r, 's')
-        sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph_uri)
+        sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph.uri)
         rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
         rec.initialise(open_dataset=open_dataset)    ## This will open files...
     return rec
