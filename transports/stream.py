@@ -519,7 +519,7 @@ class BlockParser(object):
           datalen -= delta
           self._length -= delta
         if self._length == 0:
-          logging.debug('JSON: %s', ''.join(self._jsonhdr))
+          #logging.debug('JSON: %s', ''.join(self._jsonhdr))
           try:
             self._header = json.loads(''.join(self._jsonhdr)) if len(self._jsonhdr) else { }
             self._length = 0
