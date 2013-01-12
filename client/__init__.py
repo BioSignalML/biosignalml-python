@@ -75,6 +75,8 @@ And to get back signal data::
   repository.close()
 """
 
+import os
+import tempfile
 import logging
 import numpy as np
 
@@ -88,6 +90,50 @@ from biosignalml.formats    import BSMLRecording, BSMLSignal
 from biosignalml.transports import StreamException
 
 import repository
+
+
+def _get_token_file():
+#=====================
+  path = os.getenv('HOME') + '/.bsml'
+  try: os.makedirs(path)
+  except OSError: pass
+  try:
+    return open(path + '/' + 'tokens', 'r+')
+  except IOError:
+    return open(path + '/' + 'tokens', 'w+')
+
+def save_token(repository, token):
+#=================================
+  f = _get_token_file()
+  g = tempfile.NamedTemporaryFile(delete=True)
+  existing = False
+  for l in f:
+    if repository == l.split()[0]:
+      existing = True
+      g.write('%s %s\n' % (repository, token))
+    else:
+      g.write(l)
+  if not existing: g.write('%s %s\n' % (repository, token))
+  g.flush()
+  f.seek(0)
+  f.truncate()
+  g.seek(0)
+  for l in g: f.write(l)
+  f.close()
+  g.close()
+
+
+def get_token(repository):
+#=========================
+  token = None
+  f = _get_token_file()
+  for l in f:
+    p = l.split()
+    if repository == p[0] and len(p) > 1:
+      token = p[1]
+      break
+  f.close()
+  return token
 
 
 class Signal(BSMLSignal):
@@ -173,6 +219,12 @@ class Repository(repository.RemoteRepository):
 #=============================================
 
   RecordingClass = Recording      #: The class of recordings in the repository.
+
+
+  def __init__(self, uri, **kwds):
+  #-------------------------------
+    repository.RemoteRepository.__init__(self, uri, access_key=get_token(uri), **kwds)
+
 
   def get_recording(self, uri, **kwds):
   #------------------------------------

@@ -32,9 +32,10 @@ class RemoteRepository(object):
   A connection to a repository for both metadata and data.
   '''
 
-  def __init__(self, uri, md_endpoint=None, sd_endpoint=None):
-  #-----------------------------------------------------------
+  def __init__(self, uri, access_key=None, md_endpoint=None, sd_endpoint=None):
+  #----------------------------------------------------------------------------
     self.uri = uri
+    self._access_key = access_key
     self._md_uri = uri + md_endpoint if md_endpoint is not None else ''
     self._sd_uri = uri + sd_endpoint if sd_endpoint is not None else ''
     self._http = httplib2.Http()
@@ -56,14 +57,16 @@ class RemoteRepository(object):
   def _send_metadata(self, uri, graph, method='POST'):
   #--------------------------------------------------
     format = rdf.Format.RDFXML
+    headers={'Content-type': rdf.Format.mimetype(format)}
+    if self._access_key is not None: headers['Cookie'] = 'access=%s' % self._access_key
     try:
       response, content = self._http.request(self._md_uri + str(uri),
-        method=method,
         body=graph.serialise(base=str(uri), format=format),
-        headers={'Content-type': rdf.Format.mimetype(format)})
+        method=method, headers=headers)
     except Exception, msg:
       raise
-    if response.status not in [200, 201]: raise Exception(content)
+    if   response.status == 401: raise Exception("Unauthorised")
+    elif response.status not in [200, 201]: raise Exception(content)
     return response.get('location')
 
   def put_metadata(self, uri, graph):
