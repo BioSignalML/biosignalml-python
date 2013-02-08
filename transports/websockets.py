@@ -50,13 +50,22 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   :param check: How any checksum is treated. Default `Checksum.CHECK`
   :type check: :class:`~biosignalml.transports.stream.Checksum`
   """
-  def __init__(self, endpoint, request, receiveQ, check=stream.Checksum.CHECK, **kwds):
-  #------------------------------------------------------------------------------------
-    ws4py.client.threadedclient.WebSocketClient.__init__(self, endpoint, **kwds)
+  def __init__(self, endpoint, request, receiveQ, check=stream.Checksum.CHECK, access_key=None, **kwds):
+  #-----------------------------------------------------------------------------------------------------
+    super(StreamClient, self).__init__(endpoint, **kwds)
     self._request = request
     self._receiver = receiveQ.put if isinstance(receiveQ, Queue.Queue) else receiveQ
     self._parser = stream.BlockParser(self._receiver, check=check)
     self._opened = False
+    self._access_key = access_key
+
+  @property
+  def handshake_headers(self):
+  #---------------------------
+    #headers = ws4py.client.threadedclient.WebSocketClient.handshake_headers(self)
+    headers = super(StreamClient, self).handshake_headers
+    if self._access_key is not None: headers.append(('Cookie', 'access=%s' % self._access_key))
+    return headers
 
   def opened(self):
   #----------------
@@ -124,11 +133,12 @@ class WebStreamReader(stream.SignalDataStream):
 
   ..todo:: Document extra parameters...
   """
-  def __init__(self, endpoint, uri, start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None, units=None):
-  #-----------------------------------------------------------------------------------------------------------------------
+  def __init__(self, endpoint, uri,
+    start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None, units=None, **kwds):
+  #-----------------------------------------------------------------------------------------------
     stream.SignalDataStream.__init__(self, endpoint, uri, start, offset, duration, count, maxsize, dtype, units)
     try:
-      self._ws = StreamClient(endpoint, self._request, self._receiveQ, protocols=['biosignalml-ssf'])
+      self._ws = StreamClient(endpoint, self._request, self._receiveQ, protocols=['biosignalml-ssf'], **kwds)
       self._ws.connect()
     except Exception, msg:
       logging.error('Unable to connect to WebSocket: %s', msg)
@@ -142,8 +152,8 @@ class WebStreamReader(stream.SignalDataStream):
 class WebStreamWriter(object):
 #=============================
 
-  def __init__(self, endpoint):
-  #----------------------------
+  def __init__(self, endpoint, access_key=None):
+  #---------------------------------------------
     try:
       self._ws = StreamClient(endpoint, None, self.got_response, protocols=['biosignalml-ssf'])
       self._ws.connect()

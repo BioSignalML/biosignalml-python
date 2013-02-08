@@ -89,6 +89,7 @@ class RemoteRepository(object):
     count
     dtype
     '''
+    kwds['access_key'] = self._access_key
     for block in WebStreamReader(self._sd_uri+uri, uri, **kwds):
       if block.type == BlockType.DATA: yield block.signaldata()
 
@@ -97,7 +98,7 @@ class RemoteRepository(object):
   #-----------------------------------
     stream = None
     try:
-      stream = WebStreamWriter(self._sd_uri+uri)
+      stream = WebStreamWriter(self._sd_uri+uri, access_key=self._access_key)
       MAXPOINTS = 50000   ##### TESTING    (200K bytes if double precision)
       params = { }
       if hasattr(timeseries, 'rate'): params['rate'] = timeseries.rate
