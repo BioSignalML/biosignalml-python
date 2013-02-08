@@ -641,10 +641,9 @@ class SignalData(object):
       raise StreamException('Data cannot have both a rate and a clock')
     if data.ndim not in [1, 2]:
       raise StreamException('Sample points must be scalar or a 1-D array')
-    if clock and clock.ndim:
-      raise StreamException('Clock must be a 1-D array')
-    if clock and len(clock) != len(data):
-      raise StreamException('Clock and data have different lengths')
+    if clock is not None:
+      if clock.ndim != 1: raise StreamException('Clock must be a 1-D array')
+      if len(clock) != len(data): raise StreamException('Clock and data have different lengths')
     self.uri = uri
     self.info = info
     self.start = start
@@ -685,7 +684,7 @@ class SignalData(object):
     if self.info is not None: header['info'] = self.info
     if self.data.ndim > 1: header['dims'] = self.data.shape[1]
     if self.rate: header['rate'] = self.rate
-    if self.clock:
+    if self.clock is not None:
       ctype = self.clock.ctype if self.ctype is None else self.ctype
       header['ctype'] = ctype.descr[0][1]
       content.extend(self._convert(self.clock, self.ctype))
