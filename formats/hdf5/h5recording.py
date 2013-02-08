@@ -176,6 +176,16 @@ class H5Clock(object):
     return self.dataset.attrs['uri']
 
   @property
+  def times(self):
+  #---------------
+    """The time points of the clock."""
+    t = np.asarray(self.dataset)
+    attrs = self.dataset.attrs
+    if   attrs.get('period'): return t*float(attrs['period'])
+    elif attrs.get('rate'):   return t/float(attrs['rate'])
+    else:                     return t
+
+  @property
   def units(self):
   #---------------
     """The physical units of the clock."""
