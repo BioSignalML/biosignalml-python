@@ -53,7 +53,7 @@ class RelativeTimeLine(model.core.AbstractObject):
 
 
 
-class TemporalEntity(model.core.AbstractObject):  # Declare forward
+class TemporalEntity(model.core.AbstractObject):
 #===============================================
   '''
   An abstract Temporal Entity.
@@ -65,6 +65,23 @@ class TemporalEntity(model.core.AbstractObject):  # Declare forward
   mapping = { 'timeline': PropertyMap(TL.timeline,
                                       to_rdf=mapping.get_uri,
                                       from_rdf=RelativeTimeLine) }
+
+  @classmethod
+  def create_from_graph(cls, uri, graph, **kwds):
+  #----------------------------------------------
+    """
+    We can't call the 'create_from_graph()' for the appropriate
+    class as leads to recursion...
+    """
+    self = None
+    if   graph.contains(rdf.Statement(uri, RDF.type, Interval.metaclass)):
+      self = Interval(uri, None, **kwds)
+    elif graph.contains(rdf.Statement(uri, RDF.type, Instant.metaclass)):
+      self = Instant(uri, None, **kwds)
+    if self is not None:
+      self.load_from_graph(graph)
+      self.graph = graph
+    return self
 
 
 class Interval(TemporalEntity):
@@ -146,24 +163,3 @@ class Instant(TemporalEntity):
   def __str__(self):
   #-----------------
     return 'Instant: %g' % self.start
-
-
-class TemporalEntity(model.core.AbstractObject):
-#===============================================
-
-  @classmethod
-  def create_from_graph(cls, uri, graph, **kwds):
-  #----------------------------------------------
-    """
-    We can't call the 'create_from_graph()' for the appropriate
-    class as leads to recursion...
-    """
-    self = None
-    if   graph.contains(rdf.Statement(uri, RDF.type, Interval.metaclass)):
-      self = Interval(uri, None, **kwds)
-    elif graph.contains(rdf.Statement(uri, RDF.type, Instant.metaclass)):
-      self = Instant(uri, None, **kwds)
-    if self is not None:
-      self.load_from_graph(graph)
-      self.graph = graph
-    return self
