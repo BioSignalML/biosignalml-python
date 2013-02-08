@@ -65,7 +65,7 @@ def seconds_to_isoduration(secs):
   """
   return isoduration.duration_isoformat(
     timedelta(seconds=int(secs), microseconds=int(1000000*(float(secs) - int(secs)) ))
-    )
+    ) if secs != 0.0 else "PT0S"  ## More meaningful than "P0D"
 
 def isoduration_to_seconds(d):
 #=============================
