@@ -102,7 +102,7 @@ raw data value (as read) by subtracting any offset before multiplying by any gai
 Timing for the signal(s) in a dataset is given by the mutually exclusive attributes
 of ``rate``, ``period`` and ``clock``. If ``rate`` or ``period`` is given then an
 optional ``timeunits`` attribute specifies the units of ``period``, with that of ``rate``
-being the reciprocal; default units are seconds. If ``clock`` is given its value
+being the reciprocal; default time units are seconds. If ``clock`` is given its value
 is a HDF5 reference to a dataset within the '/recording/clock' group.
 
 
