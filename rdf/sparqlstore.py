@@ -168,9 +168,9 @@ class SparqlStore(object):
   def construct(self, template, where, params=None, graph=None, format=rdf.Format.RDFXML, prefixes=None):
   #------------------------------------------------------------------------------------------------------
     if params is None: params = {}
-    return self.query('construct { %(tplate)s } where { %(graph)s { %(where)s } }'
+    return self.query('construct { %(tplate)s } %(graph)s where { %(where)s }'
                       % dict(tplate=template % params,
-                             graph=('graph <%s>' % str(graph)) if graph else '',
+                             graph=('from <%s>' % str(graph)) if graph else '',
                              where=where % params),
                       format, prefixes)
 
