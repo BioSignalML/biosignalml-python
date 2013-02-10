@@ -87,8 +87,8 @@ class BSMLStore(GraphStore):
     r = self.get_resources(BSML.Recording, condition='<%s> a []' % uri)
     return r[0] if r else (None, None)
 
-  def get_recording(self, uri, graph_uri=None):
-  #--------------------------------------------
+  def get_recording(self, uri, graph_uri=None, **kwds):
+  #----------------------------------------------------
     '''
     Get the Recording from the graph that an object is in.
 
@@ -106,7 +106,7 @@ class BSMLStore(GraphStore):
                  str(self.get_objects(rec_uri, DCT.format, graph=graph_uri)[0]),
                  Recording)
       graph = self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)
-      rec = rclass.create_from_graph(rec_uri, graph, signals=False)
+      rec = rclass.create_from_graph(rec_uri, graph, signals=False, **kwds)
       return rec
 
   def get_recording_with_signals(self, uri, open_dataset=True, graph_uri=None):
