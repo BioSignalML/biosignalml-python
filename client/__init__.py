@@ -214,11 +214,15 @@ class Recording(BSMLRecording):
       ## and not get_recording_with_signals()
 
       logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
-      sig.repository.post_metadata(self.uri, sig.metadata_as_graph())
+      self.repository.post_metadata(self.uri, sig.metadata_as_string())
       return sig
     except Exception, msg:
       raise
       raise IOError("Cannot create Signal '%s' in repository" % uri)
+
+  def save_metadata(self, metadata, format=rdf.Format.RDFXML):
+  #-----------------------------------------------------------
+    self.repository.post_metadata(self.uri, metadata, format)
 
 
 class Repository(repository.RemoteRepository):
@@ -259,7 +263,7 @@ class Repository(repository.RemoteRepository):
     try:
       rec = self.RecordingClass(uri, repository=self, **kwds)
       # Will have default metadata with attributes set from any metadata keyword dict
-      rec.graph = rdf.Graph(self.put_metadata(rec.uri, rec.metadata_as_graph()))
+      rec.graph = rdf.Graph(self.put_metadata(rec.uri, rec.metadata_as_string()))
       # Format = HDF5 (BSML ??)
       # then when server processes PUT for a new BSML recording it will create an empty HDF5 container
       return rec
@@ -269,8 +273,7 @@ class Repository(repository.RemoteRepository):
 
   def store_recording(self, rec):       ## or save_recording ??
   #------------------------------
-    self.put_metadata(rec.uri, rec.save_to_graph())
-
+    self.put_metadata(rec.uri, rec.metadata_as_string())
 
   def get_signal(self, uri, **kwds):
   #---------------------------------
