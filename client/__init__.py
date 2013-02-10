@@ -78,6 +78,7 @@ And to get back signal data::
 import os
 import tempfile
 import logging
+import urlparse
 import numpy as np
 
 import biosignalml
@@ -230,6 +231,13 @@ class Repository(repository.RemoteRepository):
   #-------------------------------
     repository.RemoteRepository.__init__(self, uri, access_key=get_token(uri), **kwds)
 
+  @classmethod
+  def connect(cls, uri, **kwds):
+  #-----------------------------
+    p = urlparse.urlparse(uri)
+    if '' in [p.scheme, p.netloc]:
+      raise IOError("Invalid URI -- %s" % uri)
+    return cls(p.scheme + '://' + p.netloc, **kwds)
 
   def get_recording(self, uri, **kwds):
   #------------------------------------
