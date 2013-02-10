@@ -54,29 +54,26 @@ class RemoteRepository(object):
     except Exception, msg:
       raise Exception("Cannot get RDF for '%s'" % uri)
 
-  def _send_metadata(self, uri, graph, method='POST'):
-  #--------------------------------------------------
-    format = rdf.Format.RDFXML
+  def _send_metadata(self, method, uri, metadata, format):
+  #-------------------------------------------------------
     headers={'Content-type': rdf.Format.mimetype(format)}
     if self._access_key is not None: headers['Cookie'] = 'access=%s' % self._access_key
     try:
       response, content = self._http.request(self._md_uri + str(uri),
-        body=graph.serialise(base=str(uri), format=format),
-        method=method, headers=headers)
+        body=metadata, method=method, headers=headers)
     except Exception, msg:
       raise
     if   response.status == 401: raise Exception("Unauthorised")
     elif response.status not in [200, 201]: raise Exception(content)
     return response.get('location')
 
-  def put_metadata(self, uri, graph):
-  #----------------------------------
-    return self._send_metadata(uri, graph, 'PUT')
+  def put_metadata(self, uri, metadata, format=rdf.Format.RDFXML):
+  #---------------------------------------------------------------
+    return self._send_metadata('PUT', uri, metadata, format)
 
-  def post_metadata(self, uri, graph):
-  #----------------------------------
-    return self._send_metadata(uri, graph, 'POST')
-
+  def post_metadata(self, uri, metadata, format=rdf.Format.RDFXML):
+  #----------------------------------------------------------------
+    return self._send_metadata('POST', uri, metadata, format)
 
   def get_data(self, uri, **kwds):
   #-------------------------------
