@@ -174,10 +174,16 @@ class SparqlStore(object):
                              where=where % params),
                       format, prefixes)
 
-  def describe(self, uri, format=rdf.Format.RDFXML, prefixes=None):
-  #----------------------------------------------------------------
-    return self.query('describe <%(uri)s>' % { 'uri': uri }, format, prefixes)
-
+  def describe(self, uri, graph=None, format=rdf.Format.RDFXML, prefixes=None):
+  #----------------------------------------------------------------------------
+    if uri == '':
+      if graph is None: return ''
+      uri = graph
+      graph = None
+    return self.construct(
+      "<%(uri)s> ?op ?o . ?o a ?ot . ?s ?sp <%(uri)s> . ?s a ?st",
+      "{ <%(uri)s> ?op ?o . optional { ?o a ?ot } } union { ?s ?sp <%(uri)s> . optional { ?s a ?st } }",
+      params=dict(uri=uri), graph=graph, format=format)
 
   def update(self, sparql, prefixes=None):
   #---------------------------------------
@@ -292,6 +298,7 @@ class Virtuoso(SparqlStore):
 
   ENDPOINTS = [ '/sparql/', '/sparql/', '/sparql-graph-crud/' ]
   UPDATE_PARAMETER = 'query'
+
 
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
