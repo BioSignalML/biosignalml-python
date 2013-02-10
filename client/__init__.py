@@ -279,9 +279,7 @@ class Repository(repository.RemoteRepository):
   #---------------------------------
     graph = self.get_metadata(uri)
     if graph.contains(rdf.Statement(uri, rdf.RDF.type, BSML.Signal)):
-      sig = self.RecordingClass.SignalClass.create_from_graph(uri, self.get_metadata(uri), repository=self)
-      sig.recording = self.get_recording(sig.recording)
-      return sig
+      return self.RecordingClass.SignalClass.create_from_graph(uri, graph, repository=self)
     else:
       raise IOError("Unknown signal -- %s" % uri)
 
