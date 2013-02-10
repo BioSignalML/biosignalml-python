@@ -197,6 +197,11 @@ class Recording(BSMLRecording):
     # Ensure all metadata has been POSTed
     pass
 
+  def add_signal(self, signal):
+  #----------------------------
+    signal.repository = self.repository
+    super(Recording, self).add_signal(signal)
+
   def new_signal(self, uri, units, id=None, **kwds):
   #-------------------------------------------------
     # And if signal uri is
