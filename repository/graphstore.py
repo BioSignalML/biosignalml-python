@@ -316,18 +316,21 @@ class GraphStore(object):
 
   def describe(self, uri, graph=None, format=Format.RDFXML):
   #---------------------------------------------------------
+    return self._sparqlstore.describe(uri, graph=graph, format=format)
 
-    def description(uri, graph, format):
-    #-----------------------------------
+    """
+    def description(uri, format):
+    #----------------------------
       return self._sparqlstore.construct('?s ?p ?o',
                              '?s ?p ?o FILTER (?s = <%(uri)s> || ?o = <%(uri)s>)',
                              params=dict(uri=uri), graph=graph, format=format)
 
     class Closure(Graph):
     #--------------------
-      def __init__(self, rdf, base, format):
+      def __init__(self, rdf, base, format, store):
         Graph.__init__(self)
         self._base = base
+        self._store = store
         self._urns = set()
         for stmt in Graph.create_from_string(base, rdf, format):
           self.append(stmt)
@@ -335,18 +338,22 @@ class GraphStore(object):
           self.add_urn(stmt.object)
 
       def add_urn(self, node):
-        if Resource.is_uuid_urn(node) and str(node) not in self._urns:
-          ttl = description(node, None, Format.TURTLE)
-          self._urns.add(str(node))
-          for stmt in Graph.create_from_string(self._base, ttl, Format.TURTLE):
-            self.append(stmt)
-            ##print '[%s, %s, %s]' % (stmt.subject, stmt.predicate, stmt.object)
-            if node != stmt.subject: self.add_urn(stmt.subject)
-            if node != stmt.object: self.add_urn(stmt.object)
+        if str(node) not in self._urns:
+          if Resource.is_uuid_urn(node):
+            ttl = description(node, Format.TURTLE)
+            self._urns.add(str(node))
+            for stmt in Graph.create_from_string(self._base, ttl, Format.TURTLE):
+              self.append(stmt)
+              ##print '[%s, %s, %s]' % (stmt.subject, stmt.predicate, stmt.object)
+              if node != stmt.subject: self.add_urn(stmt.subject)
+              if node != stmt.object: self.add_urn(stmt.object)
+#          else:
+#            for t in self._store.get_types(node, graph):
+#              self.append(Statement(node, RDF.type, t))
 
-    rdf = description(uri, graph, Format.RDFXML) # Virtuoso returns bad Turtle typed literals...
-    return Closure(rdf, self.uri, Format.RDFXML).serialise(format, base = self.uri + '/')  # Need '/' for Tabulator...
-
+    rdf = description(uri, Format.RDFXML) # Virtuoso returns bad Turtle typed literals...
+    return Closure(rdf, self.uri, Format.RDFXML, self).serialise(format, base = self.uri + '/')  # Need '/' for Tabulator...
+    """
 
 
 class SparqlHead(object):
