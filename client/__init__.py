@@ -90,7 +90,7 @@ from biosignalml.data.time  import Interval
 from biosignalml.formats    import BSMLRecording, BSMLSignal
 from biosignalml.transports import StreamException
 
-import repository
+from . import repository
 
 
 def _get_token_file():
