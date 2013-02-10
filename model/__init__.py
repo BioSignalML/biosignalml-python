@@ -183,6 +183,7 @@ class Recording(core.AbstractObject):
                                            from_rdf=_get_timeline, subelement=True) }
 
   SignalClass = Signal       #: The class of Signals in the Recording
+  EventClass  = Event        #: The class of Events in the Recording
 
 
   def __init__(self, uri, **kwds):
@@ -273,7 +274,7 @@ class Recording(core.AbstractObject):
 
   def new_event(self, uri, etype, at, duration=None, end=None, **kwds):
   #--------------------------------------------------------------------
-    evt = Event(uri, etype, self.interval(at, duration, end), **kwds)
+    evt = self.EventClass(uri, etype, self.interval(at, duration, end), **kwds)
     self.add_event(evt)
     return evt
 
