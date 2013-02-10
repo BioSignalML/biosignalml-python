@@ -83,7 +83,7 @@ Measurement units would normally be entities in a specialised units of measure o
   '''The binary-bit resolution of the analogue-to-digital convertor or
         sampling device used to digitise the signal.'''
   index          = Resource(NS.index)
-  '''The 0-origin position of a signal in a physical recording.'''
+  '''The 0-origin position of a signal in a physical recording, or of an event in a sequence of events.'''
   maxFrequency   = Resource(NS.maxFrequency)
   '''The maximum frequency, in Hertz, contained in the signal.'''
   maxValue       = Resource(NS.maxValue)

@@ -117,12 +117,13 @@ class Event(core.AbstractObject):
 
   metaclass = BSML.Event      #: :attr:`.BSML.Event`
 
-  attributes = ['eventtype', 'time', 'recording' ]
+  attributes = ['eventtype', 'time', 'recording', 'index' ]
   '''Generic attributes of an Event.'''
 
   mapping = { 'recording': PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
               'eventtype': PropertyMap(BSML.eventType),
               'time':      PropertyMap(BSML.time, subelement=True),
+              'index':     PropertyMap(BSML.index, XSD.integer),
             }
 
   def __init__(self, uri, eventtype, time=None, **kwds):
