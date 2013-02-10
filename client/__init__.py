@@ -230,7 +230,6 @@ class Repository(repository.RemoteRepository):
 
   RecordingClass = Recording      #: The class of recordings in the repository.
 
-
   def __init__(self, uri, **kwds):
   #-------------------------------
     super(Repository, self).__init__(uri, access_key=get_token(uri), **kwds)
@@ -270,7 +269,6 @@ class Repository(repository.RemoteRepository):
     except Exception, msg:
       raise IOError("Cannot create Recording '%s' in repository -- %s" % (uri, msg))
 
-
   def store_recording(self, rec):       ## or save_recording ??
   #------------------------------
     self.put_metadata(rec.uri, rec.metadata_as_string())
@@ -302,4 +300,3 @@ if __name__ == "__main__":
   sig = repo.get_signal(sig_uri)
   for d in sig.read(dtype='f4'):
     print d
-
