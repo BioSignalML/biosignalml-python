@@ -143,7 +143,7 @@ class Signal(BSMLSignal):
   def __init__(self, uri, units=None, **kwds):
   #-------------------------------------------
     repository = kwds.pop('repository', None)
-    BSMLSignal.__init__(self, uri, units, **kwds)
+    super(Signal, self).__init__(uri, units, **kwds)
     self.repository = repository
 
   def close(self):
@@ -190,7 +190,7 @@ class Recording(BSMLRecording):
   def __init__(self, *args, **kwds):
   #---------------------------------
     repository = kwds.pop('repository', None)
-    BSMLRecording.__init__(self, *args, **kwds)
+    super(Recording, self).__init__(*args, **kwds)
     self.repository = repository
 
   def close(self):
@@ -209,11 +209,11 @@ class Recording(BSMLRecording):
     # then when server processes PUT for a new signal of BSML Recording
     # it will create an signal group in HDF5 container
     try:
-      sig = BSMLRecording.new_signal(self, uri, units, id=id, repository=self.repository, **kwds)
+      sig = super(Recording, self).new_signal(uri, units, id=id, repository=self.repository, **kwds)
       ## This should spot duplicates, even if we have done get_recording()
       ## and not get_recording_with_signals()
 
-      logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
+      #logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
       self.repository.post_metadata(self.uri, sig.metadata_as_string())
       return sig
     except Exception, msg:
@@ -233,7 +233,7 @@ class Repository(repository.RemoteRepository):
 
   def __init__(self, uri, **kwds):
   #-------------------------------
-    repository.RemoteRepository.__init__(self, uri, access_key=get_token(uri), **kwds)
+    super(Repository, self).__init__(uri, access_key=get_token(uri), **kwds)
 
   @classmethod
   def connect(cls, uri, **kwds):
