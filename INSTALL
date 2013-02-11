@@ -1,0 +1,78 @@
+Pre-requisites
+==============
+
+First install:
+==============
+
+  HDF5 1.8 http://www.hdfgroup.org/HDF5/
+
+  Python 2.7
+
+  numpy >= 1.6.1 http://new.scipy.org/download.html
+
+
+
+  Redland RDF Library (http://librdf.org/):
+    raptor          (2.0.8)
+    rasqal          (0.9.30)
+    librdf          (1.0.16)
+    redland-bindings (1.0.16.1)  (Python)   [ DJB tweaks...]
+
+  PhysioTools:
+    WFDB library (10.5.17) http://www.physionet.org/physiotools/wfdb.shtml#sources 
+    WFDB SWIG (Python bindings) (10.5.0) http://www.physionet.org/physiotools/wfdb-swig.shtml
+
+  setuptools
+
+Then:
+=====
+
+  python setup.py build
+
+  sudo python setup.py install
+
+  
+  Will install:
+
+    Python easy_install:
+      isodate  (0.4.7)
+      pyparsing (1.5.7)
+      httplib2 (0.7.2)
+      python-dateutil (2.0)
+      h5py (2.0.1)
+      ws4py (0.2.4)
+  
+
+pint
+  DJB tweaked copy...
+
+
+## Only for stream re-sampling...
+libsamplerate (0.1.8) http://www.mega-nerd.com/SRC/download.html
+
+
+
+
+Utilities:
+==========
+
+  easy_install
+    docopt (0.6.1)
+  
+
+Documentation
+=============
+##                        'docutils >= 0.3',  ## For ReST documentation
+
+
+Server:
+=======
+
+easy_install tornado (2.4.1)
+
+
+Triple Store
+============
+
+Virtuoso (or 4store)
+  Configuration (when using -- specifying repository)
