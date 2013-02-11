@@ -26,6 +26,11 @@ from biosignalml.transports import BlockType, SignalData
 from biosignalml.transports import WebStreamReader, WebStreamWriter, StreamException
 
 
+def web_sockets_uri(uri):
+#========================
+  if uri.startswith('http'): return uri.replace('http', 'ws', 1)
+  else:                      return uri
+
 class RemoteRepository(object):
 #==============================
   '''
@@ -87,7 +92,8 @@ class RemoteRepository(object):
     dtype
     '''
     kwds['access_key'] = self._access_key
-    for block in WebStreamReader(self._sd_uri+uri, uri, **kwds):
+    reader = WebStreamReader(web_sockets_uri(self._sd_uri+uri), uri, **kwds)
+    for block in reader:
       if block.type == BlockType.DATA: yield block.signaldata()
 
 
@@ -95,7 +101,7 @@ class RemoteRepository(object):
   #-----------------------------------
     stream = None
     try:
-      stream = WebStreamWriter(self._sd_uri+uri, access_key=self._access_key)
+      stream = WebStreamWriter(web_sockets_uri(self._sd_uri+uri), access_key=self._access_key)
       MAXPOINTS = 50000   ##### TESTING    (200K bytes if double precision)
       params = { }
       if hasattr(timeseries, 'rate'): params['rate'] = timeseries.rate

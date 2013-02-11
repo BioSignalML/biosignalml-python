@@ -88,7 +88,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
 
   def received_message(self, msg):
   #--------------------------------
-    self._parser.process(msg.data)
+    self._parser.process(bytearray(msg.data))
 
   def send_block(self, block, check=stream.Checksum.STRICT):
   #---------------------------------------------------------
