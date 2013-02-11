@@ -14,6 +14,7 @@ Python easy_install:
   httplib2 (0.7.2)
   python-dateutil (2.0)
   h5py (2.0.1)
+  ws4py (0.2.4)
 
 From sources or binary package:
   numpy (1.6.1) http://new.scipy.org/download.html
