@@ -95,7 +95,7 @@ class RemoteRepository(object):
     reader = WebStreamReader(web_sockets_uri(self._sd_uri+uri), uri, **kwds)
     for block in reader:
       if block.type == BlockType.DATA: yield block.signaldata()
-
+    reader.join()
 
   def put_data(self, uri, timeseries):
   #-----------------------------------

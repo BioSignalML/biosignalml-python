@@ -75,12 +75,11 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   def handshake_ok(self):
   #----------------------
     self._th.start()                      # Start running the thread
-    if self._request: self._th.join()     # but only join if we will send a request
 
   def close(self, *args):
   #----------------------
     ws4py.client.threadedclient.WebSocketClient.close(self, *args)
-    if not self._request: self._th.join()
+    super(StreamClient, self).close(*args)
 
   def closed(self, code, reason=None):
   #-----------------------------------
@@ -109,12 +108,18 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
     headers.append(('Cookies', 'chocolate??'))   ### TESTING
     return headers
 
+  def join(self, *args):
+  #---------------------
+    return self._th.join(*args)
+
 
 class WebStreamReader(stream.SignalDataStream):
 #==============================================
   """
   An `iterator` yielding :class:`~biosignalml.transports.stream.SignalData`
-  objects from a data stream server via Web Sockets.
+  objects from a data stream server via WebSockets.
+
+  The WebSockets client is run in a separate thread which we need to join() when finished.
 
   :param endpoint: The URL of the data stream server's endpoint.
   :type endpoint: str
@@ -147,6 +152,10 @@ class WebStreamReader(stream.SignalDataStream):
   def close(self):
   #---------------
     self._ws.close()
+
+  def join(self, *args):
+  #---------------------
+    self._ws.join(*args)
 
 
 class WebStreamWriter(object):
