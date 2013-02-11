@@ -62,7 +62,6 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   @property
   def handshake_headers(self):
   #---------------------------
-    #headers = ws4py.client.threadedclient.WebSocketClient.handshake_headers(self)
     headers = super(StreamClient, self).handshake_headers
     if self._access_key is not None: headers.append(('Cookie', 'access=%s' % self._access_key))
     return headers
@@ -78,7 +77,6 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
 
   def close(self, *args):
   #----------------------
-    ws4py.client.threadedclient.WebSocketClient.close(self, *args)
     super(StreamClient, self).close(*args)
 
   def closed(self, code, reason=None):
@@ -99,13 +97,11 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
       to append a SHA1 checksum to the block.
     '''
     while not self._opened: sleep(0.01)   # Wait until connected
-    ##logging.debug('SEND: %s', block)
     self.send(block.bytes(), True)
 
   def handshake_headers_getter(self):
   #----------------------------------
     headers = ws4py.client.threadedclient.WebSocketClient.handshake_headers(self)
-    headers.append(('Cookies', 'chocolate??'))   ### TESTING
     return headers
 
   def join(self, *args):
@@ -141,7 +137,7 @@ class WebStreamReader(stream.SignalDataStream):
   def __init__(self, endpoint, uri,
     start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None, units=None, **kwds):
   #-----------------------------------------------------------------------------------------------
-    stream.SignalDataStream.__init__(self, endpoint, uri, start, offset, duration, count, maxsize, dtype, units)
+    super(WebStreamReader, self).__init__(endpoint, uri, start, offset, duration, count, maxsize, dtype, units)
     try:
       self._ws = StreamClient(endpoint, self._request, self._receiveQ, protocols=['biosignalml-ssf'], **kwds)
       self._ws.connect()
