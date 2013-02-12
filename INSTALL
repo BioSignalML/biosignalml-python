@@ -1,31 +1,59 @@
 Pre-requisites
 ==============
 
+
+OS/X Package Installs
+---------------------
+
+homebrew  -- http://mxcl.github.com/homebrew/
+
+  ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+
+
+brew install swig  ## For redland-bindings install
+
+
 First install:
-==============
+--------------
 
   HDF5 1.8 http://www.hdfgroup.org/HDF5/
 
-  Python 2.7
+    brew install hdf5
+
+
+
+  Python 2.7 (+ virtualenv)
+  setuptools (incl. with virtualenv)
+    http://pypi.python.org/pypi/virtualenv
+
 
   numpy >= 1.6.1 http://new.scipy.org/download.html
+
+    http://code.google.com/p/pythonxy/
+
+or  http://ricardianambivalence.com/2012/12/29/2455/  (uses brew)
 
 
 
   Redland RDF Library (http://librdf.org/):
     raptor          (2.0.8)
     rasqal          (0.9.30)
-    librdf          (1.0.16)
+    redland         (1.0.16)  [ = librdf ]
+
+    brew install redland   ##  Installs dependencies
+
     redland-bindings (1.0.16.1)  (Python)   [ DJB tweaks...]
+      ./configure --with-python=/Users/dave/biosignalml/PYTHON/bin/python   \
+                  --with-python-ldflags="-lpython2.7 -bundle"
+
 
   PhysioTools:
     WFDB library (10.5.17) http://www.physionet.org/physiotools/wfdb.shtml#sources 
     WFDB SWIG (Python bindings) (10.5.0) http://www.physionet.org/physiotools/wfdb-swig.shtml
 
-  setuptools
 
 Then:
-=====
+-----
 
   python setup.py build
 
@@ -41,10 +69,8 @@ Then:
       python-dateutil (2.0)
       h5py (2.0.1)
       ws4py (0.2.4)
-  
+      pint (0.1.3-djb)
 
-pint
-  DJB tweaked copy...
 
 
 ## Only for stream re-sampling...
@@ -54,25 +80,25 @@ libsamplerate (0.1.8) http://www.mega-nerd.com/SRC/download.html
 
 
 Utilities:
-==========
+----------
 
   easy_install
     docopt (0.6.1)
   
 
 Documentation
-=============
+-------------
 ##                        'docutils >= 0.3',  ## For ReST documentation
 
 
 Server:
-=======
+-------
 
 easy_install tornado (2.4.1)
 
 
 Triple Store
-============
+------------
 
 Virtuoso (or 4store)
   Configuration (when using -- specifying repository)
