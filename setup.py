@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = '0.3.0'
+version = '0.3.1'
 
 setup(name='BioSignalML',
       version=version,
@@ -40,6 +40,7 @@ setup(name='BioSignalML',
                         'python-dateutil >= 2.0',
                         'h5py >= 2.0.1',
                         'ws4py >= 0.2.4',
+                        'tornado >= 2.4.1',
                         'pint == 0.1.3-djb',
                        ],
       dependency_links=['http://github.com/dbrnz/pint/tarball/master#egg=pint-0.1.3-djb']
