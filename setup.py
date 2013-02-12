@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = '0.3.2'
+version = '0.3.5'
 
 setup(name='BioSignalML',
       version=version,
@@ -35,7 +35,7 @@ setup(name='BioSignalML',
                                      ]),
       install_requires=['distribute',
                         'isodate  >= 0.4.7',
-                        'pyparsing == 1.5.7',
+                        'pyparsing >= 1.5.0, < 2.0.0',
                         'httplib2 >= 0.7.2',
                         'python-dateutil >= 2.0',
                         'h5py >= 2.1.1',
