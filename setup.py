@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = '0.3.1'
+version = '0.3.2'
 
 setup(name='BioSignalML',
       version=version,
@@ -38,7 +38,7 @@ setup(name='BioSignalML',
                         'pyparsing == 1.5.7',
                         'httplib2 >= 0.7.2',
                         'python-dateutil >= 2.0',
-                        'h5py >= 2.0.1',
+                        'h5py >= 2.1.1',
                         'ws4py >= 0.2.4',
                         'tornado >= 2.4.1',
                         'pint == 0.1.3-djb',
