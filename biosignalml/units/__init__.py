@@ -108,8 +108,8 @@ def _mult(u):
   return ''.join([_power(v) for v in u.split('*')])
 
 
-def units(s):
-#============
+def get_units_uri(s):
+#====================
   """
   Convert an abbreviated unit-of-measure into a URI from a unit's ontology.
   """
@@ -118,10 +118,11 @@ def units(s):
       uome = _direct[s]
     except KeyError:
       try: uome = 'Per'.join([_mult(u) for u in s.split('/')])
-      except KeyError: return None
+      except KeyError:
+        raise ValueError("Unknown units abbreviation: %s" % s)
     resource = getattr(UNITS, uome, None)
-    if resource: return resource.uri
-  return None
+    if resource is not None: return resource.uri
+  raise ValueError("Unknown units abbreviation: %s" % s)
 
 if __name__ == '__main__':
 #=========================
@@ -130,7 +131,7 @@ if __name__ == '__main__':
 
   def convert(u):
     try:
-      o = units(u)
+      o = get_units_uri(u)
       if o: print '%s --> %s' % (u, o)
       else: print 'Cannot convert: %s' % u
     except Exception, msg:
