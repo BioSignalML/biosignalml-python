@@ -12,7 +12,7 @@ setup(name='BioSignalML',
 #     keywords = "hello world example examples",
       author='David Brooks',
       author_email='d.brooks@auckland.ac.nz',
-      url='http://www.biosignalml.org/',
+      url='https://github.com/dbrnz/biosignalml-corelib',
 
       license = "ASL",
       classifiers=['Development Status :: 4 - Beta',
