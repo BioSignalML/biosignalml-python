@@ -221,6 +221,13 @@ class BlockType(object):
   :class:`StreamException` to be raised.
   """
 
+  FINISHED = 'F'
+  """
+  The stream is finished with and can be closed.
+
+  **FUTURE** Provide a total block count, reason, etc.
+  """
+
 
 class StreamException(Exception):
 #================================
@@ -350,6 +357,17 @@ class InfoBlock(StreamBlock):
   def __init__(self, **header):
   #----------------------------
     StreamBlock.__init__(self, 0, BlockType.INFO, header, '')
+
+
+class Finished(StreamBlock):
+#===========================
+  """
+  Terminate a block stream.
+
+  """
+  def __init__(self, **header):
+  #----------------------------
+    StreamBlock.__init__(self, 0, BlockType.FINISHED, header, '')
 
 
 class RDFBlock(StreamBlock):
