@@ -18,6 +18,7 @@
 #
 ######################################################
 
+import socket
 import logging
 import httplib2
 
@@ -43,7 +44,7 @@ class RemoteRepository(object):
     self._access_key = access_key
     self._md_uri = uri + md_endpoint if md_endpoint is not None else ''
     self._sd_uri = uri + sd_endpoint if sd_endpoint is not None else ''
-    self._http = httplib2.Http()
+    self._http = httplib2.Http(timeout=20)
     self.metadata = self.get_metadata(uri)
 
   def close(self):
@@ -63,11 +64,11 @@ class RemoteRepository(object):
   #-------------------------------------------------------
     headers={'Content-type': rdf.Format.mimetype(format)}
     if self._access_key is not None: headers['Cookie'] = 'access=%s' % self._access_key
+    endpoint = self._md_uri + str(uri)
     try:
-      response, content = self._http.request(self._md_uri + str(uri),
-        body=metadata, method=method, headers=headers)
-    except Exception, msg:
-      raise
+      response, content = self._http.request(endpoint, body=metadata, method=method, headers=headers)
+    except socket.error, msg:
+      raise Exception("Cannot connect to repository: %s" % endpoint)
     if   response.status == 401: raise Exception("Unauthorised")
     elif response.status not in [200, 201]: raise Exception(content)
     return response.get('location')
