@@ -7,10 +7,10 @@ OS/X Package Installs
 
 homebrew  -- http://mxcl.github.com/homebrew/
 
-  ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+>>  ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
 
 
-brew install swig  ## For redland-bindings install
+>>  brew install swig  ## For redland-bindings install
 
 
 First install:
@@ -18,7 +18,7 @@ First install:
 
   HDF5 1.8 http://www.hdfgroup.org/HDF5/
 
-    brew install hdf5
+>>  brew install hdf5
 
 
 
@@ -27,7 +27,7 @@ First install:
     http://pypi.python.org/pypi/virtualenv
 
 
-  numpy >= 1.6.1 http://new.scipy.org/download.html
+  numpy >= 1.7.0 http://new.scipy.org/download.html
 
     http://code.google.com/p/pythonxy/
 
@@ -40,7 +40,7 @@ or  http://ricardianambivalence.com/2012/12/29/2455/  (uses brew)
     rasqal          (0.9.30)
     redland         (1.0.16)  [ = librdf ]
 
-    brew install redland   ##  Installs dependencies
+>>  brew install redland   ##  Installs dependencies
 
     redland-bindings (1.0.16.1)  (Python)   [ DJB tweaks...]
       ./configure --with-python=/Users/dave/biosignalml/PYTHON/bin/python   \
@@ -55,17 +55,16 @@ or  http://ricardianambivalence.com/2012/12/29/2455/  (uses brew)
 Then:
 -----
 
-  python setup.py build
 
-  sudo python setup.py install
+>>  pip install numpy
+>>  pip install biosignalml
 
   
-  Will install:
-
+  Will also install:
     Python easy_install:
       isodate  (0.4.7)
       pyparsing (1.5.7)
-      httplib2 (0.7.2)
+      httplib2 (0.7.7)
       python-dateutil (2.0)
       h5py (2.0.1)
       ws4py (0.2.4)
@@ -76,6 +75,7 @@ Then:
 ## Only for stream re-sampling...
 libsamplerate (0.1.8) http://www.mega-nerd.com/SRC/download.html
 
+>>  brew install libsamplerate
 
 
 
