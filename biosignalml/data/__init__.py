@@ -331,6 +331,11 @@ class DataSegment(object):
     return self.dataseries.time[index] + self.starttime
 
   @property
+  def is_uniform(self):
+  #--------------------
+    return isinstance(self.dataseries, UniformTimeSeries)
+
+  @property
   def data(self):
   #--------------
     return self.dataseries.data
