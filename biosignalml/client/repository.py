@@ -20,7 +20,9 @@
 
 import socket
 import logging
+
 import httplib2
+httplib2.RETRIES = 1
 
 import biosignalml.rdf as rdf
 from biosignalml.transports import BlockType, SignalData
