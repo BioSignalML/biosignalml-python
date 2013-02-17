@@ -40,7 +40,6 @@ setup(name='BioSignalML',
                         'python-dateutil >= 2.0',
                         'h5py >= 2.1.1',
                         'ws4py >= 0.2.4',
-                        'tornado >= 2.4.1',
                         'pint == 0.1.3-djb',
                        ],
       dependency_links=['http://github.com/dbrnz/pint/tarball/master#egg=pint-0.1.3-djb']

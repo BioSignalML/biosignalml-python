@@ -20,10 +20,10 @@
 
 import urllib
 import json
+import socket
 import logging
 
-import tornado.ioloop
-import tornado.httpclient
+import httplib2
 
 import biosignalml.rdf as rdf
 
@@ -77,27 +77,18 @@ class SparqlStore(object):
   def __init__(self, href):
   #------------------------
     self._href = href
+    self._http = httplib2.Http(timeout=20)
 
-  def _request(self, endpoint, method, **kwds):
-  #--------------------------------------------
-    ioloop = tornado.ioloop.IOLoop()
-    client = tornado.httpclient.AsyncHTTPClient(ioloop)
+  def _request(self, endpoint, method, body=None, headers=None):
+  #-------------------------------------------------------------
     endpoint = self._href + endpoint
-    self._response = None
-    def callback(response):
-      self._response = response
-      ioloop.stop()
-    client.fetch(endpoint, callback,
-                 method=method, connect_timeout=20, **kwds)
-    ioloop.start()
-    response = self._response
-    client.close()
-    if response.code == 599:
-      print response.body
-      raise StoreException("Cannot connect to SPARQL endpoint %s -- is it active?" % endpoint)
-    elif response.code not in [200, 201]:
-      raise Exception(response.body)
-    return response.body
+    try:
+      response, content = self._http.request(endpoint, body=body, method=method, headers=headers)
+    except socket.error, msg:
+      raise StoreException("Cannot connect to SPARQL endpoint: %s" % endpoint)
+    if response.status not in [200, 201]:
+      raise Exception(content)
+    return content
 
   @staticmethod
   def map_prefixes(prefixes):
