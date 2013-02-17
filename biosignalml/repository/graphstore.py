@@ -22,7 +22,6 @@ import logging
 import json
 
 import RDF as librdf
-from tornado.options import options
 
 from biosignalml import BSML
 import biosignalml.model as model
