@@ -1,0 +1,7 @@
+18 Feb 2013 -- Version v0.3.6
+=============================
+
+59e7af6 Define 'is_uniform' property for a DataSegment.
+28a13dc Use latest httplib2 and don't automatically retry when errors.
+5c0951f Correctly detect errors when connecting to a remote repository.
+c96d5da Remove dependency on Tornado's HTTP client.
