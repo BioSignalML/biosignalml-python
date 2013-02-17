@@ -46,7 +46,6 @@ class RemoteRepository(object):
     self._access_key = access_key
     self._md_uri = uri + md_endpoint if md_endpoint is not None else ''
     self._sd_uri = uri + sd_endpoint if sd_endpoint is not None else ''
-    self._http = httplib2.Http(timeout=20)
     self.metadata = self.get_metadata(uri)
 
   def close(self):
@@ -68,7 +67,8 @@ class RemoteRepository(object):
     if self._access_key is not None: headers['Cookie'] = 'access=%s' % self._access_key
     endpoint = self._md_uri + str(uri)
     try:
-      response, content = self._http.request(endpoint, body=metadata, method=method, headers=headers)
+      http = httplib2.Http(timeout=20)
+      response, content = http.request(endpoint, body=metadata, method=method, headers=headers)
     except socket.error, msg:
       raise Exception("Cannot connect to repository: %s" % endpoint)
     if   response.status == 401: raise Exception("Unauthorised")
