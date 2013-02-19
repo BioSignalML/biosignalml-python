@@ -111,21 +111,6 @@ class GraphStore(object):
     return DataItem.create_from_string(graph_uri, rdf, Format.RDFXML)
 
 
-  def add_resource_graph(self, uri, rtype, rdf, creator, format=Format.RDFXML):
-  #----------------------------------------------------------------------------
-    current = self.get_resources(rtype, condition='filter(?r = <%s>)' % uri)
-    predecessor = current[0][0] if current else None
-    #print "Preceeded by", predecessor
-    graph_uri = self.uri.make_uri()
-    prov = DataItem(graph_uri, type=self._graphtype,
-      subject=uri, precededby=predecessor,
-      createdby=DataCreation(self.uri.make_uri(), performedby=creator,
-                             completed=utils.utctime() ))
-    self.extend_graph(self._provenance_uri, prov.metadata_as_graph().serialise())
-    self.replace_graph(graph_uri, rdf, format=format)
-    return graph_uri
-
-
   def get_resources(self, rtype, rvars='?r', condition='', group=None, prefixes=None, graph=None):
   #-----------------------------------------------------------------------------------------------
     """
@@ -230,43 +215,6 @@ class GraphStore(object):
           graph ?g { <%(uri)s> a [] }''',
          params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri)):
        return sparqlstore.get_result_value(r, 'g')
-
-
-  def insert_triples(self, graph_uri, triples, prefixes=None):
-  #-----------------------------------------------------------
-    self._sparqlstore.insert_triples(graph_uri, triples, prefixes)
-
-
-  def replace_graph(self, uri, rdf, format=Format.RDFXML):
-  #-------------------------------------------------------
-    #### graph.append(Statement(graph.uri, DCT._provenance, self._provenance.add(graph.uri)))
-
-    # If graph already present then rename (to new uuid()) and add
-    # provenance...
-
-    # add version statement to graph ??
-    # What about actual recording file(s)? They should also be renamed...
-
-    self._sparqlstore.replace_graph(uri, rdf, format=format)
-
-    #  Generate provenance....
-
-
-    #for k, v in provenance.iter_items():
-    #  self._provenance.add(self.uri, content-type, hexdigest, ...)
-    #self._sparqlstore.insert(self._provenace, triples...)
-
-
-  def extend_graph(self, uri, rdf, format=Format.RDFXML):
-  #---------------------------------------------------
-    self._sparqlstore.extend_graph(uri, rdf, format=format)
-
-
-  def delete_graph(self, uri):
-  #---------------------------
-    self._sparqlstore.delete_graph(uri)
-    #self._provenance.delete_graph(uri)
-    ## Should this set provenance...
 
 
   def query(self, sparql, header=False):
@@ -425,3 +373,54 @@ class QueryResults(object):
         yield { c: sparqlstore.get_result_value(r, c) for c in cols }
     else:
       yield self._results
+
+
+
+class GraphUpdate(GraphStore):
+#=============================
+
+  def insert_triples(self, graph_uri, triples, prefixes=None):
+  #-----------------------------------------------------------
+    self._sparqlstore.insert_triples(graph_uri, triples, prefixes)
+
+  def replace_graph(self, uri, rdf, format=Format.RDFXML):
+  #-------------------------------------------------------
+    #### graph.append(Statement(graph.uri, DCT._provenance, self._provenance.add(graph.uri)))
+
+    # If graph already present then rename (to new uuid()) and add
+    # provenance...
+
+    # add version statement to graph ??
+    # What about actual recording file(s)? They should also be renamed...
+
+    self._sparqlstore.replace_graph(uri, rdf, format=format)
+
+    #  Generate provenance....
+    #for k, v in provenance.iter_items():
+    #  self._provenance.add(self.uri, content-type, hexdigest, ...)
+    #self._sparqlstore.insert(self._provenace, triples...)
+
+
+  def extend_graph(self, uri, rdf, format=Format.RDFXML):
+  #---------------------------------------------------
+    self._sparqlstore.extend_graph(uri, rdf, format=format)
+
+  def delete_graph(self, uri):
+  #---------------------------
+    self._sparqlstore.delete_graph(uri)
+    #self._provenance.delete_graph(uri)
+    ## Should this set provenance...
+
+  def add_resource_graph(self, uri, rtype, rdf, creator, format=Format.RDFXML):
+  #----------------------------------------------------------------------------
+    current = self.get_resources(rtype, condition='filter(?r = <%s>)' % uri)
+    predecessor = current[0][0] if current else None
+    #print "Preceeded by", predecessor
+    graph_uri = self.uri.make_uri()
+    prov = DataItem(graph_uri, type=self._graphtype,
+      subject=uri, precededby=predecessor,
+      createdby=DataCreation(self.uri.make_uri(), performedby=creator,
+                             completed=utils.utctime() ))
+    self.extend_graph(self._provenance_uri, prov.metadata_as_graph().serialise())
+    self.replace_graph(graph_uri, rdf, format=format)
+    return graph_uri

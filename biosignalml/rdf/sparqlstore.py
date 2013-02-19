@@ -63,17 +63,15 @@ class StoreException(Exception):
 #===============================
   pass
 
+
 class SparqlStore(object):
 #=========================
   """
   A SPARQL endpoint to a RDF store.
 
   :param href: The URL of the store.
-  :param endpoints: A list with the relative paths to Query,
-                    Update, and Graph endpoints.
-  """
 
-  ENDPOINTS = [ '/sparql/', '/update/', '/data/' ] #: Order is QUERY, UPDATE, GRAPH
+  """
 
   def __init__(self, href):
   #------------------------
@@ -96,7 +94,6 @@ class SparqlStore(object):
   #--------------------------
     return '\n'.join(['PREFIX %s: <%s>' % kv for kv in prefixes.iteritems()] + ['']) if prefixes else ''
 
-
   def query(self, sparql, format=rdf.Format.RDFXML, prefixes=None):
   #----------------------------------------------------------------
     """
@@ -104,7 +101,7 @@ class SparqlStore(object):
     """
     #logging.debug('SPARQL %s: %s', format, sparql)
     try:
-      return self._request(self.ENDPOINTS[0], 'POST',
+      return self._request('/sparql/', 'POST',
                            body=urllib.urlencode({'query': self.map_prefixes(prefixes) + sparql}),
                            headers={'Content-type': 'application/x-www-form-urlencoded',
                                     'Accept': rdf.Format.mimetype(format)} )
@@ -177,6 +174,17 @@ class SparqlStore(object):
       "{ <%(uri)s> ?op ?o . optional { ?o a ?ot } } union { ?s ?sp <%(uri)s> . optional { ?s a ?st } }",
       params=dict(uri=uri), graph=graph, format=format)
 
+
+class SparqlUpdateStore(SparqlStore):
+#====================================
+  """
+  Connect to a SPARQL 1.1 update endpoint to a RDF store.
+
+  """
+
+  ENDPOINTS = [ '/update/', '/data/' ] #: Order is UPDATE, GRAPH
+  UPDATE_PARAMETER = 'update'
+
   def update(self, sparql, prefixes=None):
   #---------------------------------------
     """
@@ -184,7 +192,7 @@ class SparqlStore(object):
     """
     ##logging.debug('UPD: %s', sparql)
     try:
-      return self._request(self.ENDPOINTS[1], 'POST',
+      return self._request(self.ENDPOINTS[0], 'POST',
                            body=urllib.urlencode({self.UPDATE_PARAMETER: sparql + self.map_prefixes(prefixes)}),
                            headers={'Content-type': 'application/x-www-form-urlencoded'})
     except Exception, msg:
@@ -240,29 +248,25 @@ class SparqlStore(object):
 
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
-    '''
-    Extend an existing graph, creating one if not present.
-    '''
-    raise NotImplemented("SparqlStore.extend_graph()")
+    self._request(self.ENDPOINTS[1], 'POST',
+                  body=urllib.urlencode({'data': statements,
+                                         'graph': str(graph),
+                                         'mime-type': rdf.Format.mimetype(format),
+                                        }),
+                  headers={'Content-type': 'application/x-www-form-urlencoded'})
 
   def replace_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #--------------------------------------------------------------------
-    '''
-    Replace an existing graph, creating one if not present.
-    '''
-    raise NotImplemented("SparqlStore.replace_graph()")
+    self._request(self.ENDPOINTS[1] + "?graph=%s" % graph, 'PUT',
+                  body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
 
   def delete_graph(self, graph):
   #-----------------------------
-    '''
-    Delete an existing graph from the store.
-    '''
-    raise NotImplemented("SparqlStore.delete_graph()")
+    self._request(self.ENDPOINTS[1] + "?graph=%s" % graph, 'DELETE')
 
 
-
-class Virtuoso(SparqlStore):
-#===========================
+class Virtuoso(SparqlUpdateStore):
+#=================================
   """
   Specifics for a Virtuoso SPARQL endpoint.
 
@@ -288,50 +292,28 @@ class Virtuoso(SparqlStore):
 
   """
 
-  ENDPOINTS = [ '/sparql/', '/sparql/', '/sparql-graph-crud/' ]
+  ENDPOINTS = [ '/sparql/', '/sparql-graph-crud/' ]
   UPDATE_PARAMETER = 'query'
 
 
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
-    self._request(self.ENDPOINTS[2] + "?graph-uri=%s" % graph, 'POST',
+    self._request(self.ENDPOINTS[1] + "?graph-uri=%s" % graph, 'POST',
                   body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
 
   def replace_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #--------------------------------------------------------------------
-    self._request(self.ENDPOINTS[2] + "?graph-uri=%s" % graph, 'PUT',
+    self._request(self.ENDPOINTS[1] + "?graph-uri=%s" % graph, 'PUT',
                   body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
 
   def delete_graph(self, graph):
   #-----------------------------
-    self._request(self.ENDPOINTS[2] + "?graph-uri=%s" % graph, 'DELETE')
+    self._request(self.ENDPOINTS[1] + "?graph-uri=%s" % graph, 'DELETE')
 
 
 
-def FourStore(SparqlStore):
-#==========================
-
-  ENDPOINTS = [ '/sparql/', '/update/', '/data/' ]
-  UPDATE_PARAMETER = 'update'
-
-  def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
-  #-------------------------------------------------------------------
-    self._request(self.ENDPOINTS[2], 'POST',
-                  body=urllib.urlencode({'data': statements,
-                                         'graph': str(graph),
-                                         'mime-type': rdf.Format.mimetype(format),
-                                        }),
-                  headers={'Content-type': 'application/x-www-form-urlencoded'})
-
-  def replace_graph(self, graph, statements, format=rdf.Format.RDFXML):
-  #--------------------------------------------------------------------
-    self._request(self.ENDPOINTS[2] + "?graph=%s" % graph, 'PUT',
-                  body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
-
-  def delete_graph(self, graph):
-  #-----------------------------
-    self._request(self.ENDPOINTS[2] + "?graph=%s" % graph, 'DELETE')
-
+def FourStore(SparqlUpdateStore):
+#================================
 
   def fulltext(self):
   #------------------

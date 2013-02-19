@@ -25,7 +25,7 @@ from biosignalml import BSML, Recording, Signal, Event, Annotation
 from biosignalml.rdf import DCT, PRV, Format
 import biosignalml.rdf.sparqlstore as sparqlstore
 
-from graphstore import GraphStore
+from graphstore import GraphStore, GraphUpdate
 
 
 class BSMLStore(GraphStore):
@@ -37,7 +37,6 @@ class BSMLStore(GraphStore):
   def __init__(self, base_uri, sparqlstore):
   #-----------------------------------------
     GraphStore.__init__(self, base_uri, BSML.RecordingGraph, sparqlstore)
-
 
   def has_recording(self, uri):
   #----------------------------
@@ -55,12 +54,6 @@ class BSMLStore(GraphStore):
     g, r = get_graph_and_recording_uri(rec)
     return g is not none and self.has_signal(sig, g)
 
-  def extend_recording(self, recording, abstractobject):
-  #-----------------------------------------------------
-    self._sparqlstore.extend_graph(recording.graph.uri,
-      abstractobject.metadata_as_string(format=Format.RDFXML),
-      format=Format.RDFXML)
-
   def recordings(self):
   #--------------------
     """
@@ -69,11 +62,6 @@ class BSMLStore(GraphStore):
     :rtype: list[(:class:`~biosignalml.rdf.Uri`, :class:`~biosignalml.rdf.Uri`)]
     """
     return self.get_resources(BSML.Recording)
-
-  def add_recording_graph(self, uri, rdf, creator, format=Format.RDFXML):
-  #----------------------------------------------------------------------
-    return self.add_resource_graph(uri, BSML.Recording, rdf, creator, format=format)
-
 
   def get_graph_and_recording_uri(self, uri):
   #------------------------------------------
@@ -130,18 +118,6 @@ class BSMLStore(GraphStore):
         rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
         rec.initialise(open_dataset=open_dataset)    ## This will open files...
     return rec
-
-
-  def store_recording(self, recording, creator=None):
-  #--------------------------------------------------
-    """
-    Store a recording's metadata in the repository.
-
-    :param recording: The :class:`~biosignalml.Recording` to store.
-    :param creator: Who or what is storing the recording.
-    """
-    return self.add_recording_graph(recording.uri,
-      recording.metadata_as_graph().serialise(Format.RDFXML), creator, Format.RDFXML)
 
 
 #  def signal_recording(self, uri):
@@ -293,3 +269,28 @@ class BSMLStore(GraphStore):
         prefixes = dict(dct=DCT.prefix, prv=PRV.prefix),
         graph = graph_uri
         ) ]
+
+
+class BSMLUpdateStore(BSMLStore, GraphUpdate):
+#=============================================
+
+  def extend_recording(self, recording, abstractobject):
+  #-----------------------------------------------------
+    self._sparqlstore.extend_graph(recording.graph.uri,
+      abstractobject.metadata_as_string(format=Format.RDFXML),
+      format=Format.RDFXML)
+
+  def add_recording_graph(self, uri, rdf, creator, format=Format.RDFXML):
+  #----------------------------------------------------------------------
+    return self.add_resource_graph(uri, BSML.Recording, rdf, creator, format=format)
+
+  def store_recording(self, recording, creator=None):
+  #--------------------------------------------------
+    """
+    Store a recording's metadata in the repository.
+
+    :param recording: The :class:`~biosignalml.Recording` to store.
+    :param creator: Who or what is storing the recording.
+    """
+    return self.add_recording_graph(recording.uri,
+      recording.metadata_as_graph().serialise(Format.RDFXML), creator, Format.RDFXML)
