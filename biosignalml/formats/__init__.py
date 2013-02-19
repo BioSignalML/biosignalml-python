@@ -171,16 +171,30 @@ class BSMLRecording(biosignalml.Recording):
     pass
 
 
+CLASSES = { }
 
-from raw  import RAWRecording
-from edf  import EDFRecording
+try:
+  from raw import RAWRecording
+  CLASSES[RAWRecording.MIMETYPE] = RAWRecording
+except ImportError:
+  pass
+
+try:
+  from edf  import EDFRecording
+  CLASSES[EDFRecording.MIMETYPE] = EDFRecording
+except ImportError:
+  pass
+
+try:
+  from wfdb import WFDBRecording
+  CLASSES[WFDBRecording.MIMETYPE] = WFDBRecording
+except ImportError:
+  pass
+
+try:
+  from hdf5 import HDF5Recording
+  CLASSES[HDF5Recording.MIMETYPE] = HDF5Recording
+except ImportError:
+  pass
+
 ##from sdf  import SDFRecording
-from wfdb import WFDBRecording
-from hdf5 import HDF5Recording
-
-
-CLASSES = { RAWRecording.MIMETYPE:  RAWRecording,
-            EDFRecording.MIMETYPE:  EDFRecording,
-            WFDBRecording.MIMETYPE: WFDBRecording,
-            HDF5Recording.MIMETYPE: HDF5Recording,
-          }
