@@ -173,7 +173,7 @@ class WFDBSignal(BSMLSignal):
 class WFDBRecording(BSMLRecording):
 #==================================
 
-  MIMETYPE = 'application/x-wfdb'
+  MIMETYPE = 'application/x-bsml+wfdb'
   EXTENSIONS = [ 'hea' ]
   SignalClass = WFDBSignal
 

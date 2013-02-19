@@ -26,7 +26,7 @@ from biosignalml.utils   import file_uri
 class RAWRecording(BSMLRecording):
 #==================================
 
-  MIMETYPE = 'application/x-raw'
+  MIMETYPE = 'application/x-bsml+raw'
 
   def __init__(self, fname, uri=None, metadata=None):
   #-------------------------------------------------

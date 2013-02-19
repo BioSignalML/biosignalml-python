@@ -39,7 +39,7 @@ MAXBUFFERS = 100   ## Has to allow for short output data records and long signal
 class EDFRecording(BSMLRecording):
 #=================================
 
-  MIMETYPE = 'application/x-edf'  ## EDF+ as well...   #### look at self.edf_type ??
+  MIMETYPE = 'application/x-bsml+edf'  ## EDF+ as well...   #### look at self.edf_type ??
   EXTENSIONS = [ 'edf' ]
   SignalClass = EDFSignal
 

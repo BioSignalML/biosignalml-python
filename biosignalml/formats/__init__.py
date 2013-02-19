@@ -118,7 +118,7 @@ class BSMLRecording(biosignalml.Recording):
   :param mode: Open the recording for reading ('r') or create a new recording ('w').
   :type mode: str
   '''
-  MIMETYPE = 'application/x-raw'
+  MIMETYPE = 'application/x-bsml+raw'
   EXTENSIONS = [ 'raw' ]
   SignalClass = BSMLSignal
   attributes = [ 'digest', 'dataset' ]
