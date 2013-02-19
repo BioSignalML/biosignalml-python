@@ -25,16 +25,19 @@ import httplib2
 httplib2.RETRIES = 1
 
 import biosignalml.rdf as rdf
+from biosignalml.rdf.sparqlstore import SparqlStore
+from biosignalml.repository import BSMLStore
 
 
-class RemoteRepository(object):
-#==============================
+class RemoteRepository(BSMLStore):
+#=================================
   '''
   A connection to a repository for both metadata and data.
   '''
 
   def __init__(self, uri, access_key=None, md_endpoint=None, sd_endpoint=None):
   #----------------------------------------------------------------------------
+    super(RemoteRepository, self).__init__(uri, SparqlStore(uri))
     self.uri = uri
     self._access_key = access_key
     self._md_uri = uri + md_endpoint if md_endpoint is not None else ''
