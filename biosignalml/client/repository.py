@@ -25,14 +25,7 @@ import httplib2
 httplib2.RETRIES = 1
 
 import biosignalml.rdf as rdf
-from biosignalml.transports import BlockType, SignalData
-from biosignalml.transports import WebStreamReader, WebStreamWriter, StreamException
 
-
-def web_sockets_uri(uri):
-#========================
-  if uri.startswith('http'): return uri.replace('http', 'ws', 1)
-  else:                      return uri
 
 class RemoteRepository(object):
 #==============================
@@ -82,46 +75,6 @@ class RemoteRepository(object):
   def post_metadata(self, uri, metadata, format=rdf.Format.RDFXML):
   #----------------------------------------------------------------
     return self._send_metadata('POST', uri, metadata, format)
-
-  def get_data(self, uri, **kwds):
-  #-------------------------------
-    """ Gets :class:`~biosignalml.data.DataSegment`\s from the remote repository. """
-    '''
-    maxsize
-    start
-    duration
-    offset
-    count
-    dtype
-    '''
-    kwds['access_key'] = self._access_key
-    reader = WebStreamReader(web_sockets_uri(self._sd_uri+uri), uri, **kwds)
-    for block in reader:
-      if block.type == BlockType.DATA: yield block.signaldata()
-    reader.join()
-
-  def put_data(self, uri, timeseries):
-  #-----------------------------------
-    stream = None
-    try:
-      stream = WebStreamWriter(web_sockets_uri(self._sd_uri+uri), access_key=self._access_key)
-      MAXPOINTS = 50000   ##### TESTING    (200K bytes if double precision)
-      params = { }
-      if hasattr(timeseries, 'rate'): params['rate'] = timeseries.rate
-      pos = 0
-      count = len(timeseries)
-      while count > 0:
-        blen = min(count, MAXPOINTS)
-        if hasattr(timeseries, 'clock'):
-          params['clock'] = timeseries.clock[pos:pos+blen]
-        stream.write_signal_data(SignalData(uri, timeseries.time[pos], timeseries.data[pos:pos+blen], **params))
-        pos += blen
-        count -= blen
-    except Exception, msg:
-      logging.error('Error in stream: %s', msg)
-      raise
-    finally:
-      if stream: stream.close()
 
 
 if __name__ == "__main__":

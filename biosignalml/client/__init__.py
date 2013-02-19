@@ -89,6 +89,8 @@ from biosignalml.data       import TimeSeries, UniformTimeSeries, DataSegment
 from biosignalml.data.time  import Interval
 from biosignalml.formats    import BSMLRecording, BSMLSignal
 from biosignalml.transports import StreamException
+from biosignalml.transports import BlockType, SignalData
+from biosignalml.transports import WebStreamReader, WebStreamWriter, StreamException
 
 from . import repository
 
@@ -280,6 +282,56 @@ class Repository(repository.RemoteRepository):
       return self.RecordingClass.SignalClass.create_from_graph(uri, graph, repository=self)
     else:
       raise IOError("Unknown signal -- %s" % uri)
+
+
+  def _web_sockets_uri(self, uri):
+  #===============================
+    uri = self._sd_uri + uri
+    if uri.startswith('http'): return uri.replace('http', 'ws', 1)
+    else:                      return uri
+
+  def get_data(self, uri, **kwds):
+  #-------------------------------
+    """ Gets :class:`~biosignalml.data.DataSegment`\s from the remote repository. """
+    '''
+    maxsize
+    start
+    duration
+    offset
+    count
+    dtype
+    '''
+    kwds['access_key'] = self._access_key
+    reader = WebStreamReader(self._web_sockets_uri(uri), uri, **kwds)
+    for block in reader:
+      if block.type == BlockType.DATA: yield block.signaldata()
+    reader.join()
+
+  def put_data(self, uri, timeseries):
+  #-----------------------------------
+    stream = None
+    try:
+      stream = WebStreamWriter(self._web_sockets_uri(uri), access_key=self._access_key)
+      MAXPOINTS = 50000   ##### TESTING    (200K bytes if double precision)
+      params = { }
+      if hasattr(timeseries, 'rate'): params['rate'] = timeseries.rate
+      pos = 0
+      count = len(timeseries)
+      while count > 0:
+        blen = min(count, MAXPOINTS)
+        if hasattr(timeseries, 'clock'):
+          params['clock'] = timeseries.clock[pos:pos+blen]
+        stream.write_signal_data(SignalData(uri, timeseries.time[pos], timeseries.data[pos:pos+blen], **params))
+        pos += blen
+        count -= blen
+    except Exception, msg:
+      logging.error('Error in stream: %s', msg)
+      raise
+    finally:
+      if stream: stream.close()
+
+
+
 
 
 if __name__ == "__main__":
