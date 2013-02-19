@@ -119,7 +119,7 @@ def get_units_uri(s):
     except KeyError:
       try: uome = 'Per'.join([_mult(u) for u in s.split('/')])
       except KeyError:
-        raise ValueError("Unknown units abbreviation: %s" % s)
+        raise ValueError("Invalid units abbreviation: %s" % s)
     resource = getattr(UNITS, uome, None)
     if resource is not None: return resource.uri
   raise ValueError("Unknown units abbreviation: %s" % s)
