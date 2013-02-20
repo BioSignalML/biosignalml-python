@@ -460,6 +460,7 @@ class BlockParser(object):
     while datalen > 0:
 
       if   self._state == BlockParser._RESET:                   # Looking for a block
+        self._error = Error.NONE
         next = data[pos:].find('#')
         if next >= 0:
           pos += (next + 1)
@@ -608,7 +609,7 @@ class BlockParser(object):
 
       if self._error != Error.NONE:
         logging.error('Stream parse error: %s', Error.text(self._error))
-        self._error = Error.NONE
+        self._receiver(StreamBlock(0, BlockType.ERROR, getattr(self, '_header', None), bytearray(Error.text(self._error))))
         self._state = BlockParser._RESET
 
 
