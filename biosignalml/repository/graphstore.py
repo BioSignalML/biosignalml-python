@@ -150,7 +150,7 @@ class GraphStore(object):
           order='?g %s' % ' '.join(varlist))
         ]
     else:
-      return [ (Uri(graph), gv(r, retvars[0])) + tuple([gv(r, v) for v in retvars[1:]])
+      return [ (Uri(str(graph)), gv(r, retvars[0])) + tuple([gv(r, v) for v in retvars[1:]])
         for r in self.select('%(rvars)s', '?r a <%(rtype)s> . %(cond)s',
           params=dict(rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
