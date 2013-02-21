@@ -86,7 +86,7 @@ class SparqlStore(object):
     except socket.error, msg:
       raise StoreException("Cannot connect to SPARQL endpoint: %s" % endpoint)
     if response.status not in [200, 201]:
-      raise Exception(content)
+      raise StoreException('SPARQL request HTTP error %d: %s' % (response.status, response.reason))
     return content
 
   @staticmethod
