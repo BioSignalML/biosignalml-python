@@ -366,7 +366,7 @@ class Graph(librdf.Model):
                                                        storage_name='hashes',
                                                        options_string="hash-type='memory'"))
     if isinstance(uri, Node): uri = uri.uri
-    if uri and not isinstance(uri, Uri): uri = Uri(uri)
+    if uri and not isinstance(uri, Uri): uri = Uri(str(uri))
     self.uri = uri
 
   @classmethod
@@ -398,7 +398,7 @@ class Graph(librdf.Model):
     :rtype: A :class:`Graph`
     """
     self = cls(uri)
-    self.parse_string(string, format, uri)
+    self.parse_string(string, format, str(uri))
     return self
 
   def __str__(self):
