@@ -89,6 +89,10 @@ class SparqlStore(object):
       raise StoreException('SPARQL request HTTP error %d: %s' % (response.status, response.reason))
     return content
 
+  def http_request(self, endpoint, method, body=None, headers=None):
+  #-----------------------------------------------------------------
+    return self._request(endpoint, method, body, headers)
+
   @staticmethod
   def map_prefixes(prefixes):
   #--------------------------
@@ -101,10 +105,10 @@ class SparqlStore(object):
     """
     #logging.debug('SPARQL %s: %s', format, sparql)
     try:
-      return self._request('/sparql/', 'POST',
-                           body=urllib.urlencode({'query': self.map_prefixes(prefixes) + sparql}),
-                           headers={'Content-type': 'application/x-www-form-urlencoded',
-                                    'Accept': rdf.Format.mimetype(format)} )
+      return self.http_request('/sparql/', 'POST',
+                               body=urllib.urlencode({'query': self.map_prefixes(prefixes) + sparql}),
+                               headers={'Content-type': 'application/x-www-form-urlencoded',
+                                        'Accept': rdf.Format.mimetype(format)} )
     except Exception, msg:
       logging.error('SPARQL: %s, %s', msg, self.map_prefixes(prefixes) + sparql)
       raise
@@ -184,6 +188,7 @@ class SparqlUpdateStore(SparqlStore):
 
   ENDPOINTS = [ '/update/', '/data/' ] #: Order is UPDATE, GRAPH
   UPDATE_PARAMETER = 'update'
+  GRAPH_PARAMETER = 'graph'
 
   def update(self, sparql, prefixes=None):
   #---------------------------------------
@@ -192,9 +197,9 @@ class SparqlUpdateStore(SparqlStore):
     """
     ##logging.debug('UPD: %s', sparql)
     try:
-      return self._request(self.ENDPOINTS[0], 'POST',
-                           body=urllib.urlencode({self.UPDATE_PARAMETER: sparql + self.map_prefixes(prefixes)}),
-                           headers={'Content-type': 'application/x-www-form-urlencoded'})
+      return self.http_request(self.ENDPOINTS[0], 'POST',
+                               body=urllib.urlencode({self.UPDATE_PARAMETER: sparql + self.map_prefixes(prefixes)}),
+                               headers={'Content-type': 'application/x-www-form-urlencoded'})
     except Exception, msg:
       logging.error('SPARQL: %s, %s', msg, sparql + self.map_prefixes(prefixes))
       raise
@@ -248,21 +253,21 @@ class SparqlUpdateStore(SparqlStore):
 
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
-    self._request(self.ENDPOINTS[1], 'POST',
-                  body=urllib.urlencode({'data': statements,
-                                         'graph': str(graph),
-                                         'mime-type': rdf.Format.mimetype(format),
-                                        }),
-                  headers={'Content-type': 'application/x-www-form-urlencoded'})
+    self.http_request(self.ENDPOINTS[1], 'POST',
+                      body=urllib.urlencode({'data': statements,
+                                             'graph': str(graph),
+                                             'mime-type': rdf.Format.mimetype(format),
+                                            }),
+                      headers={'Content-type': 'application/x-www-form-urlencoded'})
 
   def replace_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #--------------------------------------------------------------------
-    self._request(self.ENDPOINTS[1] + "?graph=%s" % graph, 'PUT',
-                  body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
+    self.http_request(self.ENDPOINTS[1] + "?%s=%s" % (self.GRAPH_PARAMETER, graph), 'PUT',
+                      body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
 
   def delete_graph(self, graph):
   #-----------------------------
-    self._request(self.ENDPOINTS[1] + "?graph=%s" % graph, 'DELETE')
+    self.http_request(self.ENDPOINTS[1] + "?%s=%s" % (self.GRAPH_PARAMETER, graph), 'DELETE')
 
 
 class Virtuoso(SparqlUpdateStore):
@@ -294,21 +299,13 @@ class Virtuoso(SparqlUpdateStore):
 
   ENDPOINTS = [ '/sparql/', '/sparql-graph-crud/' ]
   UPDATE_PARAMETER = 'query'
+  GRAPH_PARAMETER = 'graph-uri'
 
 
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
-    self._request(self.ENDPOINTS[1] + "?graph-uri=%s" % graph, 'POST',
-                  body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
-
-  def replace_graph(self, graph, statements, format=rdf.Format.RDFXML):
-  #--------------------------------------------------------------------
-    self._request(self.ENDPOINTS[1] + "?graph-uri=%s" % graph, 'PUT',
-                  body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
-
-  def delete_graph(self, graph):
-  #-----------------------------
-    self._request(self.ENDPOINTS[1] + "?graph-uri=%s" % graph, 'DELETE')
+    self.http_request(self.ENDPOINTS[1] + "?%s=%s" % (self.GRAPH_PARAMETER, graph), 'POST',
+                      body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
 
 
 
