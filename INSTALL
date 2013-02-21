@@ -16,22 +16,10 @@ homebrew  -- http://mxcl.github.com/homebrew/
 First install:
 --------------
 
-  HDF5 1.8 http://www.hdfgroup.org/HDF5/
-
->>  brew install hdf5
-
-
 
   Python 2.7 (+ virtualenv)
   setuptools (incl. with virtualenv)
     http://pypi.python.org/pypi/virtualenv
-
-
-  numpy >= 1.7.0 http://new.scipy.org/download.html
-
-    http://code.google.com/p/pythonxy/
-
-or  http://ricardianambivalence.com/2012/12/29/2455/  (uses brew)
 
 
 
@@ -46,6 +34,16 @@ or  http://ricardianambivalence.com/2012/12/29/2455/  (uses brew)
       ./configure --with-python=/Users/dave/biosignalml/PYTHON/bin/python   \
                   --with-python-ldflags="-lpython2.7 -bundle"
 
+HDF5:
+=====
+
+  HDF5 1.8 http://www.hdfgroup.org/HDF5/
+
+>>  brew install hdf5
+      'h5py >= 2.1.1',
+
+WFDB:
+=====
 
   PhysioTools:
     WFDB library (10.5.17) http://www.physionet.org/physiotools/wfdb.shtml#sources 
@@ -66,7 +64,6 @@ Then:
       pyparsing (1.5.7)
       httplib2 (0.7.7)
       python-dateutil (2.0)
-      h5py (2.0.1)
       ws4py (0.2.4)
       pint (0.1.3-djb)
 
