@@ -587,6 +587,16 @@ class Graph(librdf.Model):
     '''
     for v in self.get_objects(s, p): yield v.as_string()
 
+  def set_subject_property(self, s, p, o):
+  #---------------------------------------
+    """
+    Append the statement (s, p, o) to the graph after first removing
+    all statements with subject `s` and predicate `p`.
+    """
+    for stmt in self.find_statements(Statement(s, s, None)):
+      del self[stmt]
+    self.append(Statement(s, p, o))
+
   def query(self, sparql):
   #-----------------------
     '''
