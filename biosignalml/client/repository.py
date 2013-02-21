@@ -25,21 +25,40 @@ import httplib2
 httplib2.RETRIES = 1
 
 import biosignalml.rdf as rdf
-from biosignalml.rdf.sparqlstore import SparqlStore
-from biosignalml.repository import BSMLStore
+from biosignalml.rdf.sparqlstore import SparqlUpdateStore
+from biosignalml.repository import BSMLUpdateStore
 
 
-class RemoteRepository(BSMLStore):
-#=================================
+class RemoteSparqlStore(SparqlUpdateStore):
+#==========================================
+  """
+  Connect to SPARQL endpoints on a BioSignalML repository.
+
+  """
+  ENDPOINTS = [ '/sparql/update/', '/sparql/graph/' ] #: Order is UPDATE, GRAPH
+
+  def __init__(self, uri, access_key):
+  #-----------------------------------
+    super(RemoteSparqlStore, self).__init__(uri)
+    self._access_key = access_key
+
+  def http_request(self, endpoint, method, body=None, headers=None):
+  #-----------------------------------------------------------------
+    if self._access_key is not None: headers['Cookie'] = 'access=%s' % self._access_key
+    return self._request(endpoint, method, body, headers)
+
+
+class RemoteRepository(BSMLUpdateStore):
+#=======================================
   '''
   A connection to a repository for both metadata and data.
   '''
 
   def __init__(self, uri, access_key=None, md_endpoint=None, sd_endpoint=None):
   #----------------------------------------------------------------------------
-    super(RemoteRepository, self).__init__(uri, SparqlStore(uri))
     self.uri = uri
     self._access_key = access_key
+    super(RemoteRepository, self).__init__(uri, RemoteSparqlStore(uri, access_key))
     self._md_uri = uri + md_endpoint if md_endpoint is not None else ''
     self._sd_uri = uri + sd_endpoint if sd_endpoint is not None else ''
     self.metadata = self.get_metadata(uri)

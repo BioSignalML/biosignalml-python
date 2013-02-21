@@ -187,7 +187,6 @@ class Recording(BSMLRecording):
 #==============================
 
   SignalClass = Signal      #: The class of signals in the recording.
-  MIMETYPE = 'application/x-bsml+hdf5'  #: Stored in :class:`~biosignalml.formats.hdf5.HDF5Recording` format.
 
   def __init__(self, *args, **kwds):
   #---------------------------------
@@ -227,6 +226,7 @@ class Recording(BSMLRecording):
     self.repository.post_metadata(self.uri, metadata, format)
 
 
+
 class Repository(repository.RemoteRepository):
 #=============================================
 
@@ -244,19 +244,14 @@ class Repository(repository.RemoteRepository):
       raise IOError("Invalid URI -- %s" % uri)
     return cls(p.scheme + '://' + p.netloc, **kwds)
 
-  def get_recording(self, uri, **kwds):
-  #------------------------------------
-    graph = self.get_metadata(uri)
-    if graph.contains(rdf.Statement(uri, rdf.RDF.type, BSML.Recording)):
-      return self.RecordingClass.create_from_graph(uri, graph, repository=self, **kwds)
-    else:
-      raise IOError("Unknown recording for URI -- %s" % uri)
-
-  def get_recording_with_signals(self, uri, **kwds):
-  #-------------------------------------------------
-    rec = self.get_recording(uri, **kwds)
-    for sig in rec.signals():
-      sig.load_from_graph(self.get_metadata(sig.uri))
+  def get_recording(self, uri, graph_uri=None, **kwds):
+  #----------------------------------------------------
+    rec = super(Repository, self).get_recording(uri,
+            graph_uri=graph_uri,
+            recording_class=self.RecordingClass,
+            repository=self,
+            **kwds)
+    if rec is None: raise IOError("No Recording for: %s" % uri)
     return rec
 
   def new_recording(self, uri, **kwds):
@@ -271,18 +266,15 @@ class Repository(repository.RemoteRepository):
     except Exception, msg:
       raise IOError("Cannot create Recording '%s' in repository -- %s" % (uri, msg))
 
-  def store_recording(self, rec):       ## or save_recording ??
-  #------------------------------
-    self.put_metadata(rec.uri, rec.metadata_as_string())
-
-  def get_signal(self, uri, **kwds):
-  #---------------------------------
-    graph = self.get_metadata(uri)
-    if graph.contains(rdf.Statement(uri, rdf.RDF.type, BSML.Signal)):
-      return self.RecordingClass.SignalClass.create_from_graph(uri, graph, repository=self)
-    else:
-      raise IOError("Unknown signal -- %s" % uri)
-
+  def get_signal(self, uri, graph_uri=None, **kwds):
+  #-------------------------------------------------
+    sig = super(Repository, self).get_signal(uri,
+            graph_uri=graph_uri,
+            signal_class=self.RecordingClass.SignalClass,
+            repository=self,
+            **kwds)
+    if sig is None: raise IOError("Unknown signal: %s" % uri)
+    return sig
 
   def _web_sockets_uri(self, uri):
   #===============================
@@ -329,9 +321,6 @@ class Repository(repository.RemoteRepository):
       raise
     finally:
       if stream: stream.close()
-
-
-
 
 
 if __name__ == "__main__":
