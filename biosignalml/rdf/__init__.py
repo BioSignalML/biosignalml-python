@@ -194,6 +194,8 @@ class BlankNode(Node):
   '''
   def __init__(self, blank=None):
   #------------------------------
+    if blank is not None and blank.startswith('nodeID://'):
+      blank = str(blank[9:])    ## Tidy Virtuoso blank node identifiers
     super(BlankNode, self).__init__(blank=blank)
 
   def __str__(self):
