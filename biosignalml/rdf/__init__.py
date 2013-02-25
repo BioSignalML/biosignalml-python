@@ -593,7 +593,7 @@ class Graph(librdf.Model):
     Append the statement (s, p, o) to the graph after first removing
     all statements with subject `s` and predicate `p`.
     """
-    for stmt in self.find_statements(Statement(s, s, None)):
+    for stmt in self.find_statements(Statement(s, p, None)):
       del self[stmt]
     self.append(Statement(s, p, o))
 
