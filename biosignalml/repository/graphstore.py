@@ -213,7 +213,8 @@ class GraphStore(object):
      for r in self.select('?g',
        '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
           graph ?g { <%(uri)s> a [] }''',
-         params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri)):
+         params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri),
+         prefixes=dict(prv=PRV.prefix)):
        return sparqlstore.get_result_value(r, 'g')
 
 
