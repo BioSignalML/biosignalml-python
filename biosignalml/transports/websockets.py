@@ -160,7 +160,8 @@ class WebStreamWriter(object):
   def __init__(self, endpoint, access_key=None):
   #---------------------------------------------
     try:
-      self._ws = StreamClient(endpoint, None, self.got_response, protocols=['biosignalml-ssf'])
+      self._ws = StreamClient(endpoint, None, self.got_response, access_key=access_key,
+                              protocols=['biosignalml-ssf'])
       self._ws.connect()
     except Exception, msg:
       logging.error('Unable to connect to WebSocket: %s', msg)
