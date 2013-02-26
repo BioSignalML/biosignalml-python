@@ -122,11 +122,6 @@ class BSMLStore(GraphStore):
         rec.initialise(open_dataset=open_dataset)    ## This will open files...
     return rec
 
-
-#  def signal_recording(self, uri):
-#  #-------------------------------
-#    return self.get_object(uri, BSML.recording)
-
   def get_signal(self, uri, graph_uri=None, signal_class=None, **kwds):
   #--------------------------------------------------------------------
     '''
@@ -140,14 +135,6 @@ class BSMLStore(GraphStore):
     graph = self.get_resource_as_graph(uri, BSML.Signal, graph_uri)
     if signal_class is None: signal_class = Signal
     return signal_class.create_from_graph(uri, graph, units=None, **kwds)  # units set from graph...
-
-#  def signal(self, sig, properties):              # In context of signal's recording...
-#  #---------------------------------
-#    if self.check_type(sig, BSML.Signal):
-#      r = [ [ Graph.make_literal(t, '') for t in self.get_objects(sig, p) ] for p in properties ]
-#      r.sort()
-#      return r
-#    else: return None
 
   def signals(self, rec_uri, graph_uri=None):
   #------------------------------------------
