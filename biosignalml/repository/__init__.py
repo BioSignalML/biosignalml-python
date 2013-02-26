@@ -75,16 +75,19 @@ class BSMLStore(GraphStore):
     r = self.get_resources(BSML.Recording, condition='<%s> a []' % uri)
     return r[0] if r else (None, None)
 
-  def get_recording(self, uri, graph_uri=None, recording_class=None, **kwds):
-  #--------------------------------------------------------------------------
+  def get_recording(self, uri, with_signals=True, open_dataset=True, recording_class=None,
+  #---------------------------------------------------------------------------------------
+                                                                     graph_uri=None, **kwds):
     """
     Get the Recording from the graph that an object is in.
 
     :param uri: The URI of some object.
-    :param graph_uri: The URI of a named graph containing statements
-      about the object.
+    :paran with_signals: Default action is to also load the Recording's Signals.
+    :param open_dataset: Default action is to open the Recording's dataset.
     :param recording_class: The class of Recording to create. If not set
       the class is determined by the recording's dct:format attribute.
+    :param graph_uri: The URI of a named graph containing statements
+      about the object.
     :rtype: :class:`~biosignalml.Recording`
     """
     #logging.debug('Getting: %s', uri)
@@ -98,29 +101,16 @@ class BSMLStore(GraphStore):
                             Recording)
       graph = self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)
       rec = recording_class.create_from_graph(rec_uri, graph, signals=False, **kwds)
-      return rec
-
-  def get_recording_with_signals(self, uri, open_dataset=True, graph_uri=None):
-  #----------------------------------------------------------------------------
-    """
-    Get the Recording with its Signals from the graph
-      that an object is in.
-
-    :param uri: The URI of some object.
-    :param graph_uri: The URI of a named graph containing statements
-      about the object.
-    :param open_dataset: Try to open the recording's dataset. Optional, default True.
-    :rtype: :class:`~biosignalml.Recording`
-    """
-    rec = self.get_recording(uri, graph_uri=graph_uri)
-    if rec is not None:
-      for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
-          params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix), graph=rec.graph.uri, order='?s'):
-        sig_uri = sparqlstore.get_result_value(r, 's')
-        sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph.uri)
-        rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
+      if rec is not None:
+        if with_signals:
+          for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
+              params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix),
+              graph=graph.uri, order='?s'):
+            sig_uri = sparqlstore.get_result_value(r, 's')
+            sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph.uri)
+            rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
         rec.initialise(open_dataset=open_dataset)    ## This will open files...
-    return rec
+      return rec
 
   def get_signal(self, uri, graph_uri=None, signal_class=None, **kwds):
   #--------------------------------------------------------------------
@@ -131,6 +121,8 @@ class BSMLStore(GraphStore):
     :param graph_uri: An optional URI of the graph to query.
     :rtype: :class:`~biosignalml.Signal`
     '''
+    ### This assumes all signals for arecording in a repository
+    ### have been loaded against the Recording...
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Signal, graph_uri)
     if signal_class is None: signal_class = Signal

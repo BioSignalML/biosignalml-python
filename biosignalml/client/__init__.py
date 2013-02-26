@@ -58,7 +58,7 @@ And to get back signal data::
   repository = Repository("http://demo.biosignalml.org")
 
   # Retrieve the recording and all metadata about its signals:
-  recording = repository.get_recording_with_signals("http//example.org/recording/demo/1")
+  recording = repository.get_recording("http//example.org/recording/demo/1")
 
   # Select a signal by its signal identifier (can also use a URI):
   signal = recording.signal(id="id2")
@@ -211,8 +211,7 @@ class Recording(BSMLRecording):
     # it will create an signal group in HDF5 container
     try:
       sig = super(Recording, self).new_signal(uri, units, id=id, repository=self.repository, **kwds)
-      ## This should spot duplicates, even if we have done get_recording()
-      ## and not get_recording_with_signals()
+      ## This should spot duplicates
 
       #logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
       self.repository.post_metadata(self.uri, sig.metadata_as_string())
@@ -333,7 +332,7 @@ if __name__ == "__main__":
   rec_uri = 'http://devel.biosignalml.org/fph/icon/120312170352/FLW0002'
   sig_uri = rec_uri + '/signal/2'
 
-  rec = repo.get_recording_with_signals(rec_uri)
+  rec = repo.get_recording(rec_uri)
   for s in sorted(rec.signals(), key=lambda s: str(s.uri)):
     print s.uri, s.label
 #    for d in s.read(): print d
