@@ -425,3 +425,22 @@ class GraphUpdate(GraphStore):
     self.extend_graph(self._provenance_uri, prov.metadata_as_graph().serialise())
     self.replace_graph(graph_uri, rdf, format=format)
     return graph_uri
+
+  def save_subject_property(self, graph_uri, s, p):
+  #------------------------------------------------
+    """
+    """
+    o = getattr(s, p, None)
+    ### Following should be done in Mapping class...
+    if o not in ['', None] and isinstance(s, model.core.AbstractObject):
+      mc = [ c.metaclass for c in s.__class__.__mro__ if c.__dict__.get('metaclass') ]
+      for k, m in s.rdfmap.mapping.iteritems():
+        if (k[0] is None or k[0] in mc) and k[1] == p:
+          if isinstance(o, model.core.AbstractObject): v = "<%s>" % str(o.uri)
+          else:
+            if m.to_rdf is not None: o = m.to_rdf(o)
+            v = '"%s"' % str(o)
+            if m.datatype is not None: v += "^^<%s>" % str(m.datatype)
+          self._sparqlstore.update_triples(graph_uri,
+            [("<%s>" % str(s.uri), "<%s>" % str(m.property), v)])
+          return
