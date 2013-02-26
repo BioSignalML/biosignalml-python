@@ -96,7 +96,7 @@ class GraphStore(object):
       '''graph <%(pgraph)s> { <%(graph)s> a <%(gtype)s> MINUS { [] prv:precededBy <%(graph)s> }}
          graph <%(graph)s> { [] a [] }''',
       params=dict(pgraph=self._provenance_uri, graph=graph_uri, gtype=self._graphtype),
-      prefixes=dict(bsml=BSML.prefix))
+      prefixes=dict(bsml=BSML.prefix, prv=PRV.prefix))
 
 
   def get_provenance(self, graph_uri):
