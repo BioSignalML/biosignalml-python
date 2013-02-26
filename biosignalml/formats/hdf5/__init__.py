@@ -258,15 +258,13 @@ class HDF5Recording(BSMLRecording):
     """
     if self.dataset is not None and kwds.pop('open_dataset', True):
       dataset = str(self.dataset)
+      creating = kwds.pop('create', False)
       try:
         self._h5 = H5Recording.open(dataset, **kwds)
-        if kwds.pop('create_signals', False): kwds['create'] = True
       except IOError:
-        if not kwds.pop('create', False): raise
+        if not creating: raise
         H5Recording.create(self.uri, dataset, **kwds)
         self._h5 = H5Recording.open(dataset, **kwds)
-        kwds['create'] = True
-
+      if kwds.pop('create_signals', False): kwds['create'] = True
       for s in self.signals():
         HDF5Signal.initialise_class(s, **kwds)
-
