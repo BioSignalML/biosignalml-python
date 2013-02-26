@@ -54,8 +54,8 @@ class BSMLStore(GraphStore):
     g, r = get_graph_and_recording_uri(rec)
     return g is not none and self.has_signal(sig, g)
 
-  def recordings(self):
-  #--------------------
+  def recording_uris(self):
+  #------------------------
     """
     Return a list of tuple(recording, graph) URIs in the repository.
 
