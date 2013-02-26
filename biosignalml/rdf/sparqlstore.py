@@ -231,6 +231,20 @@ class SparqlUpdateStore(SparqlStore):
     content = self.update(sparql, prefixes)
     if 'error' in content: raise Exception(content)
 
+## These need separating into SPARQL 1.1 Update and Virtuoso SPARUL methods...
+# DELETE WHERE { GRAPH <%(g)s> { <%(s)s> <%(p)s> ?o } }   ## SPARQL 1.1
+#Sparql 1.1
+#WITH <%(graph)s>
+#  DELETE { <%(subject)s> <%(predicate>s> ?o  }
+#  INSERT { <%(subject)s> <%(predicate>s> %(value)s }
+#  WHERE  { <%(subject)s> <%(predicate>s> ?o }
+#
+#Virtuoso:
+#MODIFY GRAPH <%(graph)s>
+#  DELETE { <%(subject)s> <%(predicate>s> ?o  }
+#  INSERT { <%(subject)s> <%(predicate>s> %(value)s }
+#  FROM <%(graph)s> WHERE  { <%(subject)s> <%(predicate>s> ?o }
+
   def update_triples(self, graph, triples, prefixes=None):
   #-------------------------------------------------------
     '''
