@@ -43,14 +43,6 @@ class Signal(model.Signal, data.TimeSeries):  ## TEST WHAT MIXIN ENABLES...
     '''
     raise NotImplementedError, 'Signal.read()'
 
-  def __len__(self):
-  #----------------
-    return 0
-
-  def __nonzero__(self):
-  #---------------------
-    return True  # Otherwise bool(sig) is False, because we have __len__()
-
 
 class UniformSignal(Signal, data.UniformTimeSeries):
 #===================================================

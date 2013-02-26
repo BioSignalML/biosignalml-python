@@ -60,7 +60,7 @@ class Signal(core.AbstractObject):
 
   attributes = ['recording', 'units', 'transducer', 'filter', '_rate',  '_period', 'clock',
                 'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
-                'index', 'signaltype', 'offset', 'duration',
+                'index', 'signaltype', 'offset', '_duration',
                ]
   '''Generic attributes of a Signal.'''
 
@@ -81,7 +81,7 @@ class Signal(core.AbstractObject):
               'offset':       PropertyMap(BSML.offset, XSD.dayTimeDuration,
                                           utils.seconds_to_isoduration,
                                           utils.isoduration_to_seconds),
-              'duration':     PropertyMap(DCT.extent, XSD.dayTimeDuration,
+              '_duration':    PropertyMap(DCT.extent, XSD.dayTimeDuration,
                                           utils.seconds_to_isoduration,
                                           utils.isoduration_to_seconds),
             }
@@ -96,6 +96,14 @@ class Signal(core.AbstractObject):
     kwds['_period'] = period
     core.AbstractObject.__init__(self, uri, units=units, **kwds)
 
+  def __len__(self):
+  #----------------
+    return 0
+
+  def __nonzero__(self):
+  #---------------------
+    return True  # Otherwise bool(sig) is False, because we have __len__()
+
   @property
   def rate(self):
   #==============
@@ -107,6 +115,13 @@ class Signal(core.AbstractObject):
   #================
     if   self._period is not None: return float(self._period)
     elif self._rate   is not None: return 1.0/float(self._rate)
+
+  @property
+  def duration(self):
+  #------------------
+    if self._duration is not None: return self._duration
+    elif self.period is not None: return len(self)*self.period
+    ## self.time[-1] + (self.period if self.period is not None else 0)  ???
 
 
 class Event(core.AbstractObject):
