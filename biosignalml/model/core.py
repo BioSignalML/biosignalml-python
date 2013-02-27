@@ -25,8 +25,9 @@ import logging
 
 import biosignalml.rdf as rdf
 from biosignalml import BSML
-from biosignalml.rdf import RDFS, DCT, PRV
-from mapping import Mapping, PropertyMap
+from biosignalml.rdf import RDFS, DCT, XSD, PRV
+from mapping import Mapping, PropertyMap, get_uri
+import biosignalml.utils as utils
 
 
 class AbstractObject(object):
@@ -50,13 +51,17 @@ class AbstractObject(object):
   metaclass = None
   '''Class in BioSignalML Ontology as a :class:`biosignalml.rdf.Resource`'''
 
-  attributes = [ 'uri', 'label', 'comment', 'description', 'preceededBy' ]
+  attributes = [ 'uri', 'label', 'comment', 'description', 'preceededBy', 'creator', 'created' ]
   '''List of generic attributes all resources have.'''
 
   mapping = { 'label':       PropertyMap(RDFS.label),
               'comment':     PropertyMap(RDFS.comment),
               'description': PropertyMap(DCT.description),
               'preceededBy': PropertyMap(PRV.preceededBy),
+              'creator':     PropertyMap(DCT.creator, to_rdf=get_uri),
+              'created':     PropertyMap(DCT.created, XSD.dateTime,
+                                         utils.datetime_to_isoformat,
+                                         utils.isoformat_to_datetime),
             }
 
   rdfmap = None

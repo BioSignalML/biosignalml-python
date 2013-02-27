@@ -378,26 +378,22 @@ class Annotation(core.AbstractObject):
   '''
   metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation`
 
-  attributes = [ 'about', 'comment', 'tags', 'time', 'creator', 'created' ]
+  attributes = [ 'about', 'comment', 'tags', 'time' ]
 
   mapping = { 'about':   PropertyMap(DCT.subject, to_rdf=mapping.get_uri),
               'comment': PropertyMap(RDFS.comment),
               'tags':    PropertyMap(BSML.tag),
               'time':    PropertyMap(BSML.time, subelement=True),
-              'creator': PropertyMap(DCT.creator, to_rdf=mapping.get_uri),
-              'created': PropertyMap(DCT.created, XSD.dateTime,
-                                     utils.datetime_to_isoformat,
-                                     utils.isoformat_to_datetime),
             }
 
 
-  def __init__(self, uri, about=None, comment=None, tags=None, time=None, creator=None, timestamp=True, **kwds):
-  #-------------------------------------------------------------------------------------------------------------
+  def __init__(self, uri, about=None, comment=None, tags=None, time=None, timestamp=True, **kwds):
+  #-----------------------------------------------------------------------------------------------
     if time is not None: assert(time.end >= time.start)   ###
     created = kwds.pop('created', utils.utctime()) if timestamp else None
     label = kwds.get('label', '')
     core.AbstractObject.__init__(self, uri, about=about, comment=comment, time=time,
-      creator=creator, created=created, **kwds)
+      created=created, **kwds)
     self.tags = tags if tags else []
 
   @classmethod
