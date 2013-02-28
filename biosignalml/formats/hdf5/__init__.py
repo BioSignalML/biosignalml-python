@@ -127,14 +127,13 @@ class HDF5Signal(BSMLSignal):
     if self.recording._h5 is not None:
       rec_h5 = self.recording._h5
       h5 = rec_h5.get_signal(self.uri)
-      if h5 is not None:
-        self._set_h5_signal(h5)
-      elif kwds.pop('create', False):
+      if h5 is None and kwds.pop('create', False):
         if self.clock:
           rec_h5.create_clock(self.clock.uri)
           kwds['clock'] = self.clock.uri
         kwds['rate'] = getattr(self, 'rate', None)
-        self._h5 = rec_h5.create_signal(self.uri, self.units, **kwds)
+        h5 = rec_h5.create_signal(self.uri, self.units, **kwds)
+      if h5 is not None: self._set_h5_signal(h5)
 
   def append(self, timeseries):
   #----------------------------
