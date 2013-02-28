@@ -83,16 +83,17 @@ class AbstractObject(object):
     '''Dictionary of property values with names not in :attr:`attributes` list.'''
     if metadata is not None:
       self.metadata.update(AbstractObject.set_attributes(self, **metadata))
-    self.uri = (uri     if isinstance(uri, rdf.Uri)
+    self.uri = (uri     if isinstance(uri, rdf.Uri) or uri is None  # None ==> Blank node
            else uri.uri if isinstance(uri, rdf.Node) and uri.is_resource()
            else rdf.Uri(str(uri).strip()))
+    self.node = rdf.BlankNode() if uri is None else rdf.Resource(self.uri)
     self._associations = []
     self.graph = None
 
   def __str__(self):
   #-----------------
     try:
-      return 'Object[%s]: <%s>' % (self.metaclass, self.uri)
+      return 'Object[%s]: <%s>' % (self.metaclass, self.node)
     except AttributeError:
       return 'Object[%s]: None' %  self.metaclass
 
@@ -251,7 +252,7 @@ class AbstractObject(object):
     Return a stream of RDF statements about ourselves.
     '''
     if self.metaclass:
-      yield rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)
+      yield rdf.Statement(self.node, rdf.RDF.type, self.metaclass)
       for s in self.rdfmap.statement_stream(self): yield s
 
   def save_to_graph(self, graph):
