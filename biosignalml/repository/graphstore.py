@@ -89,6 +89,11 @@ class GraphStore(object):
     self._sparqlstore = sparqlstore
     self._provenance_uri = self.uri + PROVENANCE_PATH
 
+  @property
+  def provenance_uri(self):
+  #------------------------
+    return self._provenance_uri
+
   def has_provenance(self, graph_uri):
   #-----------------------------------
     ''' Check a URI is that of a graph for which we have current provenance.'''
