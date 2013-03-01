@@ -86,8 +86,13 @@ class SparqlStore(object):
     except socket.error, msg:
       raise StoreException("Cannot connect to SPARQL endpoint: %s" % endpoint)
     if response.status not in [200, 201]:
-      raise StoreException('SPARQL request HTTP error %d: %s' % (response.status, response.reason))
+      raise StoreException('SPARQL error: %s' % self._error_text(response, content))
     return content
+
+  @staticmethod
+  def _error_text(response, content):
+  #----------------------------------
+    return response.reason
 
   def http_request(self, endpoint, method, body=None, headers=None):
   #-----------------------------------------------------------------
@@ -315,6 +320,10 @@ class Virtuoso(SparqlUpdateStore):
   UPDATE_PARAMETER = 'query'
   GRAPH_PARAMETER = 'graph-uri'
 
+  @staticmethod
+  def _error_text(response, content):
+  #----------------------------------
+    return content.split('\n')[0].split(':')[-1].strip()
 
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
