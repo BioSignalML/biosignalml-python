@@ -57,11 +57,11 @@ class BSMLStore(GraphStore):
   def recording_uris(self):
   #------------------------
     """
-    Return a list of tuple(recording, graph) URIs in the repository.
+    Return a list of recording URIs in the repository.
 
-    :rtype: list[(:class:`~biosignalml.rdf.Uri`, :class:`~biosignalml.rdf.Uri`)]
+    :rtype: list[:class:`~biosignalml.rdf.Uri`]
     """
-    return self.get_resources(BSML.Recording)
+    return [ r[1] for r in self.get_resources(BSML.Recording) ]
 
   def get_graph_and_recording_uri(self, uri):
   #------------------------------------------
