@@ -24,7 +24,7 @@ class BSML(object):
   Electrode      = Resource(NS.Electrode)
   '''An electrical conductor in contact with non-conducting material, through which
             electrical activity can be measured.'''
-  ErrorTAG       = Resource(NS.ErrorTAG)
+  ErrorTag       = Resource(NS.ErrorTag)
   '''A tag to indicate that an annotation relates to some form of error.'''
   Event          = Resource(NS.Event)
   '''Something that has occurred in time, possibly for some duration.'''
@@ -55,6 +55,8 @@ class BSML(object):
   '''An increasing sequence of sample coordinates.
 
 Several signals may use the same clock.'''
+  SemanticTag    = Resource(NS.SemanticTag)
+  '''A tag used to classify a resource.'''
   Sensor         = Resource(NS.Sensor)
   '''What actually captured a signal -- an electrode, transducer, etc.'''
   Signal         = Resource(NS.Signal)
@@ -107,6 +109,7 @@ Measurement units would normally be entities in a specialised units of measure o
   BP             = Resource(NS.BP)
   ECG            = Resource(NS.ECG)
   EEG            = Resource(NS.EEG)
+  ErrorTAG       = Resource(NS.ErrorTAG)
 
 # owl:ObjectProperty resources:
   clock          = Resource(NS.clock)
