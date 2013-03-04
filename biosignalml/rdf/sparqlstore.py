@@ -156,10 +156,10 @@ class SparqlStore(object):
     '''
     if params is None: params = {}
     return json.loads(self.query(
-              'select%(distinct)s %(fields)s where {\n %(graph)s {\n %(where)s }\n }%(group)s%(order)s%(limit)s'
+              'select%(distinct)s %(fields)s %(graph)s where {\n %(where)s\n}%(group)s%(order)s%(limit)s'
                  % dict(distinct=' distinct' if distinct else '',
                         fields=fields % params,
-                        graph=('graph <%s>' % graph) if graph else '',
+                        graph=('from <%s>' % graph) if graph else '',
                         where=where % params,
                         group=(' group by %s' % group) if group else '',
                         order=(' order by %s' % order) if order else '',
