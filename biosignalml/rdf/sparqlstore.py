@@ -73,13 +73,18 @@ class SparqlStore(object):
 
   """
 
-  def __init__(self, href):
-  #------------------------
+  def __init__(self, href, port=None):
+  #-----------------------------------
     self._href = href
+    self._port = port
+    print href, port
 
   def _request(self, endpoint, method, body=None, headers=None):
   #-------------------------------------------------------------
-    endpoint = self._href + endpoint
+    if self._port is None:
+      endpoint = self._href + endpoint
+    else:
+      endpoint = self._href + ':' + str(self._port) + endpoint
     try:
       http = httplib2.Http(timeout=20)
       response, content = http.request(endpoint, body=body, method=method, headers=headers)

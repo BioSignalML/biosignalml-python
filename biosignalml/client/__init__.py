@@ -233,15 +233,12 @@ class Repository(repository.RemoteRepository):
 
   def __init__(self, uri, **kwds):
   #-------------------------------
-    super(Repository, self).__init__(uri, access_key=get_token(uri), **kwds)
-
-  @classmethod
-  def connect(cls, uri, **kwds):
-  #-----------------------------
     p = urlparse.urlparse(uri)
-    if '' in [p.scheme, p.netloc]:
+    if p.scheme == '' or p.hostname is None:
       raise IOError("Invalid URI -- %s" % uri)
-    return cls(p.scheme + '://' + p.netloc, **kwds)
+    uri = p.scheme + '://' + p.hostname
+    kwds['port'] = p.port
+    super(Repository, self).__init__(uri, access_key=get_token(uri), **kwds)
 
   def get_recording(self, uri, graph_uri=None, **kwds):
   #----------------------------------------------------

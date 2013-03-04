@@ -37,9 +37,9 @@ class RemoteSparqlStore(SparqlUpdateStore):
   """
   ENDPOINTS = [ '/sparql/update/', '/sparql/graph/' ] #: Order is UPDATE, GRAPH
 
-  def __init__(self, uri, access_key):
-  #-----------------------------------
-    super(RemoteSparqlStore, self).__init__(uri)
+  def __init__(self, uri, access_key, port=None):
+  #----------------------------------------------
+    super(RemoteSparqlStore, self).__init__(uri, port=port)
     self._access_key = access_key
 
   def http_request(self, endpoint, method, body=None, headers=None):
@@ -54,11 +54,11 @@ class RemoteRepository(BSMLUpdateStore):
   A connection to a repository for both metadata and data.
   '''
 
-  def __init__(self, uri, access_key=None, md_endpoint=None, sd_endpoint=None):
-  #----------------------------------------------------------------------------
+  def __init__(self, uri, access_key=None, md_endpoint=None, sd_endpoint=None, port=None):
+  #---------------------------------------------------------------------------------------
     self.uri = uri
     self._access_key = access_key
-    super(RemoteRepository, self).__init__(uri, RemoteSparqlStore(uri, access_key))
+    super(RemoteRepository, self).__init__(uri, RemoteSparqlStore(uri, access_key, port=port))
     self._md_uri = uri + md_endpoint if md_endpoint is not None else ''
     self._sd_uri = uri + sd_endpoint if sd_endpoint is not None else ''
     self.metadata = self.get_metadata(uri)
