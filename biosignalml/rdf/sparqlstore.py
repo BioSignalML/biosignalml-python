@@ -77,7 +77,6 @@ class SparqlStore(object):
   #-----------------------------------
     self._href = href
     self._port = port
-    print href, port
 
   def _request(self, endpoint, method, body=None, headers=None):
   #-------------------------------------------------------------
