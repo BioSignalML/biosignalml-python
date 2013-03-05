@@ -715,6 +715,13 @@ class UNITS(object):
   MillimetresOfWater = Resource(EXTRA.MillimetresOfWater, label="mmH2O", desc="millimetres of water")
   '''millimetres of water (mmH2O)'''
 
+  Bar = Resource(EXTRA.Bar, label="bar", desc="bar")
+  '''bar'''
+
+  Millibar = Resource(EXTRA.Millibar, label="mbar", desc="millibar")
+  '''millibar'''
+
+
   AnnotationData = Resource(EXTRA.AnnotationData, label='annotation', desc='annotation')
 
 
