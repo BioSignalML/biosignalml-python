@@ -22,10 +22,12 @@ import logging
 
 import biosignalml.formats
 from biosignalml import BSML, Recording, Signal, Event, Annotation
-from biosignalml.rdf import DCT, PRV, Format
+from biosignalml.rdf import RDFS, DCT, PRV, Format
 import biosignalml.rdf.sparqlstore as sparqlstore
 
 from graphstore import GraphStore, GraphUpdate
+
+SEMANTIC_TAGS = '/semantic-tags'  #! Graph holding bsml:SemanticTag resources
 
 
 class BSMLStore(GraphStore):
@@ -37,6 +39,7 @@ class BSMLStore(GraphStore):
   def __init__(self, base_uri, sparqlstore):
   #-----------------------------------------
     GraphStore.__init__(self, base_uri, BSML.RecordingGraph, sparqlstore)
+    self._semantic_tags = self.uri + SEMANTIC_TAGS
 
   def has_recording(self, uri):
   #----------------------------
@@ -251,6 +254,15 @@ class BSMLStore(GraphStore):
         prefixes = dict(dct=DCT.prefix, prv=PRV.prefix),
         graph = graph_uri
         ) ]
+
+  def get_semantic_tags(self):
+  #---------------------------
+    return { str(sparqlstore.get_result_value(r, 'uri')):
+                   sparqlstore.get_result_value(r, 'label')
+               for r in self.select('?uri ?label',
+                                    '?uri a bsml:SemanticTag . ?uri rdfs:label ?label',
+                                    prefixes=dict(bsml=BSML.prefix, rdfs=RDFS.prefix),
+                                    graph=self._semantic_tags) }
 
 
 class BSMLUpdateStore(BSMLStore, GraphUpdate):
