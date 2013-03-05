@@ -311,58 +311,58 @@ class UNITS(object):
   MetrePerSecondSquared = Resource(NS.MetrePerSecondSquared, label="m/s^2", desc="metre per second squared")
   '''metre per second squared (m/s^2)'''
 
-  MicroEinsteinPerSquareMetrePerSecond = Resource(NS.MicroEinsteinPerSquareMetrePerSecond, label="μeinstein/(m^2s)", desc="microeinstein per square metre per second")
+  MicroEinsteinPerSquareMetrePerSecond = Resource(NS.MicroEinsteinPerSquareMetrePerSecond, label=u"μeinstein/(m^2s)", desc="microeinstein per square metre per second")
   '''microeinstein per square metre per second (μeinstein/(m^2s))'''
 
-  Microampere    = Resource(NS.Microampere, label="μA", desc="microampere")
+  Microampere    = Resource(NS.Microampere, label=u"μA", desc="microampere")
   '''microampere (μA)'''
 
-  Microcurie     = Resource(NS.Microcurie, label="μCi", desc="microcurie")
+  Microcurie     = Resource(NS.Microcurie, label=u"μCi", desc="microcurie")
   '''microcurie (μCi)'''
 
-  Microgram      = Resource(NS.Microgram, label="μg", desc="microgram")
+  Microgram      = Resource(NS.Microgram, label=u"μg", desc="microgram")
   '''microgram (μg)'''
 
-  MicrogramPerMillilitre = Resource(NS.MicrogramPerMillilitre, label="μg/ml", desc="microgram per millilitre")
+  MicrogramPerMillilitre = Resource(NS.MicrogramPerMillilitre, label=u"μg/ml", desc="microgram per millilitre")
   '''microgram per millilitre (μg/ml)'''
 
-  Microgray      = Resource(NS.Microgray, label="μGy", desc="microgray")
+  Microgray      = Resource(NS.Microgray, label=u"μGy", desc="microgray")
   '''microgray (μGy)'''
 
-  Microlitre     = Resource(NS.Microlitre, label="μl", desc="microlitre")
+  Microlitre     = Resource(NS.Microlitre, label=u"μl", desc="microlitre")
   '''microlitre (μl)'''
 
-  MicrolitrePerKilogram = Resource(NS.MicrolitrePerKilogram, label="μl/kg", desc="microlitre per kilogram")
+  MicrolitrePerKilogram = Resource(NS.MicrolitrePerKilogram, label=u"μl/kg", desc="microlitre per kilogram")
   '''microlitre per kilogram (μl/kg)'''
 
-  MicrolitrePerMinute = Resource(NS.MicrolitrePerMinute, label="μl/min", desc="microlitre per minute")
+  MicrolitrePerMinute = Resource(NS.MicrolitrePerMinute, label=u"μl/min", desc="microlitre per minute")
   '''microlitre per minute (μl/min)'''
 
-  Micrometre     = Resource(NS.Micrometre, label="μm", desc="micrometre")
+  Micrometre     = Resource(NS.Micrometre, label=u"μm", desc="micrometre")
   '''micrometre (μm)'''
 
-  Micromolal     = Resource(NS.Micromolal, label="μmol/kg", desc="micromolal")
+  Micromolal     = Resource(NS.Micromolal, label=u"μmol/kg", desc="micromolal")
   '''micromolal (μmol/kg)'''
 
-  Micromolar     = Resource(NS.Micromolar, label="μM", desc="micromolar")
+  Micromolar     = Resource(NS.Micromolar, label=u"μM", desc="micromolar")
   '''micromolar (μM)'''
 
-  Micromole      = Resource(NS.Micromole, label="μmol", desc="micromole")
+  Micromole      = Resource(NS.Micromole, label=u"μmol", desc="micromole")
   '''micromole (μmol)'''
 
-  MicromolePerMilligramMinute = Resource(NS.MicromolePerMilligramMinute, label="μmol/(mg*min)", desc="micromole per milligram minute")
+  MicromolePerMilligramMinute = Resource(NS.MicromolePerMilligramMinute, label=u"μmol/(mg*min)", desc="micromole per milligram minute")
   '''micromole per milligram minute (μmol/(mg*min))'''
 
-  MicronPixel    = Resource(NS.MicronPixel, label="μm/dot", desc="micron pixel")
+  MicronPixel    = Resource(NS.MicronPixel, label=u"μm/dot", desc="micron pixel")
   '''micron pixel (μm/dot)'''
 
-  Microsecond    = Resource(NS.Microsecond, label="μs", desc="microsecond")
+  Microsecond    = Resource(NS.Microsecond, label=u"μs", desc="microsecond")
   '''microsecond (μs)'''
 
-  Microsievert   = Resource(NS.Microsievert, label="μSv", desc="microsievert")
+  Microsievert   = Resource(NS.Microsievert, label=u"μSv", desc="microsievert")
   '''microsievert (μSv)'''
 
-  Microvolt      = Resource(NS.Microvolt, label="μV", desc="microvolt")
+  Microvolt      = Resource(NS.Microvolt, label=u"μV", desc="microvolt")
   '''microvolt (μV)'''
   uV             = Microvolt
 
