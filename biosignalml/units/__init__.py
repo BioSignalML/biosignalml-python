@@ -18,6 +18,8 @@
 #
 ######################################################
 
+import logging
+
 from biosignalml.rdf import Resource, NS
 
 from ontology import UNITS
@@ -122,7 +124,8 @@ def get_units_uri(s):
         raise ValueError("Invalid units abbreviation: %s" % s)
     resource = getattr(UNITS, uome, None)
     if resource is not None: return resource.uri
-  raise ValueError("Unknown units abbreviation: %s" % s)
+    raise ValueError("Unknown units abbreviation: %s" % s)
+
 
 if __name__ == '__main__':
 #=========================
