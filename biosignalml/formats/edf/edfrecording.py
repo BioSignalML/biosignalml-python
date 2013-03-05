@@ -43,10 +43,21 @@ class EDFRecording(BSMLRecording):
   EXTENSIONS = [ 'edf' ]
   SignalClass = EDFSignal
 
-  def __init__(self, uri, fname=None, **kwds):
-  #-------------------------------------------
-    BSMLRecording.__init__(self, uri=uri, fname=fname, **kwds)
+  def __init__(self, uri, dataset=None, **kwds):
+  #---------------------------------------------
+    BSMLRecording.__init__(self, uri=uri, dataset=dataset, **kwds)
     self._edffile = None
+    newfile = kwds.pop('create', False)
+    if dataset:
+      if newfile: pass  ## Future...
+      else:
+        self.initialise()
+        self._set_attributes()
+
+  def close(self):
+  #---------------
+    if self._edffile:
+      self._edffile.close()
 
   def initialise(self, **kwds):
   #----------------------------
@@ -72,29 +83,16 @@ class EDFRecording(BSMLRecording):
       for k in PATIENTFIELDS: self.metadata[k] = getattr(self._edffile, k, None)
       for k in RECORDINGFIELDS: self.metadata[k] = getattr(self._edffile, k, None)
     for n in self._edffile.data_signals:      # Add EDFSignal objects
-      self.add_signal(EDFSignal(n, self))
+      self.add_signal(EDFSignal.from_recording(self, n))
     for n, a in enumerate(self._edffile.annotations()):
       tm = None
       for m, text in enumerate(a.annotations):
         if text:
           if tm is None: tm = self.interval(a.onset, a.duration)
-          self.add_event(biosignalml.Event(self.uri + '/annotation/tal_%d_%d' % (n, m),
-            metadata = {'description': text, 'time': tm}))
+          self.associate(biosignalml.Annotation(self.uri + '/annotation/tal_%d_%d' % (n, m),
+                                                about=self, comment=text, time=tm))
     # Now found common errors...
     self.comment = '\n'.join(self._edffile.errors)
-
-  @classmethod
-  def open(cls, fname, uri=None, **kwds):
-  #--------------------------------------
-    self = cls(uri=uri, dataset=fname, **kwds)
-    self.initialise()
-    self._set_attributes()
-    return self
-
-  def close(self):
-  #---------------
-    if self._edffile:
-      self._edffile.close()
 
 
   """
@@ -298,7 +296,7 @@ if __name__ == '__main__':
   #import rpdb2; rpdb2.start_embedded_debugger('test')
 
 
-  fname = '../../../../testdata/sinewave.edf'
+  fname = '../../../../workspace/testdata/sinewave.edf'
   edf = EDFRecording.open(fname, uri='http://recordings.biosignalml.org/testdata/sinewave')
   if edf is None:
     raise Exception('Missing file: %s' % fname)

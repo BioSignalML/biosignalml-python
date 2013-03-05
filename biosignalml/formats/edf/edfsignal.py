@@ -32,23 +32,27 @@ from edffile import EDF
 class EDFSignal(BSMLSignal):
 #===========================
 
-  def __init__(self, signum, recording):
-  #-------------------------------------
-    edffile = recording._edffile
-    BSMLSignal.__init__(self,
-      str(recording.uri) + '/signal/%d' % signum,
-      units.units(edffile.units[signum]),
-      **dict(recording  = recording,
-             label      = edffile.label[signum],
-             transducer = edffile.transducer[signum],
-             filter     = edffile.prefilter[signum],
-             rate       = edffile.rate[signum],
-#             minValue   = edffile._physmin[signum],
-#             maxValue   = edffile._physmax[signum],
-             index = signum,
-            ))
-    self.initialise()
+  def __init__(self, uri, units=None, **kwds):
+  #-------------------------------------------
+    BSMLSignal.__init__(self, uri, units, **kwds)
 
+  @classmethod
+  def from_recording(cls, recording, signum):
+  #------------------------------------------
+    edffile = recording._edffile
+    self = cls(str(recording.uri) + '/signal/%d' % signum,
+               units.get_units_uri(edffile.units[signum]),
+               recording  = recording,
+               label      = edffile.label[signum],
+               transducer = edffile.transducer[signum],
+               filter     = edffile.prefilter[signum],
+               rate       = edffile.rate[signum],
+#               minValue   = edffile._physmin[signum],
+#               maxValue   = edffile._physmax[signum],
+               index = signum,
+               )
+    self.initialise()
+    return self
 
   def initialise(self):
   #--------------------
