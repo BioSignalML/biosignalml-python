@@ -27,8 +27,8 @@ import biosignalml.rdf.sparqlstore as sparqlstore
 
 from graphstore import GraphStore, GraphUpdate
 
+'''Graph holding bsml:SemanticTag resources.'''
 SEMANTIC_TAGS = 'http://ontologies.biosignalml.org/semantic-tags'
-  '''Graph holding bsml:SemanticTag resources.'''
 
 
 class BSMLStore(GraphStore):

@@ -26,6 +26,7 @@ import biosignalml.rdf.sparqlstore as sparqlstore
 from biosignalml.rdf import RDF
 UOME_CORE = rdf.NS('http://www.sbpax.org/uome/core.owl#')
 
+'''Graph holding http://www.sbpax.org/uome/core.owl#UnitOfMeasurement resources.'''
 UNITS_GRAPH = "http://ontologies.biosignalml.org/units"
 
 UNIT_PREFIXES = [ rdf.UOME.prefix,
