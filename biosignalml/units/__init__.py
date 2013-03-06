@@ -26,7 +26,8 @@ from ontology import UNITS
 
 
 _direct = {
-  'bmp':    'BeatsPerMinute',
+  'Bpm':    'BeatsPerMinute',
+  'bpm':    'BeatsPerMinute',
   'cc':     'CubicCentimetre',
   'pm':     'PerMinute',
   '1/min':  'PerMinute',
