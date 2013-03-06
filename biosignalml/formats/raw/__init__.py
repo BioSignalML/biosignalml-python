@@ -27,19 +27,14 @@ class RAWRecording(BSMLRecording):
 #==================================
 
   MIMETYPE = 'application/x-bsml+raw'
+  EXTENSIONS = [ 'dat' ]
 
-  def __init__(self, fname, uri=None, metadata=None):
-  #-------------------------------------------------
-
-    self._file = open(fname, 'rb')
-
-    if metadata is None: metadata = { }
-    metadata['format'] = BSML.RAW
-    metadata['source'] = file_uri(fname)
-
-    super(RAWRecording, self).__init__(uri=uri, metadata = metadata)
+  def __init__(self, uri=None, dataset=None, mode='r', **kwds):
+  #------------------------------------------------------------
+    self._file = open(dataset, mode) if dataset is not None else None
+    super(RAWRecording, self).__init__(uri=uri, dataset=dataset, **kwds)
 
 
   def close(self):
   #---------------
-    self._file.close()
+    if self._file is not None: self._file.close()
