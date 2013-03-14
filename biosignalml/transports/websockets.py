@@ -184,6 +184,7 @@ class WebStreamWriter(object):
   def got_response(block):
   #-----------------------
     if block and block.type == stream.BlockType.ERROR:
+      logging.error("STREAM ERROR: %s:", block.content)
       raise stream.StreamException(block.content)
 
 
