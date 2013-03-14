@@ -372,8 +372,8 @@ class Graph(librdf.Model):
     self.uri = uri
 
   @classmethod
-  def create_from_resource(cls, uri, format, base=None):
-  #-----------------------------------------------------
+  def create_from_resource(cls, uri, format=Format.RDFXML, base=None):
+  #-------------------------------------------------------------------
     """
     Create a new Graph from RDF statements in a resource.
 
@@ -387,8 +387,8 @@ class Graph(librdf.Model):
     return self
 
   @classmethod
-  def create_from_string(cls, uri, string, format):
-  #------------------------------------------------
+  def create_from_string(cls, uri, string, format=Format.RDFXML):
+  #--------------------------------------------------------------
     """
     Create a new Graph from RDF statements in a string.
 
@@ -407,8 +407,8 @@ class Graph(librdf.Model):
   #-----------------
     return str(self.uri)
 
-  def parse_resource(self, uri, format, base=None):
-  #------------------------------------------------
+  def parse_resource(self, uri, format=Format.RDFXML, base=None):
+  #--------------------------------------------------------------
     """
     Add statements to the graph from a resource.
 
@@ -424,8 +424,8 @@ class Graph(librdf.Model):
     except librdf.RedlandError, msg:
       raise RDFParseError, msg
 
-  def parse_string(self, string, format, base):
-  #--------------------------------------------
+  def parse_string(self, string, format=Format.RDFXML, base=None):
+  #---------------------------------------------------------------
     """
     Add statements to the graph from a string.
 
