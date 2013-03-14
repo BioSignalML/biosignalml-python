@@ -482,7 +482,8 @@ class Graph(librdf.Model):
 
     :param graph: A :class:`Graph` containing statements.
     '''
-    for s in graph: self.append(s)
+    if graph is not None:
+      for s in graph: self.append(s)
 
   def contains(self, statement):
   #-----------------------------
