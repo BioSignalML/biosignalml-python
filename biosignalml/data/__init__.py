@@ -178,6 +178,7 @@ class TimeSeries(object):
     self.data = np.asarray(data)
     if isinstance(times, Clock): self.time = times
     else:                        self.time = Clock(None, times)
+    self.rate = None
 
   def __len__(self):
   #-----------------
@@ -305,53 +306,63 @@ class DataSegment(object):
   Keep the start time of a time series,
 
   :param float starttime: The starting time of the time series.
-  :param TimeSeries dataseries: A time series.
+  :param TimeSeries timeseries: A time series.
   '''
-  def __init__(self, starttime, dataseries):
+  def __init__(self, starttime, timeseries):
   #-----------------------------------------
-    self.starttime = starttime
-    self.dataseries = dataseries
+    self._starttime = starttime
+    self._timeseries = timeseries
 
   def __str__(self):
   #-----------------
-    return 'Start: %s, Series: %s' % (self.starttime, self.dataseries)
+    return 'Start: %s, Series: %s' % (self._starttime, self._timeseries)
 
   def __len__(self):
   #-----------------
-    return len(self.data)
+    return len(self._timeseries)
 
   def __getitem__(self, key):
   #--------------------------
-    s = self.dataseries[key]
-    if isinstance(key, slice): return s + (self.starttime, 0)
-    else:                      return (s[0] + self.starttime, s[1])
+    s = self._timeseries[key]
+    if isinstance(key, slice): return s + (self._starttime, 0)
+    else:                      return (s[0] + self._starttime, s[1])
 
   def time(self, index):
   #---------------------
-    return self.dataseries.time[index] + self.starttime
+    return self._timeseries.time[index] + self._starttime
+
+  @property
+  def rate(self):
+  #--------------
+    return self._timeseries.rate
+
+  @property
+  def starttime(self):
+  #--------------------
+    return self._starttime
 
   @property
   def is_uniform(self):
   #--------------------
-    return isinstance(self.dataseries, UniformTimeSeries)
+    return isinstance(self._timeseries, UniformTimeSeries)
 
   @property
   def data(self):
   #--------------
-    return self.dataseries.data
+    return self._timeseries.data
 
   @property
   def times(self):
   #---------------
-    return self.dataseries.times + self.starttime
+    return self._timeseries.times + self._starttime
 
   @property
   def points(self):
   #----------------
     if self.starttime:
-      return self.dataseries.points + (self.starttime, 0)
+      return self._timeseries.points + (self._starttime, 0)
     else:
-      return self.dataseries.points
+      return self._timeseries.points
 
 
 if __name__ == '__main__':
