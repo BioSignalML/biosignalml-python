@@ -97,9 +97,13 @@ class RateConverter(object):
 
   def convert(self, data, rate=None, finished=False):
   #--------------------------------------------------
-    inshape = data.shape
-    inframes = inshape[0]
-    assert(self._channels == data.size/inframes)
+    if data is not None:
+      self._inshape = data.shape
+      inframes = self._inshape[0]
+      assert(self._channels == data.size/inframes)
+    else:
+      data = np.array([0])
+      inframes = 0
     input = data.flatten().astype(np.float32)
     assert(input.flags['CONTIGUOUS'])
     inpos = 0
@@ -121,7 +125,7 @@ class RateConverter(object):
       inframes -= data.input_frames_used
       inpos += self._channels*data.input_frames_used
       outframes = data.output_frames_gen
-      outshape = (outframes,) + inshape[1:]
+      outshape = (outframes,) + self._inshape[1:]
       if outframes > 0:
         yield output[:self._channels*outframes].reshape(outshape)
 
