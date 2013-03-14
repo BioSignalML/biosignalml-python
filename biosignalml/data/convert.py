@@ -48,8 +48,16 @@ class _SRC_DATA(C.Structure):
                ('src_ratio',         C.c_double),
              ]
 
-
-_srclib = C.CDLL('libsamplerate.dylib')
+try:
+  _srclib = C.CDLL('libsamplerate.dylib')
+except OSError:
+  try:
+    _srclib = C.CDLL('libsamplerate.so')
+  except OSError:
+    try:
+      _srclib = C.CDLL('libsamplerate.dll')
+    except OSError:
+      raise OSError("Unable to load libsamplerate library")
 
 src_new = _srclib.src_new
 src_new.argtypes = [C.c_int, C.c_int, C.POINTER(C.c_int)]

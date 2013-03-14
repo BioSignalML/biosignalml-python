@@ -69,7 +69,7 @@ Then:
 
 
 
-## Only for stream re-sampling...
+## For stream re-sampling...
 libsamplerate (0.1.8) http://www.mega-nerd.com/SRC/download.html
 
 >>  brew install libsamplerate
