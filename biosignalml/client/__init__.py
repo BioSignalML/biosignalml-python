@@ -145,6 +145,7 @@ class Signal(BSMLSignal):
   def __init__(self, uri, units=None, **kwds):
   #-------------------------------------------
     repository = kwds.pop('repository', None)
+    self._length = 0
     super(Signal, self).__init__(uri, units, **kwds)
     self.repository = repository
 
@@ -155,6 +156,10 @@ class Signal(BSMLSignal):
 
   def read(self, interval=None, segment=None, maxpoints=0, dtype=None, units=None):
   #--------------------------------------------------------------------------------
+  def __len__(self):
+  #----------------
+    return self._length
+
     params = { }
     if interval:
       if isinstance(interval, Interval):
@@ -177,6 +182,7 @@ class Signal(BSMLSignal):
 
   def append(self, timeseries):
   #----------------------------
+    self._length += len(timeseries)
     if isinstance(timeseries, TimeSeries):
       return self.repository.put_data(str(self.uri), timeseries)
     elif self.rate:
