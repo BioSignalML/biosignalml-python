@@ -43,7 +43,7 @@ from biosignalml import BSML
 from biosignalml.data import DataSegment, UniformTimeSeries
 from biosignalml.utils import file_uri
 
-from biosignalml.formats import BSMLRecording, BSMLSignal
+from biosignalml.formats import BSMLRecording, BSMLSignal, MIMETYPES
 
 PHYSIOBANK = 'http://physionet.org/physiobank/database/'
 
@@ -173,7 +173,7 @@ class WFDBSignal(BSMLSignal):
 class WFDBRecording(BSMLRecording):
 #==================================
 
-  MIMETYPE = 'application/x-bsml+wfdb'
+  MIMETYPE = MIMETYPES.WFDB
   EXTENSIONS = [ 'hea' ]
   SignalClass = WFDBSignal
 

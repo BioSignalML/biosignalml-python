@@ -23,7 +23,7 @@ import logging
 
 import biosignalml.rdf as rdf
 from biosignalml import BSML
-from biosignalml.formats import BSMLRecording, BSMLSignal
+from biosignalml.formats import BSMLRecording, BSMLSignal, MIMETYPES
 from biosignalml.data import DataSegment, UniformTimeSeries, TimeSeries, Clock, UniformClock
 
 from h5recording import H5Recording
@@ -158,7 +158,7 @@ class HDF5Recording(BSMLRecording):
   :param kwds: :class:`~biosignalml.Recording` attributes to set.
   """
 
-  MIMETYPE = 'application/x-bsml+hdf5'   #: The mimetype for BioSignalML HDF5 files
+  MIMETYPE = MIMETYPES.HDF5              #: The mimetype for BioSignalML HDF5 files
   EXTENSIONS = [ 'h5', 'hdf', 'hdf5' ]   #: File extensions to try when opening a file
   SignalClass = HDF5Signal               #: The class of Signals HDF5Recording
 

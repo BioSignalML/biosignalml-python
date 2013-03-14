@@ -25,7 +25,7 @@ import numpy as np
 
 import biosignalml
 from biosignalml import BSML
-from biosignalml.formats import BSMLRecording #, BSMLSignal
+from biosignalml.formats import BSMLRecording, MIMETYPES #, BSMLSignal
 
 from edffile import EDF, EDFFile, InvalidSignalId
 from edffile import PATIENTFIELDS, RECORDINGFIELDS
@@ -39,7 +39,7 @@ MAXBUFFERS = 100   ## Has to allow for short output data records and long signal
 class EDFRecording(BSMLRecording):
 #=================================
 
-  MIMETYPE = 'application/x-bsml+edf'  ## EDF+ as well...   #### look at self.edf_type ??
+  MIMETYPE = MIMETYPES.EDF
   EXTENSIONS = [ 'edf' ]
   SignalClass = EDFSignal
 

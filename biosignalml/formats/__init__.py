@@ -171,29 +171,40 @@ class BSMLRecording(biosignalml.Recording):
     pass
 
 
-CLASSES = { }
+class MIMETYPES(object):
+#=======================
 
-try:
-  from raw import RAWRecording
-  CLASSES[RAWRecording.MIMETYPE] = RAWRecording
-except ImportError:
-  pass
+  EDF  = 'application/x-bsml+edf'    ## EDF+ as well...   #### look at self.edf_type ??
+  HDF5 = 'application/x-bsml+hdf5'   #: The mimetype for BioSignalML HDF5 files
+  RAW  = 'application/x-bsml+raw'
+  WFDB = 'application/x-bsml+wfdb'
+
+
+
+CLASSES = { }
+#============
 
 try:
   from edf  import EDFRecording
-  CLASSES[EDFRecording.MIMETYPE] = EDFRecording
-except ImportError:
-  pass
-
-try:
-  from wfdb import WFDBRecording
-  CLASSES[WFDBRecording.MIMETYPE] = WFDBRecording
+  CLASSES[MIMETYPES.EDF] = EDFRecording
 except ImportError:
   pass
 
 try:
   from hdf5 import HDF5Recording
-  CLASSES[HDF5Recording.MIMETYPE] = HDF5Recording
+  CLASSES[MIMETYPES.HDF5] = HDF5Recording
+except ImportError:
+  pass
+
+try:
+  from raw import RAWRecording
+  CLASSES[MIMETYPES.RAW] = RAWRecording
+except ImportError:
+  pass
+
+try:
+  from wfdb import WFDBRecording
+  CLASSES[MIMETYPES.WFDB] = WFDBRecording
 except ImportError:
   pass
 

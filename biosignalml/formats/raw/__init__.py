@@ -19,14 +19,14 @@
 ######################################################
 
 from biosignalml         import BSML
-from biosignalml.formats import BSMLRecording
+from biosignalml.formats import BSMLRecording, MIMETYPES
 from biosignalml.utils   import file_uri
 
 
 class RAWRecording(BSMLRecording):
 #==================================
 
-  MIMETYPE = 'application/x-bsml+raw'
+  MIMETYPE = MIMETYPES.RAW
   EXTENSIONS = [ 'dat' ]
 
   def __init__(self, uri=None, dataset=None, mode='r', **kwds):
