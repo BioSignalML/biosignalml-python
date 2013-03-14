@@ -160,7 +160,7 @@ class Recording(BSMLRecording):
   def close(self):
   #---------------
     # Ensure all metadata has been POSTed
-    pass
+    self.repository.post_metadata(self.uri, self.metadata_as_string())
 
   def add_signal(self, signal):
   #----------------------------
