@@ -128,6 +128,7 @@ class BSMLStore(GraphStore):
     ### have been loaded against the Recording...
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Signal, graph_uri)
+    if graph is None: return None
     if signal_class is None: signal_class = Signal
     return signal_class.create_from_graph(uri, graph, units=None, **kwds)  # units set from graph...
 
