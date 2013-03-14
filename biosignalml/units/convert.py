@@ -145,7 +145,7 @@ class UnitStore(object):
     return unit
 
 
-class UnitConvertor(object):
+class UnitConverter(object):
 #===========================
 
   def __init__(self, store):
@@ -157,7 +157,7 @@ class UnitConvertor(object):
     """
     Convert between compatible units.
 
-    :return: A function mapping values in `drom_units` to `to_units`.
+    :return: A function mapping values in `from_units` to `to_units`.
     """
     ratio = self._store.get_unit(from_units)/self._store.get_unit(to_units)
     if ratio.unitless:
@@ -170,7 +170,7 @@ class UnitConvertor(object):
 if __name__ == '__main__':
 #=========================
 
-  store = UnitConvertor(sparqlstore.Virtuoso('http://localhost:8890'))
+  store = UnitConverter(sparqlstore.Virtuoso('http://localhost:8890'))
 
   def test(u):
   #-----------
