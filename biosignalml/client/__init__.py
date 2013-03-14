@@ -87,7 +87,7 @@ import biosignalml.rdf as rdf
 from biosignalml            import BSML
 from biosignalml.data       import TimeSeries, UniformTimeSeries, DataSegment
 from biosignalml.data.time  import Interval
-from biosignalml.formats    import BSMLRecording, BSMLSignal
+from biosignalml.formats    import BSMLRecording, BSMLSignal, MIMETYPES
 from biosignalml.transports import StreamException
 from biosignalml.transports import BlockType, SignalData
 from biosignalml.transports import WebStreamReader, WebStreamWriter, StreamException
@@ -262,6 +262,7 @@ class Repository(repository.RemoteRepository):
       rec = self.RecordingClass(uri, repository=self, **kwds)
       # Will have default metadata with attributes set from any metadata keyword dict
       rec.graph = rdf.Graph(self.put_metadata(rec.uri, rec.metadata_as_string()))
+      rec.format = MIMETYPES.HDF5
       # Format = HDF5 (BSML ??)
       # then when server processes PUT for a new BSML recording it will create an empty HDF5 container
       return rec
