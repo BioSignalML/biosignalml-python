@@ -160,8 +160,11 @@ class UnitConvertor(object):
     :return: A function mapping values in `drom_units` to `to_units`.
     """
     ratio = self._store.get_unit(from_units)/self._store.get_unit(to_units)
-    if ratio.unitless: return lambda x: x*ratio.magnitude + 0.0   #: (scale, offset)
-    else: raise TypeError("Cannot convert between %s and %s" % (from_units, to_units))
+    if ratio.unitless:
+      if ratio.magnitude == 1.0: return lambda x: x
+      else:                      return lambda x: x*ratio.magnitude + 0.0   #: (scale, offset)
+    else:
+      raise TypeError("Cannot convert between %s and %s" % (from_units, to_units))
 
 
 if __name__ == '__main__':
