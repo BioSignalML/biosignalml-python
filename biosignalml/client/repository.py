@@ -74,7 +74,7 @@ class RemoteRepository(BSMLUpdateStore):
       if uri: graph.uri = rdf.Uri(uri)
       return graph
     except Exception, msg:
-      raise Exception("Cannot get RDF for '%s'" % uri)
+      raise IOError("Cannot get RDF for '%s'" % uri)
 
   def _send_metadata(self, method, uri, metadata, format):
   #-------------------------------------------------------
@@ -85,9 +85,9 @@ class RemoteRepository(BSMLUpdateStore):
       http = httplib2.Http(timeout=20)
       response, content = http.request(endpoint, body=metadata, method=method, headers=headers)
     except socket.error, msg:
-      raise Exception("Cannot connect to repository: %s" % endpoint)
-    if   response.status == 401: raise Exception("Unauthorised")
-    elif response.status not in [200, 201]: raise Exception(content)
+      raise IOError("Cannot connect to repository: %s" % endpoint)
+    if   response.status == 401: raise IOError("Unauthorised")
+    elif response.status not in [200, 201]: raise IOError(content)
     return response.get('location')
 
   def put_metadata(self, uri, metadata, format=rdf.Format.RDFXML):

@@ -119,7 +119,7 @@ class SparqlStore(object):
                                headers={'Content-type': 'application/x-www-form-urlencoded',
                                         'Accept': rdf.Format.mimetype(format)} )
     except Exception, msg:
-      logging.error('SPARQL: %s, %s', msg, self.map_prefixes(prefixes) + sparql)
+      logging.debug('SPARQL: %s, %s', msg, self.map_prefixes(prefixes) + sparql)
       raise
 
   def ask(self, where, params=None, graph=None, prefixes=None):
@@ -211,7 +211,7 @@ class SparqlUpdateStore(SparqlStore):
                                body=urllib.urlencode({self.UPDATE_PARAMETER: sparql + self.map_prefixes(prefixes)}),
                                headers={'Content-type': 'application/x-www-form-urlencoded'})
     except Exception, msg:
-      logging.error('SPARQL: %s, %s', msg, sparql + self.map_prefixes(prefixes))
+      logging.debug('SPARQL: %s, %s', msg, sparql + self.map_prefixes(prefixes))
       raise
 
 
@@ -226,7 +226,7 @@ class SparqlUpdateStore(SparqlStore):
                 % { 'graph': str(graph),
                     'triples': ' . '.join([' '.join(list(s)) for s in triples ]) })
     content = self.update(sparql, prefixes)
-    if 'error' in content: raise Exception(content)
+    if 'error' in content: raise StoreException(content)
 
   def delete_triples(self, graph, triples, prefixes=None):
   #------------------------\-------------------------------
@@ -239,7 +239,7 @@ class SparqlUpdateStore(SparqlStore):
                 % { 'graph': graph,
                     'triples': ' . '.join([' '.join(list(s)) for s in triples ]) })
     content = self.update(sparql, prefixes)
-    if 'error' in content: raise Exception(content)
+    if 'error' in content: raise StoreException(content)
 
 ## These need separating into SPARQL 1.1 Update and Virtuoso SPARUL methods...
 # DELETE WHERE { GRAPH <%(g)s> { <%(s)s> <%(p)s> ?o } }   ## SPARQL 1.1
@@ -270,7 +270,7 @@ class SparqlUpdateStore(SparqlStore):
         sparql = ('delete from graph <%(g)s> { %(s)s %(p)s ?o } from <%(g)s> where { %(s)s %(p)s ?o }'
                     % {'g': str(graph), 's': s, 'p': p} )
         content = self.update(sparql, prefixes)
-        if 'error' in content: raise Exception(content)
+        if 'error' in content: raise StoreException(content)
         last = (s, p)
     self.insert_triples(graph, triples, prefixes)  ###### DUPLICATES BECAUSE OF 4STORE BUG...
 
