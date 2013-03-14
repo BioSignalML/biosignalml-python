@@ -762,8 +762,9 @@ class SignalDataStream(BlockStream):
   :param maxsize: The maximum number of sample values to return in a data block.
   :type maxsize: integer
   """
-  def __init__(self, endpoint, uri, start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None, units=None):
-  #----------------------------------------------------------------------------------------------------------------------
+  def __init__(self, endpoint, uri, start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None,
+  #----------------------------------------------------------------------------------------------------------
+                                                                                      rate=None, units=None):
     BlockStream.__init__(self, endpoint)
     header = {'uri': uri }
     if start is not None and offset is not None:
@@ -776,6 +777,7 @@ class SignalDataStream(BlockStream):
     elif count is not None:  header['count'] = count
     if maxsize > 0:          header['maxsize'] = maxsize
     if dtype is not None:    header['dtype'] = dtype
+    if rate is not None:     header['rate'] = rate
     if units is not None:    header['units'] = str(units)
     self._request = StreamBlock(0, BlockType.DATA_REQ, header, '')
 

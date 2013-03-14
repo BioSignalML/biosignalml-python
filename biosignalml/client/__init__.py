@@ -110,12 +110,12 @@ class Signal(BSMLSignal):
     # Ensure all metadata has been POSTed
     pass
 
-  def read(self, interval=None, segment=None, maxpoints=0, dtype=None, units=None):
-  #--------------------------------------------------------------------------------
   def __len__(self):
   #----------------
     return self._length
 
+  def read(self, interval=None, segment=None, maxpoints=0, dtype=None, rate=None, units=None):
+  #-------------------------------------------------------------------------------------------
     params = { }
     if interval:
       if isinstance(interval, Interval):
@@ -129,6 +129,7 @@ class Signal(BSMLSignal):
       params['count'] = segment[1]
     if maxpoints: params['maxsize'] = maxpoints
     if dtype is not None: params['dtype'] = dtype
+    if rate is not None: params['rate'] = rate
     if units is not None: params['units'] = units
     for sd in self.repository.get_data(str(self.uri), **params):
       if sd.uri != str(self.uri):
@@ -251,6 +252,8 @@ class Repository(repository.RemoteRepository):
     offset
     count
     dtype
+    rate
+    units
     '''
     kwds['access_key'] = self._access_key
     reader = WebStreamReader(self._web_sockets_uri(uri), uri, **kwds)

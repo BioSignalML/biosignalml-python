@@ -135,9 +135,10 @@ class WebStreamReader(stream.SignalDataStream):
   ..todo:: Document extra parameters...
   """
   def __init__(self, endpoint, uri,
-    start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None, units=None, **kwds):
-  #-----------------------------------------------------------------------------------------------
-    super(WebStreamReader, self).__init__(endpoint, uri, start, offset, duration, count, maxsize, dtype, units)
+    start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None, rate=None, units=None, **kwds):
+  #---------------------------------------------------------------------------------------------------------
+    super(WebStreamReader, self).__init__(endpoint, uri, start, offset, duration, count, maxsize,
+                                                                                         dtype, rate, units)
     try:
       self._ws = StreamClient(endpoint, self._request, self._receiveQ, protocols=['biosignalml-ssf'], **kwds)
       self._ws.connect()
