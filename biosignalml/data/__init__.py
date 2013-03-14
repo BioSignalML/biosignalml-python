@@ -319,7 +319,7 @@ class DataSegment(object):
 
   def __len__(self):
   #-----------------
-    return len(self._timeseries)
+    return len(self._timeseries) if self._timeseries is not None else 0
 
   def __getitem__(self, key):
   #--------------------------
