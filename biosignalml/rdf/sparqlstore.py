@@ -167,8 +167,9 @@ class SparqlStore(object):
                  rdf.Format.JSON, prefixes)
         ).get('results', {}).get('bindings', [])
 
-  def construct(self, template, where, params=None, graph=None, format=rdf.Format.RDFXML, prefixes=None):
-  #------------------------------------------------------------------------------------------------------
+  def construct(self, template, where=None, params=None, graph=None, format=rdf.Format.RDFXML, prefixes=None):
+  #-----------------------------------------------------------------------------------------------------------
+    if where is None: where = template
     if params is None: params = {}
     return self.query('construct { %(tplate)s } %(graph)s where { %(where)s }'
                       % dict(tplate=template % params,
