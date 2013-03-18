@@ -20,16 +20,15 @@
 
 import pint
 
-import biosignalml.rdf             as rdf
 import biosignalml.rdf.sparqlstore as sparqlstore
 
-from biosignalml.rdf import RDF
-UOME_CORE = rdf.NS('http://www.sbpax.org/uome/core.owl#')
+from biosignalml.rdf import NS, RDF, UOME
+UOME_CORE = NS('http://www.sbpax.org/uome/core.owl#')
 
 '''Graph holding http://www.sbpax.org/uome/core.owl#UnitOfMeasurement resources.'''
 UNITS_GRAPH = "http://ontologies.biosignalml.org/units"
 
-UNIT_PREFIXES = [ rdf.UOME.prefix,
+UNIT_PREFIXES = [ UOME.prefix,
                   "http://www.biosignalml.org/ontologies/examples/unit#"
                 ]
 
