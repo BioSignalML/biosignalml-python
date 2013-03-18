@@ -151,7 +151,7 @@ class BlockType(object):
   Time series data.
 
   The content is a segment of some signal, as an array of sample values
-  optionally preceeded by an array of sample times. Sample values are either all
+  optionally preceded by an array of sample times. Sample values are either all
   a scalars or all a 1-D arrays each with the same bounds.
 
   A data block's header has the following fields:

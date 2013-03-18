@@ -51,13 +51,13 @@ class AbstractObject(object):
   metaclass = None
   '''Class in BioSignalML Ontology as a :class:`biosignalml.rdf.Resource`'''
 
-  attributes = [ 'uri', 'label', 'comment', 'description', 'preceededBy', 'creator', 'created' ]
+  attributes = [ 'uri', 'label', 'comment', 'description', 'precededBy', 'creator', 'created' ]
   '''List of generic attributes all resources have.'''
 
   mapping = { 'label':       PropertyMap(RDFS.label),
               'comment':     PropertyMap(RDFS.comment),
               'description': PropertyMap(DCT.description),
-              'preceededBy': PropertyMap(PRV.preceededBy),
+              'precededBy':  PropertyMap(PRV.precededBy),
               'creator':     PropertyMap(DCT.creator, to_rdf=get_uri),
               'created':     PropertyMap(DCT.created, XSD.dateTime,
                                          utils.datetime_to_isoformat,

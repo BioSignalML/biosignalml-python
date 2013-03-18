@@ -251,7 +251,7 @@ class BSMLStore(GraphStore):
     return [ r[1]
       for r in self.get_resources(BSML.Annotation, rvars='?r',
         condition='''?r dct:subject ?s . filter(regex(str(?s), "^%s(#.*)?$", "i")) .
-              minus { [] prv:preceededBy ?r }''' % uri,
+              minus { [] prv:precededBy ?r }''' % uri,
         prefixes = dict(dct=DCT.prefix, prv=PRV.prefix),
         graph = graph_uri
         ) ]
