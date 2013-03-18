@@ -208,10 +208,11 @@ class SparqlUpdateStore(SparqlStore):
     ##logging.debug('UPD: %s', sparql)
     try:
       return self.http_request(self.ENDPOINTS[0], 'POST',
-                               body=urllib.urlencode({self.UPDATE_PARAMETER: sparql + self.map_prefixes(prefixes)}),
+                               body=urllib.urlencode({self.UPDATE_PARAMETER:
+                                 self.map_prefixes(prefixes) + sparql}),
                                headers={'Content-type': 'application/x-www-form-urlencoded'})
     except Exception, msg:
-      logging.debug('SPARQL: %s, %s', msg, sparql + self.map_prefixes(prefixes))
+      logging.debug('SPARQL: %s, %s', msg, self.map_prefixes(prefixes) + prefixes)
       raise
 
 
