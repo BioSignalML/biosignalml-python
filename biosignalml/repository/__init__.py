@@ -275,6 +275,18 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
       abstractobject.metadata_as_string(format=Format.RDFXML),
       format=Format.RDFXML)
 
+  def remove_recording_resource(self, recording, uri):
+  #---------------------------------------------------
+    """
+    'Remove' a resource from a recording's graph.
+
+    This is done by asserting the resource precedes `bsml:deletedResource`,
+    so provenance aware queries will then return an empty result set.
+    """
+    self._sparqlstore.insert_triples(recording.graph.uri,
+      [("bsml:deletedResource", "prv:precededBy", "<%s>" % uri)],
+      prefixes=dict(bsml=BSML.prefix, prv=PRV.prefix))
+
   def add_recording_graph(self, uri, rdf, creator, format=Format.RDFXML):
   #----------------------------------------------------------------------
     return self.add_resource_graph(uri, BSML.Recording, rdf, creator, format=format)
