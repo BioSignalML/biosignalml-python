@@ -107,6 +107,7 @@ class SparqlStore(object):
   #--------------------------
     return '\n'.join(['PREFIX %s: <%s>' % kv for kv in prefixes.iteritems()] + ['']) if prefixes else ''
 
+
   def query(self, sparql, format=rdf.Format.RDFXML, prefixes=None):
   #----------------------------------------------------------------
     """
@@ -124,6 +125,15 @@ class SparqlStore(object):
 
   def ask(self, where, params=None, graph=None, prefixes=None):
   #------------------------------------------------------------
+    """
+    Check if a set of statements is in a graph.
+
+    :param where: The graph pattern to match.
+    :param params: A dictionary of string format substitutions applied to the `where` argument.
+    :param graph: The URI of an optional graph to query within.
+    :param prefixes: A dictionary of namespace prefixes to use in the SPARQL query
+    :rtype: bool
+    """
     if params is None: params = {}
     return json.loads(self.query('ask where { %(graph)s { %(where)s } }'
                                  % dict(graph=('graph <%s>' % str(graph)) if graph else '',
@@ -186,7 +196,7 @@ class SparqlStore(object):
     return self.construct(
       "<%(uri)s> ?op ?o . ?o a ?ot . ?s ?sp <%(uri)s> . ?s a ?st",
       "{ <%(uri)s> ?op ?o . optional { ?o a ?ot } } union { ?s ?sp <%(uri)s> . optional { ?s a ?st } }",
-      params=dict(uri=uri), graph=graph, format=format)
+      params=dict(uri=uri), graph=graph, format=format, prefixes=prefixes)
 
 
 class SparqlUpdateStore(SparqlStore):
