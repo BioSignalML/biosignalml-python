@@ -241,13 +241,14 @@ class BSMLStore(GraphStore):
 
   def annotations(self, uri, graph_uri=None):
   #------------------------------------------
-    '''
+    """
     Return a list of all Annotations about a subject.
 
-    :param uri: The URI of the subject.
+    :param uri: The URI of the subject. Fragment parts of the subject URI
+      are ignored.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: list of bsml:Annotation URIs
-    '''
+    """
     return [ r[1]
       for r in self.get_resources(BSML.Annotation, rvars='?r',
         condition='''?r dct:subject ?s . filter(regex(str(?s), "^%s(#.*)?$", "i")) .
@@ -258,6 +259,11 @@ class BSMLStore(GraphStore):
 
   def get_semantic_tags(self):
   #---------------------------
+    """
+    Get all labelled semantic tags stored in the repository's SEMANTIC_TAGS graph.
+
+    :return: Dictionary of { uri: label }.
+    """
     return { str(sparqlstore.get_result_value(r, 'uri')):
                    sparqlstore.get_result_value(r, 'label')
                for r in self.select('?uri ?label',
@@ -292,6 +298,12 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
 
   def add_recording_graph(self, uri, rdf, creator, format=Format.RDFXML):
   #----------------------------------------------------------------------
+    """
+    Add RDF metadata describing a recording as a new named graph.
+
+    Provenance statements will be made about the new graph, including
+    linking it to any previous graph describing the recording.
+    """
     return self.add_resource_graph(uri, BSML.Recording, rdf, creator, format=format)
 
   def store_recording(self, recording, creator=None):
