@@ -28,6 +28,7 @@ import re
 
 import biosignalml.utils as utils
 import biosignalml.rdf as rdf
+import biosignalml.units as units
 from biosignalml.ontology import BSML
 from biosignalml.rdf import XSD, RDF, RDFS, DCT, TL, PROV
 
@@ -122,6 +123,11 @@ class Signal(core.AbstractObject):
     if self._duration is not None: return self._duration
     elif self.period is not None: return len(self)*self.period
     ## self.time[-1] + (self.period if self.period is not None else 0)  ???
+
+  @property
+  def time_units(self):
+  #====================
+    return units.get_units_uri('s')
 
 
 class Event(core.AbstractObject):
