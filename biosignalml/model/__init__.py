@@ -29,7 +29,7 @@ import re
 import biosignalml.utils as utils
 import biosignalml.rdf as rdf
 from biosignalml.ontology import BSML
-from biosignalml.rdf import XSD, RDF, RDFS, DCT, TL
+from biosignalml.rdf import XSD, RDF, RDFS, DCT, TL, PROV
 
 import mapping
 from mapping import PropertyMap
@@ -179,7 +179,7 @@ class Recording(core.AbstractObject):
   metaclass = BSML.Recording  #: :attr:`.BSML.Recording`
 
   attributes = [ 'dataset', 'source', 'format', 'comment', 'investigation',
-                 'starttime', 'duration', 'timeline'
+                 'starttime', 'duration', 'timeline', 'generatedBy'
                ]
   '''Generic attributes of a Recording.'''
 
@@ -196,7 +196,9 @@ class Recording(core.AbstractObject):
 ##            'digest':        PropertyMap(BSML.digest),
               'timeline':      PropertyMap(TL.timeline,
                                            to_rdf=mapping.get_uri,
-                                           from_rdf=_get_timeline, subelement=True) }
+                                           from_rdf=_get_timeline, subelement=True),
+              'generatedBy':   PropertyMap(PROV.wasGeneratedBy, to_rdf=mapping.get_uri),
+            }
 
   SignalClass = Signal       #: The class of Signals in the Recording
   EventClass  = Event        #: The class of Events in the Recording
