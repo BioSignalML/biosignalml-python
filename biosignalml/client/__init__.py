@@ -178,7 +178,6 @@ class Recording(BSMLRecording):
       self.repository.post_metadata(self.uri, sig.metadata_as_string())
       return sig
     except Exception, msg:
-      raise
       raise IOError("Cannot create Signal '%s' in repository" % uri)
 
   def save_metadata(self, metadata=None, format=rdf.Format.RDFXML):
