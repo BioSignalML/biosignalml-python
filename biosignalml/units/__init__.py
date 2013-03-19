@@ -24,6 +24,8 @@ from biosignalml.rdf import Resource, NS
 
 from ontology import UNITS
 
+# Export package class
+from convert import UnitConverter
 
 _direct = {
   'Bpm':    'BeatsPerMinute',
