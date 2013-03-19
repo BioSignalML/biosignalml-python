@@ -75,8 +75,6 @@ And to get back signal data::
   repository.close()
 """
 
-import os
-import tempfile
 import logging
 import urlparse
 import numpy as np
@@ -195,14 +193,14 @@ class Repository(repository.RemoteRepository):
 
   RecordingClass = Recording      #: The class of recordings in the repository.
 
-  def __init__(self, uri, **kwds):
-  #-------------------------------
+  def __init__(self, uri, name=None, password=None, **kwds):
+  #---------------------------------------------------------
     p = urlparse.urlparse(uri)
     if p.scheme == '' or p.hostname is None:
       raise IOError("Invalid URI -- %s" % uri)
     uri = p.scheme + '://' + p.hostname
     kwds['port'] = p.port
-    super(Repository, self).__init__(uri, access_key=Repository.get_token(uri), **kwds)
+    super(Repository, self).__init__(uri, name=name, password=password, **kwds)
 
   def get_recording(self, uri, graph_uri=None, **kwds):
   #----------------------------------------------------
@@ -284,53 +282,6 @@ class Repository(repository.RemoteRepository):
       raise
     finally:
       if stream: stream.close()
-
-  @staticmethod
-  def _get_token_file():
-  #---------------------
-    path = os.getenv('HOME') + '/.bsml'
-    try: os.makedirs(path)
-    except OSError: pass
-    try:
-      return open(path + '/' + 'tokens', 'r+')
-    except IOError:
-      return open(path + '/' + 'tokens', 'w+')
-
-  @staticmethod
-  def get_token(uri):
-  #------------------
-    token = None
-    f = Repository._get_token_file()
-    for l in f:
-      p = l.split()
-      if str(uri) == p[0] and len(p) > 1:
-        token = p[1]
-        break
-    f.close()
-    return token
-
-  @staticmethod
-  def save_token(uri, token):
-  #--------------------------
-    f = Repository._get_token_file()
-    g = tempfile.NamedTemporaryFile(delete=True)
-    existing = False
-    uri = str(uri)
-    for l in f:
-      if uri == l.split()[0]:
-        existing = True
-        g.write('%s %s\n' % (uri, token))
-      else:
-        g.write(l)
-    if not existing:
-      g.write('%s %s\n' % (uri, token))
-    g.flush()
-    f.seek(0)
-    f.truncate()
-    g.seek(0)
-    for l in g: f.write(l)
-    f.close()
-    g.close()
 
 
 if __name__ == "__main__":
