@@ -1,1 +1,4 @@
 _build/
+*.rst
+*.dot
+!index.rst
