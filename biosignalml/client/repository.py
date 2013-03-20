@@ -203,7 +203,7 @@ class RemoteRepository(BSMLUpdateStore):
   def _send_metadata(self, method, uri, metadata, format):
   #-------------------------------------------------------
     headers={'Content-type': rdf.Format.mimetype(format)}
-    if self._access_token is not None: headers['Cookie'] = 'access=%s' % self._access_token
+    if self._token is not None: headers['Cookie'] = 'access=%s' % self._token
     endpoint = self._md_uri + str(uri)
     try:
       http = httplib2.Http(timeout=20)
