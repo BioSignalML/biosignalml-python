@@ -282,8 +282,8 @@ class AbstractObject(object):
     if prefixes: namespaces.update(prefixes)
     return self.metadata_as_graph().serialise(base=base, format=format, prefixes=namespaces)
 
-  def load_from_graph(self, graph):
-  #--------------------------------
+  def add_metadata(self, graph):
+  #-----------------------------
     """
     Set attributes from RDF triples in a graph.
 
@@ -312,7 +312,7 @@ class AbstractObject(object):
     :rtype: :class:`AbstractObject` or a sub-class.
     '''
     self = cls(uri, **kwds)
-    self.load_from_graph(graph)
+    self.add_metadata(graph)
     self.graph = graph
     return self
 

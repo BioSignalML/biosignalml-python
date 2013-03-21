@@ -79,7 +79,7 @@ class TemporalEntity(model.core.AbstractObject):
     elif graph.contains(rdf.Statement(uri, RDF.type, Instant.metaclass)):
       self = Instant(uri, None, **kwds)
     if self is not None:
-      self.load_from_graph(graph)
+      self.add_metadata(graph)
       self.graph = graph
     return self
 

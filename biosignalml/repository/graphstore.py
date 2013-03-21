@@ -52,7 +52,7 @@ class DataItem(model.core.AbstractObject):
   def create_from_graph(cls, uri, graph, **kwds):
   #----------------------------------------------
     self = cls(uri, None, **kwds)
-    self.load_from_graph(graph)
+    self.add_metadata(graph)
     if self.createdby is not None:
       self.createdby = DataCreation.create_from_graph(self.createdby, graph)
 

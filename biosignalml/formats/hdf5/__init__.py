@@ -247,7 +247,7 @@ class HDF5Recording(BSMLRecording):
     """
     rdf, format = self._h5,get_metadata()
     if rdf:
-      self.load_from_graph(rdf.Graph.create_from_string(self.uri, rdf, format))
+      self.add_metadata(rdf.Graph.create_from_string(self.uri, rdf, format))
 
   def initialise(self, **kwds):
   #----------------------------

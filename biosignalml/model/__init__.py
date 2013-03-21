@@ -162,7 +162,7 @@ class Event(core.AbstractObject):
   #----------------------------------------------
     from biosignalml.data.time import TemporalEntity  # Prevent a circular import
     self = cls(uri, None, **kwds)
-    self.load_from_graph(graph)
+    self.add_metadata(graph)
     if self.time is not None:
       self.time = TemporalEntity.create_from_graph(self.time, graph)
     return self
@@ -203,7 +203,8 @@ class Recording(core.AbstractObject):
               'timeline':      PropertyMap(TL.timeline,
                                            to_rdf=mapping.get_uri,
                                            from_rdf=_get_timeline, subelement=True),
-              'generatedBy':   PropertyMap(PROV.wasGeneratedBy, to_rdf=mapping.get_uri),
+              'generatedBy':   PropertyMap(PROV.wasGeneratedBy, to_rdf=mapping.get_uri,
+                                           subelement=True),
             }
 
   SignalClass = Signal       #: The class of Signals in the Recording
@@ -348,7 +349,7 @@ class Recording(core.AbstractObject):
     """
     self = cls(uri, **kwds)
 #    self = cls(uri, timeline=graph.get_object(uri, TL.timeline).uri, **kwds)
-    self.load_from_graph(graph)
+    self.add_metadata(graph)
     if signals:
       for r in graph.query("select ?s where { ?s a <%s> . ?s <%s> <%s> } order by ?s"
                            % (BSML.Signal, BSML.recording, self.uri)):
@@ -431,7 +432,7 @@ class Annotation(core.AbstractObject):
     '''
     from biosignalml.data.time import TemporalEntity  # Prevent a circular import
     self = cls(uri, timestamp=False, **kwds)
-    self.load_from_graph(graph)
+    self.add_metadata(graph)
     if self.time is not None:
       self.time = TemporalEntity.create_from_graph(self.time, graph)
     return self
