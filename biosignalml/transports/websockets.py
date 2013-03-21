@@ -117,20 +117,18 @@ class WebStreamReader(stream.SignalDataStream):
 
   The WebSockets client is run in a separate thread which we need to join() when finished.
 
-  :param endpoint: The URL of the data stream server's endpoint.
-  :type endpoint: str
+  :param str endpoint: The URL of the data stream server's endpoint.
   :param uri: The URI of a :class:`~biosignalml.model.Recording` or of one or more
-    :class:`~biosignalml.model.Signal`\s from which to get :class:`~biosignalml.model.data.TimeSeries`
+    :class:`~biosignalml.model.Signal`\s from which to get :class:`~biosignalml.data.TimeSeries`
     data,
   :type uri: str or list[str]
   :param start: The time, in seconds, that the first data point will be at or immediately after,
   :type start: float or None
   :param offset: The index of the first data point. An `offset` can only be given when data from a
     single signal is requested, and cannot be specified along with `start`.
-  :type offset: integer or None
-  :param duration: The duration, in seconds, of the :class:`~biosignalml.transports.stream.TimeSeries`
+  :type offset: int or None
+  :param float duration: The duration, in seconds, of the :class:`~biosignalml.transports.stream.SignalData`
     returned. A value of -1 means to return the complete time series of the signal(s).
-  :type duration: float
 
   ..todo:: Document extra parameters...
   """

@@ -279,10 +279,11 @@ class StreamBlock(object):
   """
   A block exchanged using the Block Stream format.
 
-  :type number: int
+  :param int number:
+  :param type:
   :type type: :class:`BlockType`
-  :type header: dict
-  :type content: bytearray
+  :param dict header:
+  :param bytearray content:
   """
 
   def __init__(self, number, type, header, content):
@@ -369,9 +370,9 @@ class SignalDataBlock(StreamBlock):
   """
   A data block exchanged using the Block Stream format.
 
-  :type number: int
-  :type header: dict
-  :type content: bytearray
+  :param int number:
+  :param dict header:
+  :param bytearray content:
   """
   def __init__(self, number, header, content):
   #-------------------------------------------
@@ -421,7 +422,7 @@ class BlockParser(object):
 
   :param receiver: Function to call when a complete `StreamBlock`
     has been received.
-  :param check: How any checksun is treated. Default `Checksum.CHECK`
+  :param check: How any checksum is treated. Default `Checksum.CHECK`
   :type check: :class:`Checksum`
   """
   # Parser states.
@@ -616,21 +617,18 @@ class BlockParser(object):
 class SignalData(object):
 #========================
   '''
-  A segment of a :class:`~biosignalml.model.data.TimeSeries` sent or received on a :class:`BlockStream`.
+  A segment of a :class:`~biosignalml.data.TimeSeries` sent or received on a :class:`BlockStream`.
 
-  :param uri: The URI of the :class:`~biosignalml.model.Signal` which the segment is from.
+  :param str uri: The URI of the :class:`~biosignalml.model.Signal` which the segment is from.
   :type uri: str
-  :param start: The start time of the segment, in seconds.
-  :type start: double
-  :param duration: The duration of the segment, in seconds.
-  :type duration: double
+  :param float start: The start time of the segment, in seconds.
+  :param float duration: The duration of the segment, in seconds.
   :param data: An one or two dimensional array of data points.
-  :type data: :class:`np.array`
-  :param rate: The rate, in Hertz, at which the first dimension of the data array varies.
-               A value of None signifies that sampling times are in the `clock` array.
-  :type rate: double
+  :type data: :class:`numpy.ndarray`
+  :param float rate: The rate, in Hertz, at which the first dimension of the data array varies.
+                     A value of None signifies that sampling times are in the `clock` array.
   :param clock: An one dimensional array of time points, in seconds.
-  :type clock: :class:`np.array` or None
+  :type clock: :class:`numpy.ndarray` or None
   :param dtype: The requested data type which to use for stream data values.
   :param ctype: The requested data type which to use for stream time values.
   '''
@@ -701,8 +699,7 @@ class BlockStream(object):
   This class is intended to be sub-classed by a class that will establish a connection to
   the end point and then send some request.
 
-  :param endpoint: The URL of the data stream server's endpoint.
-  :type endpoint: str
+  :param str endpoint: The URL of the data stream server's endpoint.
   """
   def __init__(self, endpoint):
   #----------------------------
@@ -732,12 +729,11 @@ class SignalDataStream(BlockStream):
   This class is intended to be sub-classed by a class that will establish a connection to
   the end point and then send a :attr:`~BlockType.DATA_REQ` request.
 
-  :param endpoint: The URL of the data stream server's endpoint.
-  :type endpoint: str
+  :param str endpoint: The URL of the data stream server's endpoint.
 
   :param uri: The URI of a :class:`~biosignalml.model.Recording` or of one or more
     :class:`~biosignalml.model.Signal`\s from which to get
-    :class:`~biosignalml.model.data.TimeSeries` data,
+    :class:`~biosignalml.data.TimeSeries` data,
   :type uri: str or list[str]
 
   :param start: The time, in seconds from the start of the signal's recording,
@@ -746,21 +742,18 @@ class SignalDataStream(BlockStream):
 
   :param offset: The index of the first data point. Can only be given when data from a
     single signal is requested, and cannot be specified along with `start`.
-  :type offset: integer or None
+  :type offset: int or None
 
-  :param duration: The duration, in seconds, of signal data to return. A value
+  :param float duration: The duration, in seconds, of signal data to return. A value
     of -1 means to get all sample points, from the starting position, of the signal(s).
-  :type duration: float
 
-  :param count: The number of sample points to return in the result. A value of -1 means
+  :param int count: The number of sample points to return in the result. A value of -1 means
     to get all starting points from the start position until the end of the time series.
 
     Can only be given when data from a single signal is requested, and cannot be specified
     along with `duration`.
-  :type count: integer
 
-  :param maxsize: The maximum number of sample values to return in a data block.
-  :type maxsize: integer
+  :param int maxsize: The maximum number of sample values to return in a data block.
   """
   def __init__(self, endpoint, uri, start=None, offset=None, duration=-1, count=None, maxsize=-1, dtype=None,
   #----------------------------------------------------------------------------------------------------------
