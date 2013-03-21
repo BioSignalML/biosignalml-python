@@ -305,8 +305,7 @@ class H5Signal(object):
     """
     Get the 'time' of a data point.
 
-    :param i: The data point's index.
-    :type i: int
+    :param int i: The data point's index.
     """
     attrs = self.dataset.attrs
     if attrs.get('clock'):
@@ -339,10 +338,8 @@ class H5Recording(object):
     """
     Open an existing HDF5 Recording file.
 
-    :param fname: The name of the file to open.
-    :type fname: str
-    :param readonly: If True don't allow updates (default = False).
-    :param readonly: bool
+    :param str fname: The name of the file to open.
+    :param bool readonly: If True don't allow updates (default = False).
     """
     try:
       if fname.startswith('file:'):
@@ -375,10 +372,8 @@ class H5Recording(object):
     Create a new HDF5 Recording file.
 
     :param uri: The URI of the Recording contained in the file.
-    :param fname: The name of the file to create.
-    :type fname: str
-    :param replace: If True replace any existing file (default = False).
-    :param replace: bool
+    :param str fname: The name of the file to create.
+    :param bool replace: If True replace any existing file (default = False).
     """
     if fname.startswith('file://'): fname = fname[7:]
     try:
@@ -416,22 +411,18 @@ class H5Recording(object):
                 is compound and contains several scalar signals.
     :param units: The units for the signal(s). Must be iterable and have the same number
                   of elements as ``uri`` when the dataset is compound.
-    :param shape: The shape of a single data point. Must be None or scalar ('()') for
+    :param tuple shape: The shape of a single data point. Must be None or scalar ('()') for
                   a compound dataset. Optional.
-    :type shape: tuple
     :param data: Initial data for the signal(s). Optional.
     :type data: :class:`numpy.ndarray` or an iterable.
     :param dtype: The datatype in which to store data points. Must be specified if
                   no ``data`` is given.
     :type dtype: :class:`numpy.dtype`
-    :param gain: If set, the signal's data values are multiplied by the ``gain`` when read. Optional.
-    :type gain: float
-    :param gain: If set, ``offset`` is subtracted from a data value before any gain
+    :param float gain: If set, the signal's data values are multiplied by the ``gain`` when read. Optional.
+    :param float offset: If set, ``offset`` is subtracted from a data value before any gain
                  multiplication. Optional.
-    :param rate: The frequency, as samples/time-unit, of data points.
-    :type rate: float
-    :param period: The time, in time-units, between data points.
-    :type period: float
+    :param float rate: The frequency, as samples/time-unit, of data points.
+    :param float period: The time, in time-units, between data points.
     :param timeunits: The units 'time' is measured in. Optional, default is seconds.
     :param clock: The URI of a clock dataset containing sample times. Optional.
     :return: The `H5Signal` created.
@@ -526,15 +517,14 @@ class H5Recording(object):
 
     :param uri: The URI for the clock.
     :param units: The units of the clock. Optional, default is seconds.
-    :param shape: The shape of a single time point. Optional.
-    :type shape: tuple
+    :param tuple shape: The shape of a single time point. Optional.
     :param times: Initial time points for the clock. Optional.
     :type times: :class:`numpy.ndarray` or an iterable.
     :param dtype: The datatype in which to store time points. Must be specified if
                   no ``times`` are given.
     :type dtype: :class:`numpy.dtype`
-    :param rate (float): The sample rate of time points. Optional.
-    :param period (float): The interval, in time units, between time points. Optional.
+    :param float rate: The sample rate of time points. Optional.
+    :param float period: The interval, in time units, between time points. Optional.
     :return: The `H5Clock` created.
     """
     if self._h5['uris'].attrs.get(str(uri)):

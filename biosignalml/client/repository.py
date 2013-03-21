@@ -61,17 +61,16 @@ class RemoteRepository(BSMLUpdateStore):
   :param password: A password to use with the `name`.
 
 
-  Authentication
-  --------------
+  .. note:: Authentication
 
-  If no `name` is supplied the file `~/.bsml/tokens` is read to find the
-  last valid access token used for the repository; if both a `name` and `password`
-  is supplied then they are sent to the repository's authentication service and,
-  if valid, an access token is saved in `~/.bsml/tokens`.
+     If no `name` is supplied the file `~/.bsml/tokens` is read to find the
+     last valid access token used for the repository; if both a `name` and `password`
+     is supplied then they are sent to the repository's authentication service and,
+     if valid, an access token is saved in `~/.bsml/tokens`.
 
-  The `access_token` property will be None if a valid access token cannot be
-  obtained. The repository though may still be usable, as it guest access may
-  be allowed.
+     The `access_token` property will be None if a valid access token cannot be
+     obtained. The repository though may still be usable, as it guest access may
+     be allowed.
 
   """
 
