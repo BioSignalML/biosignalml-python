@@ -50,14 +50,14 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   :param check: How any checksum is treated. Default `Checksum.CHECK`
   :type check: :class:`~biosignalml.transports.stream.Checksum`
   """
-  def __init__(self, endpoint, request, receiveQ, check=stream.Checksum.CHECK, access_key=None, **kwds):
-  #-----------------------------------------------------------------------------------------------------
+  def __init__(self, endpoint, request, receiveQ, check=stream.Checksum.CHECK, token=None, **kwds):
+  #------------------------------------------------------------------------------------------------
     super(StreamClient, self).__init__(endpoint, **kwds)
     self._request = request
     self._receiver = receiveQ.put if isinstance(receiveQ, Queue.Queue) else receiveQ
     self._parser = stream.BlockParser(self._receiver, check=check)
     self._opened = False
-    self._access_key = access_key
+    self._access_key = token
 
   @property
   def handshake_headers(self):
@@ -159,7 +159,7 @@ class WebStreamWriter(object):
   def __init__(self, endpoint, access_key=None):
   #---------------------------------------------
     try:
-      self._ws = StreamClient(endpoint, None, self.got_response, access_key=access_key,
+      self._ws = StreamClient(endpoint, None, self.got_response, token=access_key,
                               protocols=['biosignalml-ssf'])
       self._ws.connect()
     except Exception, msg:
