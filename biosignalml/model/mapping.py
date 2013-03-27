@@ -80,18 +80,21 @@ class PropertyMap(object):
     to the object for a RDF statement,
   :param to_rdf: An optional function to convert from the object for a RDF
     statement to an attribute value.
-  :param subelement (bool): If True, AbstractObjects referenced by properties
+  :param bool subelement: If True, AbstractObjects referenced by properties
     are recursively output when generating RDF statements.
+  :param bool functional: Set False if the property can have multiple values.
+    Default is True.
   """
-  def __init__(self, property, datatype=None, to_rdf=None, from_rdf=None, subelement=False):
-  #-----------------------------------------------------------------------------------------
+  def __init__(self, property, datatype=None, to_rdf=None, from_rdf=None, subelement=False, functional=True):
+  #---------------------------------------------------------------------------------------------------------
     self.property = property
     self.datatype = datatype
     self.to_rdf = to_rdf
     self.from_rdf = from_rdf
     self.subelement = subelement
+    self.functional = functional
 
-ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf')
+ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf, functional')
 #===========
 """
 A reverse mapping, from RDF to an attribute.
@@ -130,7 +133,7 @@ class Mapping(object):
     :type usermap: dict
     """
     for k, v in usermap.iteritems(): self.mapping[(metaclass, k)] = v
-    self.reversemap = { (k[0], str(m.property)): ReverseEntry(k[1], m.datatype, m.from_rdf)
+    self.reversemap = { (k[0], str(m.property)): ReverseEntry(k[1], m.datatype, m.from_rdf, m.functional)
                           for k, m in self.mapping.iteritems() }
 
   @staticmethod
@@ -215,14 +218,15 @@ class Mapping(object):
     in the reverse mapping table and use its properties to translate the value of the
     statement's object.
 
-    :rtype: tuple(Uri, attribute, value) where the ``Uri`` is of the statement's subject;
-      ``attribute`` is a string with the Python name of an attribute; and ``value`` is the
-      Python value for the attribute.
+    :rtype: tuple(Uri, attribute, value, functional) where the ``Uri`` is of the statement's
+      subject;``attribute`` is a string with the Python name of an attribute; ``value`` is
+      the Python value for the attribute; and ``functional'' is True if the attribute can
+      only have a single value.
 
     """
     m = self.reversemap.get((metaclass, str(statement.predicate.uri)), None)
-    if m is None: m = self.reversemap.get((None, str(statement.predicate.uri)), ReverseEntry(None, None, None))
-    return (statement.subject.uri, m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf))
+    if m is None: m = self.reversemap.get((None, str(statement.predicate.uri)), ReverseEntry(None, None, None, None))
+    return (statement.subject.uri, m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf), m.functional)
 
   def get_value_from_graph(self, resource, attr, graph):
   #-----------------------------------------------------

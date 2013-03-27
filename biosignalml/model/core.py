@@ -126,19 +126,28 @@ class AbstractObject(object):
     except Exception:
       return v1 == v2
 
-  def _assign(self, attr, value):
-  #------------------------------
+  def _assign(self, attr, value, functional=True):
+  #-----------------------------------------------
     if attr in self.__dict__:
       v = getattr(self, attr, None)
-      if v in [None, '']: setattr(self, attr, value)
-      elif isinstance(v, set): v.add(value)
-      elif isinstance(v, list): v.append(value)
-      elif not self._equal_values(v, value): setattr(self, attr, set([v, value]))
+      if functional or v in [None, '']:
+        setattr(self, attr, value)
+      elif isinstance(v, set):
+        v.add(value)
+      elif isinstance(v, list):
+        v.append(value)
+      elif not self._equal_values(v, value):
+        setattr(self, attr, set([v, value]))
     elif attr is not None:
       v = self.metadata.get(attr)
-      if v in [None, '']: self.metadata[attr] = value
-      elif isinstance(v, set): v.add(value)
-      elif not self._equal_values(v != value): self.metadata[attr] = set([v, value])
+      if functional or v in [None, '']:
+        self.metadata[attr] = value
+      elif isinstance(v, set):
+        v.add(value)
+      elif isinstance(v, list):
+        v.append(value)
+      elif not self._equal_values(v != value):
+        self.metadata[attr] = set([v, value])
 
 
   def initialise(self, **kwds):
@@ -294,10 +303,10 @@ class AbstractObject(object):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
         for metaclass in [getattr(cls, 'metaclass', None)
                             for cls in self.__class__.__mro__ if cls != object]:
-          s, attr, v = self.rdfmap.metadata(metaclass, stmt)
+          s, attr, v, fn = self.rdfmap.metadata(metaclass, stmt)
           #logging.debug("%s: %s = '%s'", self.uri, attr, v)  ###
           if attr is not None:
-            self._assign(attr, v)
+            self._assign(attr, v, fn)
             break
 
   @classmethod
