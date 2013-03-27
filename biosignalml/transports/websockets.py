@@ -156,10 +156,10 @@ class WebStreamReader(stream.SignalDataStream):
 class WebStreamWriter(object):
 #=============================
 
-  def __init__(self, endpoint, access_key=None):
-  #---------------------------------------------
+  def __init__(self, endpoint, token=None):
+  #----------------------------------------
     try:
-      self._ws = StreamClient(endpoint, None, self.got_response, token=access_key,
+      self._ws = StreamClient(endpoint, None, self.got_response, token=token,
                               protocols=['biosignalml-ssf'])
       self._ws.connect()
     except Exception, msg:

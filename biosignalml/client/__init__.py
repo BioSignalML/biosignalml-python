@@ -253,8 +253,7 @@ class Repository(repository.RemoteRepository):
     rate
     units
     '''
-    kwds['access_key'] = self._access_key
-    reader = WebStreamReader(self._web_sockets_uri(uri), uri, **kwds)
+    reader = WebStreamReader(self._web_sockets_uri(uri), uri, token=self.access_token, **kwds)
     for block in reader:
       if block.type == BlockType.DATA: yield block.signaldata()
     reader.join()
@@ -263,7 +262,7 @@ class Repository(repository.RemoteRepository):
   #-----------------------------------
     stream = None
     try:
-      stream = WebStreamWriter(self._web_sockets_uri(uri), access_key=self._access_key)
+      stream = WebStreamWriter(self._web_sockets_uri(uri), token=self.access_token)
       MAXPOINTS = 10000
       params = { 'dtype': 'f4' }
       if hasattr(timeseries, 'rate'): params['rate'] = timeseries.rate
