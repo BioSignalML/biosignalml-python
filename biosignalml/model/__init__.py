@@ -191,7 +191,7 @@ class Recording(core.AbstractObject):
 
   mapping = { 'format':        PropertyMap(DCT.format),
               'dataset':       PropertyMap(BSML.dataset),
-              'source':        PropertyMap(DCT.source),
+              'source':        PropertyMap(DCT.source, functional=False),
               'investigation': PropertyMap(DCT.subject),
               'starttime':     PropertyMap(DCT.created, XSD.dateTime,
                                            utils.datetime_to_isoformat,
@@ -391,7 +391,7 @@ class Annotation(core.AbstractObject):
 
   mapping = { 'about':   PropertyMap(DCT.subject, to_rdf=mapping.get_uri),
               'comment': PropertyMap(RDFS.comment),
-              'tags':    PropertyMap(BSML.tag),
+              'tags':    PropertyMap(BSML.tag, functional=False),
               'time':    PropertyMap(BSML.time, subelement=True),
             }
 
