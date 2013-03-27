@@ -575,7 +575,7 @@ class H5Recording(object):
     supplied data must be a multiple of the number of signals.
     """
     if len(data) == 0: return
-    if getattr(uri, '__iter__', None):
+    if getattr(uri, '__iter__', None) is not None:
       sig = self.get_signal(uri[0])
       if sig is None or list(sig.dataset.attrs['uri']) != list(uri):
          raise KeyError("Unknown signal set '%s'" % uri)
