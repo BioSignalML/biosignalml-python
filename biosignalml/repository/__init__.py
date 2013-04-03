@@ -220,9 +220,14 @@ class BSMLStore(GraphStore):
     # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Annotation, graph_uri)
-    for tm in graph.get_objects(uri, BSML.time):  ## This could be improved...
-      graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Instant, graph_uri))
-      graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Interval, graph_uri))
+
+##### Put into Annotation/Segment.load_from_graph()   ????
+    for sg in graph.get_objects(uri, DCT.subject):  ## This could be improved...
+      graph.append_graph(self.get_resource_as_graph(sg.uri, BSML.Segment, graph_uri))
+      for tm in graph.get_objects(sg.uri, BSML.time):  ## This could be improved...
+        graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Instant, graph_uri))
+        graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Interval, graph_uri))
+
     return Annotation.create_from_graph(uri, graph)
 
 #  def get_annotation_by_content(self, uri, graph_uri=None):
@@ -250,10 +255,24 @@ class BSMLStore(GraphStore):
     :rtype: list of bsml:Annotation URIs
     """
     return [ r[1]
-      for r in self.get_resources(BSML.Annotation, rvars='?r',
-        condition='''?r dct:subject ?s . filter(regex(str(?s), "^%s(#.*)?$", "i")) .
-              minus { [] prv:precededBy ?r }''' % uri,
-        prefixes = dict(dct=DCT.prefix, prv=PRV.prefix),
+      for r in self.get_resources(BSML.Annotation, rvars='?ann',
+        condition='''?ann dct:subject <%(subj)s>
+                       minus { [] prv:precededBy ?ann }
+                   } union {
+                     ?ann a bsml:Annotation ;
+                          dct:subject [ a bsml:Segment ;
+                                        dct:source <%(subj)s>
+                                      ]
+                            minus { [] prv:precededBy ?ann }'''
+                   % dict(subj=uri),
+## Following produces an internal Virtuoso error...
+#                    {
+#                      { ?ann dct:subject <%(subj)s> }
+#                     union
+#                      { ?ann dct:subject [ a bsml:Segment ; dct:source <%(subj)s> ] }
+#                    }
+#                  minus { [] prv:precededBy ?ann }
+        prefixes = dict(bsml=BSML.prefix, dct=DCT.prefix, prv=PRV.prefix),
         graph = graph_uri
         ) ]
 
