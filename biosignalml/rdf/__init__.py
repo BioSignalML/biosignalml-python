@@ -174,7 +174,7 @@ class Literal(Node):
   #-------------------------------------------------------
     super(Literal, self).__init__(literal=str(value), datatype=Uri(datatype), language=language)
 
-  def as_string(self):
+  def as_string(self):   ## V's __str__ ???
   #-------------------
     '''
     Return the literal as a quoted string with language and datatype attributes.
@@ -498,6 +498,13 @@ class Graph(librdf.Model):
     :rtype: bool
     '''
     return super(Graph, self).contains_statement(statement)
+
+  def has_resource(self, uri, rtype):
+  #----------------------------------
+    '''
+    Does the graph contain a resource of the given type?
+    '''
+    return self.contains(Statement(uri, RDF.type, rtype))
 
   def get_statements(self, statement):
   #-----------------------------------
