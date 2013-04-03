@@ -294,14 +294,15 @@ class BSMLStore(GraphStore):
 class BSMLUpdateStore(BSMLStore, GraphUpdate):
 #=============================================
 
-  def extend_recording_graph(self, recording, abstractobject):
-  #-----------------------------------------------------------
+  def extend_recording_graph(self, recording, *abstractobjects):
+  #-------------------------------------------------------------
     """
     Add metadata about an object to a recording's graph.
     """
-    self._sparqlstore.extend_graph(recording.graph.uri,
-      abstractobject.metadata_as_string(format=Format.RDFXML),
-      format=Format.RDFXML)
+    for abstractobject in abstractobjects:
+      self._sparqlstore.extend_graph(recording.graph.uri,
+        abstractobject.metadata_as_string(format=Format.RDFXML),
+        format=Format.RDFXML)
 
   def remove_recording_resource(self, recording, uri):
   #---------------------------------------------------
