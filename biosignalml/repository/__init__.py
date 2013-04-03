@@ -189,8 +189,8 @@ class BSMLStore(GraphStore):
         prefixes=dict(bsml=BSML.prefix), graph=graph_uri)
       ]
 
-  def eventtypes(self, rec_uri, counts=False, graph_uri=None):
-  #-----------------------------------------------------------
+  def event_types(self, rec_uri, counts=False, graph_uri=None):
+  #------------------------------------------------------------
     '''
     Return a list of all types of Events associated with a recording.
 
