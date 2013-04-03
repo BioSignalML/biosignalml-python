@@ -130,7 +130,7 @@ class GraphStore(object):
     The resources found can be restricted by an optional SPARQL graph pattern.
 
     :param rtype: The type of resource to find. The SPARQL variable used for the
-       resource is always '?r'.
+       resource is the first of the `rvars`.
     :param rvars (str): Space separated SPARQL variables identifying the resource
        in the query along with any other variables to return values of. The first variable
        is usually that of the resource. Optional, defaults to `?r`.
@@ -152,17 +152,17 @@ class GraphStore(object):
       return [ (gv(r, 'g'), gv(r, retvars[0])) + tuple([gv(r, v) for v in retvars[1:]])
         for r in self.select('?g %(rvars)s',
           '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
-             graph ?g { ?r a <%(rtype)s> . %(cond)s }''',
+             graph ?g { { %(res)s a <%(rtype)s> . %(cond)s } }''',
           params=dict(pgraph=self._provenance_uri, gtype=self._graphtype,
-                      rtype=rtype, rvars=rvars, cond=condition),
+                      res=varlist[0], rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           group=group,
           order='?g %s' % ' '.join(varlist))
         ]
     else:
       return [ (Uri(str(graph)), gv(r, retvars[0])) + tuple([gv(r, v) for v in retvars[1:]])
-        for r in self.select('%(rvars)s', '?r a <%(rtype)s> . %(cond)s',
-          params=dict(rtype=rtype, rvars=rvars, cond=condition),
+        for r in self.select('%(rvars)s', '{ %(res)s a <%(rtype)s> . %(cond)s }',
+          params=dict(res=varlist[0], rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           graph=graph,
           order=' '.join(varlist))
