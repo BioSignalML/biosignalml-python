@@ -313,7 +313,7 @@ if __name__ == '__main__':
     print ("  Opened %s: dataset=%s\n   start=%s, duration=%s\n   Nsigs=%s, framerate=%s, framesize=%s"
                % (wf.uri, wf.dataset, wf.starttime, wf.duration, len(wf), wf._framerate, wf._framesize))
 
-    s = wf.get_signal(index=0)
+    s = wf.signals[0]
     printsig(wf, s)
 
 #    for s in wf.signals(): printsig(wf, s)

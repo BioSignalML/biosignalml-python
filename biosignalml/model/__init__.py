@@ -22,19 +22,22 @@ Abstract BioSignalML objects.
 '''
 
 import logging
-from datetime import datetime
 from collections import OrderedDict
-import re
 
-import biosignalml.utils as utils
 import biosignalml.rdf as rdf
+import biosignalml.utils as utils
 import biosignalml.units as units
 from biosignalml.ontology import BSML
 from biosignalml.rdf import XSD, RDF, RDFS, DCT, TL, PROV
 
-import mapping
-from mapping import PropertyMap
-import core
+from .core import AbstractObject
+from .mapping import PropertyMap
+
+
+from .segment    import Segment
+
+from .annotation import Annotation
+
 
 def makelabel(label, suffix):
 #============================
@@ -48,8 +51,8 @@ def makelabel(label, suffix):
   return label + '_' + suffix
 
 
-class Signal(core.AbstractObject):
-#=================================
+class Signal(AbstractObject):
+#============================
   """
   An abstract BioSignalML Signal.
 
@@ -65,13 +68,13 @@ class Signal(core.AbstractObject):
                ]
   '''Generic attributes of a Signal.'''
 
-  mapping = { 'recording':    PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
-              'units':        PropertyMap(BSML.units, to_rdf=mapping.get_uri),
+  mapping = { 'recording':    PropertyMap(BSML.recording, to_rdf=PropertyMap.get_uri),
+              'units':        PropertyMap(BSML.units, to_rdf=PropertyMap.get_uri),
 ##            'transducer':   PropertyMap(BSML.transducer),
               'filter':       PropertyMap(BSML.preFilter),
               '_rate':        PropertyMap(BSML.rate, XSD.double),
               '_period':      PropertyMap(BSML.period, XSD.double),
-              'clock':        PropertyMap(BSML.clock, to_rdf=mapping.get_uri, subelement=True),
+              'clock':        PropertyMap(BSML.clock, to_rdf=PropertyMap.get_uri, subelement=True),
               'minFrequency': PropertyMap(BSML.minFrequency, XSD.double),
               'maxFrequency': PropertyMap(BSML.maxFrequency, XSD.double),
               'minValue':     PropertyMap(BSML.minValue, XSD.double),
@@ -95,7 +98,7 @@ class Signal(core.AbstractObject):
       raise ValueError("Signal's sampling rate doesn't match its period")
     kwds['_rate'] = rate
     kwds['_period'] = period
-    core.AbstractObject.__init__(self, uri, units=units, **kwds)
+    AbstractObject.__init__(self, uri, units=units, **kwds)
 
   def __len__(self):
   #----------------
@@ -130,8 +133,8 @@ class Signal(core.AbstractObject):
     return units.get_units_uri('s')
 
 
-class Event(core.AbstractObject):
-#================================
+class Event(AbstractObject):
+#===========================
   '''
   An abstract BioSignalML Event.
   '''
@@ -141,7 +144,7 @@ class Event(core.AbstractObject):
   attributes = ['eventtype', 'time', 'recording', 'index' ]
   '''Generic attributes of an Event.'''
 
-  mapping = { 'recording': PropertyMap(BSML.recording, to_rdf=mapping.get_uri),
+  mapping = { 'recording': PropertyMap(BSML.recording, to_rdf=PropertyMap.get_uri),
               'eventtype': PropertyMap(BSML.eventType),
               'time':      PropertyMap(BSML.time, subelement=True),
               'index':     PropertyMap(BSML.index, XSD.integer),
@@ -149,9 +152,8 @@ class Event(core.AbstractObject):
 
   def __init__(self, uri, eventtype, time=None, **kwds):
   #-----------------------------------------------------
-    core.AbstractObject.__init__(self, uri, eventtype=eventtype,
-                                            time=time,
-                                            **kwds)
+    if time is not None: assert(time.end >= time.start)
+    AbstractObject.__init__(self, uri, eventtype=eventtype, time=time, **kwds)
 
   def __str__(self):
   #-----------------
@@ -174,8 +176,8 @@ def _get_timeline(tl):      # Stops a circular import
   return RelativeTimeLine(tl)
 
 
-class Recording(core.AbstractObject):
-#====================================
+class Recording(AbstractObject):
+#===============================
   '''
   An abstract BioSignalML Recording.
 
@@ -201,9 +203,9 @@ class Recording(core.AbstractObject):
                                            utils.isoduration_to_seconds),
 ##            'digest':        PropertyMap(BSML.digest),
               'timeline':      PropertyMap(TL.timeline,
-                                           to_rdf=mapping.get_uri,
+                                           to_rdf=PropertyMap.get_uri,
                                            from_rdf=_get_timeline, subelement=True),
-              'generatedBy':   PropertyMap(PROV.wasGeneratedBy, to_rdf=mapping.get_uri,
+              'generatedBy':   PropertyMap(PROV.wasGeneratedBy, to_rdf=PropertyMap.get_uri,
                                            subelement=True),
             }
 
@@ -214,41 +216,82 @@ class Recording(core.AbstractObject):
   def __init__(self, uri, **kwds):
   #-------------------------------
     from biosignalml.data.time import RelativeTimeLine   ## Otherwise circular import...
-    core.AbstractObject.__init__(self, uri, **kwds)
+    AbstractObject.__init__(self, uri, **kwds)
     self.timeline = RelativeTimeLine(str(uri) + '/timeline')
-    self._signals = OrderedDict()
-    self._events = OrderedDict()
+    self._resources = OrderedDict()
+
+  def add_resource(self, resource):
+  #--------------------------------
+    self._resources[str(resource.uri)] = resource
+    return resource
+
+  def new_resource(self, cls, uri, *args, **kwds):
+  #-----------------------------------------------
+    return self.add_resource(cls(uri, *args, **kwds))
+
+  ## pop_resource(self, uri)      ???
+
+  ## del_resource(self, uri)      ???
+
+  def resources(self, cls):
+  #-------------------------
+    """
+    The recording's resources of a given class, as a list.
+    """
+    return [ r for r in self._resources.values() if isinstance(r, cls) ]
+
+  def get_resource(self, uri):
+  #---------------------------
+    return self._resources[str(uri)]
+
+
+  def __len__(self):
+  #-----------------
+    return len(self.signals())
 
   def signals(self):
   #-----------------
     """
     The recording's signals as a list.
     """
-    return self._signals.values()
+    return self.resources(Signal)
+
+  def get_signal(self, uri):
+  #-------------------------
+    """
+    Retrieve a :class:`Signal` from a Recording.
+
+    :param uri: The URI of the signal to get.
+    :return: A signal in the recording.
+    :rtype: :class:`Signal`
+    """
+    signal = self.get_resource(uri)
+    if not isinstance(signal, self.SignalClass):
+      raise KeyError, str(uri)
+    return signal
 
   def add_signal(self, signal):
   #----------------------------
-    '''
+    """
     Add a :class:`Signal` to a Recording.
 
     :param signal: The signal to add to the recording.
-    :type signal: :class:`Signal`
-    :return: The 0-origin index of the signal in the recording.
 
-    .. note:: If indices are to be useful they must be a permanent attribute and held in RDF.
-
-    '''
+    """
     sig_uri = str(signal.uri)
-    if sig_uri in self._signals:
-      raise Exception, "Signal '%s' already in recording" % signal.uri
-    if signal.recording:     ## Set from RDF mapping...
+    try:
+      self.get_signal(sig_uri)
+      raise Exception, "Signal '%s' already in recording" % sig_uri
+    except KeyError:
+      pass
+    if signal.recording is not None:     ## Set from RDF mapping...
       if isinstance(signal.recording, Recording): rec_uri = signal.recording.uri
       else:                                       rec_uri = signal.recording
       if str(rec_uri) != str(self.uri):
         raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, sig_uri, rec_uri)
     signal.recording = self
-    self._signals[sig_uri] = signal
-    return list(self._signals).index(sig_uri)
+    self.add_resource(signal)
+    return signal
 
   def new_signal(self, uri, units, id=None, **kwds):
   #-------------------------------------------------
@@ -263,49 +306,40 @@ class Recording(core.AbstractObject):
       raise Exception, "Signal must have 'uri' or 'id' specified"
     if uri is None:
       uri = str(self.uri) + '/signal/%s' % str(id)
-    if str(uri) in self._signals:
+    try:
+      self.get_signal(uri)
       raise Exception, "Signal '%s' already in recording" % uri
-    sig = self.SignalClass(uri, units, **kwds)
-    self.add_signal(sig)
-    return sig
-
-  def get_signal(self, uri=None, index=None):
-  #-----------------------------------------
-    '''
-    Retrieve a :class:`Signal` from a Recording.
-
-    :param uri: The URI of the signal to get.
-    :param index: The 0-origin index of the signal to get.
-    :type index: int
-    :return: A signal in the recording.
-    :rtype: :class:`Signal`
-    '''
-    if uri is None: uri = list(self._signals)[index]
-    return self._signals[str(uri)]
-
-  def __len__(self):
-  #-----------------
-    return len(self._signals)
+    except KeyError:
+      pass
+    signal = self.SignalClass(uri, units, **kwds)
+    signal.recording = self
+    self.add_resource(signal)
+    return signal
 
 
   def events(self):
   #-----------------
-    return self._events.values()
+    """
+    The recording's events as a list.
+    """
+    return self.resources(Event)
+
+  def get_event(self, uri):
+  #------------------------
+    event = self.get_resource(uri)
+    if not isinstance(event, self.EventClass):
+      raise KeyError, str(uri)
+    return event
 
   def add_event(self, event):
   #--------------------------
     event.recording = self
-    self._events[str(event.uri)] = event
+    self.add_resource(event)
+    return event
 
   def new_event(self, uri, etype, at, duration=None, end=None, **kwds):
   #--------------------------------------------------------------------
-    evt = self.EventClass(uri, etype, self.interval(at, duration, end), **kwds)
-    self.add_event(evt)
-    return evt
-
-  def get_event(self, uri):
-  #------------------------
-    return self._events[str(uri)]
+    return self.add_event(self.EventClass(uri, etype, self.interval(at, duration, end), **kwds))
 
 
   def instant(self, when):
@@ -323,6 +357,16 @@ class Recording(core.AbstractObject):
     return self.timeline.interval(start, duration, end=end)
 
 
+## Or create urn:uuid URIs ??
+  def new_segment(self, uri, at, duration=None, end=None, **kwds):  ## Of a Recording
+  #---------------------------------------------------------------
+    return self.make_resource(Segment(uri, self, self.interval(at, duration, end), **kwds))
+
+  def new_segment(self, uri, at, duration=None, end=None, **kwds):  ## Of a Signal
+  #---------------------------------------------------------------
+    return self.recording.make_resource(Segment(uri, self, self.interval(at, duration, end), **kwds))
+
+
   def save_to_graph(self, graph):
   #------------------------------
     """
@@ -331,9 +375,8 @@ class Recording(core.AbstractObject):
     :param graph: A RDF graph.
     :type graph: :class:`~biosignalml.rdf.Graph`
     """
-    core.AbstractObject.save_to_graph(self, graph)
-    for s in self.signals(): s.save_to_graph(graph)
-    for e in self._events.itervalues(): e.save_to_graph(graph)
+    AbstractObject.save_to_graph(self, graph)
+    for resource in self._resources(): resource.save_to_graph(graph)
 
   @classmethod
   def create_from_graph(cls, uri, graph, signals=True, **kwds):
@@ -358,84 +401,6 @@ class Recording(core.AbstractObject):
     self.graph = graph
     return self
 
-
-class Annotation(core.AbstractObject):
-#=====================================
-  '''
-  An abstract BioSignalML Annotation.
-
-  An Annotation is a comment about something made by someone. In BioSignalML
-  we use the following model:::
-
-    <annotation> a bsml:Annotation ;
-      bsml:about <target> ;
-      rdfs:comment "a comment" ;        # Optional if there are tags
-      bsml:tag <a/semantic/tag> ;       # Zero or more
-      dct:creator <someone> ;
-      dct:created "2012-09-29T09:30:23Z"^^xsd:dateTime ;
-      .
-
-  The <target> may refer to instant or interval on a recording or signal
-  by including a media fragment with the URI (see
-  http://www.w3.org/TR/media-frags/#URIquery-vs-fragments).
-
-
-  Do we have 'time' as an attribute and map to/from media fragments?
-
-  Best to let caller do this?? And utils package to have helper functions.
-
-  '''
-  metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation`
-
-  attributes = [ 'about', 'comment', 'tags', 'time' ]
-
-  mapping = { 'about':   PropertyMap(DCT.subject, to_rdf=mapping.get_uri),
-              'comment': PropertyMap(RDFS.comment),
-              'tags':    PropertyMap(BSML.tag, functional=False),
-              'time':    PropertyMap(BSML.time, subelement=True),
-            }
-
-
-  def __init__(self, uri, about=None, comment=None, tags=None, time=None, timestamp=True, **kwds):
-  #-----------------------------------------------------------------------------------------------
-    if time is not None: assert(time.end >= time.start)   ###
-    created = kwds.pop('created', utils.utctime()) if timestamp else None
-    label = kwds.get('label', '')
-    core.AbstractObject.__init__(self, uri, about=about, comment=comment, time=time,
-      created=created, **kwds)
-    self.tags = tags if tags else []
-
-  @classmethod
-  def Note(cls, uri, about, text, time=None, **kwds):
-  #--------------------------------------------------
-    return cls(uri, about, comment=text, time=time, **kwds)
-
-  @classmethod
-  def Tag(cls, uri, about, tag, time=None, **kwds):
-  #------------------------------------------------
-    return cls(uri, about, tags=[tag], time=time, **kwds)
-
-  def tag(self, tag):
-  #------------------
-    self.tags.append(tag)
-
-  @classmethod
-  def create_from_graph(cls, uri, graph, **kwds):
-  #----------------------------------------------
-    '''
-    Create a new instance of an Annotation, setting attributes from RDF triples in a graph.
-
-    :param uri: The URI of the Annotation.
-    :param graph: A RDF graph.
-    :type graph: :class:`~biosignalml.rdf.Graph`
-    :rtype: :class:`Annotation`
-    '''
-    from biosignalml.data.time import TemporalEntity  # Prevent a circular import
-    self = cls(uri, timestamp=False, **kwds)
-    self.add_metadata(graph)
-    if self.time is not None:
-      self.time = TemporalEntity.create_from_graph(self.time, graph)
-    return self
 
 
 if __name__ == '__main__':
@@ -472,7 +437,8 @@ if __name__ == '__main__':
 #  print r1.metadata_as_string(rdf.Format.TURTLE)
 
 #  a1 = Annotation.Note('http://example.org/ann1', r1, 'comment', creator='dave')
-  e1 = Annotation.Note('http://example.org/event', r1, 'event', r1.interval(1, 0.5),
+  e1 = Annotation.Note('http://example.org/event', Segment(r1, r1.interval(1, 0.5)),
+     'event',
      creator='dave')
   t1 = Annotation.Tag('http://example.org/tag1', r1, 'tag')
 #  print t1.metadata_as_string(rdf.Format.TURTLE)

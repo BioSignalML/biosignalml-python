@@ -26,7 +26,7 @@ import logging
 import biosignalml.rdf as rdf
 from biosignalml import BSML
 from biosignalml.rdf import RDFS, DCT, XSD, PRV
-from mapping import Mapping, PropertyMap, get_uri
+from mapping import Mapping, PropertyMap
 import biosignalml.utils as utils
 
 
@@ -58,7 +58,7 @@ class AbstractObject(object):
               'comment':     PropertyMap(RDFS.comment),
               'description': PropertyMap(DCT.description),
               'precededBy':  PropertyMap(PRV.precededBy),
-              'creator':     PropertyMap(DCT.creator, to_rdf=get_uri),
+              'creator':     PropertyMap(DCT.creator, to_rdf=PropertyMap.get_uri),
               'created':     PropertyMap(DCT.created, XSD.dateTime,
                                          utils.datetime_to_isoformat,
                                          utils.isoformat_to_datetime),

@@ -29,7 +29,6 @@ from biosignalml.rdf import RDF, RDFS, DCT, XSD, TL
 
 import biosignalml.utils as utils
 import biosignalml.model as model
-import biosignalml.model.mapping as mapping
 from biosignalml.model.mapping import PropertyMap
 
 
@@ -63,7 +62,7 @@ class TemporalEntity(model.core.AbstractObject):
   attributes = [ 'timeline', 'start' ]
 
   mapping = { 'timeline': PropertyMap(TL.timeline,
-                                      to_rdf=mapping.get_uri,
+                                      to_rdf=PropertyMap.get_uri,
                                       from_rdf=RelativeTimeLine) }
 
   @classmethod

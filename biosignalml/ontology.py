@@ -55,6 +55,9 @@ class BSML(object):
   '''An increasing sequence of sample coordinates.
 
 Several signals may use the same clock.'''
+
+  Segment        = Resource(NS.Segment)
+
   SemanticTag    = Resource(NS.SemanticTag)
   '''A tag used to classify a resource.'''
   Sensor         = Resource(NS.Sensor)
