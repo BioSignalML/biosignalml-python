@@ -53,7 +53,6 @@ class Segment(AbstractObject):
     '''
     from biosignalml.data.time import TemporalEntity  # Prevent a circular import
     self = cls(uri, **kwds)
-    print graph.serialise(format=rdf.Format.TURTLE)
     self.add_metadata(graph)
     if self.time is not None:
       self.time = TemporalEntity.create_from_graph(self.time, graph)
