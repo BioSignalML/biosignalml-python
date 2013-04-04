@@ -87,7 +87,6 @@ class AbstractObject(object):
            else uri.uri if isinstance(uri, rdf.Node) and uri.is_resource()
            else rdf.Uri(str(uri).strip()))
     self.node = rdf.BlankNode() if uri is None else rdf.Resource(self.uri)
-    self._associations = []
     self.graph = None
 
   def __str__(self):
@@ -278,7 +277,6 @@ class AbstractObject(object):
     """
     graph = rdf.Graph(self.uri)
     self.save_to_graph(graph)
-    for r in self._associations: r.save_to_graph(graph)
     return graph
 
   def metadata_as_string(self, format=rdf.Format.RDFXML, base=None, prefixes=None):
@@ -346,15 +344,3 @@ class AbstractObject(object):
     '''
     v = self.rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
-
-
-  def associate(self, resource):
-  #-----------------------------
-    """
-    Associate some other resource with ourself.
-
-    The resource's metadata will be added to our RDF graph.
-
-    :param resource: An :class:`AbstractObject` to associate with.
-    """
-    self._associations.append(resource)
