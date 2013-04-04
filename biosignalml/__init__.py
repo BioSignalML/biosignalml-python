@@ -28,7 +28,7 @@ from ontology import BSML
 import biosignalml.data  as data
 import biosignalml.model as model
 
-from model  import Recording, Event, Annotation
+from model import Recording, Event, Annotation, Segment
 
 
 class Signal(model.Signal, data.TimeSeries):  ## TEST WHAT MIXIN ENABLES...
