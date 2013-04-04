@@ -85,12 +85,17 @@ class EDFRecording(BSMLRecording):
     for n in self._edffile.data_signals:      # Add EDFSignal objects
       self.add_signal(EDFSignal.from_recording(self, n))
     for n, a in enumerate(self._edffile.annotations()):
-      tm = None
+      segment = None
       for m, text in enumerate(a.annotations):
         if text:
-          if tm is None: tm = self.interval(a.onset, a.duration)
-          self.associate(biosignalml.Annotation(self.uri + '/annotation/tal_%d_%d' % (n, m),
-                                                about=self, comment=text, time=tm))
+          if segment is None:
+            segment = self.add_resource(
+                        biosignalml.Segment(self.uri + '/time/tal_%d' % n,
+                                            source=self,
+                                            time=self.interval(a.onset, a.duration)))
+          self.add_resource(
+            biosignalml.Annotation(self.uri + '/annotation/tal_%d_%d' % (n, m),
+                                   about=segment, comment=text))
     # Now found common errors...
     self.comment = '\n'.join(self._edffile.errors)
 
