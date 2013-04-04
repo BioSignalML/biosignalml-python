@@ -376,7 +376,8 @@ class Recording(AbstractObject):
     :type graph: :class:`~biosignalml.rdf.Graph`
     """
     AbstractObject.save_to_graph(self, graph)
-    for resource in self._resources(): resource.save_to_graph(graph)
+    for resource in self._resources.values():
+      resource.save_to_graph(graph)
 
   @classmethod
   def create_from_graph(cls, uri, graph, signals=True, **kwds):
