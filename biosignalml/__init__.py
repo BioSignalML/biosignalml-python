@@ -21,7 +21,7 @@ BioSignalML data model.
 #
 ######################################################
 
-__version__ = '0.4.0pre'
+__version__ = '0.4.0'
 
 from ontology import BSML
 
