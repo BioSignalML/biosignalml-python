@@ -225,10 +225,6 @@ class Recording(AbstractObject):
     self._resources[str(resource.uri)] = resource
     return resource
 
-  def new_resource(self, cls, uri, *args, **kwds):
-  #-----------------------------------------------
-    return self.add_resource(cls(uri, *args, **kwds))
-
   ## pop_resource(self, uri)      ???
 
   ## del_resource(self, uri)      ???
