@@ -232,9 +232,9 @@ class GraphStore(object):
   #-------------------------------------
     return QueryResults(self._sparqlstore, sparql, header)
 
-#  def construct(self, template, where, params=None, graph=None, format=Format.RDFXML, prefixes=None):
-#  #--------------------------------------------------------------------------------------------------
-#    return self._sparqlstore.construct(template, where, params, graph, format, prefixes)
+  def construct(self, template, where=None, params=None, graph=None, format=Format.RDFXML, prefixes=None):
+  #-------------------------------------------------------------------------------------------------------
+    return self._sparqlstore.construct(template, where, params, graph, format, prefixes)
 
   def ask(self, query, graph):
   #---------------------------
