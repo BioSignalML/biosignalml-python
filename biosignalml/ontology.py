@@ -119,8 +119,6 @@ Measurement units would normally be entities in a specialised units of measure o
   """The location of actual signal data."""
   eventType      = Resource(NS.eventType)
   """The class or type of an Event."""
-  format         = Resource(NS.format)
-  """The format used to hold the recording."""
   preFilter      = Resource(NS.preFilter)
   """Pre-filtering applied to a signal as part of collection."""
   recording      = Resource(NS.recording)
