@@ -89,8 +89,8 @@ class ConvertError(Exception):
 class RateConverter(object):
 #===========================
 
-  def __init__(self, rate, channels=1, maxoutput=MAX_OUTPUT_FRAMES, method=SINC_FASTEST):
-  #--------------------------------------------------------------------------------------
+  def __init__(self, rate, channels=1, maxoutput=MAX_OUTPUT_FRAMES, method=SINC_MEDIUM_QUALITY):
+  #---------------------------------------------------------------------------------------------
     error = C.c_int()
     self._converter = src_new(method, channels, C.byref(error))
     if not self._converter: raise ConvertError(src_strerror(error))
