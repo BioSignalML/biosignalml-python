@@ -25,12 +25,21 @@ import math
 from biosignalml.data import DataSegment, UniformTimeSeries
 from biosignalml.formats import BSMLSignal
 import biosignalml.units as units
+from biosignalml import BSML
+from biosignalml.rdf import XSD
+from biosignalml.model.mapping import PropertyMap
+
 
 from edffile import EDF
 
 
 class EDFSignal(BSMLSignal):
 #===========================
+
+  attributes = [ 'index' ]
+
+  mapping = { 'index': PropertyMap(BSML.index, XSD.integer) }
+
 
   def __init__(self, uri, units=None, **kwds):
   #-------------------------------------------
