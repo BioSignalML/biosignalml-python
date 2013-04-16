@@ -101,8 +101,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
 
   def handshake_headers_getter(self):
   #----------------------------------
-    headers = ws4py.client.threadedclient.WebSocketClient.handshake_headers(self)
-    return headers
+    return super(StreamClient, self).handshake_headers()
 
   def join(self, *args):
   #---------------------
