@@ -59,9 +59,9 @@ class AbstractObject(object):
               'description': PropertyMap(DCT.description),
               'precededBy':  PropertyMap(PRV.precededBy),
               'creator':     PropertyMap(DCT.creator, to_rdf=PropertyMap.get_uri),
-              'created':     PropertyMap(DCT.created, XSD.dateTime,
-                                         utils.datetime_to_isoformat,
-                                         utils.isoformat_to_datetime),
+              'created':     PropertyMap(DCT.created, datatype=XSD.dateTime,
+                                         to_rdf=utils.datetime_to_isoformat,
+                                         from_rdf=utils.isoformat_to_datetime),
             }
 
   rdfmap = None
