@@ -146,7 +146,7 @@ VERSION    = str(MAJOR) + '.' + str(MINOR)
 IDENTIFIER = 'BSML ' + VERSION
 
 
-COMPRESSION = 'gzip'
+COMPRESSION = 'szip'                          #: Szip gives best performance
 
 DTYPE_STRING = h5py.special_dtype(vlen=str)   #: Store strings as variable length.
 
