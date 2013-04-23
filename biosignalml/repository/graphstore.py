@@ -205,12 +205,12 @@ class GraphStore(object):
       ### Following can give an error from Virtuoso...
       rdf = self._sparqlstore.construct('<%(uri)s> ?p ?o',
               '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
-                 graph ?g { <%(uri)s> a <%(rtype)s> . <%(uri)s> ?p ?o }''',
+                 graph ?g { <%(uri)s> a <%(rtype)s> ; ?p ?o }''',
               params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
               prefixes=dict(prv=PRV.prefix), format=Format.RDFXML)
     else:
       rdf = self._sparqlstore.construct('<%(uri)s> ?p ?o',
-              'graph <%(graph)s> { <%(uri)s> a <%(rtype)s> . <%(uri)s> ?p ?o }',
+              'graph <%(graph)s> { <%(uri)s> a <%(rtype)s> ; ?p ?o }',
               params=dict(graph=graph_uri, uri=uri, rtype=rtype), format=Format.RDFXML)
     ## Virtuoso has a MaxRows limit in its INI file with a default of 10000.
     ## This has been increased to 50000
