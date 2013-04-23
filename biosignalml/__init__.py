@@ -23,12 +23,11 @@ BioSignalML data model.
 
 __version__ = '0.4.2pre'
 
-from ontology import BSML
 
 import biosignalml.data  as data
 import biosignalml.model as model
 
-from model import Recording, Event, Annotation, Segment
+from model import BSML, Recording, Event, Annotation, Segment
 
 
 class Signal(model.Signal, data.TimeSeries):  ## TEST WHAT MIXIN ENABLES...

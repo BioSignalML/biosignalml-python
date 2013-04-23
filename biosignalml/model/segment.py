@@ -1,12 +1,10 @@
 import logging
 
-from biosignalml import BSML
-from biosignalml.rdf import RDFS, DCT
-import biosignalml.utils as utils
-import biosignalml.rdf as rdf
+from biosignalml.rdf import DCT
 
-from .core import AbstractObject
-from .mapping import PropertyMap
+from .ontology import BSML
+from .core     import AbstractObject
+from .mapping  import PropertyMap
 
 
 class Segment(AbstractObject):

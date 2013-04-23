@@ -24,10 +24,11 @@ Abstract BioSignalML objects.
 import logging
 
 import biosignalml.rdf as rdf
-from biosignalml import BSML
 from biosignalml.rdf import RDFS, DCT, XSD, PRV
 from mapping import Mapping, PropertyMap
 import biosignalml.utils as utils
+
+from .ontology import BSML
 
 
 class AbstractObject(object):
