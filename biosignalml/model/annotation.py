@@ -75,6 +75,5 @@ class Annotation(AbstractObject):
   @property
   def time(self):
   #--------------
-    logging.debug("ABT: %s", repr(self.about))
     if isinstance(self.about, Segment):
       return self.about.time
