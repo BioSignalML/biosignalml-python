@@ -197,6 +197,13 @@ class GraphStore(object):
     return self._sparqlstore.ask('graph <%(pgraph)s> { <%(uri)s> a <%(gtype)s> }',
       params=dict(pgraph=self._provenance_uri, uri=uri, gtype=self._graphtype))
 
+  def get_graph(self, graph_uri, rtype=None):
+  #------------------------------------------
+    rdf = self._sparqlstore.construct('?s ?p ?o', graph=graph_uri, format=Format.RDFXML)
+    ## Virtuoso has a MaxRows limit in its INI file with a default of 10000.
+    ## This has been increased to 50000
+    resource = Graph.create_from_string(graph_uri, rdf, Format.RDFXML)
+    return resource if rtype is None or resource.contains(Statement(None, RDF.type, rtype)) else None
 
   def get_resource_as_graph(self, uri, rtype, graph_uri=None):
   #-----------------------------------------------------------
