@@ -52,6 +52,7 @@ class Segment(AbstractObject):
     from biosignalml.data.time import TemporalEntity  # Prevent a circular import
     self = cls(uri, **kwds)
     self.add_metadata(graph)
-    if self.time is not None:
+    if self.time is not None:  ## Could add_metadata automatically do this for sub-elements??
+                               ## PropertyMap would need to know class (TemporalEntity)
       self.time = TemporalEntity.create_from_graph(self.time, graph)
     return self

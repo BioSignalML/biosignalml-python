@@ -26,6 +26,11 @@ class Annotation(AbstractObject):
       .
 
   '''
+  ### This (or core.AbstractObject ??) needs to detect a prior version exists
+  ### and link versions... cf. QtBrowser annotation edit/delete...
+  ###
+  ### An update or replace or ? method?? With auto URI generation ???
+  ###
   metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation
 
   attributes = [ 'about', 'comment', 'tags' ]

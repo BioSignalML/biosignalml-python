@@ -105,6 +105,7 @@ class BSMLStore(GraphStore):
                             str(self.get_objects(rec_uri, DCT.format, graph=graph_uri)[0]),
                             Recording)
       graph = self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)
+##    graph = self.get_graph(graph_uri, BSML.Recording)
       rec = recording_class.create_from_graph(rec_uri, graph, signals=False, **kwds)
       if rec is not None:
         if with_signals:
@@ -126,12 +127,15 @@ class BSMLStore(GraphStore):
     :param graph_uri: An optional URI of the graph to query.
     :rtype: :class:`~biosignalml.Signal`
     '''
-    ### This assumes all signals for arecording in a repository
+    ### This assumes all signals for a recording in the repository
     ### have been loaded against the Recording...
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Signal, graph_uri)
     if graph is None: return None
+
+    ## Have to get class of signal's recording...
     if signal_class is None: signal_class = Signal
+
     return signal_class.create_from_graph(uri, graph, units=None, **kwds)  # units set from graph...
 
   def signals(self, rec_uri, graph_uri=None):
@@ -163,6 +167,8 @@ class BSMLStore(GraphStore):
     # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Event, graph_uri)
+
+##### Put into Event.load_from_graph()   ????
     for tm in graph.get_objects(uri, BSML.time):  ## This could be improved...
       graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Instant, graph_uri))
       graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Interval, graph_uri))
@@ -190,6 +196,10 @@ class BSMLStore(GraphStore):
       for r in self.get_resources(BSML.Event, rvars='?r', condition=condition,
         prefixes=dict(bsml=BSML.prefix), graph=graph_uri)
       ]
+
+  ### Add a get_events() similar to get_annotations(), ideally be using
+  ### a generic method -- get_resources(cls, ...) ???
+
 
   def event_types(self, rec_uri, counts=False, graph_uri=None):
   #------------------------------------------------------------

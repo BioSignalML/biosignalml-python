@@ -105,7 +105,7 @@ class Signal(BSMLSignal):
 
   def close(self):
   #---------------
-    # Ensure all metadata has been POSTed
+    # Ensure all metadata has been POSTed (happens when recording is closed)
     pass
 
   def __len__(self):
@@ -159,6 +159,8 @@ class Recording(BSMLRecording):
   #---------------
     # Ensure all metadata has been POSTed
     self.repository.post_metadata(self.uri, self.metadata_as_string())
+    ## POST duplicates duration but leaves dataset...
+    ## PUT removes dataset,,,
 
   def add_signal(self, signal):
   #----------------------------
@@ -189,6 +191,9 @@ class Recording(BSMLRecording):
 
 class Repository(repository.RemoteRepository):
 #=============================================
+
+  ## Can a Repository by stateless, created on-the-fly as needed??
+  ## Then get/new methods would be static
 
   RecordingClass = Recording      #: The class of recordings in the repository.
 
