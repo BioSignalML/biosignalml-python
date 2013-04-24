@@ -168,10 +168,10 @@ class BSMLStore(GraphStore):
       graph.append_graph(self.get_resource_as_graph(tm.uri, BSML.Interval, graph_uri))
     return Event.create_from_graph(uri, graph)
 
-  def events(self, rec_uri, eventtype=None, timetype=None, graph_uri=None):
-  #------------------------------------------------------------------------
+  def get_event_uris(self, rec_uri, eventtype=None, timetype=None, graph_uri=None):
+  #--------------------------------------------------------------------------------
     '''
-    Return a list of all Events associated with a recording.
+    Return a list of Event URIs associated with a recording.
 
     :param uri: The URI of the recording.
     :param eventtype: The type of events to find. Optional.
@@ -232,41 +232,27 @@ class BSMLStore(GraphStore):
 
     return Annotation.create_from_graph(uri, graph)
 
-#  def get_annotation_by_content(self, uri, graph_uri=None):
-#  #--------------------------------------------------------
-#    '''
-#    Get an Annotation from the repository identified by its body content.
-#
-#    :param uri: The URI of the body of an Annotation.
-#    :rtype: :class:`~biosignalml.Annotation`
-#    '''
-#    if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
-#    for r in self.select('?a', 'graph <%(g)s> { ?a a oa:Annotation . ?a oa:hasBody <%(u)s> }',
-#                         params = dict(g=graph_uri, u=uri),
-#                         prefixes = dict(oa = OA.prefix)):
-#      return self.get_annotation(sparqlstore.get_result_value(r, 'a'), graph_uri)
-
-  def annotations(self, uri, graph_uri=None):
-  #------------------------------------------
+  def get_annotation_uris(self, subject, graph_uri=None):
+  #------------------------------------------------------
     """
-    Return a list of all Annotations about a subject.
+    Return all Annotation URIs about a subject.
 
-    :param uri: The URI of the subject. Fragment parts of the subject URI
-      are ignored.
+    :param subject: The URI of the subject.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: list of bsml:Annotation URIs
     """
     return [ r[1]
       for r in self.get_resources(BSML.Annotation, rvars='?ann',
-        condition='''?ann dct:subject <%(subj)s>
-                       minus { [] prv:precededBy ?ann }
+        condition='''?ann a bsml:Annotation ;
+                          dct:subject <%(subj)s>
+                            minus { [] prv:precededBy ?ann }
                    } union {
                      ?ann a bsml:Annotation ;
                           dct:subject [ a bsml:Segment ;
                                         dct:source <%(subj)s>
                                       ]
                             minus { [] prv:precededBy ?ann }'''
-                   % dict(subj=uri),
+                   % dict(subj=subject),
 ## Following produces an internal Virtuoso error...
 #                    {
 #                      { ?ann dct:subject <%(subj)s> }
