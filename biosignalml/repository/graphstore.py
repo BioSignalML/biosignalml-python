@@ -121,8 +121,8 @@ class GraphStore(object):
     return DataItem.create_from_string(graph_uri, rdf, Format.RDFXML)
 
 
-  def get_resources(self, rtype, rvars='?r', condition='', group=None, prefixes=None, graph=None):
-  #-----------------------------------------------------------------------------------------------
+  def get_resources(self, rtype, rvars='?r', condition='', group=None, prefixes=None, graph=None, order=None):
+  #-----------------------------------------------------------------------------------------------------------
     """
     Find resources of the given type and the most recent graphs that
     hold them.
@@ -148,6 +148,7 @@ class GraphStore(object):
     retvars = [ var[1:] for var in varlist ]
     gv = sparqlstore.get_result_value   ## Shorten code
     NOVALUE = { 'value': None }  # For optional result variables
+    if order is None: order = ' '.join(varlist)
     if graph is None:
       return [ (gv(r, 'g'), gv(r, retvars[0])) + tuple([gv(r, v) for v in retvars[1:]])
         for r in self.select('?g %(rvars)s',
@@ -157,7 +158,7 @@ class GraphStore(object):
                       res=varlist[0], rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           group=group,
-          order='?g %s' % ' '.join(varlist))
+          order='?g %s' % order)
         ]
     else:
       return [ (Uri(str(graph)), gv(r, retvars[0])) + tuple([gv(r, v) for v in retvars[1:]])
@@ -165,7 +166,7 @@ class GraphStore(object):
           params=dict(res=varlist[0], rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           graph=graph,
-          order=' '.join(varlist))
+          order=order)
         ]
 
 
