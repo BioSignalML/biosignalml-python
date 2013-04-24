@@ -19,10 +19,12 @@
 ######################################################
 
 import logging
+import operator
 
 import biosignalml.formats
-from biosignalml import BSML, Recording, Signal, Event, Annotation
-from biosignalml.rdf import RDFS, DCT, PRV, Format
+from biosignalml import BSML, Recording, Signal, Event, Annotation, Segment
+from biosignalml.data.time import TemporalEntity
+from biosignalml.rdf import RDFS, DCT, PRV, TL, Format
 import biosignalml.rdf.sparqlstore as sparqlstore
 
 from graphstore import GraphStore, GraphUpdate
@@ -275,6 +277,59 @@ class BSMLStore(GraphStore):
         prefixes = dict(bsml=BSML.prefix, dct=DCT.prefix, prv=PRV.prefix),
         graph = graph_uri
         ) ]
+
+  def get_annotations(self, subject, graph_uri=None):
+  #--------------------------------------------------
+    """
+    Return all Annotations about a subject.
+
+    This is significantly faster (approx 15x) then getting a list of URIs
+    (fast) and then creating Annotations (slow).
+
+    Code could be used as a template for general abstract object creation
+    based on PropertyMap and bypassing internal use of RDF -- instead map
+    directly to and from SPARQL.
+
+    :param subject: The URI of the subject.
+    :param graph_uri: An optional URI of the graph to query.
+    :rtype: list of bsml:Annotations
+    """
+    anns = self.get_resources(BSML.Annotation,
+        rvars='?ann ?about ?stype ?comment ?tag ?created ?source ?tm ?start ?duration ?timeline',
+        condition='''minus { [] prv:precededBy ?ann }
+                       {
+                         ?ann dct:subject ?about .
+                         ?about a ?stype .
+                         optional { ?ann rdfs:comment ?comment }
+                         optional { ?ann dct:created ?created }
+                         optional { ?ann bsml:tag ?tag }
+                         { ?ann dct:subject <%(subject)s> }
+                         union
+                         { ?about a bsml:Segment ;
+                             dct:source <%(subject)s> ;
+                             dct:source ?source ;
+                             bsml:time ?tm .
+                             ?tm tl:timeline ?timeline .
+                           { ?tm a bsml:Interval ; tl:start ?start ; tl:duration ?duration }
+                           union
+                           { ?tm a bsml:Instant ; tl:at ?start }
+                         }
+                       }''' % dict(subject=subject),
+        prefixes = dict(bsml=BSML.prefix, dct=DCT.prefix, prv=PRV.prefix, tl=TL.prefix),
+        graph = graph_uri,
+#       order = '?start',  ## Virtuoso doesn't correctly sort xsd:dayTimeDuration
+        )
+    anns.sort(key=operator.itemgetter(9, 2, 1))  # start, about, uri
+    annotations = [ ]
+    for a in anns:
+      ann = Annotation(a[1], about=a[2], comment=a[4], created=a[6])
+      if str(a[3]) == str(BSML.Segment):
+        time = TemporalEntity.create(a[8], float(a[9]),
+          duration=None if a[10] in ['', None] else float(a[10]),
+          timeline=a[11])
+        ann.about = Segment(a[2], source=a[7], time=time)
+      annotations.append(ann)
+    return annotations
 
   def get_semantic_tags(self):
   #---------------------------
