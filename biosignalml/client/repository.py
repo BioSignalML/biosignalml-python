@@ -77,8 +77,8 @@ class RemoteRepository(BSMLUpdateStore):
   def __init__(self, uri, name=None, password=None, md_endpoint=None, sd_endpoint=None, port=None):
   #------------------------------------------------------------------------------------------------
     self.uri = uri
-    if name is None: self._get_access()   # Sets self._token
-    else:            self._authenticate(name, password)
+    if name in [None, '']: self._get_access()   # Sets self._token
+    else:                  self._authenticate(name, password)
     super(RemoteRepository, self).__init__(uri, RemoteSparqlStore(uri, self._token, port=port))
     self._md_uri = uri + md_endpoint if md_endpoint is not None else ''
     self._sd_uri = uri + sd_endpoint if sd_endpoint is not None else ''
@@ -155,6 +155,8 @@ class RemoteRepository(BSMLUpdateStore):
       p = access.split()
       self._token = p[0]
       self._expiry = p[2]
+    else:
+      self._save_access('')
 
   @property
   def access_token(self):
