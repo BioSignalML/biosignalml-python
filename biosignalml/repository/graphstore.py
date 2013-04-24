@@ -169,7 +169,6 @@ class GraphStore(object):
           order=order)
         ]
 
-
   def has_resource(self, uri, rtype=None, graph_uri=None):
   #-------------------------------------------------------
     '''
@@ -188,7 +187,6 @@ class GraphStore(object):
         '''graph <%(graph)s> { <%(uri)s> a %(rtype)s }''',
         params=dict(graph=graph_uri, uri=uri, rtype=rtype),
         prefixes=dict(prv=PRV.prefix))
-
 
   def has_graph(self, uri):
   #------------------------
@@ -218,13 +216,11 @@ class GraphStore(object):
               prefixes=dict(prv=PRV.prefix), format=Format.RDFXML)
     else:
       rdf = self._sparqlstore.construct('<%(uri)s> ?p ?o',
-              'graph <%(graph)s> { <%(uri)s> a <%(rtype)s> ; ?p ?o }',
-              params=dict(graph=graph_uri, uri=uri, rtype=rtype), format=Format.RDFXML)
-    ## Virtuoso has a MaxRows limit in its INI file with a default of 10000.
-    ## This has been increased to 50000
+              '<%(uri)s> a <%(rtype)s> ; ?p ?o',
+              params=dict(uri=uri, rtype=rtype),
+              graph=graph_uri, format=Format.RDFXML)
     resource = Graph.create_from_string(graph_uri, rdf, Format.RDFXML)
     return resource if resource.contains(Statement(uri, RDF.type, rtype)) else None
-
 
   def get_resource_graph_uri(self, uri):
   #-------------------------------------
@@ -234,7 +230,6 @@ class GraphStore(object):
         params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri),
         prefixes=dict(prv=PRV.prefix)):
       return sparqlstore.get_result_value(r, 'g')
-
 
   def query(self, sparql, header=False):
   #-------------------------------------
