@@ -66,6 +66,14 @@ class TemporalEntity(model.core.AbstractObject):
                                       from_rdf=RelativeTimeLine) }
 
   @classmethod
+  def create(cls, uri, start, duration=None, end=None, **kwds):
+  #------------------------------------------------------------
+    if duration in [None, 0.0] and end in [None, start]:
+      return Instant(uri, start, **kwds)
+    else:
+      return Interval(uri, start, duration=duration, end=end, **kwds)
+
+  @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
   #----------------------------------------------
     """
