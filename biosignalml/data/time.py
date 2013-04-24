@@ -122,7 +122,7 @@ class Interval(TemporalEntity):
   def end(self, timeline=None):     # Needs to use timeline to map
   #----------------------------
     '''Get the end of the interval.'''
-    return self.start + (self.duration if self.duration is not None else None)
+    return self.start + (self.duration if self.duration is not None else 0.0)
 
   def __add__(self, increment):
   #----------------------------
