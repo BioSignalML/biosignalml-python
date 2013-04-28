@@ -135,13 +135,13 @@ class Signal(BSMLSignal):
       if sd.rate is not None: yield DataSegment(sd.start, UniformTimeSeries(sd.data, sd.rate))
       else:                   yield DataSegment(sd.start, TimeSeries(sd.data, sd.clock))
 
-  def append(self, timeseries):
-  #----------------------------
+  def append(self, timeseries, dtype='f4'):
+  #----------------------------------------
     self._length += len(timeseries)
     if isinstance(timeseries, TimeSeries):
-      return self.repository.put_data(str(self.uri), timeseries)
+      return self.repository.put_data(str(self.uri), timeseries, dtype=dtype)
     elif self.rate:
-      return self.repository.put_data(str(self.uri), UniformTimeSeries(timeseries, self.rate))
+      return self.repository.put_data(str(self.uri), UniformTimeSeries(timeseries, self.rate), dtype=dtype)
 
 
 class Recording(BSMLRecording):
@@ -263,13 +263,13 @@ class Repository(repository.RemoteRepository):
       if block.type == BlockType.DATA: yield block.signaldata()
     reader.join()
 
-  def put_data(self, uri, timeseries):
-  #-----------------------------------
+  def put_data(self, uri, timeseries, dtype='f4'):
+  #-----------------------------------------------
     stream = None
     try:
       stream = WebStreamWriter(self._web_sockets_uri(uri), token=self.access_token)
       MAXPOINTS = 10000
-      params = { 'dtype': 'f4' }
+      params = { 'dtype': dtype }
       if hasattr(timeseries, 'rate'): params['rate'] = timeseries.rate
       pos = 0
       count = len(timeseries)
