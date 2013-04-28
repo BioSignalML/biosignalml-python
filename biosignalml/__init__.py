@@ -21,7 +21,7 @@ BioSignalML data model.
 #
 ######################################################
 
-__version__ = '0.4.2pre'
+__version__ = '0.5.0pre'
 
 
 import biosignalml.data  as data
