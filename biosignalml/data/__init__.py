@@ -22,7 +22,7 @@ import math
 import logging
 import numpy as np
 
-from biosignalml.ontology import BSML
+from biosignalml.model import BSML
 from biosignalml.model.core import AbstractObject
 from biosignalml.model.mapping import PropertyMap
 
