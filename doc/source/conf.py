@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# biosignalml documentation build configuration file, created by
-# sphinx-quickstart on Mon Jan  2 11:38:51 2012.
+# BioSignalML Python API documentation build configuration file, created by
+# sphinx-quickstart on Mon Apr 29 18:02:36 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -51,7 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'BioSignalML'
+project = u'BioSignalML Python API'
 copyright = u'2012, David Brooks'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -181,7 +181,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'biosignalmldoc'
+htmlhelp_basename = 'BioSignalMLPythonAPIdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -200,7 +200,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'biosignalml.tex', u'BioSignalML Documentation',
+  ('index', 'BioSignalMLPythonAPI.tex', u'BioSignalML Python API Documentation',
    u'David Brooks', 'manual'),
 ]
 
@@ -230,8 +230,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'biosignalml', u'biosignalml Documentation',
-     [u'Author'], 1)
+    ('index', 'biosignalmlpythonapi', u'BioSignalML Python API Documentation',
+     [u'David Brooks'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -244,8 +244,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'biosignalml', u'biosignalml Documentation',
-   u'Author', 'biosignalml', 'One line description of project.',
+  ('index', 'BioSignalMLPythonAPI', u'BioSignalML Python API Documentation',
+   u'David Brooks', 'BioSignalMLPythonAPI', 'One line description of project.',
    'Miscellaneous'),
 ]
 
