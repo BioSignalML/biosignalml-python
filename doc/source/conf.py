@@ -35,9 +35,6 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
              ]
 
-# Include todo notes in output.
-todo_include_todos = True
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -107,6 +104,26 @@ modindex_common_prefix = ['biosignalml.']
 intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None),
                        'numpy':  ('http://docs.scipy.org/doc/numpy', None),
                       }
+
+# -- Local extras --------------------------------------------------------------
+
+## Include todo notes in output.
+# todo_include_todos = True
+
+
+## Use source order in documentation
+autodoc_member_order = 'bysource'
+
+
+## Inheritance diagram configuration:
+inheritance_graph_attrs = dict(rankdir="LR", size='"6.0, 8.0"',
+                               fontsize=14, ratio='compress')
+
+inheritance_node_attrs = dict(shape='ellipse', fontsize=14, height=0.75)
+#                              color='dodgerblue1', style='filled')
+
+### graphviz_dot = '/Users/dave/biosignalml/python/apidoc/savedot.py'
+
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -262,18 +279,3 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
-
-
-## Use source order in documentation
-autodoc_member_order = 'bysource'
-
-
-## Inheritance diagram configuration:
-
-inheritance_graph_attrs = dict(rankdir="LR", size='"6.0, 8.0"',
-                               fontsize=14, ratio='compress')
-
-inheritance_node_attrs = dict(shape='ellipse', fontsize=14, height=0.75)
-#                              color='dodgerblue1', style='filled')
-
-### graphviz_dot = '/Users/dave/biosignalml/python/apidoc/savedot.py'
