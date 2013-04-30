@@ -38,14 +38,27 @@ import fractions
 
 def lcm(l):
 #==========
+  """Least common multiple.
+
+  :param int l: List of integers.
+  """
   return reduce(lambda x, y: (x*y)/fractions.gcd(x,y), l)
 
 def gcd(l):
 #==========
+  """Greatest common denominator.
+
+  :param int l: List of integers.
+  """
   return reduce(fractions.gcd, l)
 
 def ratios(l):
 #=============
+  """Scaling ratios to least common multiple.
+
+  :param int l: List of integers.
+  :rtype: list
+  """
   m = lcm(l)
   return [m/n for n in l]
 
