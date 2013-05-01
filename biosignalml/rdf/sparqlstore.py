@@ -324,7 +324,7 @@ class Virtuoso(SparqlUpdateStore):
 
   4. Full text search enabling using ISQL:::
 
-     DB.DBA.RDF_OBJ_FT_RULE_ADD (null, null, 'All');
+         DB.DBA.RDF_OBJ_FT_RULE_ADD (null, null, 'All');
 
   5. Define additional namespace prefixes as required.
 
