@@ -4,6 +4,8 @@
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
+   :members:
+   :special-members:
 
    {% block methods %}
    .. automethod:: __init__
