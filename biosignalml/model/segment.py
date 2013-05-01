@@ -42,7 +42,7 @@ class Segment(AbstractObject):
       .
 
   """
-  metaclass = BSML.Segment  #: :attr:`.BSML.Segment
+  metaclass = BSML.Segment  #: :attr:`.BSML.Segment`
 
   attributes = [ 'source', 'time' ]
 
