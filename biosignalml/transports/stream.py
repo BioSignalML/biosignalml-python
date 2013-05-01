@@ -792,7 +792,7 @@ if __name__ == '__main__':
 
   print nd
   testQ = Queue.Queue()
-  bp = BlockParser(testQ, Checksum.STRICT)
+  bp = BlockParser(testQ.put, Checksum.STRICT)
   bp.process(nd.streamblock().bytes(Checksum.STRICT))
 
   print testQ.get(True, 10).signaldata()
