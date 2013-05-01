@@ -10,6 +10,9 @@ from biosignalml.rdf import Resource, NS as Namespace
 
 __all__ = [ 'VERSION', 'BSML' ]
 
+VERSION = '0.93.4'
+
+
 class BSML(object):
   URI = "http://www.biosignalml.org/ontologies/2011/04/biosignalml#"
   NS = Namespace(URI)
