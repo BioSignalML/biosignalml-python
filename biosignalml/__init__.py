@@ -1,6 +1,3 @@
-'''
-BioSignalML data model.
-'''
 ######################################################
 #
 #  BioSignalML Management in Python
@@ -21,35 +18,12 @@ BioSignalML data model.
 #
 ######################################################
 
+"""
+BioSignalML Python API.
+"""
+
 __version__ = '0.5.0pre'
 
 
-import biosignalml.data  as data
-import biosignalml.model as model
-
-from model import BSML, Recording, Event, Annotation, Segment
-
-
-class Signal(model.Signal, data.TimeSeries):  ## TEST WHAT MIXIN ENABLES...
-#===========================================
-
-  ##def __init__(self, 
-
-  def read(self, interval=None, **kwds):
-  #-------------------------------------
-    '''
-    :return: A :class:TimeSeries containing signal data covering the interval.
-    '''
-    raise NotImplementedError, 'Signal.read()'
-
-
-class UniformSignal(Signal, data.UniformTimeSeries):
-#===================================================
-
-  @classmethod
-  def create(cls, uri, units, rate=None, period=None, **kwds):
-  #------------------------------------------------------------
-    self = cls(uri, units, rate=rate, period=period, **kwds)
-
-
-## from client import Repository   ## Needs to be after Signal has been declared
+"""Top-level components of the BioSignalML Model"""
+from model import BSML, Recording, Event, Annotation, Segment, Signal

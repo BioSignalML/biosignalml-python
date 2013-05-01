@@ -111,4 +111,9 @@ class Signal(AbstractObject):
   #====================
     return units.get_units_uri('s')
 
-
+  def read(self, interval=None, **kwds):
+  #-------------------------------------
+    '''
+    :return: A :class:TimeSeries containing signal data covering the interval.
+    '''
+    raise NotImplementedError, 'Signal.read()'
