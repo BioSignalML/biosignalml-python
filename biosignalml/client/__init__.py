@@ -86,9 +86,9 @@ from biosignalml            import BSML
 from biosignalml.data       import TimeSeries, UniformTimeSeries, DataSegment
 from biosignalml.data.time  import Interval
 from biosignalml.formats    import BSMLRecording, BSMLSignal, MIMETYPES
-from biosignalml.transports import StreamException
-from biosignalml.transports import BlockType, SignalData
 from biosignalml.transports import WebStreamReader, WebStreamWriter, StreamException
+from biosignalml.transports.stream import BlockType, SignalData
+
 
 from . import repository
 
