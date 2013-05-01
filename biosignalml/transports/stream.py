@@ -144,8 +144,6 @@ class BlockType(object):
 
   INFO = 'I'
 
-  RDF  = 'R'
-
   DATA = 'D'
   """
   Time series data.
@@ -351,18 +349,6 @@ class InfoBlock(StreamBlock):
   def __init__(self, **header):
   #----------------------------
     StreamBlock.__init__(self, 0, BlockType.INFO, header, '')
-
-
-class RDFBlock(StreamBlock):
-#===========================
-  """
-  An RDF message block.
-
-  .. todo:: Document parameters.
-  """
-  def __init__(self, rdf, mimetype):
-  #---------------------------------
-    StreamBlock.__init__(self, 0, BlockType.RDF, {'mimetype': mimetype}, bytearray(rdf))
 
 
 class SignalDataBlock(StreamBlock):
