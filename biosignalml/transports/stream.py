@@ -68,6 +68,13 @@ except ImportError:
 import numpy as np
 
 
+__all__ = [ 'BlockParser', 'BlockStream', 'BlockType', 'Checksum', 'Error',
+            'ErrorBlock', 'InfoBlock', 'RDFBlock', 'SignalData', 'SignalDataBlock',
+            'SignalDataStream', 'StreamBlock', 'TestBlock', 'StreamException',
+            'VERSION' ]
+
+
+
 class BlockType(object):
 #=======================
   '''

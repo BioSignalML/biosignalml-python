@@ -7,6 +7,9 @@ Generated from http://www.sbpax.org/uome/list.owl at Tue May 15 11:54:58 2012
 
 from biosignalml.rdf import Uri, Resource, NS as Namespace
 
+__all__ = [ 'UNITS' ]
+
+
 class UNITS(object):
   uri = Uri("http://www.sbpax.org/uome/list.owl#")
   NS = Namespace(str(uri))

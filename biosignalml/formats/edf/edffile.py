@@ -27,6 +27,8 @@ import logging
 from datetime import datetime
 from collections import namedtuple
 
+__all__ = [ 'EDFFile', 'FormatError', 'InvalidSignalId' ]
+
 
 class FormatError(Exception):
   pass

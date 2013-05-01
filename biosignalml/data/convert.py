@@ -25,6 +25,8 @@ import math
 import ctypes as C
 import logging
 
+__all__ = [ 'RateConverter', 'ConvertError' ]
+
 
 SINC_BEST_QUALITY   = 0
 SINC_MEDIUM_QUALITY = 1

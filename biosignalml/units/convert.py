@@ -24,6 +24,10 @@ import logging
 import biosignalml.rdf.sparqlstore as sparqlstore
 
 from biosignalml.rdf import NS, RDF, UOME
+
+__all__ = [ 'UnitConverter' ]
+
+
 UOME_CORE = NS('http://www.sbpax.org/uome/core.owl#')
 
 '''Graph holding http://www.sbpax.org/uome/core.owl#UnitOfMeasurement resources.'''

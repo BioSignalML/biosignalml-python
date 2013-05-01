@@ -28,6 +28,8 @@ from biosignalml.data import DataSegment, UniformTimeSeries, TimeSeries, Clock, 
 
 from h5recording import H5Recording
 
+__all__ = [ 'HDF5Signal', 'HDF5Recording' ]
+
 
 class HDF5Signal(BSMLSignal):
 #============================

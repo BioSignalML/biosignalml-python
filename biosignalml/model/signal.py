@@ -30,6 +30,8 @@ from .ontology import BSML
 from .core     import AbstractObject
 from .mapping  import PropertyMap
 
+__all__ = [ 'Signal' ]
+
 
 class Signal(AbstractObject):
 #============================

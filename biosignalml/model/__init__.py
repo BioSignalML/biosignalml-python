@@ -21,6 +21,9 @@
 Abstract BioSignalML objects.
 '''
 
+__all__ = [ 'makelabel' ]
+
+
 from .ontology   import BSML
 from .recording  import Recording
 from .signal     import Signal

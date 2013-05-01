@@ -26,6 +26,9 @@ available from http://librdf.org/.
 
 '''
 
+__all__ = [ 'Format', 'NS', 'Uri', 'Node', 'Literal',
+            'BlankNode', 'Resource', 'QueryResults', 'Graph' ]
+
 import sys
 import uuid
 import logging

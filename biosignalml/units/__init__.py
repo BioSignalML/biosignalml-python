@@ -27,6 +27,9 @@ from ontology import UNITS
 # Export package class
 from convert import UnitConverter
 
+__all__ = [ 'get_units_uri' ]
+
+
 _direct = {
   'Bpm':    'BeatsPerMinute',
   'bpm':    'BeatsPerMinute',

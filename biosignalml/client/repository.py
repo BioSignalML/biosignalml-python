@@ -31,6 +31,8 @@ import biosignalml.rdf as rdf
 from biosignalml.rdf.sparqlstore import SparqlUpdateStore
 from biosignalml.repository import BSMLUpdateStore
 
+__all__ = [ 'RemoteSparqlStore', 'RemoteRepository' ]
+
 
 class RemoteSparqlStore(SparqlUpdateStore):
 #==========================================

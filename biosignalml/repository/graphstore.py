@@ -35,6 +35,8 @@ import biosignalml.rdf.sparqlstore as sparqlstore
 
 import biosignalml.utils as utils
 
+__all__ = [ 'GraphStore', 'GraphUpdate' ]
+
 
 PROVENANCE_PATH = '/provenance'     #: Relative to a graph store's URI
 

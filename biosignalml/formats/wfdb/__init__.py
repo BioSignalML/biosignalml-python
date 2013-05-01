@@ -45,6 +45,9 @@ from biosignalml.utils import file_uri
 
 from biosignalml.formats import BSMLRecording, BSMLSignal, MIMETYPES
 
+__all__ = [ 'WFDBSignal', 'WFDBRecording', 'PHYSIOBANK' ]
+
+
 PHYSIOBANK = 'http://physionet.org/physiobank/database/'
 
 _WFDBLock      = threading.Lock()

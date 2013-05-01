@@ -29,6 +29,7 @@ from biosignalml import BSML
 from biosignalml.utils import file_uri
 import biosignalml.model.mapping as mapping
 
+__all__ = [ 'BSMLSignal', 'BSMLRecording', 'MIMETYPES' ]
 
 def not_implemented(instance, method):
 #=====================================

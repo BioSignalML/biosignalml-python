@@ -28,6 +28,8 @@ from biosignalml.model.mapping import PropertyMap
 
 from biosignalml.rdf import XSD
 
+__all__ = [ 'DataError', 'Clock', 'DataSegment', 'TimeSeries', 'UniformClock', 'UniformTimeSeries' ]
+
 
 class DataError(Exception):
 #==========================

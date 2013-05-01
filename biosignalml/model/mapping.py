@@ -37,6 +37,9 @@ from collections import namedtuple
 
 from biosignalml.rdf import Node, Uri, Statement, XSD
 
+__all__ = [ 'PropertyMap' ]
+
+
 URI_SCHEMES = [ 'http', 'file' ]
 
 datatypes = { XSD.float:              float,

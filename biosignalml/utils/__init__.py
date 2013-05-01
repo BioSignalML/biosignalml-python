@@ -26,6 +26,12 @@ import dateutil.parser
 from dateutil.tz import tzutc
 
 
+__all__ = [ 'datetime_to_isoformat', 'isoformat_to_datetime', 'seconds_to_isoduration',
+            'isoduration_to_seconds', 'utctime', 'utctime_as_string', 'expired', 'chop',
+            'trimdecimal', 'maketime', 'cp1252', 'nbspescape', 'xmlescape', 'xml', 'num',
+            'file_uri', 'hexdump', 'unescape' ]
+
+
 def datetime_to_isoformat(dt):
 #=============================
   """

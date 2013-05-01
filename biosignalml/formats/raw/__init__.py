@@ -23,6 +23,9 @@ from biosignalml.formats import BSMLRecording, MIMETYPES
 from biosignalml.utils   import file_uri
 
 
+__all__ = [ 'RAWRecording' ]
+
+
 class RAWRecording(BSMLRecording):
 #==================================
 

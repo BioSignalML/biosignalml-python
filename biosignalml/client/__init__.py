@@ -93,6 +93,9 @@ from biosignalml.transports import WebStreamReader, WebStreamWriter, StreamExcep
 from . import repository
 
 
+__all__ = [ 'Repository', 'Recording', 'Signal' ]
+
+
 class Signal(BSMLSignal):
 #========================
 

@@ -6,6 +6,8 @@ from .ontology import BSML
 from .core     import AbstractObject
 from .mapping  import PropertyMap
 
+__all__ = [ 'Segment' ]
+
 
 class Segment(AbstractObject):
 #=============================

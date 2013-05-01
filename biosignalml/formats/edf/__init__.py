@@ -21,3 +21,4 @@
 from edffile import EDF, EDFFile, InvalidSignalId
 from edfrecording import EDFRecording
 from edfsignal import EDFSignal
+__all__ = [ 'EDFSignal', 'EDFRecording' ]

@@ -30,6 +30,8 @@ import biosignalml.model as model
 from biosignalml.model import BSML
 from biosignalml.model.mapping import PropertyMap
 
+__all__ = [ 'Instant', 'Interval', 'RelativeTimeLine', 'TemporalEntity' ]
+
 
 class RelativeTimeLine(model.core.AbstractObject):
 #=================================================

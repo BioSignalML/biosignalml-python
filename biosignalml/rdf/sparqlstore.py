@@ -28,6 +28,9 @@ httplib2.RETRIES = 1
 
 import biosignalml.rdf as rdf
 
+__all__ = [ 'get_result_value', 'SparqlStore', 'SparqlUpdateStore',
+            'FourStore', 'Virtuoso', 'StoreException' ]
+
 
 def get_result_value(result, column):
 #====================================

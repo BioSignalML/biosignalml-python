@@ -8,6 +8,8 @@ Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2
 
 from biosignalml.rdf import Resource, NS as Namespace
 
+__all__ = [ 'VERSION', 'BSML' ]
+
 class BSML(object):
   URI = "http://www.biosignalml.org/ontologies/2011/04/biosignalml#"
   NS = Namespace(URI)

@@ -30,6 +30,8 @@ import biosignalml.utils as utils
 
 from .ontology import BSML
 
+__all__ = [ 'AbstractObject' ]
+
 
 class AbstractObject(object):
 #============================

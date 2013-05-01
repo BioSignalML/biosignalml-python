@@ -8,6 +8,8 @@ from .core     import AbstractObject
 from .mapping  import PropertyMap
 from .segment  import Segment
 
+__all__ = [ 'Annotation' ]
+
 
 class Annotation(AbstractObject):
 #================================

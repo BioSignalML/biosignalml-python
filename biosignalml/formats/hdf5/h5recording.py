@@ -139,6 +139,8 @@ import urllib
 import h5py
 import numpy as np
 
+__all__ = [ 'H5Clock', 'H5Signal', 'H5Recording', 'IDENTIFIER' ]
+
 
 MAJOR      = 1
 MINOR      = 0

@@ -34,6 +34,8 @@ from .mapping  import PropertyMap
 from .signal   import Signal
 from .event    import Event
 
+__all__ = [ 'Recording' ]
+
 
 def _get_timeline(tl):      # Stops a circular import
 #--------------------

@@ -29,6 +29,8 @@ from .ontology import BSML
 from .core     import AbstractObject
 from .mapping  import PropertyMap
 
+__all__ = [ 'Event' ]
+
 
 class Event(AbstractObject):
 #===========================
