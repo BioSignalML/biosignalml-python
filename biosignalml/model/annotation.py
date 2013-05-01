@@ -35,6 +35,7 @@ class Annotation(AbstractObject):
   ###
   metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation
 
+  '''Attributes of an Annotation.'''
   attributes = [ 'about', 'comment', 'tags' ]
 
   mapping = { 'about':   PropertyMap(DCT.subject, to_rdf=PropertyMap.get_uri),

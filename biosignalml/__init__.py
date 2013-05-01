@@ -19,11 +19,11 @@
 ######################################################
 
 """
-BioSignalML Python API.
+Top-level components of the BioSignalML Model.
+
 """
 
 __version__ = '0.5.0pre'
 
 
-"""Top-level components of the BioSignalML Model"""
 from model import BSML, Recording, Event, Annotation, Segment, Signal

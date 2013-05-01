@@ -48,14 +48,13 @@ expression notation, a block is defined as::
 
 Supported block types are defined in the :class:`BlockType` class.
 
-A block's header is a set of '(name, value)' pairs, which is sent formatted as JSON, and in
-Python kept as a ``{ name: value }`` dictionary. Valid 'names' and 'values'
-are specific to each block type.
+A block's header is a set of '(name, value)' pairs, which is sent formatted as JSON, and
+kept in Python as a ``{name: value}`` dictionary. Valid 'names' and 'values'
+are specific to each block type, and are described with the :class:`BlockType` class.
 
 """
 
 VERSION = 1    #: Initial version of Block Stream protocol.
-
 
 import logging
 import hashlib
@@ -337,7 +336,6 @@ class ErrorBlock(StreamBlock):
   """
   An error message block.
 
-  .. todo:: Document parameters.
   """
   def __init__(self, errblock, msg):
   #---------------------------------
@@ -351,7 +349,6 @@ class InfoBlock(StreamBlock):
   """
   An info message block.
 
-  .. todo:: Document parameters.
   """
   def __init__(self, **header):
   #----------------------------

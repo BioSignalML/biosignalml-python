@@ -21,6 +21,7 @@
 import os
 import math
 from datetime import datetime, timedelta
+
 from isodate  import isoduration
 import dateutil.parser
 from dateutil.tz import tzutc
@@ -121,6 +122,7 @@ def expired(when):
 
 def chop(s, n):
 #=============
+  """Chop characters of the front of a string."""
   return str(s)[n:]
 
 def trimdecimal(v):
