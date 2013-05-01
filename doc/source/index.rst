@@ -1,14 +1,29 @@
-.. BioSignalML documentation master file, created by
-   sphinx-quickstart on Mon Jul 26 16:58:47 2010.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+BioSignalML Python API
+======================
 
-BioSignalML API
-===============
+Introduction
+------------
+
+
 
 Contents:
-
+---------
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 2
 
-   biosignalml
+   reference
+
+..   install
+..   overview
+..   clients
+..   server
+..   authors
+..   licence
+..   changes
+
+Index
+-----
+
+* :ref:`genindex`
+* :ref:`search`
+
