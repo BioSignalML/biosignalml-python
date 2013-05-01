@@ -367,15 +367,15 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
       [("bsml:deletedResource", "prv:precededBy", "<%s>" % uri)],
       prefixes=dict(bsml=BSML.prefix, prv=PRV.prefix))
 
-  def add_recording_graph(self, uri, rdf, creator, format=Format.RDFXML):
-  #----------------------------------------------------------------------
+  def add_recording_graph(self, uri, graph_rdf, creator, format=Format.RDFXML):
+  #---------------------------------------------------------------------------
     """
     Add RDF metadata describing a recording as a new named graph.
 
     Provenance statements will be made about the new graph, including
     linking it to any previous graph describing the recording.
     """
-    return self.add_resource_graph(uri, BSML.Recording, rdf, creator, format=format)
+    return self.add_resource_graph(uri, BSML.Recording, graph_rdf, creator, format=format)
 
   def store_recording(self, recording, creator=None):
   #--------------------------------------------------
