@@ -26,7 +26,7 @@ from biosignalml import BSML
 from biosignalml.formats import BSMLRecording, BSMLSignal, MIMETYPES
 from biosignalml.data import DataSegment, UniformTimeSeries, TimeSeries, Clock, UniformClock
 
-from h5recording import H5Recording
+from .h5recording import H5Recording
 
 __all__ = [ 'HDF5Signal', 'HDF5Recording' ]
 

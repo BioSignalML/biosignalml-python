@@ -27,7 +27,8 @@ from biosignalml.data.time import TemporalEntity
 from biosignalml.rdf import RDFS, DCT, PRV, TL, Format
 import biosignalml.rdf.sparqlstore as sparqlstore
 
-from graphstore import GraphStore, GraphUpdate
+from .graphstore import GraphStore, GraphUpdate
+
 __all__ = [ 'BSMLStore', 'BSMLUpdateStore' ]
 
 
