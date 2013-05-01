@@ -48,8 +48,8 @@ BASE_UNITS = { 'Metre':         'length',
              }
 
 
-def strip_prefix(uri):
-#=====================
+def _strip_prefix(uri):
+#======================
   for p in UNIT_PREFIXES:
     if uri.startswith(p): return(uri[len(p):])
   raise ValueError("'%s' doesn't have a standard unit prefix" % uri)
@@ -120,7 +120,7 @@ class UnitStore(object):
     uri = str(uri)
     unit = self._cache.get(uri)
     if unit is None:
-      name = strip_prefix(uri)
+      name = _strip_prefix(uri)
       if not self.contains(uri):
         raise KeyError("'%s' is not defined in units ontologies" % uri)
       derivation = self.get_derivation(uri)
