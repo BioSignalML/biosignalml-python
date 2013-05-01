@@ -41,6 +41,15 @@
     }
   }
 
+
+div.section > h1 {
+  font-size: 1.6em ;
+  }
+
+div.section > h1 + p {
+  font-weight: bolder ;
+  }
+
 div.section > h2 {
   border-top: 4px solid #666 ;
   padding-top: 5px ;
@@ -54,7 +63,9 @@ dl {
 
 dl.class,
 dl.data,
+dl.function,
 dl.exception {
+  margin-top: 30px ;
   border-top: 2px solid #888 ;
   }
 
@@ -67,6 +78,7 @@ dl.attribute {
 
 dl.class > dt,
 dl.data > dt,
+dl.function > dt,
 dl.exception > dt {
   margin-top: 5px ;
   background: #98dbcc ;
@@ -74,6 +86,12 @@ dl.exception > dt {
 
 dl.class > dt:target, dl.class .highlighted,
 dl.data > dt:target, dl.data .highlighted,
+dl.function > dt:target, dl.data .highlighted,
 dl.exception > dt:target, dl.exception .highlighted {
   background-color: #FBE54E;
+  }
+
+table.longtable {
+  background-color: #EEE;
+  margin: 10px ;
   }
