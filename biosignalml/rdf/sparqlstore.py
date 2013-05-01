@@ -351,8 +351,8 @@ class Virtuoso(SparqlUpdateStore):
 
 
 
-def FourStore(SparqlUpdateStore):
-#================================
+class FourStore(SparqlUpdateStore):
+#==================================
 
   def fulltext(self):
   #------------------
