@@ -31,8 +31,9 @@ import biosignalml.model.mapping as mapping
 
 __all__ = [ 'BSMLSignal', 'BSMLRecording', 'MIMETYPES' ]
 
-def not_implemented(instance, method):
-#=====================================
+
+def _not_implemented(instance, method):
+#======================================
   '''
   Raise an Exception for unimplemented methods.
   '''
@@ -72,7 +73,7 @@ class BSMLSignal(biosignalml.Signal):
 
     If both ``maxduration`` and ``maxpoints`` are given their minimum value is used.
     """
-    not_implemented(self, 'read')
+    _not_implemented(self, 'read')
 
   def append(self, timeseries):
   #----------------------------
@@ -82,7 +83,7 @@ class BSMLSignal(biosignalml.Signal):
     :param timeseries: The data points (and times) to append.
     :type timeseries: :class:`~biosignalml.data.TimeSeries`
     '''
-    not_implemented(self, 'append')
+    _not_implemented(self, 'append')
 
   def data(self, n):
   #----------------
@@ -93,7 +94,7 @@ class BSMLSignal(biosignalml.Signal):
     :type n: non-negative integer
     :return: The value of the n\ :sup:`th` data point.
     '''
-    not_implemented(self, 'data')
+    _not_implemented(self, 'data')
 
   def time(self, n):
   #----------------
@@ -104,7 +105,7 @@ class BSMLSignal(biosignalml.Signal):
     :type n: non-negative integer
     :return: The time of the n\ :sup:`th` data point.
     '''
-    not_implemented(self, 'time')
+    _not_implemented(self, 'time')
 
 
 class BSMLRecording(biosignalml.Recording):
