@@ -1,6 +1,3 @@
-@import url("sphinxdoc.css");
-
-
 @media print {
 
   body {
@@ -42,31 +39,22 @@
   }
 
 
-div.section > h1 {
-  font-size: 1.6em ;
+body {
+  padding-top: 0 ;
+  padding-bottom: 16px ;
   }
 
-div.section > h1 + p {
-  font-weight: bolder ;
+.navbar-fixed-top, .navbar-fixed-bottom {
+  position: static ;
   }
 
-div.section > h2 {
-  border-top: 4px solid #666 ;
-  padding-top: 5px ;
-  padding-bottom: 5px ;
-  background: #ee9816 ;
-  }
-
-dl {
-  margin-bottom: 15px ;
-  }
 
 dl.class,
 dl.data,
 dl.function,
 dl.exception {
   margin-top: 30px ;
-  border-top: 2px solid #888 ;
+  border-top: 2px solid #444 ;
   }
 
 dl.method,
@@ -81,17 +69,14 @@ dl.data > dt,
 dl.function > dt,
 dl.exception > dt {
   margin-top: 5px ;
-  background: #98dbcc ;
+  background: #def ;
+  line-height: 24px ;
+  font-size: 16px
   }
 
 dl.class > dt:target, dl.class .highlighted,
 dl.data > dt:target, dl.data .highlighted,
 dl.function > dt:target, dl.data .highlighted,
 dl.exception > dt:target, dl.exception .highlighted {
-  background-color: #FBE54E;
-  }
-
-table.longtable {
-  background-color: #EEE;
-  margin: 10px ;
+  background-color: #bdf ;
   }

@@ -33,6 +33,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.pngmath',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.intersphinx',
+              'sphinxjp.themecore',
              ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -129,7 +130,7 @@ inheritance_node_attrs = dict(shape='ellipse', fontsize=14, height=0.75)
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinxdoc'
+html_theme = 'basicstrap'
 html_style = 'biosignalml.css'
 
 # Theme options are theme-specific and customize the look and feel of a theme
