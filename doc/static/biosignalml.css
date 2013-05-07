@@ -1,3 +1,5 @@
+@import url('pydoctheme.css') ;
+
 @media print {
 
   body {
@@ -48,6 +50,15 @@ body {
   position: static ;
   }
 
+div.related {
+  background-color: #cfc ;
+  }
+
+dl {
+  margin-bottom: 10px ;
+  margin-top: 15px ;
+  padding-top: 5px ;
+  }
 
 dl.class,
 dl.data,
@@ -64,19 +75,21 @@ dl.attribute {
   border-top: 1px solid #AAA ;
   }
 
+dl.data > dt:target,
+dl.class > dt:target,
+dl.function > dt:target,
+dl.exception > dt:target,
+.highlighted {
+  background-color: #fe5 ;
+  }
+
 dl.class > dt,
 dl.data > dt,
 dl.function > dt,
 dl.exception > dt {
   margin-top: 5px ;
-  background: #def ;
+  background: #ccf ;
   line-height: 24px ;
-  font-size: 16px
-  }
-
-dl.class > dt:target, dl.class .highlighted,
-dl.data > dt:target, dl.data .highlighted,
-dl.function > dt:target, dl.data .highlighted,
-dl.exception > dt:target, dl.exception .highlighted {
-  background-color: #bdf ;
+  font-size: 16px ;
+  padding-left: 5px ;
   }

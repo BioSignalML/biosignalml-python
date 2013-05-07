@@ -33,7 +33,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.pngmath',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.intersphinx',
-              'sphinxjp.themecore',
+#              'sphinxjp.themecore',
              ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -130,7 +130,11 @@ inheritance_node_attrs = dict(shape='ellipse', fontsize=14, height=0.75)
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'basicstrap'
+#html_theme = 'basicstrap'
+
+html_theme = 'pydoctheme'
+html_theme_path = ['../templates']
+html_theme_options = {'collapsiblesidebar': True}
 html_style = 'biosignalml.css'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -160,7 +164,7 @@ html_style = 'biosignalml.css'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['../static']
+html_static_path = ['../static', '../templates/pydoctheme/static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
