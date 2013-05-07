@@ -1,7 +1,7 @@
 """
 Provide access to the BioSignalML ontology.
 
-Generated from file:///Users/dave/biosignalml/workspace/ontologies/bsml/2011-04-biosignalml.ttl at 10:10:05 Wed 08 May 2013
+Generated from file:///Users/dave/biosignalml/workspace/ontologies/bsml/2011-04-biosignalml.ttl at 10:10:43 Wed 08 May 2013
 
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
@@ -23,130 +23,130 @@ class BSML(object):
 
 # owl:Class resources:
   Annotation     = Resource(NS.Annotation)
-  """A general note, comment, or qualitative measure about the whole of,
+  """**owl:Class**: A general note, comment, or qualitative measure about the whole of,
            or some portion of, a Recording, Signal or Event."""
   BP_Filter      = Resource(NS.BP_Filter)
-  """A band-pass filter."""
+  """**owl:Class**: A band-pass filter."""
   Device         = Resource(NS.Device)
-  """The physical device that saved the output of a sensor into a format able to be stored."""
+  """**owl:Class**: The physical device that saved the output of a sensor into a format able to be stored."""
   Electrode      = Resource(NS.Electrode)
-  """An electrical conductor in contact with non-conducting material, through which
+  """**owl:Class**: An electrical conductor in contact with non-conducting material, through which
             electrical activity can be measured."""
   ErrorTag       = Resource(NS.ErrorTag)
-  """A tag to indicate that an annotation relates to some form of error."""
+  """**owl:Class**: A tag to indicate that an annotation relates to some form of error."""
   Event          = Resource(NS.Event)
-  """Something that has occurred in time, possibly for some duration."""
+  """**owl:Class**: Something that has occurred in time, possibly for some duration."""
   EventType      = Resource(NS.EventType)
-  """Something which is the class or type of an Event."""
+  """**owl:Class**: Something which is the class or type of an Event."""
   Filter         = Resource(NS.Filter)
-  """The class of filter that has been applied to a signal during data collection."""
+  """**owl:Class**: The class of filter that has been applied to a signal during data collection."""
   HP_Filter      = Resource(NS.HP_Filter)
-  """A high-pass filter."""
+  """**owl:Class**: A high-pass filter."""
   Instant        = Resource(NS.Instant)
-  """A particular point in time."""
+  """**owl:Class**: A particular point in time."""
   Interval       = Resource(NS.Interval)
-  """A period in time."""
+  """**owl:Class**: A period in time."""
   LP_Filter      = Resource(NS.LP_Filter)
-  """A low-pass filter."""
+  """**owl:Class**: A low-pass filter."""
   Notch_Filter   = Resource(NS.Notch_Filter)
-  """A notch (blocking) filter."""
+  """**owl:Class**: A notch (blocking) filter."""
   Recording      = Resource(NS.Recording)
-  """A collection of Signals held as a named entity, all pertaining to one thing
+  """**owl:Class**: A collection of Signals held as a named entity, all pertaining to one thing
           (the subject) and which have been recorded in the same session."""
   RecordingGraph = Resource(NS.RecordingGraph)
-  """A RDF graph containing Recording metadata, used for managing provenance."""
+  """**owl:Class**: A RDF graph containing Recording metadata, used for managing provenance."""
   SampleClock    = Resource(NS.SampleClock)
-  """An increasing sequence of sample coordinates.
+  """**owl:Class**: An increasing sequence of sample coordinates.
 
 Several signals may use the same clock."""
   Segment        = Resource(NS.Segment)
-  """A portion of a Signal or Recording, defined by restricting samples to some
+  """**owl:Class**: A portion of a Signal or Recording, defined by restricting samples to some
            interval in the sampling dimension."""
   SemanticTag    = Resource(NS.SemanticTag)
-  """A tag used to classify a resource."""
+  """**owl:Class**: A tag used to classify a resource."""
   Sensor         = Resource(NS.Sensor)
-  """What actually captured a signal -- an electrode, transducer, etc."""
+  """**owl:Class**: What actually captured a signal -- an electrode, transducer, etc."""
   Signal         = Resource(NS.Signal)
-  """A sequence of periodic measurements of some physical quantity, ordered by some sampling
+  """**owl:Class**: A sequence of periodic measurements of some physical quantity, ordered by some sampling
            dimension, normally time. A Signal is part of some Recording."""
   SignalType     = Resource(NS.SignalType)
-  """The class or type of signal (e.g. EEG, ECG)."""
+  """**owl:Class**: The class or type of signal (e.g. EEG, ECG)."""
   Simulation     = Resource(NS.Simulation)
-  """A computer simulation or modelling process that created the Signal or Recording."""
+  """**owl:Class**: A computer simulation or modelling process that created the Signal or Recording."""
   Source         = Resource(NS.Source)
-  """The source (i.e. device, simulation, etc) of a Signal or Recording."""
+  """**owl:Class**: The source (i.e. device, simulation, etc) of a Signal or Recording."""
   TemporalEntity = Resource(NS.TemporalEntity)
-  """Some measurement of time, either as a particular point in time or as some interval."""
+  """**owl:Class**: Some measurement of time, either as a particular point in time or as some interval."""
   Transducer     = Resource(NS.Transducer)
-  """A device that converts a measurable quantity into an electrical signal
+  """**owl:Class**: A device that converts a measurable quantity into an electrical signal
            (e.g. thermistor, pressure sensor, strain gauge)."""
   UniformSignal  = Resource(NS.UniformSignal)
-  """A signal that has been sampled at a constant rate."""
+  """**owl:Class**: A signal that has been sampled at a constant rate."""
   UnitOfMeasure  = Resource(NS.UnitOfMeasure)
-  """The class used to represent the types of measurement units used by signals.
+  """**owl:Class**: The class used to represent the types of measurement units used by signals.
 
 Measurement units would normally be entities in a specialised units of measure ontology."""
 
 # owl:DatatypeProperty resources:
   dataBits       = Resource(NS.dataBits)
-  """The binary-bit resolution of the analogue-to-digital convertor or
+  """**owl:DatatypeProperty**: The binary-bit resolution of the analogue-to-digital convertor or
         sampling device used to digitise the signal."""
   filterFrequency = Resource(NS.filterFrequency)
-  """The cutoff frequency, in Hertz, of a filter."""
+  """**owl:DatatypeProperty**: The cutoff frequency, in Hertz, of a filter."""
   index          = Resource(NS.index)
-  """The 0-origin position of a signal in a physical recording."""
+  """**owl:DatatypeProperty**: The 0-origin position of a signal in a physical recording."""
   maxFrequency   = Resource(NS.maxFrequency)
-  """The maximum frequency, in Hertz, contained in the signal."""
+  """**owl:DatatypeProperty**: The maximum frequency, in Hertz, contained in the signal."""
   maxValue       = Resource(NS.maxValue)
-  """The maximum value of the signal."""
+  """**owl:DatatypeProperty**: The maximum value of the signal."""
   minFrequency   = Resource(NS.minFrequency)
-  """The minimum frequency, in Hertz, contained in the signal."""
+  """**owl:DatatypeProperty**: The minimum frequency, in Hertz, contained in the signal."""
   minValue       = Resource(NS.minValue)
-  """The minimum value of the signal."""
+  """**owl:DatatypeProperty**: The minimum value of the signal."""
   offset         = Resource(NS.offset)
-  """The temporal offset, from the beginning of a recording, to a signal's first sample."""
+  """**owl:DatatypeProperty**: The temporal offset, from the beginning of a recording, to a signal's first sample."""
   period         = Resource(NS.period)
-  """The sampling period, in seconds, of a uniformly sampled signal."""
+  """**owl:DatatypeProperty**: The sampling period, in seconds, of a uniformly sampled signal."""
   rate           = Resource(NS.rate)
-  """The sampling rate, in Hertz, of a uniformly sampled signal."""
+  """**owl:DatatypeProperty**: The sampling rate, in Hertz, of a uniformly sampled signal."""
   resolution     = Resource(NS.resolution)
-  """The resolution, in seconds, of a clock's timing."""
+  """**owl:DatatypeProperty**: The resolution, in seconds, of a clock's timing."""
 
 # owl:NamedIndividual resources:
   BP             = Resource(NS.BP)
-  """Blood Pressure"""
+  """**owl:NamedIndividual**: Blood Pressure"""
   ECG            = Resource(NS.ECG)
-  """Electrocardiogram"""
+  """**owl:NamedIndividual**: Electrocardiogram"""
   EEG            = Resource(NS.EEG)
-  """Electroencephalogram"""
+  """**owl:NamedIndividual**: Electroencephalogram"""
   ErrorTAG       = Resource(NS.ErrorTAG)
-  """Error TAG"""
+  """**owl:NamedIndividual**: Error TAG"""
 
 # owl:ObjectProperty resources:
   clock          = Resource(NS.clock)
-  """The sampling coordinates associated with a signal's data values."""
+  """**owl:ObjectProperty**: The sampling coordinates associated with a signal's data values."""
   dataset        = Resource(NS.dataset)
-  """The location of actual signal data."""
+  """**owl:ObjectProperty**: The location of actual signal data."""
   eventType      = Resource(NS.eventType)
-  """The class or type of an Event."""
+  """**owl:ObjectProperty**: The class or type of an Event."""
   preFilter      = Resource(NS.preFilter)
-  """Pre-filtering applied to a signal as part of collection."""
+  """**owl:ObjectProperty**: Pre-filtering applied to a signal as part of collection."""
   recording      = Resource(NS.recording)
-  """The Recording a Signal is part of."""
+  """**owl:ObjectProperty**: The Recording a Signal is part of."""
   sensor         = Resource(NS.sensor)
-  """What was used to collect or derive an electrical signal."""
+  """**owl:ObjectProperty**: What was used to collect or derive an electrical signal."""
   signalType     = Resource(NS.signalType)
-  """A signal's generic type."""
+  """**owl:ObjectProperty**: A signal's generic type."""
   tag            = Resource(NS.tag)
-  """A semantic tag given to a resource by an annotation.
+  """**owl:ObjectProperty**: A semantic tag given to a resource by an annotation.
 
 Tags are effectively controlled keywords."""
   time           = Resource(NS.time)
-  """An instant or interval associated with a resource."""
+  """**owl:ObjectProperty**: An instant or interval associated with a resource."""
   uncertainty    = Resource(NS.uncertainty)
-  """A resource describing the measurement uncertainty associated with a Recording,
+  """**owl:ObjectProperty**: A resource describing the measurement uncertainty associated with a Recording,
            Signal, or Segment."""
   units          = Resource(NS.units)
-  """The physical units that are represented by a signal's data values.
+  """**owl:ObjectProperty**: The physical units that are represented by a signal's data values.
 
 Specification of units allows for consistency checking and automatic conversion."""
