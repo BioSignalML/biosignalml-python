@@ -1,19 +1,22 @@
 """
 Provide access to the BioSignalML ontology.
 
-Generated from file:///Users/dave/biosignalml/workspace/ontologies/bsml/2011-04-biosignalml.ttl at Sun Apr 14 11:17:54 2013
+Generated from file:///Users/dave/biosignalml/workspace/ontologies/bsml/2011-04-biosignalml.ttl at 10:10:05 Wed 08 May 2013
 
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
 
 from biosignalml.rdf import Resource, NS as Namespace
 
-__all__ = [ 'VERSION', 'BSML' ]
+__all__ = [ "VERSION", "BSML" ]
 
-VERSION = '0.93.4'
 
+VERSION = "0.93.4"
 
 class BSML(object):
+  """
+  RDF resources for each item in the BioSignalML ontology.
+  """
   URI = "http://www.biosignalml.org/ontologies/2011/04/biosignalml#"
   NS = Namespace(URI)
   prefix = NS.prefix
@@ -108,14 +111,16 @@ Measurement units would normally be entities in a specialised units of measure o
   """The sampling rate, in Hertz, of a uniformly sampled signal."""
   resolution     = Resource(NS.resolution)
   """The resolution, in seconds, of a clock's timing."""
-  time           = Resource(NS.time)
-  """The temporal offset, from the beginning of a recording, to the start of some event."""
 
 # owl:NamedIndividual resources:
   BP             = Resource(NS.BP)
+  """Blood Pressure"""
   ECG            = Resource(NS.ECG)
+  """Electrocardiogram"""
   EEG            = Resource(NS.EEG)
+  """Electroencephalogram"""
   ErrorTAG       = Resource(NS.ErrorTAG)
+  """Error TAG"""
 
 # owl:ObjectProperty resources:
   clock          = Resource(NS.clock)
@@ -136,6 +141,8 @@ Measurement units would normally be entities in a specialised units of measure o
   """A semantic tag given to a resource by an annotation.
 
 Tags are effectively controlled keywords."""
+  time           = Resource(NS.time)
+  """An instant or interval associated with a resource."""
   uncertainty    = Resource(NS.uncertainty)
   """A resource describing the measurement uncertainty associated with a Recording,
            Signal, or Segment."""
