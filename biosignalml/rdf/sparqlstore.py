@@ -329,7 +329,7 @@ class Virtuoso(SparqlUpdateStore):
   5. Define additional namespace prefixes as required.
 
 
-  ..warning::
+  .. warning::
 
     Virtuoso currently (V6.1.6) only supports RDFXML...
 
