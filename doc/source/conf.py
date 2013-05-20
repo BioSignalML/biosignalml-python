@@ -222,6 +222,16 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 #'preamble': '',
+
+## For Xelatex     (Angstrom symbol is in ontology...)
+    'inputenc': '',
+    'utf8extra': '',
+    'preamble': '''
+\usepackage{fontspec}
+\setsansfont{Arial}
+\setromanfont{Arial}
+\setmonofont{DejaVu Sans Mono}
+''',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
