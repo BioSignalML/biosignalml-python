@@ -185,13 +185,14 @@ class EDFRecording(BSMLRecording):
 
   def initialise(self, **kwds):
   #----------------------------
-    fname = str(self.dataset)
-    edffile = EDFFile.open(fname)
-    if edffile is None:
-      raise IOError("Cannot open '%s'", fname)
-    self._edffile = edffile
-    for s in self.signals():
-      EDFSignal.initialise_class(s)
+    if self.dataset is not None and kwds.pop('open_dataset', True):
+      fname = str(self.dataset)
+      edffile = EDFFile.open(fname)
+      if edffile is None:
+        raise IOError("Cannot open '%s'", fname)
+      self._edffile = edffile
+      for s in self.signals():
+        EDFSignal.initialise_class(s)
 
   def _set_attributes(self):
   #-------------------------
