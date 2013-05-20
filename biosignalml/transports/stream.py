@@ -68,7 +68,7 @@ import numpy as np
 
 
 __all__ = [ 'BlockParser', 'BlockStream', 'BlockType', 'Checksum', 'Error',
-            'ErrorBlock', 'InfoBlock', 'RDFBlock', 'SignalData', 'SignalDataBlock',
+            'ErrorBlock', 'SignalData', 'SignalDataBlock',
             'SignalDataStream', 'StreamBlock', 'TestBlock', 'StreamException',
             'VERSION' ]
 
@@ -147,8 +147,6 @@ class BlockType(object):
   the requested duration a shortened time series will be returned; if the period spanned in a signal
   contains discontinuous segments they will be returned in separate blocks.
   """
-
-  INFO = 'I'
 
   DATA = 'D'
   """
@@ -342,17 +340,6 @@ class ErrorBlock(StreamBlock):
     header = errblock.header.copy()
     header['type'] = errblock.type
     StreamBlock.__init__(self, 0, BlockType.ERROR, header, bytearray(msg))
-
-
-class InfoBlock(StreamBlock):
-#============================
-  """
-  An info message block.
-
-  """
-  def __init__(self, **header):
-  #----------------------------
-    StreamBlock.__init__(self, 0, BlockType.INFO, header, '')
 
 
 class SignalDataBlock(StreamBlock):
