@@ -135,6 +135,10 @@ class BSMLRecording(biosignalml.Recording):
     kwds['format'] = getattr(self, 'MIMETYPE')
     biosignalml.Recording.__init__(self, uri, **kwds)
 
+  def __del__(self):
+  #-----------------
+    self.close()
+
   @classmethod
   def open(cls, dataset, uri=None, mode='r', **kwds):
   #------------------------------------------------
