@@ -1,7 +1,7 @@
 """
 Provide access to the BioSignalML ontology.
 
-Generated from file:///Users/dave/biosignalml/workspace/ontologies/bsml/2011-04-biosignalml.ttl at 10:10:43 Wed 08 May 2013
+Generated from file:///Users/dave/biosignalml/workspace/ontologies/bsml/2011-04-biosignalml.ttl at 10:10:47 Fri 31 May 2013
 
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
@@ -28,7 +28,7 @@ class BSML(object):
   BP_Filter      = Resource(NS.BP_Filter)
   """**owl:Class**: A band-pass filter."""
   Device         = Resource(NS.Device)
-  """**owl:Class**: The physical device that saved the output of a sensor into a format able to be stored."""
+  """**owl:Class**: A physical device that converts the output of a sensor into a format able to be stored."""
   Electrode      = Resource(NS.Electrode)
   """**owl:Class**: An electrical conductor in contact with non-conducting material, through which
             electrical activity can be measured."""
