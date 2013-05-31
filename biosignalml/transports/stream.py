@@ -163,11 +163,6 @@ class BlockType(object):
 
       REQUIRED.
 
-    **info** (*integer*)
-      The index into arrays describing the signal that were in the latest Info block.
-
-      REQUIRED.
-
     **start** (*float*)
       The time, in seconds, from the start of the signal's recording, of the first
       sample value.
