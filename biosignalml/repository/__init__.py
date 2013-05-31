@@ -18,6 +18,11 @@
 #
 ######################################################
 
+"""
+BSML Store description...
+
+"""
+
 import logging
 import operator
 
@@ -216,10 +221,10 @@ class BSMLStore(GraphStore):
     '''
     return [ tuple(r[1:3]) if counts else r[1]
       for r in self.get_resources(BSML.Event, rvars='?et count(?et) as ?count',
-        condition = '?r bsml:recording <%s> . ?r bsml:eventType ?et' % rec_uri,
+        condition = '?e bsml:recording <%s> . ?e bsml:eventType ?et' % rec_uri,
         group = '?et',
         prefixes = dict(bsml=BSML.prefix),
-        graph = graph_uri
+        graph = graph_uri, resource='?e'
         ) ]
 
 
@@ -351,7 +356,7 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
   def extend_recording_graph(self, recording, *abstractobjects):
   #-------------------------------------------------------------
     """
-    Add metadata about an object to a recording's graph.
+    Add abstractobjects to a recording's graph.
     """
     for abstractobject in abstractobjects:
       self._sparqlstore.extend_graph(recording.graph.uri,

@@ -123,24 +123,27 @@ class GraphStore(object):
     return DataItem.create_from_string(graph_uri, rdf, Format.RDFXML)
 
 
-  def get_resources(self, rtype, rvars='?r', condition='', group=None, prefixes=None, graph=None, order=None):
-  #-----------------------------------------------------------------------------------------------------------
+  def get_resources(self, rtype, rvars='?r', condition='',
+                                 group=None, prefixes=None, graph=None, order=None, resource=None):
+  #------------------------------------------------------------------------------------------------
     """
-    Find resources of the given type and the most recent graphs that
-    hold them.
+    Find resources of the given type and the most recent graphs that hold them.
 
     The resources found can be restricted by an optional SPARQL graph pattern.
 
     :param rtype: The type of resource to find. The SPARQL variable used for the
        resource is the first of the `rvars`.
-    :param rvars (str): Space separated SPARQL variables identifying the resource
+    :param str rvars: Space separated SPARQL variables identifying the resource
        in the query along with any other variables to return values of. The first variable
-       is usually that of the resource. Optional, defaults to `?r`.
-    :param condition (str): A SPARQL graph pattern for selecting resources. Optional.
-    :param group (str): Variables to group the results by. Optional.
-    :param prefixes (dict): Optional namespace prefixes for the SPARQL query.
+       is usually that of the resource. Optional, defaults to `?r` unless `resource` is given.
+    :param str condition: A SPARQL graph pattern for selecting resources. Optional.
+    :param str group: Variables to group the results by. Optional.
+    :param dict prefixes: Optional namespace prefixes for the SPARQL query.
     :param graph: The URI of a specific graph to search in, instead of finding
        the most recent. Optional.
+    :param str order: The sort order of the SPARQL query. Optional.
+    :param str resource: The SPARQL variable of the resource, if not in the `rvars` list.
+       Optional.
     :return: A list of (graph_uri, resource_uri, optional_variable) tuples.
     :rtype: list[tuple(:class:`~biosignalml.rdf.Uri`, :class:`~biosignalml.rdf.Uri`)]
     """
@@ -148,6 +151,7 @@ class GraphStore(object):
     if prefixes: pfxdict.update(prefixes)
     varlist = [ var for var in rvars.split() if var[0] == '?' ]
     retvars = [ var[1:] for var in varlist ]
+    if resource is None: resource = varlist[0]
     gv = sparqlstore.get_result_value   ## Shorten code
     NOVALUE = { 'value': None }  # For optional result variables
     if order is None: order = ' '.join(varlist)
@@ -157,7 +161,7 @@ class GraphStore(object):
           '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
              graph ?g { { %(res)s a <%(rtype)s> . %(cond)s } }''',
           params=dict(pgraph=self._provenance_uri, gtype=self._graphtype,
-                      res=varlist[0], rtype=rtype, rvars=rvars, cond=condition),
+                      res=resource, rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           group=group,
           order='?g %s' % order)
@@ -165,7 +169,7 @@ class GraphStore(object):
     else:
       return [ (Uri(str(graph)), gv(r, retvars[0])) + tuple([gv(r, v) for v in retvars[1:]])
         for r in self.select('%(rvars)s', '{ %(res)s a <%(rtype)s> . %(cond)s }',
-          params=dict(res=varlist[0], rtype=rtype, rvars=rvars, cond=condition),
+          params=dict(res=resource, rtype=rtype, rvars=rvars, cond=condition),
           prefixes=pfxdict,
           graph=graph,
           order=order)
