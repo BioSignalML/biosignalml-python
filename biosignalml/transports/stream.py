@@ -362,7 +362,6 @@ class SignalDataBlock(StreamBlock):
     start = self.header.get('start', 0)
     count = self.header.get('count', 0)
     dims = self.header.get('dims', 1)
-    info = self.header.get('info', None)
     dtype = self.header.get('dtype', None)
     rate = self.header.get('rate', None)
     ctype = self.header.get('ctype', None)
@@ -389,7 +388,7 @@ class SignalDataBlock(StreamBlock):
         data = np.frombuffer(self.content[datastart:], dtype=dt)
       else:
         data = np.reshape(np.frombuffer(self.content[datastart:], dtype=dt), (count, dims))
-    return SignalData(uri, start, data, info=info, rate=rate, clock=clock, dtype=dtype, ctype=ctype)
+    return SignalData(uri, start, data, rate=rate, clock=clock, dtype=dtype, ctype=ctype)
 
 
 class BlockParser(object):
@@ -609,8 +608,8 @@ class SignalData(object):
   :param dtype: The requested data type which to use for stream data values.
   :param ctype: The requested data type which to use for stream time values.
   '''
-  def __init__(self, uri, start, data, info=None, rate=None, clock=None, dtype=None, ctype=None):
-  #----------------------------------------------------------------------------------------------
+  def __init__(self, uri, start, data, rate=None, clock=None, dtype=None, ctype=None):
+  #-----------------------------------------------------------------------------------
     if rate is None and clock is None:
       raise StreamException('Data must have either a rate or a clock')
     elif rate is not None and clock is not None:
@@ -621,7 +620,6 @@ class SignalData(object):
       if clock.ndim != 1: raise StreamException('Clock must be a 1-D array')
       if len(clock) != len(data): raise StreamException('Clock and data have different lengths')
     self.uri = uri
-    self.info = info
     self.start = start
     self.data = data
     self.rate = rate
@@ -657,7 +655,6 @@ class SignalData(object):
                'count': len(self.data),
                'dtype': dtype.descr[0][1]
              }
-    if self.info is not None: header['info'] = self.info
     if self.data.ndim > 1: header['dims'] = self.data.shape[1]
     if self.rate: header['rate'] = self.rate
     if self.clock is not None:
