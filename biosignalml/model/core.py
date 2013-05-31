@@ -25,10 +25,10 @@ import logging
 
 import biosignalml.rdf as rdf
 from biosignalml.rdf import RDFS, DCT, XSD, PRV
-from mapping import Mapping, PropertyMap
 import biosignalml.utils as utils
 
 from .ontology import BSML
+from .mapping import Mapping, PropertyMap
 
 __all__ = [ 'AbstractObject' ]
 
@@ -52,7 +52,7 @@ class AbstractObject(object):
   """
 
   metaclass = None
-  '''Class in BioSignalML Ontology as a :class:`biosignalml.rdf.Resource`'''
+  '''Class in BioSignalML Ontology as a :class:`~biosignalml.rdf.Resource`'''
 
   attributes = [ 'uri', 'label', 'comment', 'description', 'precededBy', 'creator', 'created' ]
   '''List of generic attributes all resources have.'''
@@ -298,7 +298,7 @@ class AbstractObject(object):
     Set attributes from RDF triples in a graph.
 
     :param graph: A graph of RDF statements.
-    :type graph: :class:`biosignalml.rdf.Graph`
+    :type graph: :class:`~biosignalml.rdf.Graph`
     """
     if self.metaclass is not None and graph.contains(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):

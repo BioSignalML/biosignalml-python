@@ -29,6 +29,7 @@ from biosignalml.rdf import XSD, DCT
 from .ontology import BSML
 from .core     import AbstractObject
 from .mapping  import PropertyMap
+from .segment  import Segment
 
 __all__ = [ 'Signal' ]
 
@@ -40,15 +41,15 @@ class Signal(AbstractObject):
 
   :param uri: The URI of the signal.
   :param units: The physical units of the signal's data.
+  :param kwds: Signal attributes, specified as keywords.
   """
 
   metaclass = BSML.Signal     #: :attr:`.BSML.Signal`
 
   attributes = ['recording', 'units', 'transducer', 'filter', '_rate',  '_period', 'clock',
                 'minFrequency', 'maxFrequency', 'minValue', 'maxValue',
-                'index', 'signaltype', 'offset', '_duration',
-               ]
-  '''Generic attributes of a Signal.'''
+                'index', 'signaltype', 'offset', '_duration', '_time_units',
+               ]              #: Generic attributes of a Signal.
 
   mapping = { 'recording':    PropertyMap(BSML.recording, to_rdf=PropertyMap.get_uri),
               'units':        PropertyMap(BSML.units, to_rdf=PropertyMap.get_uri),
@@ -92,18 +93,21 @@ class Signal(AbstractObject):
   @property
   def rate(self):
   #==============
+    """The signal's sampling rate, in 1/:attr:`time_units`"""
     if   self._rate   is not None: return float(self._rate)
     elif self._period is not None: return 1.0/float(self._period)
 
   @property
   def period(self):
   #================
+    """The signal's sampling period, in :attr:`time_units`."""
     if   self._period is not None: return float(self._period)
     elif self._rate   is not None: return 1.0/float(self._rate)
 
   @property
   def duration(self):
   #------------------
+    """The signal's total duration, in :attr:`time_units`."""
     if self._duration is not None: return self._duration
     elif self.period is not None: return len(self)*self.period
     ## self.time[-1] + (self.period if self.period is not None else 0)  ???
@@ -111,11 +115,20 @@ class Signal(AbstractObject):
   @property
   def time_units(self):
   #====================
-    return units.get_units_uri('s')
+    """The units used for signal timing. Default units are seconds"""
+    return getattr(self, '_time_units', units.get_units_uri('s'))
 
-  def read(self, interval=None, **kwds):
-  #-------------------------------------
-    '''
-    :return: A :class:TimeSeries containing signal data covering the interval.
-    '''
-    raise NotImplementedError, 'Signal.read()'
+  def new_segment(self, uri, at, duration=None, end=None, **kwds):  ## Of a Signal
+  #---------------------------------------------------------------
+    """
+    Create a new :class:`~.segment.Segment` of a Signal.
+
+    :param uri: The URI of the Segment.
+    :param float at: When the segment starts.
+    :param float duration: The duration of the Segment. Optional.
+    :param float duration: When the Segment ends. Optional.
+    :param kwds: Optional additional attributes for the Segment.
+
+    """
+    return self.recording.add_resource(
+             Segment(uri, self, self.recording.interval(at, duration, end), **kwds))

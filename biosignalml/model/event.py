@@ -17,9 +17,9 @@
 #  limitations under the License.
 #
 ######################################################
-'''
+"""
 A BioSignalML Event.
-'''
+"""
 
 import logging
 
@@ -34,14 +34,13 @@ __all__ = [ 'Event' ]
 
 class Event(AbstractObject):
 #===========================
-  '''
+  """
   An abstract BioSignalML Event.
-  '''
+  """
 
-  metaclass = BSML.Event      #: :attr:`.BSML.Event`
+  metaclass = BSML.Event                            #: :attr:`.BSML.Event`
 
-  attributes = ['eventtype', 'time', 'recording' ]
-  '''Generic attributes of an Event.'''
+  attributes = ['eventtype', 'time', 'recording' ]  #: Generic attributes of an Event.
 
   mapping = { 'recording': PropertyMap(BSML.recording, to_rdf=PropertyMap.get_uri),
               'eventtype': PropertyMap(BSML.eventType),

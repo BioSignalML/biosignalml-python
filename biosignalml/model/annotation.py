@@ -33,7 +33,7 @@ __all__ = [ 'Annotation' ]
 
 class Annotation(AbstractObject):
 #================================
-  '''
+  """
   An abstract BioSignalML Annotation.
 
   An Annotation is a comment about something made by someone. In BioSignalML
@@ -47,16 +47,15 @@ class Annotation(AbstractObject):
       dct:created "2012-09-29T09:30:23Z"^^xsd:dateTime ;
       .
 
-  '''
+  """
   ### This (or core.AbstractObject ??) needs to detect a prior version exists
   ### and link versions... cf. QtBrowser annotation edit/delete...
   ###
   ### An update or replace or ? method?? With auto URI generation ???
   ###
-  metaclass = BSML.Annotation  #: :attr:`.BSML.Annotation
+  metaclass = BSML.Annotation                  #: :attr:`.BSML.Annotation`
 
-  '''Attributes of an Annotation.'''
-  attributes = [ 'about', 'comment', 'tags' ]
+  attributes = [ 'about', 'comment', 'tags' ]  #: Attributes of an Annotation.
 
   mapping = { 'about':   PropertyMap(DCT.subject, to_rdf=PropertyMap.get_uri),
               'comment': PropertyMap(RDFS.comment),
@@ -86,14 +85,14 @@ class Annotation(AbstractObject):
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
   #----------------------------------------------
-    '''
+    """
     Create a new instance of an Annotation, setting attributes from RDF triples in a graph.
 
     :param uri: The URI of the Annotation.
     :param graph: A RDF graph.
     :type graph: :class:`~biosignalml.rdf.Graph`
     :rtype: :class:`Annotation`
-    '''
+    """
     self = cls(uri, timestamp=False, **kwds)
     self.add_metadata(graph)
     if graph.has_resource(self.about, BSML.Segment):
@@ -103,5 +102,6 @@ class Annotation(AbstractObject):
   @property
   def time(self):
   #--------------
+    """The time, if any, associated with the resource that is annotated."""
     if isinstance(self.about, Segment):
       return self.about.time

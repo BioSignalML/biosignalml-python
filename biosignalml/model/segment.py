@@ -41,10 +41,16 @@ class Segment(AbstractObject):
       bsml:time <temporal_entity> ;
       .
 
-  """
-  metaclass = BSML.Segment  #: :attr:`.BSML.Segment`
 
-  attributes = [ 'source', 'time' ]
+  :param uri: The URI of the segment.
+  :param source: The resource (Signal or Recording) which the Segment is part of.
+  :param time: A :class:`.TemporalEntity` locating the Segment in its resource.
+  :param kwds: Segment attributes, specified as keywords.
+
+  """
+  metaclass = BSML.Segment            #: :attr:`.BSML.Segment`
+
+  attributes = [ 'source', 'time' ]   #: Attributes of a Segment.
 
   mapping = { 'source': PropertyMap(DCT.source, to_rdf=PropertyMap.get_uri),
               'time':   PropertyMap(BSML.time, subelement=True),

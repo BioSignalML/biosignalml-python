@@ -45,7 +45,7 @@ class Clock(AbstractObject):
   :param float resolution: The time, in seconds, represented by a time of 1.0. Optional.
   :param float rate: Resolution can be given as the reciprocal of ``rate``. Optional.
   """
-  metaclass = BSML.SampleClock
+  metaclass = BSML.SampleClock  #: :attr:`.BSML.SampleClock`
 
   # Also have 'frequency' ?? and/or 'period' ??
   attributes = [ 'resolution', 'rate' ]

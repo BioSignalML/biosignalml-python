@@ -37,7 +37,7 @@ from collections import namedtuple
 
 from biosignalml.rdf import Node, Uri, Statement, XSD
 
-__all__ = [ 'PropertyMap' ]
+__all__ = [ 'PropertyMap', 'Mapping' ]
 
 
 URI_SCHEMES = [ 'http', 'file' ]
@@ -113,14 +113,20 @@ class Mapping(object):
   """
   Map attribute values to and from RDF.
 
+  :param metaclass: A mapping dictionary.
   :param usermap: A mapping dictionary.
   :type usermap: dict
 
   A mapping dictionary has has 2-tuples as keys, indexing :class:`PropertyMap`\s.
-  The first element of a key is a string with the name of the attribute which the
-  PropertyMap is for; the second is either None, meaning the map is for all attributes
-  having the name, or a Resource object, meaning the map is only for attributes of
-  instances of the resource class and its subclasses.
+
+  The first element of a key is either None, meaning the map is for all attributes
+  having the name, or is a :class:`~biosignalml.rdf.Resource`, meaning the map is
+  only for attributes of :class:`~biosignalml.model.core.AbstractObject`\s that
+  have the Resource as their :attr:`~biosignalml.model.core.AbstractObject.metaclass`.
+
+  The second element of a key is a string with the name of the attribute which the
+  PropertyMap is for.
+
   """
   def __init__(self, metaclass=None, usermap=None):
   #------------------------------------------------
@@ -223,8 +229,8 @@ class Mapping(object):
     statement's object.
 
     :rtype: tuple(Uri, attribute, value, functional) where the ``Uri`` is of the statement's
-      subject;``attribute`` is a string with the Python name of an attribute; ``value`` is
-      the Python value for the attribute; and ``functional'' is True if the attribute can
+      subject; ``attribute`` is a string with the Python name of an attribute; ``value`` is
+      the Python value for the attribute; and ``functional`` is True if the attribute can
       only have a single value.
 
     """

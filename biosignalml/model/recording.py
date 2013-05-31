@@ -17,9 +17,9 @@
 #  limitations under the License.
 #
 ######################################################
-'''
-Abstract BioSignalML objects.
-'''
+"""
+An abstract BioSignalML Recording.
+"""
 
 import logging
 from collections import OrderedDict
@@ -33,6 +33,7 @@ from .core     import AbstractObject
 from .mapping  import PropertyMap
 from .signal   import Signal
 from .event    import Event
+from .segment  import Segment
 
 __all__ = [ 'Recording' ]
 
@@ -45,18 +46,18 @@ def _get_timeline(tl):      # Stops a circular import
 
 class Recording(AbstractObject):
 #===============================
-  '''
+  """
   An abstract BioSignalML Recording.
 
   :param uri: The URI of the recording.
-  '''
+  :param kwds: Recording attributes, specified as keywords.
+  """
 
   metaclass = BSML.Recording  #: :attr:`.BSML.Recording`
 
   attributes = [ 'dataset', 'source', 'format', 'comment', 'investigation',
                  'starttime', 'duration', 'timeline', 'generatedBy'
-               ]
-  '''Generic attributes of a Recording.'''
+               ]              #: Generic attributes of a Recording.
 
   mapping = { 'format':        PropertyMap(DCT.format),
               'dataset':       PropertyMap(BSML.dataset),
@@ -77,8 +78,8 @@ class Recording(AbstractObject):
                                            subelement=True),
             }
 
-  SignalClass = Signal       #: The class of Signals in the Recording
-  EventClass  = Event        #: The class of Events in the Recording
+  SignalClass = Signal       #: The class of :class:`~.signal.Signal`\s in the Recording
+  EventClass  = Event        #: The class of :class:`~.event.Event`\s in the Recording
 
 
   def __init__(self, uri, **kwds):
@@ -90,6 +91,7 @@ class Recording(AbstractObject):
 
   def add_resource(self, resource):
   #--------------------------------
+    """Associate a resource with a Recording."""
     self._resources[str(resource.uri)] = resource
     return resource
 
@@ -106,8 +108,13 @@ class Recording(AbstractObject):
 
   def get_resource(self, uri):
   #---------------------------
-    return self._resources[str(uri)]
+    """
+    Get a resource associated with the Recording.
 
+    :param uri: The resource's URI.
+
+    """
+    return self._resources.get(str(uri))
 
   def __len__(self):
   #-----------------
@@ -123,11 +130,11 @@ class Recording(AbstractObject):
   def get_signal(self, uri):
   #-------------------------
     """
-    Retrieve a :class:`Signal` from a Recording.
+    Retrieve a :class:`~.signal.Signal` from a Recording.
 
-    :param uri: The URI of the signal to get.
+    :param uri: The URI of the signal.
     :return: A signal in the recording.
-    :rtype: :class:`Signal`
+
     """
     signal = self.get_resource(uri)
     if not isinstance(signal, self.SignalClass):
@@ -137,7 +144,7 @@ class Recording(AbstractObject):
   def add_signal(self, signal):
   #----------------------------
     """
-    Add a :class:`Signal` to a Recording.
+    Add a :class:`~.signal.Signal` to a Recording.
 
     :param signal: The signal to add to the recording.
 
@@ -159,13 +166,13 @@ class Recording(AbstractObject):
 
   def new_signal(self, uri, units, id=None, **kwds):
   #-------------------------------------------------
-    '''
+    """
     Create a new Signal and add it to the Recording.
 
     :param uri: The URI for the signal.
-    :param units: The units signal values are in.
-    :return: A Signal of type `sigclass`.
-    '''
+    :param units: The units signal data values are in.
+    :return: A Signal of type :attr:`SignalClass`.
+    """
     if uri is None and id is None:
       raise Exception, "Signal must have 'uri' or 'id' specified"
     if uri is None:
@@ -190,6 +197,13 @@ class Recording(AbstractObject):
 
   def get_event(self, uri):
   #------------------------
+    """
+    Retrieve an :class:`~.event.Event` from a Recording.
+
+    :param uri: The URI of the event.
+    :return: An event in the recording.
+
+    """
     event = self.get_resource(uri)
     if not isinstance(event, self.EventClass):
       raise KeyError, str(uri)
@@ -197,12 +211,23 @@ class Recording(AbstractObject):
 
   def add_event(self, event):
   #--------------------------
+    """
+    Add an :class:`~.event.Event` to a Recording.
+
+    :param event: The event to add to the recording.
+
+    """
     event.recording = self
     self.add_resource(event)
     return event
 
   def new_event(self, uri, etype, at, duration=None, end=None, **kwds):
   #--------------------------------------------------------------------
+    """
+    Create a new Event and add it to the Recording.
+
+    :return: An Event of type :attr:`EventClass`.
+    """
     return self.add_event(self.EventClass(uri, etype, self.interval(at, duration, end), **kwds))
 
 
@@ -224,11 +249,17 @@ class Recording(AbstractObject):
 ## Or create urn:uuid URIs ??
   def new_segment(self, uri, at, duration=None, end=None, **kwds):  ## Of a Recording
   #---------------------------------------------------------------
-    return self.make_resource(Segment(uri, self, self.interval(at, duration, end), **kwds))
+    """
+    Create a new :class:`~.segment.Segment` of a Recording.
 
-  def new_segment(self, uri, at, duration=None, end=None, **kwds):  ## Of a Signal
-  #---------------------------------------------------------------
-    return self.recording.make_resource(Segment(uri, self, self.interval(at, duration, end), **kwds))
+    :param uri: The URI of the Segment.
+    :param float at: When the segment starts.
+    :param float duration: The duration of the Segment. Optional.
+    :param float duration: When the Segment ends. Optional.
+    :param kwds: Optional additional attributes for the Segment.
+
+    """
+    return self.add_resource(Segment(uri, self, self.interval(at, duration, end), **kwds))
 
 
   def save_to_graph(self, graph):

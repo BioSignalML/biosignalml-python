@@ -18,9 +18,9 @@
 #
 ######################################################
 
-'''
+"""
 Read and write physical Recordings and Signals.
-'''
+"""
 
 import os
 
@@ -34,28 +34,32 @@ __all__ = [ 'BSMLSignal', 'BSMLRecording', 'MIMETYPES' ]
 
 def _not_implemented(instance, method):
 #======================================
-  '''
+  """
   Raise an Exception for unimplemented methods.
-  '''
+  """
   raise NotImplementedError('%s.%s()' % (instance.__class__.__name__, method))
 
 
 class BSMLSignal(biosignalml.Signal):
 #====================================
-  '''
+  """
   A generic biosignal Signal as a physical object.
 
-  :param uri: URI of the signal.
-  :type uri: str
-  :param metadata: Dictionary containing metadata values for the signal.
-  :type metadata: dict
-  '''
+  :param uri: The URI of the signal.
+  :param units: The signal's measurement units.
+  :param kwds: Attributes of a :class:`~biosignalml.Signal`.
+  """
 
   MAXPOINTS = 50000     #: Maximum number of sample points returned by a single :meth:`read`.
 
   def __init__(self, uri, units, **kwds):
   #--------------------------------------
     biosignalml.Signal.__init__(self, uri, units, **kwds)
+
+  def close(self):
+  #---------------
+    """Close a Signal."""
+    pass
 
   def read(self, interval=None, segment=None, maxduration=None, maxpoints=None):
   #-----------------------------------------------------------------------------
@@ -68,7 +72,7 @@ class BSMLSignal(biosignalml.Signal):
       point not included in the returned range.
     :param maxduration: The maximum duration, in seconds, of a single returned segment.
     :param maxpoints: The maximum length, in samples, of a single returned segment.
-    :return: An `iterator` returning :class:`~biosignalml.data.DataSegment` segments
+    :return: An ``iterator`` returning :class:`~biosignalml.data.DataSegment` segments
       of the signal data.
 
     If both ``maxduration`` and ``maxpoints`` are given their minimum value is used.
@@ -77,40 +81,40 @@ class BSMLSignal(biosignalml.Signal):
 
   def append(self, timeseries):
   #----------------------------
-    '''
+    """
     Append data to a Signal.
 
     :param timeseries: The data points (and times) to append.
     :type timeseries: :class:`~biosignalml.data.TimeSeries`
-    '''
+    """
     _not_implemented(self, 'append')
 
   def data(self, n):
   #----------------
-    '''
+    """
     Get a single data point in a Signal.
 
     :param n: The index of the data point.
     :type n: non-negative integer
     :return: The value of the n\ :sup:`th` data point.
-    '''
+    """
     _not_implemented(self, 'data')
 
   def time(self, n):
   #----------------
-    '''
+    """
     Get the time of a data point in a Signal.
 
     :param n: The index of the data point.
     :type n: non-negative integer
     :return: The time of the n\ :sup:`th` data point.
-    '''
+    """
     _not_implemented(self, 'time')
 
 
 class BSMLRecording(biosignalml.Recording):
 #==========================================
-  '''
+  """
   A generic biosignal Recording as a physical object.
 
   :param fname: Name of filesystem object holding a Recording.
@@ -119,7 +123,7 @@ class BSMLRecording(biosignalml.Recording):
   :type uri: str
   :param mode: Open the recording for reading ('r') or create a new recording ('w').
   :type mode: str
-  '''
+  """
   MIMETYPE = 'application/x-bsml'
   EXTENSIONS = [ 'bsml' ]
   SignalClass = BSMLSignal
@@ -142,7 +146,7 @@ class BSMLRecording(biosignalml.Recording):
   @classmethod
   def open(cls, dataset, uri=None, mode='r', **kwds):
   #------------------------------------------------
-    '''
+    """
     Open a Recording.
 
     :param dataset: Name of filesystem object holding the recording.
@@ -152,13 +156,13 @@ class BSMLRecording(biosignalml.Recording):
     :param mode: Open the recording for reading ('r') or create a new recording ('w').
     :type mode: str
     :return: a biosignal Recording.
-    '''
+    """
     return cls(uri=uri, dataset=dataset, mode=mode, **kwds)
 
   @classmethod
   def create(cls, dataset, uri=None, **kwds):
   #----------------------------------------
-    '''
+    """
     Create a Recording.
 
     :param dataset: Name of filesystem object holding a Recording.
@@ -166,14 +170,14 @@ class BSMLRecording(biosignalml.Recording):
     :param uri: URI of the Recording.
     :type uri: str
     :return: a new biosignal Recording (with no Signals).
-    '''
+    """
     return cls.open(uri=uri, dataset=dataset, mode='w', **kwds)
 
   def close(self):
   #---------------
-    '''
+    """
     Close a Recording.
-    '''
+    """
     pass
 
 
