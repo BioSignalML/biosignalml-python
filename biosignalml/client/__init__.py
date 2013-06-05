@@ -106,11 +106,6 @@ class Signal(BSMLSignal):
     super(Signal, self).__init__(uri, units, **kwds)
     self.repository = repository
 
-  def close(self):
-  #---------------
-    # Ensure all metadata has been POSTed (happens when recording is closed)
-    pass
-
   def __len__(self):
   #----------------
     return self._length
