@@ -19,10 +19,9 @@
 ######################################################
 
 """
-High level interfaces to a BioSignalML repository.
-
-This package simplifies creating and reading signals in a repository
-by providing wrappers around connections to metadata and data endpoints.
+The ``biosignalml.client`` package provides high-level interfaces to a
+BioSignalML repository, allowing recordings, signals and associated resources
+to be stored and retrieved.
 
 To create a new recording and signals::
 
@@ -98,6 +97,7 @@ __all__ = [ 'Repository', 'Recording', 'Signal' ]
 
 class Signal(BSMLSignal):
 #========================
+  """A Signal in a :class:`Recording`."""
 
   def __init__(self, uri, units=None, **kwds):
   #-------------------------------------------
