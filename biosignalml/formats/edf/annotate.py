@@ -23,6 +23,8 @@ import copy
 
 from biosignalml.formats.edf import EDF, EDFFile
 
+__all__ = [ 'Annotation', 'annotate' ]
+
 
 class Annotation(object):
 #=======================
@@ -66,7 +68,7 @@ def annotate(source, outfile, annotations):
   Add annotations to an EDF(+) file, creating a new file.
   
   The existing file is copied as EDF+ before an `EDF Annotations` signal
-  is addded to it.
+  is added to it.
 
   :param str source: The name of an EDF file.
   :param str outfile: The name of the EDF+ file to create.
