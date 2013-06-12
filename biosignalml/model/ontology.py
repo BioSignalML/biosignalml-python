@@ -1,7 +1,7 @@
 """
 Provide access to the BioSignalML ontology.
 
-Generated from file:///Users/dave/biosignalml/workspace/ontologies/bsml/2011-04-biosignalml.ttl at 10:10:47 Fri 31 May 2013
+Generated from file:///Users/dave/biosignalml/workspace/ontologies/bsml/2011-04-biosignalml.ttl at 11:11:05 Wed 12 Jun 2013
 
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
@@ -11,7 +11,7 @@ from biosignalml.rdf import Resource, NS as Namespace
 __all__ = [ "VERSION", "BSML" ]
 
 
-VERSION = "0.93.4"
+VERSION = "0.93.5"
 
 class BSML(object):
   """
@@ -76,7 +76,7 @@ Several signals may use the same clock."""
   Source         = Resource(NS.Source)
   """**owl:Class**: The source (i.e. device, simulation, etc) of a Signal or Recording."""
   TemporalEntity = Resource(NS.TemporalEntity)
-  """**owl:Class**: Some measurement of time, either as a particular point in time or as some interval."""
+  """**owl:Class**: Some measurement of time, either a particular point in time or some interval."""
   Transducer     = Resource(NS.Transducer)
   """**owl:Class**: A device that converts a measurable quantity into an electrical signal
            (e.g. thermistor, pressure sensor, strain gauge)."""
@@ -126,7 +126,7 @@ Measurement units would normally be entities in a specialised units of measure o
   clock          = Resource(NS.clock)
   """**owl:ObjectProperty**: The sampling coordinates associated with a signal's data values."""
   dataset        = Resource(NS.dataset)
-  """**owl:ObjectProperty**: The location of actual signal data."""
+  """**owl:ObjectProperty**: The location of actual data, in a format suitable for computer processing."""
   eventType      = Resource(NS.eventType)
   """**owl:ObjectProperty**: The class or type of an Event."""
   preFilter      = Resource(NS.preFilter)
