@@ -91,7 +91,7 @@ class SparqlStore(object):
       http = httplib2.Http(timeout=20)
       response, content = http.request(endpoint, body=body, method=method, headers=headers)
     except socket.error, msg:
-      raise StoreException("Cannot connect to SPARQL endpoint: %s" % endpoint)
+      raise StoreException("Cannot connect to SPARQL endpoint %s (%s)" % (endpoint, msg))
     if response.status not in [200, 201]:
       raise StoreException('SPARQL error: %s' % self._error_text(response, content))
     return content
