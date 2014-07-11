@@ -450,7 +450,8 @@ class H5Recording(object):
     else:
       raise ValueError("'uri' and 'units' have different sizes")
 
-    if data: data = np.asarray(data)
+    if data is not None:
+      data = np.asarray(data)
     if nsignals > 1:         # compound dataset
       if shape: raise TypeError("A compound dataset can only have scalar type")
       maxshape = (None, nsignals)
@@ -532,7 +533,8 @@ class H5Recording(object):
     if self._h5['uris'].attrs.get(str(uri)):
       raise KeyError("A clock already has URI '%s'" % uri)
 
-    if times: times = np.asarray(times)
+    if times is not None:
+      times = np.asarray(times)
     if shape is not None:
       maxshape = (None,) + shape
       elsize = reduce((lambda x, y: x * y), shape) if (len(shape) and shape[0]) else 1
