@@ -21,8 +21,6 @@
 import logging
 import json
 
-import RDF as librdf
-
 from biosignalml import BSML
 import biosignalml.model as model
 from biosignalml.model.mapping import PropertyMap
