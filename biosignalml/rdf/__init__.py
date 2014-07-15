@@ -21,8 +21,7 @@
 '''
 A generic interface to some RDF library.
 
-We use the Redland RDF Libraries and their Python bindings,
-available from http://librdf.org/.
+We use the RDFlib package from https://github.com/RDFLib/rdflib.
 
 '''
 
@@ -33,7 +32,8 @@ import sys
 import uuid
 import logging
 
-import RDF as librdf
+import rdflib
+
 
 class RDFParseError(Exception):
 #==============================
@@ -63,55 +63,24 @@ class Format(object):
   def name(mimetype):
   #-----------------
     """ Get the name of a format from its mimetype."""
-    return { Format.RDFXML: 'rdfxml',
+    return { Format.RDFXML: 'xml',
              Format.TURTLE: 'turtle',
              Format.JSON:   'json',
-           }.get(mimetype, 'rdfxml')
+           }.get(mimetype, 'xml')
 
   @staticmethod
   def format(name):
   #-----------------
     """ Get the RDF format from its name."""
-    return { 'rdfxml': Format.RDFXML,
+    return { 'xml':    Format.RDFXML,
              'turtle': Format.TURTLE,
              'json':   Format.JSON,
            }.get(name, Format.RDFXML)
 
 
-class NS(librdf.NS):
-#===================
+class Uri(rdflib.term.Identifier):
+#=================================
   '''
-  Wrapper for Redland Namespace utility class --- see http://librdf.org/docs/pydoc/RDF.html#NS.
-  '''
-  @property
-  def prefix(self):
-  #----------------
-    """Get the namespace's prefix."""
-    return self._prefix
-
-
-# Generic namespaces:
-NAMESPACES = {
-  'xsd':  'http://www.w3.org/2001/XMLSchema#',
-  'rdf':  'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-  'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
-  'owl':  'http://www.w3.org/2002/07/owl#',
-  'dct':  'http://purl.org/dc/terms/',
-  'time': 'http://www.w3.org/2006/time#',
-  'tl':   'http://purl.org/NET/c4dm/timeline.owl#',
-  'uome': 'http://www.sbpax.org/uome/list.owl#',
-  'prv':  'http://purl.org/net/provenance/ns#',
-  'prov': 'http://www.w3.org/ns/prov#',
-  }
-for prefix, name in NAMESPACES.iteritems():
-  setattr(sys.modules[__name__], prefix.upper(), NS(name))
-
-
-class Uri(librdf.Uri):
-#=====================
-  '''
-  Wrapper for Redland URI class --- see http://librdf.org/docs/pydoc/RDF.html#Uri.
-
   We extend the class with an `__add__()` method to allow a new URI to be formed
   by appending a string to an existing one.
   '''
@@ -150,21 +119,61 @@ class Uri(librdf.Uri):
     return Uri(nu)
 
 
-class Node(librdf.Node):
-#=======================
-  '''
-  Wrapper for Redland Node (RDF Resource, Property, Literal)
-  class --- see http://librdf.org/docs/pydoc/RDF.html#Node.
-  '''
+class NS(object):
+#================
+  """
+  Provide a Namespace class.
 
-  def as_string(self):
-  #-------------------
-    return (self.literal_value['string'] if self.is_literal()
-      else str(self))            ## Add <...> around str(resource) selfs ??
+  We can't wrap `rdflib.namespace.Namespace` because it sub-classes
+  `unicode` whose method names then restrict our names.
+  """
+  def __init__(self, base):
+  #------------------------
+    self._base = unicode(base)
+
+  def __getattr__(self, name):
+  #---------------------------
+    return Uri(self._base + (name if isinstance(name, basestring) else ''))
+
+  def __str__(self):
+  #----------------
+    return self._base
+
+  @property
+  def prefix(self):
+  #----------------
+    """Get the namespace's prefix."""
+    return self._base
 
 
-class Literal(Node):
-#===================
+# Generic namespaces:
+NAMESPACES = {
+  'xsd':  'http://www.w3.org/2001/XMLSchema#',
+  'rdf':  'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+  'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+  'owl':  'http://www.w3.org/2002/07/owl#',
+  'dct':  'http://purl.org/dc/terms/',
+  'time': 'http://www.w3.org/2006/time#',
+  'tl':   'http://purl.org/NET/c4dm/timeline.owl#',
+  'uome': 'http://www.sbpax.org/uome/list.owl#',
+  'prv':  'http://purl.org/net/provenance/ns#',
+  'prov': 'http://www.w3.org/ns/prov#',
+  }
+for prefix, name in NAMESPACES.iteritems():
+  setattr(sys.modules[__name__], prefix.upper(), NS(name))
+
+
+Node = rdflib.term.Node
+#======================
+''' A Node in a RDF Graph. '''
+
+Node.as_string = lambda self: str(self)
+#--------------------------------------
+''' Represent a Node as a string. '''
+
+
+class Literal(rdflib.term.Literal):
+#==================================
   '''
   Create a Literal node.
 
@@ -175,21 +184,21 @@ class Literal(Node):
   '''
   def __init__(self, value, datatype=None, language=None):
   #-------------------------------------------------------
-    super(Literal, self).__init__(literal=str(value), datatype=Uri(datatype), language=language)
+    super(Literal, self).__init__(value, datatype=datatype, lang=language)
 
   def as_string(self):   ## V's __str__ ???
   #-------------------
     '''
     Return the literal as a quoted string with language and datatype attributes.
     '''
-    l = ['"""' + self.literal[0] + '"""']
-    if   self.literal[1]: l.append('@' + self.literal[1])
-    elif self.literal[2]: l.append('^^' + self.literal[2])
+    l = ['"""' + str(self.value) + '"""']
+    if   self.language: l.append('@' + self.language)
+    elif self.datatype: l.append('^^' + self.datatype)
     return ''.join(l)
 
 
-class BlankNode(Node):
-#=====================
+class BlankNode(rdflib.term.BNode):
+#==================================
   '''
   Create a Blank node.
 
@@ -200,43 +209,33 @@ class BlankNode(Node):
   #------------------------------
     if blank is not None and blank.startswith('nodeID://'):
       blank = str(blank[9:])    ## Tidy Virtuoso blank node identifiers
-    super(BlankNode, self).__init__(blank=blank)
+    super(BlankNode, self).__init__(value=blank)
 
-  def __str__(self):
+  def __str__(self):   ## V's as_string() ???
   #-----------------
-    return '_:%s' % self.blank_identifier
+    return '_:%s' % unicode(self)
 
 
-class Resource(Node):
-#====================
+class Resource(rdflib.term.URIRef):
+#==================================
   '''
   Create a Resource node.
 
   :param uri: The URI of the resource.
   '''
+  def __new__(cls, uri, **kwds):
+  #------------------------------
+    return rdflib.term.URIRef.__new__(cls, uri)
+
   def __init__(self, uri, label='', desc=''):
   #------------------------------------------
-    if isinstance(uri, librdf.Node) and uri.is_resource():
-      super(Resource, self).__init__(node=uri)
-    else:
-      super(Resource, self).__init__(uri=Uri(uri))
+    self.uri = uri
     self._label = label
     self._description = desc
 
   def __str__(self):
   #-----------------
-    return self.label if self.label else str(self.uri)
-
-  def __eq__(self, this):
-  #----------------------
-    return (isinstance(this, librdf.Node) and this.is_resource()
-              and str(self.uri) == str(this.uri)
-         or isinstance(this, librdf.Uri)
-              and str(self.uri) == str(this))
-
-  def __ne__(self, this):
-  #----------------------
-    return not self.__eq__(this)
+    return self.label if self.label else unicode(self)
 
   @property
   def label(self):
@@ -265,81 +264,41 @@ class Resource(Node):
     This is implemented as a static method so we can use it
     to test generic resources.
     '''
-    return ((isinstance(this, librdf.Node) and this.is_resource()
-          or isinstance(this, librdf.Uri)) and str(this).startswith('urn:uuid:'))
+    return (isinstance(this, rdflib.term.URIRef)
+        and str(this).startswith('urn:uuid:'))
 
 
-class Statement(librdf.Statement):
-#=================================
+class Statement(tuple):
+#======================
   '''
-  Wrapper for Redland Statement (triple) class --- see http://librdf.org/docs/pydoc/RDF.html#Statement.
-
   The main means of manipulating statements is by the `subject`, `predicate` and `object` properties.
   '''
-  def __init__(self, s=None, p=None, o=None, **kwds):
-  #--------------------------------------------------
-    if s and not isinstance(s, librdf.Node) and not isinstance(s, librdf.Uri): s = Uri(s)
-    if p and not isinstance(p, librdf.Node) and not isinstance(p, librdf.Uri): p = Uri(p)
-    librdf.Statement.__init__(self, subject=s, predicate=p, object=o, **kwds)
+  def __new__(cls, s=None, p=None, o=None, **kwds):
+  #------------------------------------------------
+    if s and not isinstance(s, rdflib.term.URIRef): s = Resource(s)
+    if p and not isinstance(p, rdflib.term.URIRef): p = Resource(p)
+    return tuple.__new__(cls, (s, p, o))
+
+  @property
+  def subject(self):
+  #-----------------
+    return self[0]
+
+  @property
+  def predicate(self):
+  #-------------------
+    return self[1]
+
+  @property
+  def object(self):
+  #----------------
+    return self[2]
 
 
-class QueryResults(librdf.QueryResults):
+class QueryResults(rdflib.query.Result):
 #=======================================
   '''
-  Wrapper for Redland QueryResults class.
-
-  The following has been obtained via `pydoc` as the class is not documented
-  at http://librdf.org/docs/pydoc/RDF.html.
-
-  .. py:method:: as_stream()
-
-     Return the query results as a stream of triples (RDF.Statement)
-
-  .. py:method:: finished()
-
-     Test if reached the last variable binding result
-
-  .. py:method:: get_binding_name(offset)
-
-     Get the name of a variable binding by offset
-
-  .. py:method:: get_binding_value(offset)
-
-     Get the value of a variable binding by offset
-
-  .. py:method:: get_binding_value_by_name(name)
-
-     Get the value of a variable binding by variable name
-
-  .. py:method:: get_bindings_count()
-
-     Get the number of variable bindings in the query result
-
-  .. py:method:: get_boolean()
-
-     Get the boolean query result
-
-  .. py:method:: is_bindings()
-
-     Test if the query results format is variable bindings
-
-  .. py:method:: is_boolean()
-
-     Test if the query results format is a boolean
-
-  .. py:method:: is_graph()
-
-     Test if the query results format is an RDF graph
-
-  .. py:method:: make_results_hash()
-
-  .. py:method:: to_file(name, format_uri=None, base_uri=None)
-
-     Serialize to filename name in syntax format_uri using the optional base URI.
-
-  .. py:method:: to_string(format_uri=None, base_uri=None)
-
-     Serialize to a string syntax format_uri using the optional base URI.
+  Wrapper for RDFLib QueryResult class.
   '''
 
   def next(self):
@@ -350,30 +309,29 @@ class QueryResults(librdf.QueryResults):
     We force the resulting Nodes to be an appropriate sub-class.
     '''
     r = super(QueryResults, self).next()
-    if isinstance(r, dict):
-      for n, v in r.iteritems():
-        if   v is None:       pass
-        elif v.is_resource(): r[n].__class__ = Resource
-        elif v.is_literal():  r[n].__class__ = Literal
-        elif v.is_blank():    r[n].__class__ = BlankNode
+    if isinstance(r, rdflib.query.ResultRow):
+      for node in r():
+        if              node is None:               pass
+        elif isinstance(node, rdflib.term.URIRef):  node.__class__ = Resource
+        elif isinstance(node, rdflib.term.Literal): node.__class__ = Literak
+        elif isinstance(node, rdflib.term.BNode):   node.__class__ = BlankNode
     return r
 
 
-class Graph(librdf.Model):
-#=========================
+class Graph(rdflib.graph.Graph):
+#===============================
   '''
-  Extends Redland Model class --- see http://librdf.org/docs/pydoc/RDF.html#Model.
-
-  We always store graphs in memory using a hash index.
+  We store graphs in memory.
   '''
   def __init__(self, uri=None):
   #----------------------------
-    librdf.Model.__init__(self, storage=librdf.Storage(name='triples',
-                                                       storage_name='hashes',
-                                                       options_string="hash-type='memory'"))
-    if isinstance(uri, Node): uri = uri.uri
-    if uri and not isinstance(uri, Uri): uri = Uri(str(uri))
-    self.uri = uri
+    super(Graph, self).__init__(store=rdflib.plugins.memory.IOMemory(),
+                                identifier=uri)
+
+  @property
+  def uri(self):
+  #-------------
+    return self.identifier
 
   @classmethod
   def create_from_resource(cls, uri, format=Format.RDFXML, base=None):
@@ -387,7 +345,7 @@ class Graph(librdf.Model):
     :rtype: A :class:`Graph`
     """
     self = cls(uri)
-    self.parse_resource(uri, format, base)
+    self.parse(source=uri, format=Format.name(format), publicID=base)
     return self
 
   @classmethod
@@ -404,7 +362,7 @@ class Graph(librdf.Model):
     :rtype: A :class:`Graph`
     """
     self = cls(uri)
-    self.parse_string(string, format, str(uri))
+    self.parse(data=string, format=Format.name(format), publicID=str(uri))
     return self
 
   def __str__(self):
@@ -420,13 +378,7 @@ class Graph(librdf.Model):
     :param format: The content's RDF format.
     :param base: An optional base URI of the content.
     """
-    parser = librdf.Parser(mime_type=format)
-    try:
-      statements = parser.parse_as_stream(uri, base)
-      if statements: self.add_statements(statements)
-      else:          raise RDFParseError, 'RDF parsing error'
-    except librdf.RedlandError, msg:
-      raise RDFParseError, msg
+    self.parse(source=uri, format=Format.name(format), publicID=base)
 
   def parse_string(self, string, format=Format.RDFXML, base=None):
   #---------------------------------------------------------------
@@ -438,13 +390,7 @@ class Graph(librdf.Model):
     :param format: The string's RDF format.
     :param base: The base URI of the content.
     """
-    parser = librdf.Parser(name=Format.name(format))
-    try:
-      statements = parser.parse_string_as_stream(string, base)
-      if statements: self.add_statements(statements)
-      else:          raise RDFParseError, 'RDF parsing error'
-    except librdf.RedlandError, msg:
-      raise RDFParseError, msg
+    self.parse(data=string, format=Format.name(format), publicID=base)
 
   def serialise(self, format=Format.RDFXML, base=None, prefixes={}):
   #-----------------------------------------------------------------
@@ -460,10 +406,9 @@ class Graph(librdf.Model):
     :rtype: str
     '''
     if base is None: base = self.uri
-    serialiser = librdf.Serializer(name=Format.name(format))
     for prefix, uri in prefixes.iteritems():
-      serialiser.set_namespace(prefix, Uri(uri))
-    return serialiser.serialize_model_to_string(self, base_uri=base)
+      self.bind(prefix, uri)
+    return self.serialize(format=Format.name(format), base=base)
 
 #  def __iter__(self):
 #  #------------------
@@ -477,17 +422,17 @@ class Graph(librdf.Model):
     :param statements: A sequence of :class:`Statement`\s to add.
     :type statements: iterator
     '''
-    for s in statements: self.append(s)
+    for s in statements: self.add(s)
 
   def append_graph(self, graph):
   #-----------------------------
     '''
-    Add statements from anothe graph to this graph.
+    Add statements from another graph to this graph.
 
     :param graph: A :class:`Graph` containing statements.
     '''
     if graph is not None:
-      for s in graph: self.append(s)
+      for s in graph: self.add(s)
 
   def contains(self, statement):
   #-----------------------------
@@ -500,7 +445,7 @@ class Graph(librdf.Model):
     :return: True if the graph contains `statement`.
     :rtype: bool
     '''
-    return super(Graph, self).contains_statement(statement)
+    return statement in self
 
   def has_resource(self, uri, rtype):
   #----------------------------------
@@ -519,7 +464,7 @@ class Graph(librdf.Model):
     :type statement: :class:`Statement`
     :return: A sequence of :class:`Statement`\s.
     '''
-    return super(Graph, self).find_statements(statement)
+    return self.triples(statement)
 
   def get_object(self, s, p):
   #--------------------------
@@ -533,11 +478,7 @@ class Graph(librdf.Model):
       in the graph, otherwise `None`.
     :rtype: :class:`Node`
     '''
-##    node = self.get_target(source, property)
-##    return (Node(Uri(node.literal_value['string'])) if node and node.is_literal() else node)
-    if s and not isinstance(s, librdf.Node) and not isinstance(s, librdf.Uri): s = Uri(s)
-    if p and not isinstance(p, librdf.Node) and not isinstance(p, librdf.Uri): p = Uri(p)
-    return self.get_target(s, p)
+    return tuple(self.get_objects(s, p))[0]
 
   def get_literal(self, s, p):
   #----------------------------
@@ -567,8 +508,8 @@ class Graph(librdf.Model):
       (`subject`, `predicate`, `object`) statements in the graph.
     :rtype: iterator
     '''
-    if p and not isinstance(p, librdf.Node) and not isinstance(p, librdf.Uri): p = Uri(p)
-    for s in self.get_sources(p, o): yield s
+    if p and not isinstance(p, rdflib.term.URIRef): p = Resource(p)
+    return self.subjects(predicate=p, object=o)
 
   def get_objects(self, s, p):
   #---------------------------
@@ -582,9 +523,9 @@ class Graph(librdf.Model):
       (`subject`, `predicate`, `object`) statements in the graph.
     :rtype: iterator
     '''
-    if s and not isinstance(s, librdf.Node) and not isinstance(s, librdf.Uri): s = Uri(s)
-    if p and not isinstance(p, librdf.Node) and not isinstance(p, librdf.Uri): p = Uri(p)
-    for o in self.get_targets(s, p): yield o
+    if s and not isinstance(s, rdflib.term.URIRef): s = Resource(s)
+    if p and not isinstance(p, rdflib.term.URIRef): p = Resource(p)
+    return self.objects(subject=s, predicate=p)
 
   def get_literals(self, s, p):
   #------------------------------
@@ -607,9 +548,8 @@ class Graph(librdf.Model):
     Append the statement (s, p, o) to the graph after first removing
     all statements with subject `s` and predicate `p`.
     """
-    for stmt in self.find_statements(Statement(s, p, None)):
-      del self[stmt]
-    self.append(Statement(s, p, o))
+    self.remove(Statement(s, p, None))
+    self.add(Statement(s, p, o))
 
   def query(self, sparql):
   #-----------------------
@@ -622,9 +562,27 @@ class Graph(librdf.Model):
     :rtype: :class:`QueryResults`
     '''
     try:
-      results = librdf.Query(sparql, query_language='sparql11-query').execute(self)
+      results = self.query(sparql)
       results.__class__ = QueryResults
       return results
     except Exception, msg:
       logging.error('Graph query: %s', msg)
     return [ ]
+
+
+######################################################################################
+#
+# From: http://rdflib.readthedocs.org/en/4.1.0/intro_to_sparql.html
+#
+#   RDFLib lets you prepare queries before execution, this saves re-parsing and
+#   translating the query into SPARQL Algebra each time.
+#
+#   The method rdflib.plugins.sparql.prepareQuery() takes a query as a string and
+#   will return a rdflib.plugins.sparql.sparql.Query object. This can then be passed
+#   to the rdflib.graph.Graph.query() method.
+#
+#   The initBindings kwarg can be used to pass in a dict of initial bindings:
+#
+######################################################################################
+
+
