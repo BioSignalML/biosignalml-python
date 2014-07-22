@@ -164,7 +164,7 @@ class WebStreamWriter(object):
                               protocols=['biosignalml-ssf'])
       self._ws.connect()
     except Exception, msg:
-      logging.error('Unable to connect to WebSocket: %s', msg)
+      logging.error('Unable to connect to WebSocket at %s: %s', endpoint, msg)
       raise StreamException('Cannot open WebStreamWriter')
 
   def close(self):
