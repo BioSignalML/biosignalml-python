@@ -310,27 +310,10 @@ class Statement(list):
     return self[2]
 
 
-class QueryResults(rdflib.query.Result):
-#=======================================
-  '''
-  Wrapper for RDFLib QueryResult class.
-  '''
+QueryResults = rdflib.query.Result
+#===========
 
-  def next(self):
-  #--------------
-    '''
-    Get the next variable binding result.
 
-    We force the resulting Nodes to be an appropriate sub-class.
-    '''
-    r = super(QueryResults, self).next()
-    if isinstance(r, rdflib.query.ResultRow):
-      for node in r():
-        if              node is None:               pass
-        elif isinstance(node, rdflib.term.URIRef):  node.__class__ = Resource
-        elif isinstance(node, rdflib.term.Literal): node.__class__ = Literak
-        elif isinstance(node, rdflib.term.BNode):   node.__class__ = BlankNode
-    return r
 class IOMemory(rdflib.plugins.memory.IOMemory):
 #==============================================
 
@@ -603,9 +586,7 @@ class Graph(rdflib.graph.Graph):
     :rtype: :class:`QueryResults`
     '''
     try:
-      results = self.query(sparql)
-      results.__class__ = QueryResults
-      return results
+      return super(Graph, self).query(sparql)
     except Exception, msg:
       logging.error('Graph query: %s', msg)
     return [ ]
