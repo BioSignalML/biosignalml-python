@@ -357,6 +357,11 @@ class Graph(rdflib.graph.Graph):
   #-------------
     return self.identifier
 
+  @uri.setter
+  def uri(self, value):
+  #--------------------
+    self.__identifier = value
+
   @classmethod
   def create_from_resource(cls, uri, format=Format.RDFXML, base=None):
   #-------------------------------------------------------------------
