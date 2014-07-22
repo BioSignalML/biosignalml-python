@@ -40,6 +40,7 @@ setup(name='BioSignalML',
                         'httplib2 >= 0.7.7',
                         'python-dateutil >= 2.0',
                         'ws4py >= 0.2.4',
+                        'rdflib >= 4.1.0',
                         'pint == 0.1.3-djb',
                        ],
       dependency_links=['http://github.com/dbrnz/pint/tarball/master#egg=pint-0.1.3-djb']
