@@ -278,16 +278,21 @@ class Resource(rdflib.term.URIRef):
 
 rdflib.term.URIRef.uri = property(lambda self: unicode(self))
 
-class Statement(tuple):
-#======================
+
+class Statement(list):
+#=====================
   '''
   The main means of manipulating statements is by the `subject`, `predicate` and `object` properties.
   '''
-  def __new__(cls, s=None, p=None, o=None, **kwds):
+  def __init__(self, s=None, p=None, o=None, **kwds):
   #------------------------------------------------
-    if s and not isinstance(s, rdflib.term.URIRef): s = Resource(s)
+    if (s and not isinstance(s, rdflib.term.URIRef)
+          and not isinstance(s, rdflib.term.BNode)): s = Resource(s)
     if p and not isinstance(p, rdflib.term.URIRef): p = Resource(p)
-    return tuple.__new__(cls, (s, p, o))
+    if (o and not isinstance(o, rdflib.term.URIRef)
+          and not isinstance(o, rdflib.term.BNode)
+          and not isinstance(o, rdflib.term.Literal)): o = Literal(o)
+    list.__init__(self, [s, p, o])
 
   @property
   def subject(self):
