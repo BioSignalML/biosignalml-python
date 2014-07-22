@@ -33,6 +33,7 @@ import uuid
 import logging
 
 import rdflib
+import rdflib.plugins.memory
 
 
 class RDFParseError(Exception):
@@ -316,6 +317,33 @@ class QueryResults(rdflib.query.Result):
         elif isinstance(node, rdflib.term.Literal): node.__class__ = Literak
         elif isinstance(node, rdflib.term.BNode):   node.__class__ = BlankNode
     return r
+class IOMemory(rdflib.plugins.memory.IOMemory):
+#==============================================
+
+  def __obj2id(self, obj):        # Class name is IOMemory to ensure
+  #-----------------------        # private metod is overriden.
+    """encode object, storing it in the encoding map if necessary,
+       and return the integer key"""
+
+    if isinstance(obj, rdflib.term.BNode):
+      s = "_:%s" % unicode(obj)
+    elif isinstance(obj, rdflib.term.Literal):
+      v = ['"""' + unicode(obj.value) + '"""']
+      if   obj.language: v.append('@' + unicode(obj.language))
+      elif obj.datatype: v.append('^^' + unicode(obj.datatype))
+      s = "".join(v)
+    elif isinstance(obj, rdflib.term.URIRef):
+      s = "<%s>" % unicode(obj)
+    else:
+      s = obj
+    if s not in self.__obj2int:
+      id = rdflib.plugins.memory.randid()
+      while id in self.__int2obj:
+        id = rdflib.plugins.memory.randid()
+      self.__obj2int[s] = id
+      self.__int2obj[id] = obj
+      return id
+    return self.__obj2int[s]
 
 
 class Graph(rdflib.graph.Graph):
@@ -325,8 +353,7 @@ class Graph(rdflib.graph.Graph):
   '''
   def __init__(self, uri=None):
   #----------------------------
-    super(Graph, self).__init__(store=rdflib.plugins.memory.IOMemory(),
-                                identifier=uri)
+    super(Graph, self).__init__(store=IOMemory(), identifier=uri)
 
   @property
   def uri(self):
