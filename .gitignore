@@ -1,3 +1,5 @@
 BioSignalML.egg-info/
 build/
 dist/
+docs/_build
+*.pyc
