@@ -493,7 +493,7 @@ class Graph(rdflib.graph.Graph):
     :type statement: :class:`Statement`
     :return: A sequence of :class:`Statement`\s.
     '''
-    return self.triples(statement)
+    for s in self.triples(statement): yield Statement(*s)
 
   def get_object(self, s, p):
   #--------------------------
