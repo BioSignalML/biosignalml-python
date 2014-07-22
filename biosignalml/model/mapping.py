@@ -35,7 +35,7 @@ import os
 import logging
 from collections import namedtuple
 
-from biosignalml.rdf import Node, Uri, Statement, XSD
+from biosignalml.rdf import Node, Uri, Resource, Literal, Statement, XSD
 
 __all__ = [ 'PropertyMap', 'Mapping' ]
 
@@ -147,26 +147,24 @@ class Mapping(object):
                           for k, m in self.mapping.iteritems() }
 
   @staticmethod
-  def _makenode(v, dtype, mapfn):
-  #------------------------------
-    if   isinstance(v, Node) or isinstance(v, Uri):
-      return Node(v)
-    elif hasattr(v, 'node'): return v.node
-    elif hasattr(v, 'uri') and mapfn in [None, PropertyMap.get_uri]:
-      if isinstance(v.uri, Node): return Node(v)
-      else:                       return Node(Uri(v.uri))
+  def _makenode(value, dtype, mapfn):
+  #----------------------------------
+    if   isinstance(value, Node) and value.is_resource(): return value
+    elif isinstance(value, Uri): return Resource(value)
+    elif hasattr(value, 'node'): return value.node
+    elif hasattr(value, 'uri') and mapfn in [None, PropertyMap.get_uri]:
+      if isinstance(value.uri, Node): return value.uri
+      else:                           return Resource(value.uri)
     else:
       if mapfn:
-        try: v = mapfn(v)
+        try: value = mapfn(value)
         except Exception, msg:
           logging.error("Exception mapping literal with '%s': %s", str(mapfn), msg)
-      v = unicode(v)
-      if len(v.split(':')) > 1 and v.split(':')[0] in URI_SCHEMES:
-        return Node(Uri(v))
+      value = unicode(value)
+      if len(value.split(':')) > 1 and value.split(':')[0] in URI_SCHEMES:
+        return Resource(value)
       else:
-        result = { 'literal': v }
-        if dtype: result['datatype'] = dtype.uri
-        return Node(**result)
+        return Literal(value, datatype=dtype)
 
   def _statements(self, subject, map, value):
   #------------------------------------------
@@ -216,9 +214,10 @@ class Mapping(object):
     if node is None: return None
     elif node.is_resource(): v = Uri(node.uri)
     elif node.is_blank(): v = node.blank
-    else:
-      v = node.literal[0]
+    elif node.is_literal():
+      v = node.value
       if dtype: v = datatypes.get(dtype, str)(v)
+    else: v = str(node)
     return from_rdf(v) if from_rdf else v
 
   def metadata(self, metaclass, statement):
