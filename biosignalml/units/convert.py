@@ -19,6 +19,8 @@
 ######################################################
 
 import pint
+import pint.unit
+
 import logging
 
 import biosignalml.rdf.sparqlstore as sparqlstore
@@ -37,14 +39,14 @@ UNIT_PREFIXES = [ UOME.prefix,
                   "http://www.biosignalml.org/ontologies/examples/unit#"
                 ]
 
-BASE_UNITS = { 'Metre':         'length',
-               'Kilogram':      'mass',
-               'Second':        'time',
-               'Ampere':        'current',
-               'Candela':       'luminosity',
-               'Mole':          'substance',
-               'Kelvin':        'temperature',
-               'Dimensionless': 'dimensionless',
+BASE_UNITS = { 'Metre':         '[length]',
+               'Kilogram':      '[mass]',
+               'Second':        '[time]',
+               'Ampere':        '[current]',
+               'Candela':       '[luminosity]',
+               'Mole':          '[substance]',
+               'Kelvin':        '[temperature]',
+               'Dimensionless': '[dimensionless]',
              }
 
 
@@ -86,12 +88,14 @@ class UnitStore(object):
     self._store = store
     self._graph = graph
     self._cache = { }
-    self._registry = pint.UnitRegistry(None)
-    for u, t in BASE_UNITS.iteritems():
-      self._registry.add_unit(u, self._registry.Quantity(None, pint.UnitsContainer({t: 1})))
+    self._registry = pint.UnitRegistry(None)   # Start with an empty registry
+    for u, t in BASE_UNITS.iteritems():        # and add the base units.
+      self._registry.define(pint.unit.UnitDefinition(u, None, (), pint.unit.ScaleConverter(1),
+                                                     reference=pint.unit.UnitsContainer({t: 1.0}),
+                                                     is_base=True))
 
   def contains(self, uri):
-  #------------------------
+  #-----------------------
     return self._store.ask("<%s> a core:UnitOfMeasurement" % uri,
       graph=self._graph, prefixes=dict(core="http://www.sbpax.org/uome/core.owl#"))
 
@@ -126,7 +130,8 @@ class UnitStore(object):
       derivation = self.get_derivation(uri)
       if derivation is None:
         if name not in BASE_UNITS:
-          self._registry.add_unit(name, self._registry.Quantity(None, None)) # Dimensionless
+          self._registry.define(pint.unit.UnitDefinition(name, None, (), pint.unit.ScaleConverter(1),  # Dimensionless
+                                                         reference=self._registry.Quantity(None, None)))
         unit = self._registry[name]
       else:
         kind = derivation.kind
@@ -141,7 +146,8 @@ class UnitStore(object):
         elif kind == str(UOME_CORE.QuotientExpression):
           unit = self.get_unit(derivation.unit1) / self.get_unit(derivation.unit2)
         elif kind == str(UOME_CORE.EquivalenzExpression):
-          self._registry.add_unit(name, self.get_unit(derivation.unit1))
+          self._registry.define(pint.unit.UnitDefinition(name, None, (), pint.unit.ScaleConverter(1),
+                                                         reference=self.get_unit(derivation.unit1)))
           unit = self._registry[name]
         else:
           raise ValueError("Invalid unit's derivation")
