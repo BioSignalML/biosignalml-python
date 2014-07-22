@@ -613,3 +613,25 @@ class Graph(rdflib.graph.Graph):
 ######################################################################################
 
 
+if __name__ == '__main__':
+#=========================
+
+  graph_uri = 'http://devel.biosignalml.org/test'
+  g = Graph(graph_uri)
+  statements = ([Resource(u'http://devel.biosignalml.org/test'),
+                   Resource(u'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+                     Resource(u'http://www.biosignalml.org/ontologies/2011/04/biosignalml#Recording')],
+                [Resource(u'http://devel.biosignalml.org/test'),
+                   Resource(u'http://purl.org/NET/c4dm/timeline.owl#timeline'),
+                     Resource(u'http://devel.biosignalml.org/test/timeline')],
+                [Resource(u'http://devel.biosignalml.org/test/timeline'),
+                   Resource(u'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+                     Literal(u'http://purl.org/NET/c4dm/timeline.owl#RelativeTimeLine')],
+                [Resource(u'http://devel.biosignalml.org/test'),
+                   Resource(u'http://purl.org/dc/terms/format'),
+                     Literal(u'application/x-bsml')],
+               )
+  g.add_statements(statements)
+
+#  for s in g: print s
+  print g.serialize(format="turtle") # , xml_base=graph_uri)
