@@ -186,7 +186,7 @@ class Literal(rdflib.term.Literal):
   #-------------------------------------------------------
     super(Literal, self).__init__(value, datatype=datatype, lang=language)
 
-  def as_string(self):   ## V's __str__ ???
+  def as_string(self):
   #-------------------
     '''
     Return the literal as a quoted string with language and datatype attributes.
@@ -211,8 +211,8 @@ class BlankNode(rdflib.term.BNode):
       blank = str(blank[9:])    ## Tidy Virtuoso blank node identifiers
     super(BlankNode, self).__init__(value=blank)
 
-  def __str__(self):   ## V's as_string() ???
-  #-----------------
+  def as_string(self):
+  #-------------------
     return '_:%s' % unicode(self)
 
 
@@ -233,8 +233,8 @@ class Resource(rdflib.term.URIRef):
     self._label = label
     self._description = desc
 
-  def __str__(self):
-  #-----------------
+  def as_string(self):
+  #-------------------
     return self.label if self.label else unicode(self)
 
   @property
