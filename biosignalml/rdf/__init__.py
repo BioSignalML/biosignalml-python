@@ -172,6 +172,15 @@ Node.as_string = lambda self: str(self)
 #--------------------------------------
 ''' Represent a Node as a string. '''
 
+Node.is_resource = lambda self: isinstance(self, rdflib.term.URIRef)
+#---------------
+
+Node.is_blank = lambda self: isinstance(self, rdflib.term.BNode)
+#------------
+
+Node.is_literal = lambda self: isinstance(self, rdflib.term.Literal)
+#--------------
+
 
 class Literal(rdflib.term.Literal):
 #==================================
@@ -230,7 +239,6 @@ class Resource(rdflib.term.URIRef):
 
   def __init__(self, uri, label='', desc=''):
   #------------------------------------------
-    self.uri = uri
     self._label = label
     self._description = desc
 
@@ -268,6 +276,7 @@ class Resource(rdflib.term.URIRef):
     return (isinstance(this, rdflib.term.URIRef)
         and str(this).startswith('urn:uuid:'))
 
+rdflib.term.URIRef.uri = property(lambda self: unicode(self))
 
 class Statement(tuple):
 #======================
