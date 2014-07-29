@@ -130,7 +130,7 @@ def annotate(source, outfile, annotations):
     annsize = 2*output.nsamples[annsig]
 
   output.writeheader()
-  for n in xrange(0, input._datarecs):
+  for n in range(0, input._datarecs):
     output._file.write(input._file.read(input._recsize))
     if annsize:
       timekeep = ('+%s\x14\x14\00' % str(n * input._drduration)) if tlen else ''
@@ -166,7 +166,7 @@ if __name__ == '__main__':
   infile = args[0]
   outfile = args[1]
   if not os.path.exists(infile):
-    print "Missing file '%s'" % infile
+    print("Missing file '%s'" % infile)
     sys.exit()
 
 

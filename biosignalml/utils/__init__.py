@@ -57,7 +57,7 @@ def isoformat_to_datetime(v):
     dt = dateutil.parser.parse(v)
     if dt.tzinfo is not None: return (dt - dt.utcoffset()).replace(tzinfo=tzutc())
     else:                     return dt
-  except Exception, msg:
+  except Exception as msg:
     logging.error("Cannot convert datetime '%s': %s", v, msg)
     return None
 
@@ -142,10 +142,10 @@ def cp1252(s):
 #============
   """ Encodes 's' as Unicode using cp1252 code table."""
   try:
-    if isinstance(s, unicode): return s
+    if isinstance(s, str): return s
     elif isinstance(s, str):   return s.decode('cp1252')
     else:                      return str(s).decode('cp1252')
-  except Exception, e:
+  except Exception as e:
     logging.error("Can not encode %s", s)
     return('???')
 
@@ -174,7 +174,7 @@ def xml(x):
 #=========
   r = []
   r.append('<' + x.__class__.__name__)
-  for n, v in x.__dict__.iteritems(): r.append(' ' + n + '="' + xmlescape(str(v)) + '"')
+  for n, v in x.__dict__.items(): r.append(' ' + n + '="' + xmlescape(str(v)) + '"')
   r.append('/>')
   return ''.join(r)
 
@@ -232,7 +232,7 @@ def hexdump(s, prompt='', offset=0):
 ##
 ## From http://effbot.org/zone/re-sub.htm#unescape-html
 
-import re, htmlentitydefs
+import re, html.entities
 
 ##
 # Removes HTML or XML character references and entities from a text string.
@@ -245,13 +245,13 @@ def unescape(text):
     text = m.group(0)
     if text[:2] == "&#":  # character reference
       try:
-        if text[:3] == "&#x": return unichr(int(text[3:-1], 16))
-        else:                 return unichr(int(text[2:-1]))
+        if text[:3] == "&#x": return chr(int(text[3:-1], 16))
+        else:                 return chr(int(text[2:-1]))
       except ValueError:
         pass
     else:                 # named entity
       try:
-        text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+        text = chr(html.entities.name2codepoint[text[1:-1]])
       except KeyError:
         pass
     return text           # leave as is
@@ -264,6 +264,6 @@ def unescape(text):
 
 if __name__ == '__main__':
 #========================
-  print utctime()
-  print utctime_as_string()
-  print hexdump('123\x01\x41B1234567890abcdefghijklmnopqrstuvwxyz')
+  print(utctime())
+  print(utctime_as_string())
+  print(hexdump('123\x01\x41B1234567890abcdefghijklmnopqrstuvwxyz'))

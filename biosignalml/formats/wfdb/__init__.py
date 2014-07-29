@@ -144,7 +144,7 @@ class WFDBSignal(BSMLSignal):
     siginfo = self._record._siginfo
     offsets = [ (0, siginfo[0].spf) ]    ## This is record wide data...
     samplesperframe = siginfo[0].spf
-    for s in xrange(1, self._record._nsignals):
+    for s in range(1, self._record._nsignals):
       offsets.append((samplesperframe, siginfo[s].spf))
       samplesperframe += siginfo[s].spf
 
@@ -162,7 +162,7 @@ class WFDBSignal(BSMLSignal):
           r = wfdb.getframe(v.cast())
         if r <= 0: i = 0
         else:
-          for n in xrange(offsets[s][0], offsets[s][0]+offsets[s][1]):
+          for n in range(offsets[s][0], offsets[s][0]+offsets[s][1]):
             d.append(v[n])
             i -= 1
             rpos += 1
@@ -235,7 +235,7 @@ class WFDBRecording(BSMLRecording):
     self.annotation_signals = [ ]
     self._offsets = [ ]
     offset = 0
-    for n in xrange(self._nsignals):
+    for n in range(self._nsignals):
       if self._siginfo[n].desc != 'EDF Annotations':
         self.data_signals.append(n)
         self.add_signal(WFDBSignal(n, self,
@@ -251,9 +251,9 @@ class WFDBRecording(BSMLRecording):
       offset = self._framesize
 
     self._sigpoints = np.ones(self._framesize, 'bool')
-    for n in xrange(self._nsignals):
+    for n in range(self._nsignals):
       if n in self.annotation_signals:
-        for i in xrange(*self._offsets[n]): self._sigpoints[i] = False
+        for i in range(*self._offsets[n]): self._sigpoints[i] = False
 
     #if len(self.annotation_signals) > 0:
       # read all frames, build TAL and add events -- see edffile.py
@@ -286,8 +286,8 @@ class WFDBRecording(BSMLRecording):
     if signo < 0 or signo in self.data_signals:
       v = wfdb.WFDB_SampleArray(self._framesize)
       while wfdb.getframe(v.cast()) == self._nsignals:
-        if signo < 0: yield [v[i] for i in xrange(self._framesize) if self._sigpoints[i]]
-        else:         yield [v[i] for i in xrange(*self._offsets[n])]
+        if signo < 0: yield [v[i] for i in range(self._framesize) if self._sigpoints[i]]
+        else:         yield [v[i] for i in range(*self._offsets[n])]
 
 
 
@@ -300,21 +300,21 @@ if __name__ == '__main__':
 
   def printsig(wf, s):
   #-------------------
-    print ("\nSignal %s: (%s) rate=%s\n     gain=%s, base=%s"
-                  % (s.uri, s.label, s.rate, s._gain, s._baseline))
+    print(("\nSignal %s: (%s) rate=%s\n     gain=%s, base=%s"
+                  % (s.uri, s.label, s.rate, s._gain, s._baseline)))
     for d in s.read(interval=wf.interval(4.3, 0.1)):
 #    for d in s.read(segment=[3, 150]):
-      print d
-      print d.data
+      print(d)
+      print(d.data)
 
 
   def testrec(record):
   #-------------------
-    print "\nOpening: %s" % record
+    print("\nOpening: %s" % record)
 
     wf = WFDBRecording(record)
-    print ("  Opened %s: dataset=%s\n   start=%s, duration=%s\n   Nsigs=%s, framerate=%s, framesize=%s"
-               % (wf.uri, wf.dataset, wf.starttime, wf.duration, len(wf), wf._framerate, wf._framesize))
+    print(("  Opened %s: dataset=%s\n   start=%s, duration=%s\n   Nsigs=%s, framerate=%s, framesize=%s"
+               % (wf.uri, wf.dataset, wf.starttime, wf.duration, len(wf), wf._framerate, wf._framesize)))
 
     s = wf.signals[0]
     printsig(wf, s)

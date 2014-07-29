@@ -134,7 +134,7 @@ matrix 'time' values,
 """
 
 from functools import reduce
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import h5py
 import numpy as np
@@ -346,11 +346,11 @@ class H5Recording(object):
     """
     try:
       if fname.startswith('file:'):
-        f = urllib.urlopen(fname)
+        f = urllib.request.urlopen(fname)
         fname = f.fp.name
         f.close()
       h5 = h5py.File(fname, 'r' if readonly else 'r+')
-    except IOError, msg:
+    except IOError as msg:
       raise IOError("Cannot open file '%s' (%s)" % (fname, msg))
     try:
       v = h5.attrs['version']
@@ -381,7 +381,7 @@ class H5Recording(object):
     if fname.startswith('file://'): fname = fname[7:]
     try:
       h5 = h5py.File(fname, 'w' if replace else 'w-')
-    except IOError, msg:
+    except IOError as msg:
       raise IOError("Cannot create file '%s' (%s)" % (fname, msg))
     h5.attrs['version'] = IDENTIFIER
     h5.create_group('uris')
@@ -492,7 +492,7 @@ class H5Recording(object):
       dset = self._h5['/recording/signal'].create_dataset(str(signo),
         data=data, shape=shape, maxshape=maxshape, dtype=dtype,
         chunks=True, compression=compression)
-    except Exception, msg:
+    except Exception as msg:
       raise RuntimeError("Cannot create signal dataset (%s)" % msg)
 
     if nsignals == 1:
@@ -554,7 +554,7 @@ class H5Recording(object):
       dset = self._h5['/recording/clock'].create_dataset(str(clockno),
         data=times, shape=shape, maxshape=maxshape, dtype=dtype,
         chunks=True, compression=compression)
-    except Exception, msg:
+    except Exception as msg:
       raise RuntimeError("Cannot create clock dataset (%s)" % msg)
 
     dset.attrs['uri'] = str(uri)
@@ -609,7 +609,7 @@ class H5Recording(object):
         dset[dpoints:] = data.reshape((npoints, dset.shape[1]))
       else:                    # simple dataset
         dset[dpoints:] = data.reshape((npoints,) + dset.shape[1:])
-    except Exception, msg:
+    except Exception as msg:
       raise RuntimeError("Cannot extend signal dataset '%s' (%s)" % (uri, msg))
 
 
@@ -633,7 +633,7 @@ class H5Recording(object):
     try:
       dset.resize(dpoints + npoints, 0)
       dset[dpoints:] = times.reshape((npoints,) + dset.shape[1:])
-    except Exception, msg:
+    except Exception as msg:
       raise RuntimeError("Cannot extend clock dataset '%s' (%s)" % (uri, msg))
 
 
@@ -787,7 +787,7 @@ if __name__ == '__main__':
   g.extend_clock('clock URI', [ 1, 2, 4, 5, 6, 7, 8, 9, ])
   g.extend_signal('another signal URI', [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ])
 
-  print g.get_metadata()
+  print(g.get_metadata())
 
   g.close()
 

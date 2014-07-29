@@ -24,7 +24,7 @@ Send and receive BioSignalML data using Web Sockets.
 
 
 import logging
-import Queue
+import queue
 from time import sleep
 
 import ws4py.client.threadedclient
@@ -56,7 +56,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   #-----------------------------------------------------------------------------------------
     super(StreamClient, self).__init__(endpoint, **kwds)
     self._request = request
-    self._receiver = receiveQ.put if isinstance(receiveQ, Queue.Queue) else receiveQ
+    self._receiver = receiveQ.put if isinstance(receiveQ, queue.Queue) else receiveQ
     self._parser = BlockParser(self._receiver, check=check)
     self._opened = False
     self._access_key = token
@@ -141,7 +141,7 @@ class WebStreamReader(SignalDataStream):
     try:
       self._ws = StreamClient(endpoint, self._request, self._receiveQ, protocols=['biosignalml-ssf'], **kwds)
       self._ws.connect()
-    except Exception, msg:
+    except Exception as msg:
       logging.error('Unable to connect to WebSocket: %s', msg)
       raise StreamException('Cannot open WebStreamReader')
 
@@ -163,7 +163,7 @@ class WebStreamWriter(object):
       self._ws = StreamClient(endpoint, None, self.got_response, token=token,
                               protocols=['biosignalml-ssf'])
       self._ws.connect()
-    except Exception, msg:
+    except Exception as msg:
       logging.error('Unable to connect to WebSocket at %s: %s', endpoint, msg)
       raise StreamException('Cannot open WebStreamWriter')
 
@@ -195,9 +195,9 @@ if __name__ == '__main__':
   logging.getLogger().setLevel(logging.DEBUG)
 
   if len(sys.argv) < 5:
-    print 'Usage: %s endpoint uri start duration' % sys.argv[0]
+    print('Usage: %s endpoint uri start duration' % sys.argv[0])
     sys.exit(1)
 
   for d in WebStreamReader(sys.argv[1], sys.argv[2], start=float(sys.argv[3]),
                                                      duration=float(sys.argv[4]) ):
-    print d
+    print(d)

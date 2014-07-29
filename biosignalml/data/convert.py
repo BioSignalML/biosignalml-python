@@ -153,6 +153,6 @@ if __name__ == "__main__":
   #for o in resampler.convert(signal, 1, finished=True):
   g = resampler.convert(signal, 1, finished=True)
   for o in g:
-    print len(o)
+    print(len(o))
 
   del resampler

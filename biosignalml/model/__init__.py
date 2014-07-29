@@ -54,9 +54,9 @@ if __name__ == '__main__':
 
   def print_dict(r):
   #-----------------
-    print '{'
-    for kv in r.__dict__.iteritems(): print '  %s: %s' % kv
-    print '  }'
+    print('{')
+    for kv in r.__dict__.items(): print('  %s: %s' % kv)
+    print('  }')
 
   def check(instance):
   #-------------------
@@ -70,8 +70,8 @@ if __name__ == '__main__':
 #    print instance.metadata_as_string(rdf.Format.TURTLE)
 #    print copy.metadata_as_string(rdf.Format.TURTLE)
     if instance.metadata_as_string(rdf.Format.TURTLE) != copy.metadata_as_string(rdf.Format.TURTLE):
-      print "INPUT:", instance.metadata_as_string(rdf.Format.TURTLE)
-      print "RESULT:", copy.metadata_as_string(rdf.Format.TURTLE)
+      print("INPUT:", instance.metadata_as_string(rdf.Format.TURTLE))
+      print("RESULT:", copy.metadata_as_string(rdf.Format.TURTLE))
       raise AssertionError
     return copy
 

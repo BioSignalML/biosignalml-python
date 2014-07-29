@@ -89,7 +89,7 @@ class UnitStore(object):
     self._graph = graph
     self._cache = { }
     self._registry = pint.UnitRegistry(None)   # Start with an empty registry
-    for u, t in BASE_UNITS.iteritems():        # and add the base units.
+    for u, t in BASE_UNITS.items():        # and add the base units.
       self._registry.define(pint.unit.UnitDefinition(u, None, (), pint.unit.ScaleConverter(1),
                                                      reference=pint.unit.UnitsContainer({t: 1.0}),
                                                      is_base=True))
@@ -188,7 +188,7 @@ if __name__ == '__main__':
 
   def test(u):
   #-----------
-    print u, '\n  ', repr(store._store.get_unit(u))
+    print(u, '\n  ', repr(store._store.get_unit(u)))
 
   test('http://www.sbpax.org/uome/list.owl#Centimetre')
   test('http://www.sbpax.org/uome/list.owl#RadianPerSecond')
@@ -203,29 +203,29 @@ if __name__ == '__main__':
   d = store._store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#DecilitrePerMinute')
   c = store._store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
   x = d/c
-  print repr(x), x.unitless, x.dimensionless, x.magnitude
+  print(repr(x), x.unitless, x.dimensionless, x.magnitude)
 
   r = store._store.get_unit('http://www.sbpax.org/uome/list.owl#Radian')
   a = store._store.get_unit('http://www.sbpax.org/uome/list.owl#DegreeOfArc')
   x = r/a
-  print "Radian/Degree:", repr(x), x.unitless, x.dimensionless, x.magnitude
+  print("Radian/Degree:", repr(x), x.unitless, x.dimensionless, x.magnitude)
 ## Can convert if unitless
 
   dl = store._store.get_unit('http://www.sbpax.org/uome/list.owl#Decilitre')
-  print repr(dl/d)
+  print(repr(dl/d))
 
   try:
     dl = store._store.get_unit('http://www.biosignalml.org/ontologies/examples/unit#Decilitre')
-  except Exception, msg:
-    print msg
+  except Exception as msg:
+    print(msg)
 
   f = store.mapping('http://www.biosignalml.org/ontologies/examples/unit#DecilitrePerMinute',
                     'http://www.biosignalml.org/ontologies/examples/unit#CentilitrePerMinute')
-  print f(12)
+  print(f(12))
 
   f = store.mapping('http://www.sbpax.org/uome/list.owl#Nanomolar',
                     'http://www.sbpax.org/uome/list.owl#Micromolar')
-  print '1200 nM =', f(1200), 'uM'
+  print('1200 nM =', f(1200), 'uM')
 
 """
 

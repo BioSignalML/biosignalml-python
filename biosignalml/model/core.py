@@ -205,7 +205,7 @@ class AbstractObject(object):
         elif attr not in self.__dict__:
           setattr(self, attr, None)                # So it's able to be _assign()ed to
         attribs.append(attr)                      # Attributes that have been set
-    return { attr: value for attr, value in values.iteritems()
+    return { attr: value for attr, value in values.items()
       if not (value is None or attr in attribs or attr[0] == '_') }
 
 

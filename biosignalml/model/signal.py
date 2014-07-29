@@ -86,7 +86,7 @@ class Signal(AbstractObject):
   #----------------
     return 0
 
-  def __nonzero__(self):
+  def __bool__(self):
   #---------------------
     return True  # Otherwise bool(sig) is False, because we have __len__()
 
