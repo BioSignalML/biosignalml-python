@@ -192,9 +192,9 @@ class Literal(rdflib.term.Literal):
   :param language: The literal's language.
   :type language: str
   '''
-  def __init__(self, value, datatype=None, language=None):
-  #-------------------------------------------------------
-    super(Literal, self).__init__(value, datatype=datatype, lang=language)
+  def __new__(cls, value, datatype=None, language=None):
+  #-----------------------------------------------------
+    return rdflib.term.Literal.__new__(cls, value, datatype=datatype, lang=language)
 
   def as_string(self):
   #-------------------
@@ -215,11 +215,11 @@ class BlankNode(rdflib.term.BNode):
   :param blank: Blank self identifier.
   :type blank: str
   '''
-  def __init__(self, blank=None):
-  #------------------------------
+  def __new__(cls, blank=None):
+  #----------------------------
     if blank is not None and blank.startswith('nodeID://'):
       blank = str(blank[9:])    ## Tidy Virtuoso blank node identifiers
-    super(BlankNode, self).__init__(value=blank)
+    return rdflib.term.BNode.__new__(cls, value=blank)
 
   def as_string(self):
   #-------------------
