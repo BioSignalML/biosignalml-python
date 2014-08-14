@@ -434,13 +434,13 @@ class H5Recording(object):
 
     """
 
-    if not getattr(uri, '__iter__', None) and not getattr(units, '__iter__', None):
+    uri_list = (hasattr(uri, '__iter__') and not hasattr(uri, 'strip'))
+    unit_list = (hasattr(units, '__iter__') and not hasattr(units, 'strip'))
+    if not uri_list and not unit_list:
       if self._h5['uris'].attrs.get(str(uri)):
         raise KeyError("A signal already has URI '%s'" % uri)
       nsignals = 1
-    elif (getattr(uri, '__iter__', None)
-     and getattr(units, '__iter__', None)
-     and len(uri) == len(units)):  # compound dataset
+    elif uri_list and unit_list and len(uri) == len(units):  # compound dataset
       for u in uri:
         if self._h5['uris'].attrs.get(str(u)):
           raise KeyError("A signal already has URI '%s'" % uri)
@@ -580,7 +580,7 @@ class H5Recording(object):
     supplied data must be a multiple of the number of signals.
     """
     if len(data) == 0: return
-    if getattr(uri, '__iter__', None) is not None:
+    if hasattr(uri, '__iter__') and not hasattr(uri, 'strip'):
       sig = self.get_signal(uri[0])
       if sig is None or list(sig.dataset.attrs['uri']) != list(uri):
          raise KeyError("Unknown signal set '%s'" % uri)

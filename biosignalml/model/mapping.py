@@ -170,7 +170,7 @@ class Mapping(object):
   #------------------------------------------
     from .core import AbstractObject
     if value not in [None, '']:
-      if hasattr(value, '__iter__'):
+      if hasattr(value, '__iter__') and not hasattr(value, 'strip'):
         for v in value:
           if isinstance(v, AbstractObject):
             yield Statement(subject, map.property, self._makenode(v, None, None))

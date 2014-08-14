@@ -165,8 +165,7 @@ def xmlescape(s):
                      '&amp;').replace('<',
                                       '&lt;').replace('>',
                                                       '&gt;').replace('"',
-                                                                      '&quot;').encode('ascii',
-                                                                                       'xmlcharrefreplace')
+                                                                      '&quot;')
   else:
     return ''
 
