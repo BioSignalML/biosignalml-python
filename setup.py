@@ -42,5 +42,6 @@ setup(name='BioSignalML',
                         'ws4py >= 0.2.4',
                         'rdflib >= 4.1.0',
                         'pint >= 0.5.1',
+                        'numpy >= 1.8.1',
                        ],
       )
