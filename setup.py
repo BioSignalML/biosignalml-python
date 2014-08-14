@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = "0.6.0a"
+version = "0.6.0b"
 
 
 setup(name='BioSignalML',
