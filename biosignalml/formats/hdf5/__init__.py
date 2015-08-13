@@ -149,6 +149,16 @@ class HDF5Signal(BSMLSignal):
       self.recording._h5.extend_clock(self.clock.uri, timeseries.time.times)
     self.recording._h5.extend_signal(self.uri, timeseries.data)
 
+  def extend(self, points):
+  #------------------------
+    '''
+    Append data points to a signal.
+
+    :param points: The data points to append.
+    :type points: :class:`numpy.ndarray` or an iterable.
+    '''
+    self.recording._h5.extend_signal(self.uri, points)
+
 
 class HDF5Recording(BSMLRecording):
 #==================================
