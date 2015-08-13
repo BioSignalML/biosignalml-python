@@ -225,7 +225,8 @@ class HDF5Recording(BSMLRecording):
     """
     sig = BSMLRecording.new_signal(self, uri, units, id=id, **kwds)
     if self._h5:
-      if sig.clock: self._h5.create_clock(sig.clock.uri)
+      if sig.clock:
+        self._h5.create_clock(sig.clock.uri, sig.clock.units, times=sig.clock.times)
       sig._h5 = self._h5.create_signal(sig.uri, units, **kwds)
     return sig
 

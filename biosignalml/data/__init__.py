@@ -48,10 +48,12 @@ class Clock(AbstractObject):
   metaclass = BSML.SampleClock  #: :attr:`.BSML.SampleClock`
 
   # Also have 'frequency' ?? and/or 'period' ??
-  attributes = [ 'resolution', 'rate' ]
+  attributes = [ 'resolution', 'rate', 'units' ]
 
   mapping = { 'resolution': PropertyMap(BSML.resolution, XSD.double),
-              'rate':       PropertyMap(BSML.rate,       XSD.double) }
+              'rate':       PropertyMap(BSML.rate,       XSD.double),
+              'units':      PropertyMap(BSML.units, to_rdf=PropertyMap.get_uri) }
+
 
   def __init__(self, uri, times, resolution=None, rate=None, **kwds):
   #------------------------------------------------------------------
