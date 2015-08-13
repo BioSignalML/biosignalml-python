@@ -48,10 +48,12 @@ class Clock(AbstractObject):
   metaclass = BSML.SampleClock  #: :attr:`.BSML.SampleClock`
 
   # Also have 'frequency' ?? and/or 'period' ??
-  attributes = [ 'resolution', 'rate' ]
+  attributes = [ 'resolution', 'rate', 'units' ]
 
   mapping = { 'resolution': PropertyMap(BSML.resolution, XSD.double),
-              'rate':       PropertyMap(BSML.rate,       XSD.double) }
+              'rate':       PropertyMap(BSML.rate,       XSD.double),
+              'units':      PropertyMap(BSML.units, to_rdf=PropertyMap.get_uri) }
+
 
   def __init__(self, uri, times, resolution=None, rate=None, **kwds):
   #------------------------------------------------------------------
@@ -59,7 +61,7 @@ class Clock(AbstractObject):
      and float(resolution)*float(rate) != 1.0):
       raise DataError("Clock's resolution doesn't match its rate")
     AbstractObject.__init__(self, uri, resolution=resolution, rate=rate, **kwds)
-    self.times = np.asarray(times) if times is not None else None
+    self.times = np.asarray(times) if times is not None else np.empty(0)
 
   def __getitem__(self, key):
   #--------------------------
