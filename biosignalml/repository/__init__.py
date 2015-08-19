@@ -168,7 +168,7 @@ class BSMLStore(GraphStore):
     '''
     Get an Event from the repository.
 
-    :param uri: The URI of an Eventt.
+    :param uri: The URI of an Event.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: :class:`~biosignalml.Event`
     '''
@@ -187,8 +187,9 @@ class BSMLStore(GraphStore):
     '''
     Return a list of Event URIs associated with a recording.
 
-    :param uri: The URI of the recording.
+    :param rec_uri: The URI of the recording.
     :param eventtype: The type of events to find. Optional.
+    :param timetype: The class of temporal entity to find. Optional.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: list of bsml:Event URIs
     '''
