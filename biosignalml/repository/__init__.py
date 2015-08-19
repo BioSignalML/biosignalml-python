@@ -221,7 +221,7 @@ class BSMLStore(GraphStore):
     :rtype: list of bsml:Event URIs if no counts, otherwise tuple(URI, count).
     '''
     return [ tuple(r[1:3]) if counts else r[1]
-      for r in self.get_resources(BSML.Event, rvars='?et count(?et) as ?count',
+      for r in self.get_resources(BSML.Event, rvars='?et (count(?et) as ?count)',
         condition = '?e bsml:recording <%s> . ?e bsml:eventType ?et' % rec_uri,
         group = '?et',
         prefixes = dict(bsml=BSML.prefix),
