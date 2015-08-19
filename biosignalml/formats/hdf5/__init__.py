@@ -186,7 +186,7 @@ class HDF5Recording(BSMLRecording):
         self._h5 = H5Recording.open(fname, **kwds)
         if uri is not None and str(uri) != str(self._h5.uri):
           raise TypeError("Wrong URI in HDF5 recording")
-        ## What about self.load_metadata() ???? Do kwds override ??
+        self._load_metadata()
         for n, s in enumerate(self._h5.signals()):
           self.add_signal(HDF5Signal.create_from_H5Signal(n, s))
     else:
@@ -216,10 +216,11 @@ class HDF5Recording(BSMLRecording):
     return cls(uri, dataset, create=True, **kwds)
 ###    self.dataset = dataset    ### Only set dataset in metadata when storing into a repository??
 
-  def close(self):
-  #---------------
+  def close(self, prefixes=None):
+  #------------------------------
     """ Close a recording`. """
     if self._h5:
+      self._save_metadata(prefixes=prefixes)
       self._h5.close()
       self._h5 = None
 
@@ -241,8 +242,9 @@ class HDF5Recording(BSMLRecording):
       sig._h5 = self._h5.create_signal(sig.uri, units, **kwds)
     return sig
 
-  def save_metadata(self, format=rdf.Format.TURTLE, prefixes=None):
-  #----------------------------------------------------------------
+
+  def _save_metadata(self, format=rdf.Format.TURTLE, prefixes=None):
+  #-----------------------------------------------------------------
     """
     Save all metadata associated with the recording in its
     BioSignalML HDF5 file.
@@ -253,15 +255,19 @@ class HDF5Recording(BSMLRecording):
     self._h5.store_metadata(self.metadata_as_string(format=format, prefixes=prefixes, base=self.uri),
                         rdf.Format.mimetype(format))
 
-  def load_metadata(self):
-  #-----------------------
+  def _load_metadata(self):
+  #------------------------
     """
     Set metadata attributes of the recording from its associated
     BioSignalML HDF5 file.
     """
-    rdf, format = self._h5,get_metadata()
-    if rdf:
-      self.add_metadata(rdf.Graph.create_from_string(self.uri, rdf, format))
+    rdf, format = self._h5.get_metadata()
+    if rdf:         ## An error if no metadata in the file
+      self.graph = rdf.Graph.create_from_string(self.uri, rdf, format)
+      self.add_metadata(self.graph)
+    else:
+      raise TypeError("No metadata in BioSignalML file")
+
 
   def initialise(self, **kwds):
   #----------------------------
