@@ -15,6 +15,7 @@ Subpackages
     biosignalml.transports
     biosignalml.units
     biosignalml.utils
+    classes
 
 Module contents
 ---------------
@@ -23,3 +24,4 @@ Module contents
     :members:
     :undoc-members:
     :show-inheritance:
+
