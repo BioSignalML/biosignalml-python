@@ -29,8 +29,8 @@ import operator
 import biosignalml.formats
 from biosignalml import BSML, Recording, Signal, Event, Annotation, Segment
 from biosignalml.data.time import TemporalEntity
+import biosignalml.rdf as rdf
 from biosignalml.rdf import RDFS, DCT, PRV, TL, Format
-import biosignalml.rdf.sparqlstore as sparqlstore
 
 from .graphstore import GraphStore, GraphUpdate
 
@@ -273,9 +273,9 @@ class RecordingGraph(rdf.Graph):
 
 class BSMLStore(GraphStore):
 #===========================
-  '''
+  """
   An RDF repository containing BioSignalML metadata.
-  '''
+  """
 
   def __init__(self, base_uri, sparqlstore):
   #-----------------------------------------
@@ -283,17 +283,17 @@ class BSMLStore(GraphStore):
 
   def has_recording(self, uri):
   #----------------------------
-    ''' Check a URI refers to a Recording. '''
+    """ Check a URI refers to a Recording. """
     return self.has_resource(uri, BSML.Recording)
 
   def has_signal(self, uri, graph_uri=None):
   #-----------------------------------------
-    ''' Check a URI refers to a Signal. '''
+    """ Check a URI refers to a Signal. """
     return self.has_resource(uri, BSML.Signal, graph_uri)
 
   def has_signal_in_recording(self, sig, rec):
   #-------------------------------------------
-    ''' Check a URI refers to a Signal in a given Recording. '''
+    """ Check a URI refers to a Signal in a given Recording. """
     g, r = get_graph_and_recording_uri(rec)
     return g is not none and self.has_signal(sig, g)
 
@@ -318,14 +318,14 @@ class BSMLStore(GraphStore):
     r = self.get_resources(BSML.Recording, condition='<%s> a []' % uri)
     return r[0] if r else (None, None)
 
-  def get_recording(self, uri, with_signals=True, open_dataset=True, recording_class=None,
-  #---------------------------------------------------------------------------------------
-                                                                     graph_uri=None, **kwds):
+  def get_recording(self, uri, signals=True, open_dataset=True, recording_class=None,
+  #----------------------------------------------------------------------------------
+                                                                graph_uri=None, **kwds):
     """
     Get the Recording from the graph that an object is in.
 
-    :param uri: The URI of some object.
-    :paran with_signals: Default action is to also load the Recording's Signals.
+    :param uri: The URI of the Recording.
+    :param signals: Default action is to create the Recording's Signals.
     :param open_dataset: Default action is to open the Recording's dataset.
     :param recording_class: The class of Recording to create. If not set
       the class is determined by the recording's dct:format attribute.
@@ -346,11 +346,11 @@ class BSMLStore(GraphStore):
 ##    graph = self.get_graph(graph_uri, BSML.Recording)
       rec = recording_class.create_from_graph(rec_uri, graph, signals=False, **kwds)
       if rec is not None:
-        if with_signals:
+        if signals:
           for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
               params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix),
               graph=graph.uri, order='?s'):
-            sig_uri = sparqlstore.get_result_value(r, 's')
+            sig_uri = rdf.sparqlstore.get_result_value(r, 's')
             sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph.uri)
             rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
         rec.initialise(open_dataset=open_dataset)    ## This will open files...
@@ -358,13 +358,13 @@ class BSMLStore(GraphStore):
 
   def get_signal(self, uri, graph_uri=None, signal_class=None, **kwds):
   #--------------------------------------------------------------------
-    '''
+    """
     Get a Signal from the repository.
 
     :param uri: The URI of a Signal.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: :class:`~biosignalml.Signal`
-    '''
+    """
     ### This assumes all signals for a recording in the repository
     ### have been loaded against the Recording...
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
@@ -378,13 +378,13 @@ class BSMLStore(GraphStore):
 
   def signals(self, rec_uri, graph_uri=None):
   #------------------------------------------
-    '''
+    """
     Return a list of all Signals of a recording.
 
     :param uri: The URI of the recording.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: list of bsml:Signal URIs
-    '''
+    """
     return [ r[1]
       for r in self.get_resources(BSML.Signal, rvars='?r',
         condition='?r bsml:recording <%s>' % rec_uri,
@@ -395,13 +395,13 @@ class BSMLStore(GraphStore):
 
   def get_event(self, uri, graph_uri=None):
   #-----------------------------------------
-    '''
+    """
     Get an Event from the repository.
 
     :param uri: The URI of an Event.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: :class:`~biosignalml.Event`
-    '''
+    """
     # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Event, graph_uri)
@@ -414,7 +414,7 @@ class BSMLStore(GraphStore):
 
   def get_event_uris(self, rec_uri, eventtype=None, timetype=None, graph_uri=None):
   #--------------------------------------------------------------------------------
-    '''
+    """
     Return a list of Event URIs associated with a recording.
 
     :param rec_uri: The URI of the recording.
@@ -422,7 +422,7 @@ class BSMLStore(GraphStore):
     :param timetype: The class of temporal entity to find. Optional.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: list of bsml:Event URIs
-    '''
+    """
 
     if eventtype is None:
       condition =  '?r bsml:recording <%s>' % rec_uri
@@ -442,14 +442,14 @@ class BSMLStore(GraphStore):
 
   def event_types(self, rec_uri, counts=False, graph_uri=None):
   #------------------------------------------------------------
-    '''
+    """
     Return a list of all types of Events associated with a recording.
 
     :param uri: The URI of the recording.
     :param counts: Optionally return a count of each type of event.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: list of bsml:Event URIs if no counts, otherwise tuple(URI, count).
-    '''
+    """
     return [ tuple(r[1:3]) if counts else r[1]
       for r in self.get_resources(BSML.Event, rvars='?et (count(?et) as ?count)',
         condition = '?e bsml:recording <%s> . ?e bsml:eventType ?et' % rec_uri,
@@ -461,13 +461,13 @@ class BSMLStore(GraphStore):
 
   def get_annotation(self, uri, graph_uri=None):
   #---------------------------------------------
-    '''
+    """
     Get an Annotation from the repository.
 
     :param uri: The URI of an Annotation.
     :param graph_uri: An optional URI of the graph to query.
     :rtype: :class:`~biosignalml.Annotation`
-    '''
+    """
     # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Annotation, graph_uri)
@@ -573,8 +573,8 @@ class BSMLStore(GraphStore):
 
     :return: Dictionary of { uri: label }.
     """
-    return { str(sparqlstore.get_result_value(r, 'uri')):
-                   sparqlstore.get_result_value(r, 'label')
+    return { str(rdf.sparqlstore.get_result_value(r, 'uri')):
+                   rdf.sparqlstore.get_result_value(r, 'label')
                for r in self.select('?uri ?label',
                                     '?uri a bsml:SemanticTag . ?uri rdfs:label ?label',
                                     prefixes=dict(bsml=BSML.prefix, rdfs=RDFS.prefix),
