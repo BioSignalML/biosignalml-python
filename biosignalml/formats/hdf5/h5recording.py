@@ -334,6 +334,7 @@ class H5Recording(object):
   #--------------------------------
     self.uri = uri
     self._h5 = h5
+    self._clocks = { }
 
   def __del__(self):
   #-----------------
@@ -568,7 +569,9 @@ class H5Recording(object):
     if rate: dset.attrs['rate'] = float(rate)
     if period: dset.attrs['period'] = float(period)
     self._h5['uris'].attrs[str(uri)] = dset.ref
-    return H5Clock(dset)
+    clk = H5Clock(dset)
+    self._clocks[str(uri)] = clk
+    return clk
 
 
   def extend_signal(self, uri, data):
@@ -679,8 +682,13 @@ class H5Recording(object):
     :return: A :class:`H5Clock` or None if the URI is unknown or
              the dataset is not that for a clock.
     """
+    clk = self._clocks.get(str(uri))
+    if clk is not None: return clk
     dset = self.get_dataset(uri)
-    if dset and dset.name.startswith('/recording/clock/'): return H5Clock(dset)
+    if dset and dset.name.startswith('/recording/clock/'):
+      clk = H5Clock(dset)
+      self._clocks[str(uri)] = clk
+      return clk
 
 
   def get_signal(self, uri):
