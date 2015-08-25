@@ -197,12 +197,22 @@ class GraphStore(object):
     return self._sparqlstore.ask('graph <%(pgraph)s> { <%(uri)s> a <%(gtype)s> }',
       params=dict(pgraph=self._provenance_uri, uri=uri, gtype=self._graphtype))
 
-  def get_graph(self, graph_uri, rtype=None):
-  #------------------------------------------
-    rdf = self._sparqlstore.construct('?s ?p ?o', graph=graph_uri, format=Format.RDFXML)
-    ## Virtuoso has a MaxRows limit in its INI file with a default of 10000.
-    ## This has been increased to 50000
-    return resource if rtype is None or resource.contains(Statement(None, RDF.type, rtype)) else None
+  def get_graph_with_resource(self, uri, rtype, graph_uri=None):
+  #-------------------------------------------------------------
+    if graph_uri is None:
+      graph_uri = uri
+      ### Following can give an error from Virtuoso...
+      text = self._sparqlstore.construct('?s ?p ?o',
+              '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
+                 graph ?g { <%(uri)s> a <%(rtype)s> . ?s ?p ?o }''',
+              params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
+              prefixes=dict(prv=PRV.prefix), format=rdf.Format.RDFXML)
+    else:
+      text = self._sparqlstore.construct('?s ?p ?o',
+              '<%(uri)s> a <%(rtype)s> . ?s ?p ?o',
+              params=dict(uri=uri, rtype=rtype),
+              graph=graph_uri, format=rdf.Format.RDFXML)
+    return rdf.Graph.create_from_string(graph_uri, text, rdf.Format.RDFXML)
 
   def get_resource_as_graph(self, uri, rtype, graph_uri=None):
   #-----------------------------------------------------------
