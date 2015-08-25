@@ -34,12 +34,242 @@ import biosignalml.rdf.sparqlstore as sparqlstore
 
 from .graphstore import GraphStore, GraphUpdate
 
-__all__ = [ 'BSMLStore', 'BSMLUpdateStore' ]
+__all__ = [ 'RecordingGraph', 'BSMLStore', 'BSMLUpdateStore' ]
 
 
 '''Graph holding bsml:SemanticTag resources.'''
 SEMANTIC_TAGS = 'http://ontologies.biosignalml.org/semantic-tags'
 
+
+class RecordingGraph(rdf.Graph):
+#===============================
+  """ The full RDF graph describing a recording and its associated objects.
+
+  """
+  def __init__(self, uri, rec_class=None, loaded=False):
+  #--------------------------------------------------------------
+    if not loaded: super(RecordingGraph, self).__init__(uri)
+    ## Set externally...
+    sparql = ['PREFIX bsml: <%s>' % BSML.prefix,
+              'select ?r where { ?r a bsml:Recording }'
+             ]
+    r = list(self.query('\n'.join(sparql)))
+    self._rec_uri = r[0] if r else None
+
+##    self._rec_uri = rec_uri
+    if rec_class is None:
+      rec_class = biosignalml.formats.CLASSES.get(
+                    str(self.get_object(uri, DCT.format)), Recording)
+    self._rec_class = rec_class
+    self._sig_class = rec_class.SignalClass
+
+  @classmethod
+  def create_from_store(cls, store, uri, rec_class=None):
+  #------------------------------------------------------
+    graph_uri, rec_uri = store.get_graph_and_recording_uri(uri)
+    if rec_uri is None: raise IOError("Unknown recording: %s" % uri)
+    self = store.get_graph_with_resource(uri, BSML.Recording, graph_uri)
+    self.__class__ = cls
+    self.__init__(uri, rec_class, True)
+    return self
+
+  @classmethod
+  def create_from_string(cls, uri, string, format=Format.RDFXML, rec_class=None):
+  #------------------------------------------------------------------------------
+    self = rdf.Graph.create_from_string(uri, string, format)
+    self.__class__ = cls
+    self.__init__(uri, rec_class, True)
+    return self
+
+  def get_recording(self, signals=True, **kwds):
+  #---------------------------------------------
+    """
+    Return the Recording described in its Graph.
+
+    :param signals: Default action is to create the Recording's Signals.
+    :param open_dataset: Default action is to open the Recording's dataset.
+    :param recording_class: The class of Recording to create. If not set
+      the class is determined by the recording's dct:format attribute.
+    :rtype: :class:`~biosignalml.Recording`
+    """
+    rec = self._rec_class.create_from_graph(self._rec_uri, self, signals=signals, **kwds)
+    rec.initialise(open_dataset=True)
+    rec.graph = self
+    return rec
+
+  def get_signal(self, uri, signal_class=None, **kwds):
+  #----------------------------------------------------
+    """
+    Get a Signal from its recording's graph.
+
+    :param uri: The URI of a Signal.
+    :rtype: :class:`~biosignalml.Signal`
+    """
+    if signal_class is None: signal_class = self._sig_class  # Get class of signal's recording.
+    return signal_class.create_from_graph(uri, self, units=None, **kwds)  # units set from graph...
+
+  def get_signal_uris(self):
+  #-------------------------
+    """
+    Return a list of all Signals of a recording.
+
+    :rtype: list of bsml:Signal URIs
+    """
+    sparql = ['PREFIX bsml: <%s>' % BSML.prefix,
+              'select distinct ?s where {',
+              '  ?s a bsml:Signal ; bsml:recording <%s>' % self._rec_uri,
+              '  }',
+              'order by ?s',
+             ]
+    return [ r[0] for r in self.query('\n'.join(sparql)) ]
+
+  def get_event(self, uri):
+  #------------------------
+    """
+    Get an Event from its recording's graph.
+
+    :param uri: The URI of an Event.
+    :rtype: :class:`~biosignalml.Event`
+    """
+    return Event.create_from_graph(uri, self)
+
+
+  def get_event_uris(self, eventtype=None, timetype=None):
+  #-------------------------------------------------------
+    """
+    Return a list of Event URIs associated with a recording.
+
+    :param eventtype: The type of events to find. Optional.
+    :param timetype: The class of temporal entity to find. Optional.
+    :rtype: list of bsml:Event URIs
+    """
+    sparql = ['PREFIX bsml: <%s>' % BSML.prefix,
+              'select distinct ?e where {',
+              '  ?e a bsml:Event ; bsml:recording <%s>' % self._rec_uri,
+             ]
+    if eventtype is not None:
+      sparql.append('. ?e bsml:eventType <%s>' % eventtype)
+#    if timetype is not None:
+#      sparql.append('. ?e bsml:time ?tm . ?tm a <%s>' % timetype)
+    sparql.append('} order by ?e')
+    results = self.query('\n'.join(sparql))
+    return [ r[0] for r in results ]
+
+  def get_event_types(self, counts=False):
+  #---------------------------------------
+    """
+    Return a list of all types of Events associated with the recording.
+
+    :param counts: Optionally return a count of each type of event.
+    :rtype: list of bsml:Event URIs if no counts, otherwise tuple(URI, count).
+    """
+    sparql = ['PREFIX bsml: <%s>' % BSML.prefix,
+              'select ?et (count(?et) as ?c) where {',
+#              'select distinct ?et where {',
+              '  ?e bsml:recording <%s>' % self._rec_uri,
+              '. ?e bsml:eventType ?et',
+              '}',
+              'group by ?et',
+             ]
+    results = self.query('\n'.join(sparql))
+    if counts: x = [ r for r in results ]
+    else:      x = [ r[0] for r in results ]
+    return x
+
+  def get_annotation(self, uri):
+  #-----------------------------
+    """
+    Get an Annotation from its recording's graph.
+
+    :param uri: The URI of an Annotation.
+    :rtype: :class:`~biosignalml.Annotation`
+    """
+    return Annotation.create_from_graph(uri, self)
+
+  def get_annotation_uris(self, subject):
+  #--------------------------------------
+    """
+    Return all Annotation URIs about a subject.
+
+    :param subject: The URI of the subject.
+    :rtype: list of bsml:Annotation URIs
+    """
+    return [ r[1]
+      for r in self.get_resources(BSML.Annotation, rvars='?ann',
+        condition='''?ann a bsml:Annotation ;
+                          dct:subject <%(subj)s>
+                            minus { [] prv:precededBy ?ann }
+                   } union {
+                     ?ann a bsml:Annotation ;
+                          dct:subject [ a bsml:Segment ;
+                                        dct:source <%(subj)s>
+                                      ]
+                            minus { [] prv:precededBy ?ann }'''
+                   % dict(subj=subject),
+## Following produces an internal Virtuoso error...
+#                    {
+#                      { ?ann dct:subject <%(subj)s> }
+#                     union
+#                      { ?ann dct:subject [ a bsml:Segment ; dct:source <%(subj)s> ] }
+#                    }
+#                  minus { [] prv:precededBy ?ann }
+        prefixes = dict(bsml=BSML.prefix, dct=DCT.prefix, prv=PRV.prefix),
+        ) ]
+
+  def get_annotations(self):
+  #-------------------------
+    """
+    Return all Annotations about the recording.
+
+    :rtype: list of bsml:Annotations
+    """
+    sparql = """PREFIX bsml: <%(bsml)s>
+                PREFIX rdfs: <%(rdfs)s>
+                PREFIX dct: <%(dct)s>
+                PREFIX prv: <%(prv)s>
+                PREFIX tl: <%(tl)s>
+
+                select ?ann ?about ?stype ?comment ?tag ?created
+                       ?source ?tm ?start ?duration ?timeline
+                where {
+                    ?ann a bsml:Annotation
+                    minus { [] prv:precededBy ?ann }
+                       {
+                         ?ann dct:subject ?about .
+                         ?about a ?stype .
+                         optional { ?ann rdfs:comment ?comment }
+                         optional { ?ann dct:created ?created }
+                         optional { ?ann bsml:tag ?tag }
+                         { ?ann dct:subject <%(subject)s> }
+                         union
+                         { ?about a bsml:Segment ;
+                             dct:source <%(subject)s> ;
+                             dct:source ?source ;
+                             bsml:time ?tm .
+                             ?tm tl:timeline ?timeline .
+                           { ?tm a bsml:Interval ; tl:start ?start ; tl:duration ?duration }
+                           union
+                           { ?tm a bsml:Instant ; tl:at ?start }
+                         }
+                       }
+                     }""" % dict(subject=self._rec_uri,
+                                 bsml=BSML.prefix,
+                                 rdfs=RDFS.prefix,
+                                 dct=DCT.prefix,
+                                 prv=PRV.prefix,
+                                 tl=TL.prefix)
+    anns = self.query(sparql)
+##    anns.sort(key=operator.itemgetter(9, 2, 1))  # start, about, uri
+    annotations = [ ]
+    for a in anns:
+      ann = Annotation(a[1], about=a[2], comment=a[4], created=a[6])
+      if str(a[3]) == str(BSML.Segment):
+        time = TemporalEntity.create(a[8], float(a[9]),
+          duration=None if a[10] in ['', None] else float(a[10]),
+          timeline=a[11])
+        ann.about = Segment(a[2], source=a[7], time=time)
+      annotations.append(ann)
+    return annotations
 
 class BSMLStore(GraphStore):
 #===========================

@@ -87,7 +87,7 @@ from biosignalml.data.time  import Interval
 from biosignalml.formats    import BSMLRecording, BSMLSignal, MIMETYPES
 from biosignalml.transports import WebStreamReader, WebStreamWriter, StreamException
 from biosignalml.transports.stream import BlockType, SignalData
-
+from biosignalml.repository import RecordingGraph
 
 from . import repository
 
@@ -214,13 +214,8 @@ class Repository(repository.RemoteRepository):
 
   def get_recording(self, uri, graph_uri=None, **kwds):
   #----------------------------------------------------
-    rec = super(Repository, self).get_recording(uri,
-            graph_uri=graph_uri,
-            recording_class=self.RecordingClass,
-            repository=self,
-            **kwds)
-    if rec is None: raise IOError("No Recording for: %s" % uri)
-    return rec
+    rgraph = RecordingGraph.create_from_store(self, uri, rec_class=self.RecordingClass)
+    return rgraph.get_recording(repository=self, **kwds)
 
   def new_recording(self, uri, **kwds):
   #------------------------------------

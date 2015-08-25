@@ -25,6 +25,7 @@ import biosignalml.rdf as rdf
 from biosignalml import BSML
 from biosignalml.formats import BSMLRecording, BSMLSignal, MIMETYPES
 from biosignalml.data import DataSegment, UniformTimeSeries, TimeSeries, Clock, UniformClock
+from biosignalml.repository import RecordingGraph
 
 from .h5recording import H5Recording
 
@@ -182,6 +183,7 @@ class HDF5Recording(BSMLRecording):
     if dataset:
       if newfile:
         self._h5 = H5Recording.create(uri, str(dataset), **kwds)
+        self.graph = RecordingGraph(uri, rec_class=HDF5Recording)
       else:
         self._h5 = H5Recording.open(fname, **kwds)
         if uri is not None and str(uri) != str(self._h5.uri):
@@ -261,9 +263,10 @@ class HDF5Recording(BSMLRecording):
     Set metadata attributes of the recording from its associated
     BioSignalML HDF5 file.
     """
-    rdf, format = self._h5.get_metadata()
-    if rdf:         ## An error if no metadata in the file
-      self.graph = rdf.Graph.create_from_string(self.uri, rdf, format)
+    string, format = self._h5.get_metadata()
+    if string:
+      self.graph = RecordingGraph.create_from_string(self.uri, string,
+                                                     format=format, rec_class=HDF5Recording)
       self.add_metadata(self.graph)
     else:
       raise TypeError("No metadata in BioSignalML file")
