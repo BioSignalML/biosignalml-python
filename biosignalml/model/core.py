@@ -132,8 +132,10 @@ class AbstractObject(object):
   #-----------------------------------------------
     if attr in self.__dict__:
       v = getattr(self, attr, None)
-      if functional or v in [None, '']:
+      if v in [None, '']:
         setattr(self, attr, value)
+      elif functional:
+        pass
       elif isinstance(v, set):
         v.add(value)
       elif isinstance(v, list):
