@@ -215,7 +215,7 @@ class Mapping(object):
     elif node.is_resource(): v = Uri(node.uri)
     elif node.is_blank(): v = node.blank
     elif node.is_literal():
-      v = node.value
+      v = node.rstrip(None) # `node.value` is None for datatypes `rdflib` doesn't support
       if dtype: v = datatypes.get(dtype, str)(v)
     else: v = str(node)
     return from_rdf(v) if from_rdf else v
