@@ -254,8 +254,10 @@ class HDF5Recording(BSMLRecording):
     :param format: The :class:`~biosignalml.rdf.Format` in which to serialise RDF.
     :param prefixes: An optional dictionary of namespace abbreviations and URIs.
     """
-    self._h5.store_metadata(self.metadata_as_string(format=format, prefixes=prefixes, base=self.uri),
-                        rdf.Format.mimetype(format))
+    self.save_metadata_to_graph(self.graph)
+    self._h5.store_metadata(
+      self.graph.serialise(format=format, prefixes=prefixes, base=self.uri),
+      rdf.Format.mimetype(format))
 
   def _load_metadata(self):
   #------------------------
