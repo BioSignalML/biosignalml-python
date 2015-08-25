@@ -205,8 +205,13 @@ class Recording(AbstractObject):
 
     """
     event = self.get_resource(uri)
-    if not isinstance(event, self.EventClass):
-      raise KeyError, str(uri)
+    if event is None:
+      event = Event.create_from_graph(uri, self.graph)  ## graphstore ??
+      if self.uri != event.recording.uri:
+        raise KeyError, "Event <%s> doesn't refer to recording" % uri
+      self.add_event(event)
+    elif not isinstance(event, self.EventClass):
+      raise KeyError, "<%s> isn't an Event" % uri
     return event
 
   def add_event(self, event):
