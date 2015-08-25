@@ -165,6 +165,7 @@ class H5Clock(object):
   def __init__(self, dataset):
   #---------------------------
     self.dataset = dataset
+    self._times = np.empty(0)
 
   @property
   def name(self):
@@ -182,11 +183,15 @@ class H5Clock(object):
   def times(self):
   #---------------
     """The time points of the clock."""
-    t = np.asarray(self.dataset)
-    attrs = self.dataset.attrs
-    if   attrs.get('period'): return t*float(attrs['period'])
-    elif attrs.get('rate'):   return t/float(attrs['rate'])
-    else:                     return t
+    if self.dataset.len() != len(self._times):
+      attrs = self.dataset.attrs
+      if   attrs.get('period'):
+        self._times = np.asarray(self.dataset)*float(attrs['period'])
+      elif attrs.get('rate'):
+        self._times = np.asarray(self.dataset)/float(attrs['rate'])
+      else:
+        self._times = np.asarray(self.dataset)
+    return self._times
 
   @property
   def units(self):
