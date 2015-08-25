@@ -262,17 +262,17 @@ class Recording(AbstractObject):
     return self.add_resource(Segment(uri, self, self.interval(at, duration, end), **kwds))
 
 
-  def save_to_graph(self, graph):
-  #------------------------------
+  def save_metadata_to_graph(self, graph):
+  #---------------------------------------
     """
     Add a Recording's metadata to a RDF graph.
 
     :param graph: A RDF graph.
     :type graph: :class:`~biosignalml.rdf.Graph`
     """
-    AbstractObject.save_to_graph(self, graph)
+    super(Recording, self).save_metadata_to_graph(graph)
     for resource in self._resources.values():
-      resource.save_to_graph(graph)
+      resource.save_metadata_to_graph(graph)
 
   @classmethod
   def create_from_graph(cls, uri, graph, signals=True, **kwds):

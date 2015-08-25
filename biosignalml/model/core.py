@@ -266,8 +266,8 @@ class AbstractObject(object):
       yield rdf.Statement(self.node, rdf.RDF.type, self.metaclass)
       for s in self.rdfmap.statement_stream(self): yield s
 
-  def save_to_graph(self, graph):
-  #------------------------------
+  def save_metadata_to_graph(self, graph):
+  #---------------------------------------
     '''
     Add RDF statements about ourselves to a graph.
     '''
@@ -279,7 +279,7 @@ class AbstractObject(object):
     Return a RDF graph containing our metadata.
     """
     graph = rdf.Graph(self.uri)
-    self.save_to_graph(graph)
+    self.save_metadata_to_graph(graph)
     return graph
 
   def metadata_as_string(self, format=rdf.Format.RDFXML, base=None, prefixes=None):

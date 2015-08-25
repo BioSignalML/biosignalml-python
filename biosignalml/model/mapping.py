@@ -268,7 +268,7 @@ if __name__ == '__main__':
 
   r = MyRecording('http://example.org/uri1', description='Hello', yy = ['subject', 'in', 'list'] )
   g = rdf.Graph()
-  r.save_to_graph(g)
+  r.save_metadata_to_graph(g)
 
   s = MyRecording.create_from_graph('http://example.org/uri1', g)
   assert(r.metadata_as_string(rdf.Format.TURTLE) == s.metadata_as_string(rdf.Format.TURTLE))
@@ -291,7 +291,7 @@ if __name__ == '__main__':
   #print b.metadata_as_string(rdf.Format.TURTLE)
   #print c.metadata_as_string(rdf.Format.TURTLE)
 
-  c.save_to_graph(g)
+  c.save_metadata_to_graph(g)
   d = Annotation.create_from_graph(a3, g)
   assert(c.metadata_as_string(rdf.Format.TURTLE) == d.metadata_as_string(rdf.Format.TURTLE))
 

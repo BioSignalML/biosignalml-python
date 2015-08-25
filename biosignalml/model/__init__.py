@@ -61,7 +61,7 @@ if __name__ == '__main__':
   def check(instance):
   #-------------------
     g = rdf.Graph()
-    instance.save_to_graph(g)
+    instance.save_metadata_to_graph(g)
 #    print g.serialise(format=rdf.Format.TURTLE)
     copy = instance.__class__.create_from_graph(instance.uri, g)
 #    if isinstance(instance, Event):
