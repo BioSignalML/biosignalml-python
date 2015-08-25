@@ -134,7 +134,6 @@ class BSMLRecording(biosignalml.Recording):
   #------------------------------------------------------------
     if dataset:
       dataset = file_uri(dataset)
-      if not uri: uri = dataset
     kwds['dataset'] = dataset
     kwds['format'] = getattr(self, 'MIMETYPE')
     biosignalml.Recording.__init__(self, uri, **kwds)
