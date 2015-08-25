@@ -93,8 +93,7 @@ class Annotation(AbstractObject):
     :type graph: :class:`~biosignalml.rdf.Graph`
     :rtype: :class:`Annotation`
     """
-    self = cls(uri, timestamp=False, **kwds)
-    self.add_metadata(graph)
+    self = super(Annotation, cls).create_from_graph(cls, uri, graph, timestamp=false, **kwds)
     if graph.has_resource(self.about, BSML.Segment):
       self.about = Segment.create_from_graph(self.about, graph)
     return self

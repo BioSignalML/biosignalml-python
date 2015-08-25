@@ -286,9 +286,8 @@ class Recording(AbstractObject):
     :type signals: Set False to not load the Recording's Signals.
     :rtype: :class:`Recording`
     """
-    self = cls(uri, **kwds)
-#    self = cls(uri, timeline=graph.get_object(uri, TL.timeline).uri, **kwds)
-    self.add_metadata(graph)
+
+    self = super(Recording, cls).create_from_graph(uri, graph, **kwds)
     if signals:
       for r in graph.query("select ?s where { ?s a <%s> . ?s <%s> <%s> } order by ?s"
                            % (BSML.Signal, BSML.recording, self.uri)):
