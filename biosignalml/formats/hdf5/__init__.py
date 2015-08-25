@@ -194,7 +194,10 @@ class HDF5Recording(BSMLRecording):
           raise TypeError("Wrong URI in HDF5 recording")
         self._load_metadata()
         for n, s in enumerate(self._h5.signals()):
-          self.add_signal(HDF5Signal.create_from_H5Signal(n, s))
+          signal = HDF5Signal.create_from_H5Signal(n, s)
+          signal.add_metadata(self.graph)
+          signal.clock.add_metadata(self.graph)  ## We need to cache clocks in recording...
+          self.add_signal(signal)
     else:
       self._h5 = None
 
