@@ -101,10 +101,13 @@ class Signal(BSMLSignal):
 
   def __init__(self, uri, units=None, **kwds):
   #-------------------------------------------
-    repository = kwds.pop('repository', None)
     self._length = 0
+    self._repository = None
     super(Signal, self).__init__(uri, units, **kwds)
-    self.repository = repository
+
+  def set_repository(self, repository):
+  #------------------------------------
+    self._repository = repository
 
   def __len__(self):
   #----------------
@@ -112,6 +115,8 @@ class Signal(BSMLSignal):
 
   def read(self, interval=None, segment=None, maxpoints=0, dtype=None, rate=None, units=None):
   #-------------------------------------------------------------------------------------------
+    if self._repository is None:
+      raise IOError("Signal isn't connected to a repository")
     params = { }
     if interval:
       if isinstance(interval, Interval):
@@ -127,7 +132,7 @@ class Signal(BSMLSignal):
     if dtype is not None: params['dtype'] = dtype
     if rate is not None: params['rate'] = rate
     if units is not None: params['units'] = units
-    for sd in self.repository.get_data(str(self.uri), **params):
+    for sd in self._repository.get_data(str(self.uri), **params):
       if sd.uri != str(self.uri):
         raise StreamExeception("Received signal '%s' different from requested '%s'" % (sd.uri, self.uri))
       if sd.rate is not None: yield DataSegment(sd.start, UniformTimeSeries(sd.data, sd.rate))
@@ -135,11 +140,13 @@ class Signal(BSMLSignal):
 
   def append(self, timeseries, dtype='f4'):
   #----------------------------------------
+    if self._repository is None:
+      raise IOError("Signal isn't connected to a repository")
     self._length += len(timeseries)
     if isinstance(timeseries, TimeSeries):
-      return self.repository.put_data(str(self.uri), timeseries, dtype=dtype)
+      return self._repository.put_data(str(self.uri), timeseries, dtype=dtype)
     elif self.rate:
-      return self.repository.put_data(str(self.uri), UniformTimeSeries(timeseries, self.rate), dtype=dtype)
+      return self._repository.put_data(str(self.uri), UniformTimeSeries(timeseries, self.rate), dtype=dtype)
 
 
 class Recording(BSMLRecording):
@@ -151,19 +158,19 @@ class Recording(BSMLRecording):
   #---------------------------------
     repository = kwds.pop('repository', None)
     super(Recording, self).__init__(*args, **kwds)
-    self.repository = repository
+    self._repository = repository
 
   def close(self):
   #---------------
     # Ensure all metadata has been POSTed
-    self.repository.post_metadata(self.uri, self.metadata_as_string())
+    self._repository.post_metadata(self.uri, self.metadata_as_string())
     ## POST duplicates duration but leaves dataset...
     ## PUT removes dataset,,,
 
   def add_signal(self, signal):
   #----------------------------
-    signal.repository = self.repository
     super(Recording, self).add_signal(signal)
+    signal.set_repository(self._repository)
 
   def new_signal(self, uri, units, id=None, **kwds):
   #-------------------------------------------------
@@ -171,11 +178,12 @@ class Recording(BSMLRecording):
     # then when server processes PUT for a new signal of BSML Recording
     # it will create an signal group in HDF5 container
     try:
-      sig = super(Recording, self).new_signal(uri, units, id=id, repository=self.repository, **kwds)
+      sig = super(Recording, self).new_signal(uri, units, id=id, **kwds)
+      sig.set_repository(self._repository)
       ## This should spot duplicates
 
       #logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
-      self.repository.post_metadata(self.uri, sig.metadata_as_string())
+      self._repository.post_metadata(self.uri, sig.metadata_as_string())
       return sig
     except Exception, msg:
       raise IOError("Cannot create Signal '%s' in repository" % uri)
@@ -183,7 +191,7 @@ class Recording(BSMLRecording):
   def save_metadata(self, metadata=None, format=rdf.Format.RDFXML):
   #----------------------------------------------------------------
     if metadata is None: metadata = self.metadata_as_string()
-    self.repository.post_metadata(self.uri, metadata, format)
+    self._repository.post_metadata(self.uri, metadata, format)
 
 
 
