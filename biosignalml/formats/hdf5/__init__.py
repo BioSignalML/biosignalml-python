@@ -56,8 +56,8 @@ class HDF5Signal(BSMLSignal):
   def _set_h5_signal(self, h5):
   #----------------------------
     self._h5 = h5
-    if   h5.clock: self.clock = Clock(h5.clock.uri, h5.clock.times)
-    elif h5.rate:  self.clock = UniformClock(None, h5.rate)
+    if   h5.clock: self.clock = Clock(h5.clock.uri, h5.clock.times, units=h5.clock.units)
+    elif h5.rate:  self.clock = UniformClock(None, h5.rate, units=h5.clock.units)
 
   @classmethod
   def create_from_H5Signal(cls, index, signal):
