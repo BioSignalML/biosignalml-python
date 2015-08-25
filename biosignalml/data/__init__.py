@@ -65,29 +65,19 @@ class Clock(AbstractObject):
 
   def __getitem__(self, key):
   #--------------------------
-    """Return the unscaled time at index ``key``."""
-    return self.times[key]
+    """Return the time in seconds at index ``key``."""
+    if   self.resolution: return self.times[key]*self.resolution
+    elif self.rate:       return self.times[key]/self.rate
+    else:                 return self.times[key]
 
   def __len__(self):
   #-----------------
     return len(self.times)
 
-  def scale(self, time):
-  #---------------------
-    """
-    Convert a time value to seconds.
-
-    :param float time: Time measured at the clock's resolution.
-    :return: The time in seconds.
-    """
-    if   self.resolution: return self.resolution*float(time)
-    elif self.rate:       return float(time)/self.rate
-    else:                 return float(time)
-
   def time(self, pos):
   #-------------------
     """Return the time at index ``pos`` in seconds."""
-    return self.scale(self[pos])
+    return self[pos]
 
   def index(self, time):
   #---------------------
@@ -103,8 +93,8 @@ class Clock(AbstractObject):
     j = len(self)
     while i < j:
       m = (i + j)//2
-      if self.time(m) <= time: i = m + 1
-      else:                    j = m
+      if self[m] <= time: i = m + 1
+      else:               j = m
     return i - 1
 
   def extend(self, times):
@@ -114,9 +104,11 @@ class Clock(AbstractObject):
 
     :param np.array times: Array of sample times, in seconds.
     """
-    if self.times[-1] >= times[0]:
+    if self[-1] >= times[0]:
       raise DataError('Times must be increasing')
-    self.times = np.append(self.times, times)
+    if   self.resolution: self.times = np.append(self.times, times/self.resolution)
+    elif self.rate:       self.times = np.append(self.times, times*self.rate)
+    else:                 self.times = np.append(self.times, times)
 
 
 class UniformClock(Clock):
