@@ -177,16 +177,20 @@ class HDF5Recording(BSMLRecording):
 
   def __init__(self, uri, dataset=None, **kwds):
   #---------------------------------------------
-    ## What about self.load_metadata() ???? Do kwds override ??
-    BSMLRecording.__init__(self, uri, dataset, **kwds)
     newfile = kwds.pop('create', False)
+    if uri is None and (newfile or dataset is None):
+      raise TypeError("No URI given for HDF5 recording")
+    if uri is not None:
+      BSMLRecording.__init__(self, uri, dataset, **kwds)
     if dataset:
       if newfile:
         self._h5 = H5Recording.create(uri, str(dataset), **kwds)
         self.graph = RecordingGraph(uri, rec_class=HDF5Recording)
       else:
-        self._h5 = H5Recording.open(fname, **kwds)
-        if uri is not None and str(uri) != str(self._h5.uri):
+        self._h5 = H5Recording.open(dataset, **kwds)
+        if uri is None:
+          BSMLRecording.__init__(self, self._h5.uri, dataset, **kwds)
+        elif str(uri) != str(self._h5.uri):
           raise TypeError("Wrong URI in HDF5 recording")
         self._load_metadata()
         for n, s in enumerate(self._h5.signals()):
