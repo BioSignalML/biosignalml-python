@@ -85,7 +85,7 @@ class Recording(AbstractObject):
   def __init__(self, uri, **kwds):
   #-------------------------------
     from biosignalml.data.time import RelativeTimeLine   ## Otherwise circular import...
-    AbstractObject.__init__(self, uri, **kwds)
+    super(Recording, self).__init__(uri, **kwds)
     self.timeline = RelativeTimeLine(str(uri) + '/timeline')
     self._resources = OrderedDict()
 
