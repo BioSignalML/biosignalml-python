@@ -293,5 +293,4 @@ class Recording(AbstractObject):
                            % (BSML.Signal, BSML.recording, self.uri)):
         self.add_signal(self.SignalClass.create_from_graph(str(r['s']), graph, units=None))
     # Do we load events? There may be a lot of them...
-    self.graph = graph
     return self
