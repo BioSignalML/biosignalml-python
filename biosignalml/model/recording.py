@@ -89,22 +89,23 @@ class Recording(AbstractObject):
     self.timeline = RelativeTimeLine(str(uri) + '/timeline')
     self._resources = OrderedDict()
 
-  def add_resource(self, resource):
-  #--------------------------------
-    """Associate a resource with a Recording."""
-    self._resources[str(resource.uri)] = resource
-    return resource
-
-  ## pop_resource(self, uri)      ???
-
-  ## del_resource(self, uri)      ???
-
   def resources(self, cls):
   #-------------------------
     """
     The recording's resources of a given class, as a list.
     """
     return [ r for r in self._resources.values() if isinstance(r, cls) ]
+
+  def add_resource(self, resource):
+  #--------------------------------
+    """Associate a resource with a Recording."""
+    self._resources[str(resource.uri)] = resource
+    return resource
+
+  def remove_resource(self, uri):
+  #------------------------------
+    """Remove a resource from a Recording."""
+    return self._resources.pop(str(uri), None)
 
   def get_resource(self, uri):
   #---------------------------
