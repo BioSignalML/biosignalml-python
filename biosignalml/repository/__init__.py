@@ -54,9 +54,7 @@ class RecordingGraph(rdf.Graph):
               'select ?r where { ?r a bsml:Recording }'
              ]
     r = list(self.query('\n'.join(sparql)))
-    self._rec_uri = r[0] if r else None
-
-##    self._rec_uri = rec_uri
+    self._rec_uri = r[0][0].uri if r else None
     if rec_class is None:
       rec_class = biosignalml.formats.CLASSES.get(
                     str(self.get_object(uri, DCT.format)), Recording)
@@ -258,16 +256,17 @@ class RecordingGraph(rdf.Graph):
                                  dct=DCT.prefix,
                                  prv=PRV.prefix,
                                  tl=TL.prefix)
-    anns = self.query(sparql)
-##    anns.sort(key=operator.itemgetter(9, 2, 1))  # start, about, uri
+    anns = [ [str(a[0].uri), str(a[1].uri), str(a[2]), a[3].value, a[5].value,
+              str(a[6].uri), str(a[7].uri), a[8].value,
+              None if a[9] in ['', None] else a[9].value, str(a[10].uri)]
+             for a in self.query(sparql) ]
+    anns.sort(key=operator.itemgetter(7, 1, 0))  # start, about, uri
     annotations = [ ]
     for a in anns:
-      ann = Annotation(a[1], about=a[2], comment=a[4], created=a[6])
-      if str(a[3]) == str(BSML.Segment):
-        time = TemporalEntity.create(a[8], float(a[9]),
-          duration=None if a[10] in ['', None] else float(a[10]),
-          timeline=a[11])
-        ann.about = Segment(a[2], source=a[7], time=time)
+      ann = Annotation(a[0], about=a[1], comment=a[3], created=a[4])
+      if a[2] == str(BSML.Segment):
+        time = TemporalEntity.create(a[6], a[7], a[8], timeline=a[9])
+        ann.about = Segment(a[1], source=a[5], time=time)
       annotations.append(ann)
     return annotations
 

@@ -580,6 +580,25 @@ class Graph(rdflib.graph.Graph):
     self.remove(Statement(s, p, None))
     self.add(Statement(s, p, o))
 
+  class QueryResult(object):
+  #=========================
+
+    def __init__(self, results):
+    #---------------------------
+      self._results = results
+
+    def __iter__(self):
+    #------------------
+      for r in self._results:
+        yield tuple(self._coerce(a) for a in r)
+
+    def _coerce(self, v):
+    #--------------------
+      if   isinstance(v, rdflib.term.URIRef):  return Resource(v)
+      elif isinstance(v, rdflib.term.Literal): return Literal(v)
+      elif isinstance(v, rdflib.term.BNode):   return BlankNode(v)
+      else:                                    return v
+
   def query(self, sparql):
   #-----------------------
     '''
@@ -591,7 +610,7 @@ class Graph(rdflib.graph.Graph):
     :rtype: :class:`QueryResults`
     '''
     try:
-      return super(Graph, self).query(sparql)
+      return self.QueryResult(super(Graph, self).query(sparql))
     except Exception, msg:
       logging.error('Graph query: %s', msg)
     return [ ]
