@@ -256,7 +256,8 @@ class RecordingGraph(rdf.Graph):
                                  dct=DCT.prefix,
                                  prv=PRV.prefix,
                                  tl=TL.prefix)
-    anns = [ [str(a[0].uri), str(a[1].uri), str(a[2]), a[3].value, a[5].value,
+    anns = [ [str(a[0].uri), str(a[1].uri), str(a[2]),
+              a[3].value if a[3] else '', a[5].value,
               str(a[6].uri), str(a[7].uri), a[8].value,
               None if a[9] in ['', None] else a[9].value, str(a[10].uri)]
              for a in self.query(sparql) ]
