@@ -194,25 +194,25 @@ CLASSES = { }
 #============
 
 try:
-  from edf  import EDFRecording
+  from .edf  import EDFRecording
   CLASSES[MIMETYPES.EDF] = EDFRecording
 except ImportError:
   pass
 
 try:
-  from hdf5 import HDF5Recording
+  from .hdf5 import HDF5Recording
   CLASSES[MIMETYPES.HDF5] = HDF5Recording
 except ImportError:
   pass
 
 try:
-  from raw import RAWRecording
+  from .raw import RAWRecording
   CLASSES[MIMETYPES.RAW] = RAWRecording
 except ImportError:
   pass
 
 try:
-  from wfdb import WFDBRecording
+  from .wfdb import WFDBRecording
   CLASSES[MIMETYPES.WFDB] = WFDBRecording
 except ImportError:
   pass

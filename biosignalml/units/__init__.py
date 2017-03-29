@@ -22,10 +22,10 @@ import logging
 
 from biosignalml.rdf import Resource, NS
 
-from ontology import UNITS
+from .ontology import UNITS
 
 # Export package class
-from convert import UnitConverter
+from .convert import UnitConverter
 
 __all__ = [ 'get_units_uri' ]
 
@@ -86,7 +86,7 @@ _prefixes = { 'Y': 'Yotta', 'Z': 'Zetta', 'E': 'Exa',
               'u': 'Micro', 'n': 'Nano',  'p': 'Pico',
               'f': 'Femto', 'a': 'Atto',  'z': 'Zepto',
               'y': 'Yocto',
-              u'\u00b5': 'Micro',
+              '\u00b5': 'Micro',
             }
 
 
@@ -142,10 +142,10 @@ if __name__ == '__main__':
   def convert(u):
     try:
       o = get_units_uri(u)
-      if o: print '%s --> %s' % (u, o)
-      else: print 'Cannot convert: %s' % u
-    except Exception, msg:
-      print 'Error converting: %s (%s)' % (u, msg)
+      if o: print('%s --> %s' % (u, o))
+      else: print('Cannot convert: %s' % u)
+    except Exception as msg:
+      print('Error converting: %s (%s)' % (u, msg))
 
   for l in sys.stdin:
     for w in l.split():
@@ -171,5 +171,5 @@ if __name__ == '__main__':
   test('bpm')
   test('clpm')
   test('')
-  test(u'\u00b5V')
+  test(u'\\u00b5V')
   '''

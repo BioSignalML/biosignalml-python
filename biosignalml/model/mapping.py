@@ -44,17 +44,17 @@ URI_SCHEMES = [ 'http', 'file' ]
 
 datatypes = { XSD.float:              float,
               XSD.double:             float,
-              XSD.integer:            long,
-              XSD.long:               long,
+              XSD.integer:            int,
+              XSD.long:               int,
               XSD.int:                int,
               XSD.short:              int,
               XSD.byte:               int,
-              XSD.nonPostiveInteger:  long,
-              XSD.nonNegativeInteger: long,
-              XSD.positiveInteger:    long,
-              XSD.negativeInteger:    long,
-              XSD.unsignedLong:       long,
-              XSD.unsignedInt:        long,
+              XSD.nonPostiveInteger:  int,
+              XSD.nonNegativeInteger: int,
+              XSD.positiveInteger:    int,
+              XSD.negativeInteger:    int,
+              XSD.unsignedLong:       int,
+              XSD.unsignedInt:        int,
               XSD.unsignedShort:      int,
               XSD.unsignedByte:       int,
             }
@@ -142,9 +142,9 @@ class Mapping(object):
     :param usermap: A mapping dictionary.
     :type usermap: dict
     """
-    for k, v in usermap.iteritems(): self.mapping[(metaclass, k)] = v
+    for k, v in usermap.items(): self.mapping[(metaclass, k)] = v
     self.reversemap = { (k[0], str(m.property)): ReverseEntry(k[1], m.datatype, m.from_rdf, m.functional)
-                          for k, m in self.mapping.iteritems() }
+                          for k, m in self.mapping.items() }
 
   @staticmethod
   def _makenode(value, dtype, mapfn):
@@ -158,9 +158,9 @@ class Mapping(object):
     else:
       if mapfn:
         try: value = mapfn(value)
-        except Exception, msg:
+        except Exception as msg:
           logging.error("Exception mapping literal with '%s': %s", str(mapfn), msg)
-      value = unicode(value)
+      value = str(value)
       if len(value.split(':')) > 1 and value.split(':')[0] in URI_SCHEMES:
         return Resource(value)
       else:
@@ -170,7 +170,7 @@ class Mapping(object):
   #------------------------------------------
     from .core import AbstractObject
     if value not in [None, '']:
-      if hasattr(value, '__iter__'):
+      if hasattr(value, '__iter__') and not hasattr(value, 'strip'):
         for v in value:
           if isinstance(v, AbstractObject):
             yield Statement(subject, map.property, self._makenode(v, None, None))
@@ -203,7 +203,7 @@ class Mapping(object):
       subject = resource.node
       metaclasses = [ c.metaclass for c in resource.__class__.__mro__ if c.__dict__.get('metaclass') ]
       metadict = getattr(resource, 'metadata', { })
-      for k, m in self.mapping.iteritems():
+      for k, m in self.mapping.items():
         if k[0] is None or k[0] in metaclasses:  ## Or do we need str() before lookup ??
           for s in self._statements(subject, m, getattr(resource, k[1], None)): yield s
           for s in self._statements(subject, m, metadict.get(k[1], None)): yield s
@@ -296,5 +296,5 @@ if __name__ == '__main__':
   assert(c.metadata_as_string(rdf.Format.TURTLE) == d.metadata_as_string(rdf.Format.TURTLE))
 
   s.metadata['zz'] = [ a, b, c ]
-  print s.metadata_as_string(rdf.Format.TURTLE)
+  print(s.metadata_as_string(rdf.Format.TURTLE))
 

@@ -132,11 +132,11 @@ class NS(object):
   """
   def __init__(self, base):
   #------------------------
-    self._base = unicode(base)
+    self._base = str(base)
 
   def __getattr__(self, name):
   #---------------------------
-    return Uri(self._base + (name if isinstance(name, basestring) else ''))
+    return Uri(self._base + (name if isinstance(name, str) else ''))
 
   def __str__(self):
   #----------------
@@ -162,7 +162,7 @@ NAMESPACES = {
   'prv':  'http://purl.org/net/provenance/ns#',
   'prov': 'http://www.w3.org/ns/prov#',
   }
-for prefix, name in NAMESPACES.iteritems():
+for prefix, name in NAMESPACES.items():
   setattr(sys.modules[__name__], prefix.upper(), NS(name))
 
 
@@ -235,7 +235,7 @@ class BlankNode(rdflib.term.BNode):
 
   def as_string(self):
   #-------------------
-    return '_:%s' % unicode(self)
+    return '_:%s' % str(self)
 
 
 class Resource(rdflib.term.URIRef):
@@ -256,7 +256,7 @@ class Resource(rdflib.term.URIRef):
 
   def as_string(self):
   #-------------------
-    return self.label if self.label else unicode(self)
+    return self.label if self.label else str(self)
 
   @property
   def label(self):
@@ -288,7 +288,7 @@ class Resource(rdflib.term.URIRef):
     return (isinstance(this, rdflib.term.URIRef)
         and str(this).startswith('urn:uuid:'))
 
-rdflib.term.URIRef.uri = property(lambda self: unicode(self))
+rdflib.term.URIRef.uri = property(lambda self: str(self))
 
 
 class Statement(list):
@@ -335,14 +335,14 @@ class IOMemory(rdflib.plugins.memory.IOMemory):
        and return the integer key"""
 
     if isinstance(obj, rdflib.term.BNode):
-      s = "_:%s" % unicode(obj)
+      s = "_:%s" % str(obj)
     elif isinstance(obj, rdflib.term.Literal):
-      v = ['"""' + unicode(obj.value) + '"""']
-      if   obj.language: v.append('@' + unicode(obj.language))
-      elif obj.datatype: v.append('^^' + unicode(obj.datatype))
+      v = ['"""' + str(obj.value) + '"""']
+      if   obj.language: v.append('@' + str(obj.language))
+      elif obj.datatype: v.append('^^' + str(obj.datatype))
       s = "".join(v)
     elif isinstance(obj, rdflib.term.URIRef):
-      s = "<%s>" % unicode(obj)
+      s = "<%s>" % str(obj)
     else:
       s = obj
     if s not in self.__obj2int:
@@ -448,7 +448,7 @@ class Graph(rdflib.graph.Graph):
     '''
     if base is None: base = self.uri
     if prefixes:
-      for prefix, uri in prefixes.iteritems(): self.bind(prefix, uri)
+      for prefix, uri in prefixes.items(): self.bind(prefix, uri)
     return self.serialize(format=Format.name(format)) ## BUG IN RDFLIB..., base=base)
 
 #  def __iter__(self):
@@ -623,7 +623,7 @@ class Graph(rdflib.graph.Graph):
     '''
     try:
       return self.QueryResult(super(Graph, self).query(sparql))
-    except Exception, msg:
+    except Exception as msg:
       logging.error('Graph query: %s', msg)
     return [ ]
 
@@ -649,20 +649,20 @@ if __name__ == '__main__':
 
   graph_uri = 'http://devel.biosignalml.org/test'
   g = Graph(graph_uri)
-  statements = ([Resource(u'http://devel.biosignalml.org/test'),
-                   Resource(u'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-                     Resource(u'http://www.biosignalml.org/ontologies/2011/04/biosignalml#Recording')],
-                [Resource(u'http://devel.biosignalml.org/test'),
-                   Resource(u'http://purl.org/NET/c4dm/timeline.owl#timeline'),
-                     Resource(u'http://devel.biosignalml.org/test/timeline')],
-                [Resource(u'http://devel.biosignalml.org/test/timeline'),
-                   Resource(u'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-                     Literal(u'http://purl.org/NET/c4dm/timeline.owl#RelativeTimeLine')],
-                [Resource(u'http://devel.biosignalml.org/test'),
-                   Resource(u'http://purl.org/dc/terms/format'),
-                     Literal(u'application/x-bsml')],
+  statements = ([Resource('http://devel.biosignalml.org/test'),
+                   Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+                     Resource('http://www.biosignalml.org/ontologies/2011/04/biosignalml#Recording')],
+                [Resource('http://devel.biosignalml.org/test'),
+                   Resource('http://purl.org/NET/c4dm/timeline.owl#timeline'),
+                     Resource('http://devel.biosignalml.org/test/timeline')],
+                [Resource('http://devel.biosignalml.org/test/timeline'),
+                   Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+                     Literal('http://purl.org/NET/c4dm/timeline.owl#RelativeTimeLine')],
+                [Resource('http://devel.biosignalml.org/test'),
+                   Resource('http://purl.org/dc/terms/format'),
+                     Literal('application/x-bsml')],
                )
   g.add_statements(statements)
 
 #  for s in g: print s
-  print g.serialize(format="turtle") # , xml_base=graph_uri)
+  print(g.serialize(format="turtle")) # , xml_base=graph_uri)

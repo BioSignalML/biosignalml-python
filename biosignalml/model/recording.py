@@ -94,7 +94,7 @@ class Recording(AbstractObject):
     """
     The recording's resources of a given class, as a list.
     """
-    return [ r for r in self._resources.values() if isinstance(r, cls) ]
+    return [ r for r in list(self._resources.values()) if isinstance(r, cls) ]
 
   def add_resource(self, resource):
   #--------------------------------
@@ -139,7 +139,7 @@ class Recording(AbstractObject):
     """
     signal = self.get_resource(uri)
     if not isinstance(signal, self.SignalClass):
-      raise KeyError, str(uri)
+      raise KeyError(str(uri))
     return signal
 
   def add_signal(self, signal):
@@ -153,14 +153,14 @@ class Recording(AbstractObject):
     sig_uri = str(signal.uri)
     try:
       self.get_signal(sig_uri)
-      raise Exception, "Signal '%s' already in recording" % sig_uri
+      raise Exception("Signal '%s' already in recording" % sig_uri)
     except KeyError:
       pass
     if signal.recording is not None:     ## Set from RDF mapping...
       if isinstance(signal.recording, Recording): rec_uri = signal.recording.uri
       else:                                       rec_uri = signal.recording
       if str(rec_uri) != str(self.uri):
-        raise Exception, "Adding to '%s', but signal '%s' is in '%s'" % (self.uri, sig_uri, rec_uri)
+        raise Exception("Adding to '%s', but signal '%s' is in '%s'" % (self.uri, sig_uri, rec_uri))
     signal.recording = self
     self.add_resource(signal)
     return signal
@@ -175,12 +175,12 @@ class Recording(AbstractObject):
     :return: A Signal of type :attr:`SignalClass`.
     """
     if uri is None and id is None:
-      raise Exception, "Signal must have 'uri' or 'id' specified"
+      raise Exception("Signal must have 'uri' or 'id' specified")
     if uri is None:
       uri = str(self.uri) + '/signal/%s' % str(id)
     try:
       self.get_signal(uri)
-      raise Exception, "Signal '%s' already in recording" % uri
+      raise Exception("Signal '%s' already in recording" % uri)
     except KeyError:
       pass
     signal = self.SignalClass(uri, units, **kwds)
@@ -209,10 +209,10 @@ class Recording(AbstractObject):
     if event is None:
       event = Event.create_from_graph(uri, self.graph)  ## graphstore ??
       if self.uri != event.recording.uri:
-        raise KeyError, "Event <%s> doesn't refer to recording" % uri
+        raise KeyError("Event <%s> doesn't refer to recording" % uri)
       self.add_event(event)
     elif not isinstance(event, self.EventClass):
-      raise KeyError, "<%s> isn't an Event" % uri
+      raise KeyError("<%s> isn't an Event" % uri)
     return event
 
   def add_event(self, event):

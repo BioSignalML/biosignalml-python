@@ -75,7 +75,7 @@ And to get back signal data::
 """
 
 import logging
-import urlparse
+import urllib.parse
 import numpy as np
 
 import biosignalml
@@ -185,7 +185,7 @@ class Recording(BSMLRecording):
       #logging.debug('New Signal: %s --> %s', sig.uri, sig.attributes)
       self._repository.post_metadata(self.uri, sig.metadata_as_string())
       return sig
-    except Exception, msg:
+    except Exception as msg:
       raise IOError("Cannot create Signal '%s' in repository" % uri)
 
   def save_metadata(self, metadata=None, format=rdf.Format.RDFXML):
@@ -205,7 +205,7 @@ class Repository(repository.RemoteRepository):
 
   def __init__(self, uri, name=None, password=None, **kwds):
   #---------------------------------------------------------
-    p = urlparse.urlparse(uri)
+    p = urllib.parse.urlparse(uri)
     if p.scheme == '' or p.hostname is None:
       raise IOError("Invalid URI -- %s" % uri)
     uri = p.scheme + '://' + p.hostname
@@ -227,7 +227,7 @@ class Repository(repository.RemoteRepository):
       # Format = HDF5 (BSML ??)
       # then when server processes PUT for a new BSML recording it will create an empty HDF5 container
       return rec
-    except Exception, msg:
+    except Exception as msg:
       raise IOError("Cannot create Recording '%s' in repository -- %s" % (uri, msg))
 
   def get_signal(self, uri, graph_uri=None, **kwds):
@@ -281,7 +281,7 @@ class Repository(repository.RemoteRepository):
         stream.write_signal_data(SignalData(uri, timeseries.time[pos], timeseries.data[pos:pos+blen], **params))
         pos += blen
         count -= blen
-    except Exception, msg:
+    except Exception as msg:
       logging.error('Error in stream: %s', msg)
       raise
     finally:
@@ -300,9 +300,9 @@ if __name__ == "__main__":
 
   rec = repo.get_recording(rec_uri)
   for s in sorted(rec.signals(), key=lambda s: str(s.uri)):
-    print s.uri, s.label
+    print(s.uri, s.label)
 #    for d in s.read(): print d
 
   sig = repo.get_signal(sig_uri)
   for d in sig.read(dtype='f4'):
-    print d
+    print(d)

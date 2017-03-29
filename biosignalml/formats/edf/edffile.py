@@ -22,7 +22,7 @@ import os
 import re
 import math
 import numpy as np
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import logging
 from datetime import datetime
 from collections import namedtuple
@@ -147,7 +147,7 @@ class EDFFile(object):
   #--------------------
     try:
       self = cls()
-      self._open(urllib.urlopen(fname).fp)
+      self._open(urllib.request.urlopen(fname).fp)
       return self
     except Exception:
       return None
@@ -195,11 +195,11 @@ class EDFFile(object):
       self.start_datetime = self.start_datetime.replace(self.start_datetime.year + 100)
 
     #: Indices to EDF+ annotations.
-    self.annotation_signals = [ i for i in xrange(0, self._nsignals)
+    self.annotation_signals = [ i for i in range(0, self._nsignals)
                                   if self.label[i] == 'EDF Annotations' ]
     
     #: A list of indices to data signals.
-    self.data_signals = [ i for i in xrange(0, self._nsignals)
+    self.data_signals = [ i for i in range(0, self._nsignals)
                             if i not in self.annotation_signals ]
 
     #: The duration of the EDF file, in seconds.
@@ -219,7 +219,7 @@ class EDFFile(object):
         self.scaling.append( Scaling(1.0, 0.0) )
 
     self._offsets = [0]
-    for i in xrange(1, self._nsignals):
+    for i in range(1, self._nsignals):
       self._offsets.append(self._offsets[i-1] + 2*self.nsamples[i-1])
     self._recsize = self._offsets[self._nsignals-1] + 2*self.nsamples[self._nsignals-1]
 
@@ -243,7 +243,7 @@ class EDFFile(object):
 
   def fixheader(self):
   #-------------------
-    for i in xrange(0, self._nsignals):
+    for i in range(0, self._nsignals):
       if self._digmin[i] == self._digmax[i] == 0:
         self._digmin[i] = -32768
         self._digmax[i] =  32767
@@ -291,7 +291,7 @@ class EDFFile(object):
         n += l
       else:
         fields = []
-        for i in xrange(0, count):
+        for i in range(0, count):
           fields.append(self._getfield(('%s[%d]' % (f, i), l, typ), data, n))
           n += l
         setattr(self, f, fields)
@@ -303,7 +303,7 @@ class EDFFile(object):
       fld = getattr(self, f)
       if count == 0: data.append(str(fld).lstrip().ljust(l))
       else:
-        for i in xrange(0, count): data.append(str(fld[i]).lstrip().ljust(l))
+        for i in range(0, count): data.append(str(fld[i]).lstrip().ljust(l))
     data = ''.join(data)
     ##data = nonprinting.sub(' ', data)
     if nonprinting.search(data): raise FormatError("Non printing characters in output")
@@ -401,7 +401,7 @@ class EDFFile(object):
         else:
           for TAL in data.rstrip('\x00').split('\x00'):
             try: yield TimeStampedAnnotation(TAL)
-            except FormatError, msg: self._error(msg)
+            except FormatError as msg: self._error(msg)
       recno += 1
 
 #### Record start must match annotations[0].onset

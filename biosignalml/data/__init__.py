@@ -374,36 +374,36 @@ if __name__ == '__main__':
 
   np.set_printoptions(threshold=50, edgeitems=5, suppress=True)
 
-  print sw
-  print ''
-  print uts
-  print ''
-  print uts.points
-  print ''
+  print(sw)
+  print('')
+  print(uts)
+  print('')
+  print(uts.points)
+  print('')
 
   dsu = DataSegment(sw.time[-1] + 1.0/uts.rate, uts)
-  print dsu
-  print ''
+  print(dsu)
+  print('')
 
 #  sw.extend(uts.times + sw.time[-1] + 1.0/uts.rate, uts.data)
 
   j = sw + dsu
 
-  print j
-  print ''
-  print j.points
-  print ''
+  print(j)
+  print('')
+  print(j.points)
+  print('')
 
-  print j[95:106]
-  print ''
+  print(j[95:106])
+  print('')
 
   ds = DataSegment(100.0, j)
-  print ds[95:106]
+  print(ds[95:106])
 
 
   c = Clock('http://example.org/clock', [], resolution=0.4)
-  print c.resolution
-  print c.metadata_as_string()
+  print(c.resolution)
+  print(c.metadata_as_string())
 
 
 #  import pylab

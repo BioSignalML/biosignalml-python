@@ -18,7 +18,7 @@
 #
 ######################################################
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import json
 import socket
 import logging
@@ -90,11 +90,11 @@ class SparqlStore(object):
     try:
       http = httplib2.Http(timeout=20)
       response, content = http.request(endpoint, body=body, method=method, headers=headers)
-    except socket.error, msg:
+    except socket.error as msg:
       raise StoreException("Cannot connect to SPARQL endpoint %s (%s)" % (endpoint, msg))
     if response.status not in [200, 201]:
       raise StoreException('SPARQL error: %s' % self._error_text(response, content))
-    return content
+    return content.decode()
 
   @staticmethod
   def _error_text(response, content):
@@ -108,7 +108,7 @@ class SparqlStore(object):
   @staticmethod
   def map_prefixes(prefixes):
   #--------------------------
-    return '\n'.join(['PREFIX %s: <%s>' % kv for kv in prefixes.iteritems()] + ['']) if prefixes else ''
+    return '\n'.join(['PREFIX %s: <%s>' % kv for kv in prefixes.items()] + ['']) if prefixes else ''
 
 
   def query(self, sparql, format=rdf.Format.RDFXML, prefixes=None):
@@ -119,10 +119,10 @@ class SparqlStore(object):
     #logging.debug('SPARQL %s: %s', format, sparql)
     try:
       return self.http_request('/sparql/', 'POST',
-                               body=urllib.urlencode({'query': self.map_prefixes(prefixes) + sparql}),
+                               body=urllib.parse.urlencode({'query': self.map_prefixes(prefixes) + sparql}),
                                headers={'Content-type': 'application/x-www-form-urlencoded',
                                         'Accept': rdf.Format.mimetype(format)} )
-    except Exception, msg:
+    except Exception as msg:
       logging.debug('SPARQL: %s, %s', msg, self.map_prefixes(prefixes) + sparql)
       raise
 
@@ -221,10 +221,10 @@ class SparqlUpdateStore(SparqlStore):
     ##logging.debug('UPD: %s', sparql)
     try:
       return self.http_request(self.ENDPOINTS[0], 'POST',
-                               body=urllib.urlencode({self.UPDATE_PARAMETER:
+                               body=urllib.parse.urlencode({self.UPDATE_PARAMETER:
                                  self.map_prefixes(prefixes) + sparql}),
                                headers={'Content-type': 'application/x-www-form-urlencoded'})
-    except Exception, msg:
+    except Exception as msg:
       logging.debug('SPARQL: %s, %s', msg, self.map_prefixes(prefixes) + prefixes)
       raise
 
@@ -292,7 +292,7 @@ class SparqlUpdateStore(SparqlStore):
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
     self.http_request(self.ENDPOINTS[1], 'POST',
-                      body=urllib.urlencode({'data': statements,
+                      body=urllib.parse.urlencode({'data': statements,
                                              'graph': str(graph),
                                              'mime-type': rdf.Format.mimetype(format),
                                             }),
@@ -380,7 +380,7 @@ if __name__ == '__main__':
 
   def query(store, graph):
   #-----------------------
-    print store.query("select * where { graph <%s> { ?s ?p ?o } }" % graph)
+    print(store.query("select * where { graph <%s> { ?s ?p ?o } }" % graph))
 
   rdf1 = """<?xml version="1.0" encoding="utf-8"?>
             <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -403,18 +403,18 @@ if __name__ == '__main__':
   store = Virtuoso("http://localhost:8890")
 
 
-  print "RDF1 PUT"
+  print("RDF1 PUT")
   store.replace_graph(graph, rdf1)
   query(store, graph)
 
-  print "\nRDF2 POST"
+  print("\nRDF2 POST")
   store.extend_graph(graph, rdf2)
   query(store, graph)
 
-  print "\nRDF2 PUT"
+  print("\nRDF2 PUT")
   store.replace_graph(graph, rdf2)
   query(store, graph)
 
-  print "\nDELETE"
+  print("\nDELETE")
   store.delete_graph(graph)
   query(store, graph)

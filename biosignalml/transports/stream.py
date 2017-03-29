@@ -58,7 +58,7 @@ VERSION = 1    #: Initial version of Block Stream protocol.
 
 import logging
 import hashlib
-import Queue
+import queue
 try:
   import simplejson as json
 except ImportError:
@@ -674,7 +674,7 @@ class BlockStream(object):
   #----------------------------
     self._endpoint = endpoint
     self._request = StreamBlock(0, None, { }, '')
-    self._receiveQ = Queue.Queue()
+    self._receiveQ = queue.Queue()
 
   def close(self):
   #---------------
@@ -761,14 +761,14 @@ if __name__ == '__main__':
   nd = SignalData('', 10, np.ones(1),                                rate=100)
   sd = SignalData('', 10, np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), rate=100)
 
-  print sd
-  print sd.streamblock()
-  print sd.streamblock().signaldata()
+  print(sd)
+  print(sd.streamblock())
+  print(sd.streamblock().signaldata())
 
 
-  print nd
-  testQ = Queue.Queue()
+  print(nd)
+  testQ = queue.Queue()
   bp = BlockParser(testQ.put, Checksum.STRICT)
   bp.process(nd.streamblock().bytes(Checksum.STRICT))
 
-  print testQ.get(True, 10).signaldata()
+  print(testQ.get(True, 10).signaldata())

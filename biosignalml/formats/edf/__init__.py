@@ -241,7 +241,7 @@ if __name__ == '__main__':
 
 
   for s in edf.signals():
-    print s
+    print(s)
 
   #window = edf.interval(0.0, 1.0)   # 10 second wide window
   ## Hmm, recording.duration could be a RelativeInterval...
@@ -251,8 +251,8 @@ if __name__ == '__main__':
   #  window += 1.0
 
   for e in edf.events():
-    print e
+    print(e)
 
-  print edf.metadata_as_string()
+  print(edf.metadata_as_string())
 
   edf.close()

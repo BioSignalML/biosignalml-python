@@ -356,7 +356,7 @@ class QueryResults(object):
     #logging.debug('SPARQL: %s', sparql)
     try:
       self._results = json.loads(sparqlstore.query(sparql, rdf.Format.JSON))
-    except Exception, msg:
+    except Exception as msg:
       self._results = { 'error': str(msg) }
 
   @property
@@ -378,7 +378,7 @@ class QueryResults(object):
   def abbreviate_uri(self, uri):
   #-----------------------------
     uri = str(uri)
-    for name, prefix in self._prefixes.iteritems():
+    for name, prefix in self._prefixes.items():
       if uri.startswith(prefix): return '%s:%s' % (name, uri[len(prefix):])
     return uri
 
@@ -457,7 +457,7 @@ class GraphUpdate(GraphStore):
     ### Following should be done in Mapping class...
     if o not in ['', None] and isinstance(s, model.core.AbstractObject):
       mc = [ c.metaclass for c in s.__class__.__mro__ if c.__dict__.get('metaclass') ]
-      for k, m in s.rdfmap.mapping.iteritems():
+      for k, m in s.rdfmap.mapping.items():
         if (k[0] is None or k[0] in mc) and k[1] == p:
           if isinstance(o, model.core.AbstractObject): v = "<%s>" % str(o.uri)
           else:

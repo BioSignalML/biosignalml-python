@@ -23,7 +23,7 @@ import tempfile
 import socket
 import logging
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import httplib2
 httplib2.RETRIES = 1
 
@@ -148,9 +148,9 @@ class RemoteRepository(BSMLUpdateStore):
     remote = httplib2.Http()
     try:
       response, access = remote.request(str(self.uri) + '/frontend/login',
-        method='POST', body=urllib.urlencode(body),
+        method='POST', body=urllib.parse.urlencode(body),
         headers={'Content-type': 'application/x-www-form-urlencoded'})
-    except Exception, msg:
+    except Exception as msg:
       raise IOError(msg)
     if response.status == 200:
       self._save_access(access)
@@ -187,9 +187,9 @@ class RemoteRepository(BSMLUpdateStore):
     remote = httplib2.Http()
     try:
       response, access = remote.request(uri + '/frontend/login',
-        method='POST', body=urllib.urlencode(body),
+        method='POST', body=urllib.parse.urlencode(body),
         headers={'Content-type': 'application/x-www-form-urlencoded'})
-    except Exception, msg:
+    except Exception as msg:
       raise IOError(msg)
     return (response.status == 200)
 
@@ -200,7 +200,7 @@ class RemoteRepository(BSMLUpdateStore):
       graph = rdf.Graph.create_from_resource(self._md_uri + str(uri), rdf.Format.RDFXML)
       if uri: graph.uri = rdf.Uri(uri)
       return graph
-    except Exception, msg:
+    except Exception as msg:
       raise IOError("Cannot get RDF for '%s' (%s)" % (uri, msg))
 
   def _send_metadata(self, method, uri, metadata, format):
@@ -211,7 +211,7 @@ class RemoteRepository(BSMLUpdateStore):
     try:
       http = httplib2.Http(timeout=20)
       response, content = http.request(endpoint, body=metadata, method=method, headers=headers)
-    except socket.error, msg:
+    except socket.error as msg:
       raise IOError("Cannot connect to repository: %s" % endpoint)
     if   response.status == 401: raise IOError("Unauthorised")
     elif response.status not in [200, 201]: raise IOError("%s: %s" % (response.status, content))
@@ -236,7 +236,7 @@ if __name__ == "__main__":
   sig_uri = rec_uri + '/signal/0'
 
   for d in repo.get_data(rec_uri):
-    print d
+    print(d)
 
   for d in repo.get_data(sig_uri):
-    print d
+    print(d)
