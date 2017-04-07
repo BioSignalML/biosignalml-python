@@ -21,11 +21,11 @@
 import math
 import logging
 
-import biosignalml.rdf as rdf
-from biosignalml import BSML
-from biosignalml.formats import BSMLRecording, BSMLSignal, MIMETYPES
-from biosignalml.data import DataSegment, UniformTimeSeries, TimeSeries, Clock, UniformClock
-from biosignalml.repository import RecordingGraph
+from ... import rdf
+from ... import BSML
+from .. import BSMLRecording, BSMLSignal, MIMETYPES
+from ...data import DataSegment, UniformTimeSeries, TimeSeries, Clock, UniformClock
+from ...repository import RecordingGraph
 
 from .h5recording import H5Recording
 
@@ -97,6 +97,10 @@ class HDF5Signal(BSMLSignal):
 
     # We need to be consistent as to what an interval is....
     # Use model.Interval ??
+
+    ## interval and maxduration are in units...
+    ## self.rate is in self.clock.units
+
     if interval is not None:
       segment = (self.clock.index(interval.start), self.clock.index(interval.end))
 
@@ -113,6 +117,7 @@ class HDF5Signal(BSMLSignal):
     while length > 0:
       if maxpoints > length: maxpoints = length
       data = self._h5[startpos: startpos+maxpoints]
+      ## Times are in self.clock.units...
       if isinstance(self.clock, UniformClock):
         yield DataSegment(self.clock[startpos], UniformTimeSeries(data, self.clock.rate))
       else:
@@ -222,6 +227,7 @@ class HDF5Recording(BSMLRecording):
     :param dataset: The file path or URI of the BioSignalML HDF5 file.
     :param kwds: Other :class:`~biosignalml.Recording` attributes to set.
     """
+    ##print("create:", uri)
     return cls(uri, dataset, create=True, **kwds)
 ###    self.dataset = dataset    ### Only set dataset in metadata when storing into a repository??
 
@@ -244,6 +250,7 @@ class HDF5Recording(BSMLRecording):
     :param kwds: Other :class:`~biosignalml.Signal` attributes to set.
     """
     sig = BSMLRecording.new_signal(self, uri, units, id=id, **kwds)
+    ## Above uses SignalClass to create a HDF5Signal
     if self._h5:
       if sig.clock:
         self._h5.create_clock(sig.clock.uri, sig.clock.units, times=sig.clock.times)

@@ -24,9 +24,8 @@ An abstract BioSignalML Recording.
 import logging
 from collections import OrderedDict
 
-import biosignalml.rdf as rdf
-import biosignalml.utils as utils
-from biosignalml.rdf import XSD, DCT, TL, PROV
+from .. import rdf, utils
+from ..rdf import XSD, DCT, TL, PROV
 
 from .ontology import BSML
 from .core     import AbstractObject
@@ -215,6 +214,7 @@ class Recording(AbstractObject):
       raise KeyError("<%s> isn't an Event" % uri)
     return event
 
+
   def add_event(self, event):
   #--------------------------
     """
@@ -299,4 +299,5 @@ class Recording(AbstractObject):
                            % (BSML.Signal, BSML.recording, self.uri)):
         self.add_signal(self.SignalClass.create_from_graph(str(r['s']), graph, units=None))
     # Do we load events? There may be a lot of them...
+    ## Or just find their URIs??
     return self

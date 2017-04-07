@@ -20,7 +20,7 @@
 
 import logging
 
-from biosignalml.rdf import Resource, NS
+from ..rdf import Resource, NS
 
 from .ontology import UNITS
 

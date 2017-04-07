@@ -35,7 +35,7 @@ import os
 import logging
 from collections import namedtuple
 
-from biosignalml.rdf import Node, Uri, Resource, Literal, Statement, XSD
+from ..rdf import Node, Uri, Resource, Literal, Statement, XSD
 
 __all__ = [ 'PropertyMap', 'Mapping' ]
 
@@ -287,9 +287,9 @@ if __name__ == '__main__':
   b = Annotation.Tag(a2, s.uri, user, t1)
   c = Annotation(a3, s.uri, user, tags=[t2, t3], text='Multiple tags')
 
-  #print a.metadata_as_string(rdf.Format.TURTLE)
-  #print b.metadata_as_string(rdf.Format.TURTLE)
-  #print c.metadata_as_string(rdf.Format.TURTLE)
+  #print(a.metadata_as_string(rdf.Format.TURTLE))
+  #print(b.metadata_as_string(rdf.Format.TURTLE))
+  #print(c.metadata_as_string(rdf.Format.TURTLE))
 
   c.save_metadata_to_graph(g)
   d = Annotation.create_from_graph(a3, g)

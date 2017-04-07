@@ -5,7 +5,7 @@ Provide access to the UOME List ontology.
 Generated from http://www.sbpax.org/uome/list.owl at Tue May 15 11:54:58 2012
 """
 
-from biosignalml.rdf import Uri, Resource, NS as Namespace
+from ..rdf import Uri, Resource, NS as Namespace
 
 __all__ = [ 'UNITS' ]
 

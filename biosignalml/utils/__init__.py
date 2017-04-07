@@ -29,7 +29,7 @@ from dateutil.tz import tzutc
 
 __all__ = [ 'datetime_to_isoformat', 'isoformat_to_datetime', 'seconds_to_isoduration',
             'isoduration_to_seconds', 'utctime', 'utctime_as_string', 'expired', 'chop',
-            'trimdecimal', 'maketime', 'cp1252', 'nbspescape', 'xmlescape', 'xml', 'num',
+            'trimdecimal', 'maketime', 'nbspescape', 'xmlescape', 'xml', 'num',
             'file_uri', 'hexdump', 'unescape' ]
 
 
@@ -137,17 +137,6 @@ def maketime(secs):
 #=================
   return trimdecimal(timedelta(seconds=secs))
 
-
-def cp1252(s):
-#============
-  """ Encodes 's' as Unicode using cp1252 code table."""
-  try:
-    if isinstance(s, str): return s
-    elif isinstance(s, str):   return s.decode('cp1252')
-    else:                      return str(s).decode('cp1252')
-  except Exception as e:
-    logging.error("Can not encode %s", s)
-    return('???')
 
 def nbspescape(s):
 #================

@@ -21,14 +21,11 @@
 import logging
 import json
 
-from biosignalml import BSML
-import biosignalml.model as model
-from biosignalml.model.mapping import PropertyMap
+from .. import BSML
 
-import biosignalml.rdf as rdf
-from biosignalml.rdf import RDF, DCT, PRV, XSD
-
-import biosignalml.utils as utils
+from .. import model, rdf, utils
+from ..model.mapping import PropertyMap
+from ..rdf import RDF, DCT, PRV, XSD
 
 __all__ = [ 'GraphStore', 'GraphUpdate' ]
 
@@ -57,7 +54,6 @@ class DataItem(model.core.AbstractObject):
     for s in graph.get_subjects(PRV.precededBy, self.uri):
       self.followedby = s
       break
-
     return self
 
 

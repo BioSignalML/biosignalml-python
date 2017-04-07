@@ -23,7 +23,7 @@ A BioSignalML Event.
 
 import logging
 
-import biosignalml.utils as utils
+from .. import utils
 
 from .ontology import BSML
 from .core     import AbstractObject
@@ -62,7 +62,7 @@ class Event(AbstractObject):
     from biosignalml.data.time import TemporalEntity  # Prevent a circular import
     self = cls(uri, None, **kwds)
     self.add_metadata(graph)
-    if self.time is not None:
+    if self.time is not None:  ## Can we events that don't have a time ??
       self.time = TemporalEntity.create_from_graph(self.time, graph)
     return self
 

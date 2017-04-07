@@ -23,8 +23,8 @@ A BioSignalML Signal.
 
 import logging
 
-import biosignalml.utils as utils
-from biosignalml.rdf import XSD, DCT
+from .. import utils
+from ..rdf import XSD, DCT
 
 from .ontology import BSML
 from .core     import AbstractObject

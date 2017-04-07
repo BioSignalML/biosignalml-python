@@ -26,11 +26,10 @@ BSML Store description...
 import logging
 import operator
 
-import biosignalml.formats
-from biosignalml import BSML, Recording, Signal, Event, Annotation, Segment
-from biosignalml.data.time import TemporalEntity
-import biosignalml.rdf as rdf
-from biosignalml.rdf import RDFS, DCT, PRV, TL, Format
+from .. import formats, rdf
+from .. import BSML, Recording, Signal, Event, Annotation, Segment
+from ..data.time import TemporalEntity
+from ..rdf import RDFS, DCT, PRV, TL, Format
 
 from .graphstore import GraphStore, GraphUpdate
 
@@ -250,26 +249,40 @@ class RecordingGraph(rdf.Graph):
                            { ?tm a bsml:Instant ; tl:at ?start }
                          }
                        }
-                     }""" % dict(subject=self._rec_uri,
+                     } order by ?ann""" % dict(
+                                 subject=self._rec_uri,
                                  bsml=BSML.prefix,
                                  rdfs=RDFS.prefix,
                                  dct=DCT.prefix,
                                  prv=PRV.prefix,
                                  tl=TL.prefix)
-    anns = [ [str(a[0].uri), str(a[1].uri), str(a[2]),
-              a[3].value if a[3] else '', a[5].value,
-              str(a[6].uri), str(a[7].uri), a[8].value,
-              None if a[9] in ['', None] else a[9].value, str(a[10].uri)]
-             for a in self.query(sparql) ]
+
+    def ann_data(a, tags):
+      return [str(a[0].uri), str(a[1].uri), str(a[2]),
+              a[3].value if a[3] else '',
+              tags, a[5].value, str(a[6].uri), str(a[7].uri), a[8].value,
+              None if a[9] in ['', None] else a[9].value, str(a[10].uri) ]
+    anns = [ ]
+    tags = [ ]
+    lastann = None
+    for a in self.query(sparql):
+      if lastann is not None:
+        if a[0].uri != lastann[0].uri:
+          anns.append(ann_data(lastann, tags))
+          tags = [ ]
+      if a[4] is not None: tags.append(str(a[4].uri))
+      lastann = a
+    if lastann is not None: anns.append(ann_data(lastann, tags))
     anns.sort(key=operator.itemgetter(7, 1, 0))  # start, about, uri
     annotations = [ ]
     for a in anns:
-      ann = Annotation(a[0], about=a[1], comment=a[3], created=a[4])
+      ann = Annotation(a[0], about=a[1], comment=a[3], tags=a[4], created=a[5])
       if a[2] == str(BSML.Segment):
-        time = TemporalEntity.create(a[6], a[7], a[8], timeline=a[9])
-        ann.about = Segment(a[1], source=a[5], time=time)
+        time = TemporalEntity.create(a[7], a[8], a[9], timeline=a[10])
+        ann.about = Segment(a[1], source=a[6], time=time)
       annotations.append(ann)
     return annotations
+
 
 class BSMLStore(GraphStore):
 #===========================
@@ -337,24 +350,38 @@ class BSMLStore(GraphStore):
     if graph_uri is None: graph_uri, rec_uri = self.get_graph_and_recording_uri(uri)
     else: rec_uri = uri
     #logging.debug('Graph: %s', graph_uri)
+
     if graph_uri is not None:
       if recording_class is None:
         recording_class = biosignalml.formats.CLASSES.get(
                             str(self.get_objects(rec_uri, DCT.format, graph=graph_uri)[0]),
                             Recording)
+
+      ## If graph is entire named graph of recording then
+      ## create_from_graph will add signals...
+
       graph = self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)
 ##    graph = self.get_graph(graph_uri, BSML.Recording)
+
       rec = recording_class.create_from_graph(rec_uri, graph, signals=False, **kwds)
+
+      ## Why not add signals in Recording class creation??
+
       if rec is not None:
         if signals:
           for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
               params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix),
               graph=graph.uri, order='?s'):
+
             sig_uri = rdf.sparqlstore.get_result_value(r, 's')
+
             sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph.uri)
             rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
+
+
         rec.initialise(open_dataset=open_dataset)    ## This will open files...
       return rec
+
 
   def get_signal(self, uri, graph_uri=None, signal_class=None, **kwds):
   #--------------------------------------------------------------------

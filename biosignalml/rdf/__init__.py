@@ -35,7 +35,7 @@ import logging
 import rdflib
 import rdflib.plugins.memory
 
-import biosignalml.utils as utils
+from .. import utils
 
 
 class RDFParseError(Exception):
@@ -202,11 +202,11 @@ class Literal(rdflib.term.Literal):
   def value(self):
   #---------------
     if   str(self.datatype) == str(XSD.dayTimeDuration):
-      return utils.isoduration_to_seconds(unicode(self))
+      return utils.isoduration_to_seconds(str(self))
     elif self._value is not None:
       return self._value
     else:
-      return unicode(self)
+      return str(self)
 
   def as_string(self):
   #-------------------

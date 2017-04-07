@@ -4,7 +4,6 @@ from setuptools import setup, find_packages
 
 version = "0.6.0b"
 
-
 setup(name='BioSignalML',
       version=version,
       provides=['biosignalml'],
@@ -43,5 +42,6 @@ setup(name='BioSignalML',
                         'rdflib >= 4.1.0',
                         'pint >= 0.5.1',
                         'numpy >= 1.8.1',
+                        'h5py >= 2.7.0',
                        ],
       )

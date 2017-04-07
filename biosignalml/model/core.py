@@ -23,9 +23,8 @@ Abstract BioSignalML objects.
 
 import logging
 
-import biosignalml.rdf as rdf
-from biosignalml.rdf import RDFS, DCT, XSD, PRV
-import biosignalml.utils as utils
+from .. import rdf, utils
+from ..rdf import RDFS, DCT, XSD, PRV
 
 from .ontology import BSML
 from .mapping import Mapping, PropertyMap

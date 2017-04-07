@@ -246,7 +246,7 @@ if __name__ == '__main__':
   #window = edf.interval(0.0, 1.0)   # 10 second wide window
   ## Hmm, recording.duration could be a RelativeInterval...
   #while window.start < edf.duration:
-  #  for e, h in sigs.iteritems():
+  #  for e, h in sigs.items():
   #    for d in e.read(window): h.append(d)
   #  window += 1.0
 

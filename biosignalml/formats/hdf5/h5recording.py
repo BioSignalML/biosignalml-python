@@ -408,6 +408,12 @@ class H5Recording(object):
       self._h5 = None
 
 
+  @staticmethod
+  def _iterable(s):
+    """Check if we have a non-string iterable."""
+    return not isinstance(s, str) and getattr(s, '__iter__', None)
+
+
   def create_signal(self, uri, units, shape=None, data=None,
                           dtype=None, gain=None, offset=None,
                           rate=None, period=None, timeunits=None, clock=None,
@@ -434,19 +440,20 @@ class H5Recording(object):
     :param float period: The time, in time-units, between data points.
     :param timeunits: The units 'time' is measured in. Optional, default is seconds.
     :param clock: The URI of a clock dataset containing sample times. Optional.
+                  Could this not also be a Clock (or HDF5Clock)????
     :return: The `H5Signal` created.
 
     Only one of ``rate``, ``period``, or ``clock`` can be given.
 
     """
 
-    uri_list = (hasattr(uri, '__iter__') and not hasattr(uri, 'strip'))
-    unit_list = (hasattr(units, '__iter__') and not hasattr(units, 'strip'))
-    if not uri_list and not unit_list:
+    if not self._iterable(uri) and not self._iterable(units):
       if self._h5['uris'].attrs.get(str(uri)):
         raise KeyError("A signal already has URI '%s'" % uri)
       nsignals = 1
-    elif uri_list and unit_list and len(uri) == len(units):  # compound dataset
+    elif (self._iterable(uri) and self._iterable(units)
+     and len(uri) == len(units)):  # compound dataset
+#      print(type(uri), type(units))
       for u in uri:
         if self._h5['uris'].attrs.get(str(u)):
           raise KeyError("A signal already has URI '%s'" % uri)
@@ -588,7 +595,7 @@ class H5Recording(object):
     supplied data must be a multiple of the number of signals.
     """
     if len(data) == 0: return
-    if hasattr(uri, '__iter__') and not hasattr(uri, 'strip'):
+    if self._iterable(uri):
       sig = self.get_signal(uri[0])
       if sig is None or list(sig.dataset.attrs['uri']) != list(uri):
          raise KeyError("Unknown signal set '%s'" % uri)
@@ -750,14 +757,16 @@ class H5Recording(object):
     Store metadata in the HDF5 recording.
 
     :param metadata: RDF serialised as a string.
-    :type metadata: str or unicode
+    :type metadata: str
     :param mimetype: A mimetype string for the RDF format used.
 
     Metadata is encoded as UTF-8 when stored.
     """
     if self._h5.get('/metadata'): del self._h5['/metadata']
-    md = self._h5.create_dataset('/metadata', data=metadata.encode('utf-8'))
+    md = self._h5.create_dataset('/metadata', data=str(metadata, 'utf-8'))
     md.attrs['mimetype'] = mimetype
+    ## Error if new_metadata???
+    ## Store as new_metadata then delete metadata and rename
 
   def get_metadata(self):
   #----------------------
@@ -766,14 +775,15 @@ class H5Recording(object):
 
     :return: A 2-tuple of retrieved metadata and mimetype, or
              (None, None) if the recording has no '/metadata' dataset.
-    :rtype: tuple(unicode, str)
+    :rtype: tuple(str, str)
     """
     if self._h5.get('/metadata'):
       md = self._h5['/metadata']
       return (md[()].decode('utf-8'), md.attrs.get('mimetype'))
     else:
       return (None, None)
-
+    ## Error if no metadata???
+    ## Error if new_metadata???
 
 if __name__ == '__main__':
 #=========================
@@ -785,7 +795,7 @@ if __name__ == '__main__':
   g = H5Recording.open('test.h5')
 
   g.create_signal('a signal URI', 'mV', data=[1, 2, 3], rate=10)
-  
+
   g.create_signal('2d signal', 'mV', data=[1, 2, 3, 4], shape=(2,), rate=100)
 
   g.create_signal(['URI1', 'URI2'], ['mA', 'mV'], data=[1, 2, 3, 4], period=0.001)

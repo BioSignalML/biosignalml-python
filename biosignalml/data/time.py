@@ -22,13 +22,10 @@ RelativeTimeLine, Instant and Interval objects.
 ######################################################
 
 
-import biosignalml.rdf as rdf
-from biosignalml.rdf import RDF, RDFS, DCT, XSD, TL
-
-import biosignalml.utils as utils
-import biosignalml.model as model
-from biosignalml.model import BSML
-from biosignalml.model.mapping import PropertyMap
+from .. import model, rdf, utils
+from ..model import BSML
+from ..model.mapping import PropertyMap
+from ..rdf import RDF, RDFS, DCT, XSD, TL
 
 __all__ = [ 'Instant', 'Interval', 'RelativeTimeLine', 'TemporalEntity' ]
 

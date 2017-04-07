@@ -6,7 +6,7 @@ Generated from file:///Users/dave/biosignalml/workspace/ontologies/bsml/2011-04-
 Full documentation of the ontology is at http://www.biosignalml.org/ontologies/2011/04/biosignalml
 """
 
-from biosignalml.rdf import Resource, NS as Namespace
+from ..rdf import Resource, NS as Namespace
 
 __all__ = [ "VERSION", "BSML" ]
 

@@ -20,8 +20,8 @@
 
 import logging
 
-from biosignalml.rdf import RDFS, DCT
-import biosignalml.utils as utils
+from .. import utils
+from ..rdf import RDFS, DCT
 
 from .ontology import BSML
 from .core     import AbstractObject

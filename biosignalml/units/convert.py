@@ -23,9 +23,8 @@ import pint.unit
 
 import logging
 
-import biosignalml.rdf.sparqlstore as sparqlstore
-
-from biosignalml.rdf import NS, RDF, UOME
+from ..rdf import sparqlstore
+from ..rdf import NS, RDF, UOME
 
 __all__ = [ 'UnitConverter' ]
 
