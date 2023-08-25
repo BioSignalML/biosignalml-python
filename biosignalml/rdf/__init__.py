@@ -449,7 +449,7 @@ class Graph(rdflib.graph.Graph):
     if base is None: base = self.uri
     if prefixes:
       for prefix, uri in prefixes.items(): self.bind(prefix, uri)
-    return self.serialize(format=Format.name(format)) ## BUG IN RDFLIB..., base=base)
+    return self.serialize(format=Format.name(format), encoding='utf-8') ## BUG IN RDFLIB..., base=base)
 
 #  def __iter__(self):
 #  #------------------
