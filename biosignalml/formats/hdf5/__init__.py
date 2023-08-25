@@ -207,6 +207,8 @@ class HDF5Recording(BSMLRecording):
 
   def __init__(self, uri, dataset=None, **kwds):
   #---------------------------------------------
+    self._h5 = None
+    self._readonly = True
     newfile = kwds.pop('create', False)
     if uri is None and (newfile or dataset is None):
       raise TypeError("No URI given for HDF5 recording")
@@ -216,20 +218,26 @@ class HDF5Recording(BSMLRecording):
       if newfile:
         self._h5 = H5Recording.create(uri, str(dataset), **kwds)
         self.graph = RecordingGraph(uri, rec_class=HDF5Recording)
+        self._readonly = False
       else:
-        self._h5 = H5Recording.open(dataset, **kwds)
-        if uri is None:
-          BSMLRecording.__init__(self, self._h5.uri, dataset, **kwds)
-        elif str(uri) != str(self._h5.uri):
-          raise TypeError("Wrong URI in HDF5 recording")
-        self._load_metadata()
-        for n, s in enumerate(self._h5.signals()):
-          signal = HDF5Signal.create_from_H5Signal(n, s)
-          signal.add_metadata(self.graph)
-          signal.clock.add_metadata(self.graph)  ## We need to cache clocks in recording...
-          self.add_signal(signal)
-    else:
-      self._h5 = None
+        try:
+          self._h5 = H5Recording.open(dataset, **kwds)
+          if uri is None:
+            BSMLRecording.__init__(self, self._h5.uri, dataset, **kwds)
+          elif uri != self._h5.uri:
+            raise TypeError("Wrong URI in HDF5 recording")
+          self._load_metadata()
+          for n, s in enumerate(self._h5.signals()):
+            signal = HDF5Signal.create_from_H5Signal(n, s)
+            signal.add_metadata(self.graph)
+            signal.clock.add_metadata(self.graph)  ## We need to cache clocks in recording...
+            self.add_signal(signal)
+
+          if 'readonly' not in kwds:
+            self._readonly = False    # File has been sucessfully opened
+        except Exception:
+          self.close()
+          raise
 
   @classmethod
   def open(cls, dataset, **kwds):
@@ -260,7 +268,8 @@ class HDF5Recording(BSMLRecording):
   #------------------------------
     """ Close a recording`. """
     if self._h5:
-      self._save_metadata(prefixes=prefixes)
+      if not self._readonly:
+        self._save_metadata(prefixes=prefixes)
       self._h5.close()
       self._h5 = None
 
