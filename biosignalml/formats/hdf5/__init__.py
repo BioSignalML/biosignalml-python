@@ -26,6 +26,7 @@ from ... import BSML
 from .. import BSMLRecording, BSMLSignal, MIMETYPES
 from ...data import DataSegment, UniformTimeSeries, TimeSeries, Clock, UniformClock
 from ...repository import RecordingGraph
+from ...units import UnitConverter
 
 from .h5recording import H5Recording
 
@@ -57,7 +58,7 @@ class HDF5Signal(BSMLSignal):
   #----------------------------
     self._h5 = h5
     if   h5.clock: self.clock = Clock(h5.clock.uri, h5.clock.times, units=h5.clock.units)
-    elif h5.rate:  self.clock = UniformClock(None, h5.rate, units=h5.clock.units)
+    elif h5.rate:  self.clock = UniformClock(None, h5.rate)
 
   @classmethod
   def create_from_H5Signal(cls, index, signal):
@@ -70,8 +71,8 @@ class HDF5Signal(BSMLSignal):
     self._set_h5_signal(signal)
     return self
 
-  def read(self, interval=None, segment=None, maxduration=None, maxpoints=None):
-  #-----------------------------------------------------------------------------
+  def read(self, interval=None, segment=None, maxduration=None, maxpoints=None, units=None):
+  #-----------------------------------------------------------------------------------------
     """
     Read data from a signal.
 
@@ -81,6 +82,8 @@ class HDF5Signal(BSMLSignal):
       point not included in the returned range.
     :param maxduration: The maximum duration, in seconds, of a single returned segment.
     :param maxpoints: The maximum length, in samples, of a single returned segment.
+    :param units: :class:`Uri` The units-of-measurement for data values. A TypeError is raised if
+      signal data can not be converted.
     :return: An `iterator` returning :class:`~biosignalml.data.DataSegment` segments
       of the signal data.
 

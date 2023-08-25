@@ -61,8 +61,8 @@ class BSMLSignal(biosignalml.Signal):
     """Close a Signal."""
     pass
 
-  def read(self, interval=None, segment=None, maxduration=None, maxpoints=None):
-  #-----------------------------------------------------------------------------
+  def read(self, interval=None, segment=None, maxduration=None, maxpoints=None, units=None):
+  #-----------------------------------------------------------------------------------------
     """
     Read data from a Signal.
 
@@ -72,6 +72,8 @@ class BSMLSignal(biosignalml.Signal):
       point not included in the returned range.
     :param maxduration: The maximum duration, in seconds, of a single returned segment.
     :param maxpoints: The maximum length, in samples, of a single returned segment.
+    :param units: :class:`Uri` The units-of-measurement for data values. A TypeError is raised if
+      signal data can not be converted.
     :return: An ``iterator`` returning :class:`~biosignalml.data.DataSegment` segments
       of the signal data.
 
