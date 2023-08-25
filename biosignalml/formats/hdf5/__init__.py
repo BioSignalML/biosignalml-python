@@ -168,6 +168,28 @@ class HDF5Signal(BSMLSignal):
     '''
     self.recording._h5.extend_signal(self.uri, points)
 
+  def data(self, n):
+  #----------------
+    """
+    Get a single data point in a Signal.
+
+    :param n: The index of the data point.
+    :type n: non-negative integer
+    :return: The value of the n\ :sup:`th` data point.
+    """
+    return self._h5[n]
+
+  def time(self, n):
+  #----------------
+    """
+    Get the time of a data point in a Signal.
+
+    :param n: The index of the data point.
+    :type n: non-negative integer
+    :return: The time of the n\ :sup:`th` data point.
+    """
+    return self._h5.time(n)
+
 
 class HDF5Recording(BSMLRecording):
 #==================================
