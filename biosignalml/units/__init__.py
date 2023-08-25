@@ -41,6 +41,7 @@ _direct = {
   'mv':     'Millivolt',
   'uV-mrs': 'Microvolt',
   'annotation': 'AnnotationData',
+  'dimensionless': 'Dimensionless',
   }
 
 _units = {
