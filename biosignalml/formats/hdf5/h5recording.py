@@ -142,10 +142,10 @@ import numpy as np
 __all__ = [ 'H5Clock', 'H5Signal', 'H5Recording', 'IDENTIFIER' ]
 
 
-MAJOR      = 1
-MINOR      = 0
-VERSION    = str(MAJOR) + '.' + str(MINOR)
-IDENTIFIER = 'BSML ' + VERSION
+MAJOR      = b'1'
+MINOR      = b'0'
+VERSION    = MAJOR + b'.' + MINOR
+IDENTIFIER = b'BSML ' + VERSION
 
 
 COMPRESSION = 'szip'                          #: Szip gives best performance
@@ -361,9 +361,9 @@ class H5Recording(object):
     try:
       v = h5.attrs['version']
       if v[0:5] != IDENTIFIER[0:5]: raise TypeError("Not a valid BSML file")
-      (m, n) = tuple([int(i) for i in v[5:].split('.')])
-      if m > MAJOR:
         raise ValueError("File '%s' not compatible with version %s" % (fname, VERSION))
+      (m, n) = tuple([int(i) for i in v[5:].split(b'.')])
+      if m > int(MAJOR):
     except Exception:
       raise ValueError("Invalid file format")
     uri = h5['recording'].attrs['uri'].decode('utf-8')
