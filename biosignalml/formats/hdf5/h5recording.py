@@ -357,20 +357,20 @@ class H5Recording(object):
         f.close()
       h5 = h5py.File(fname, 'r' if readonly else 'r+')
     except IOError as msg:
-      raise IOError("Cannot open file '%s' (%s)" % (fname, msg))
+      raise IOError("Cannot open file '{}' ({})".format(fname, msg))
     try:
       v = h5.attrs['version']
       if v[0:5] != IDENTIFIER[0:5]: raise TypeError("Not a valid BSML file")
-        raise ValueError("File '%s' not compatible with version %s" % (fname, VERSION))
       (m, n) = tuple([int(i) for i in v[5:].split(b'.')])
       if m > int(MAJOR):
+        raise ValueError("File '{}' not compatible with version {}".format(fname, VERSION))
     except Exception:
       raise ValueError("Invalid file format")
     uri = h5['recording'].attrs['uri'].decode('utf-8')
     if not (h5.get('/uris')
         and h5.get('/recording/signal')
-      raise TypeError("'%s' is not a BioSignalML file" % fname)
         and h5[h5['uris'].attrs.get(uri)] == h5[h5['recording'].ref]):
+      raise TypeError("'{}' is not a BioSignalML file".format(fname))
     return cls(uri, h5)
 
 
@@ -388,7 +388,7 @@ class H5Recording(object):
     try:
       h5 = h5py.File(fname, 'w' if replace else 'w-')
     except IOError as msg:
-      raise IOError("Cannot create file '%s' (%s)" % (fname, msg))
+      raise IOError("Cannot create file '{}' ({})".format(fname, msg))
     h5.attrs['version'] = IDENTIFIER
     h5.create_group('uris')
     h5.create_group('recording')
@@ -448,15 +448,15 @@ class H5Recording(object):
     """
 
     if not self._iterable(uri) and not self._iterable(units):
-        raise KeyError("A signal already has URI '%s'" % uri)
       if self._h5['uris'].attrs.get(uri):
+        raise KeyError("A signal already has URI '{}'".format(uri))
       nsignals = 1
     elif (self._iterable(uri) and self._iterable(units)
      and len(uri) == len(units)):  # compound dataset
 #      print(type(uri), type(units))
       for u in uri:
-          raise KeyError("A signal already has URI '%s'" % uri)
         if self._h5['uris'].attrs.get(u):
+          raise KeyError("A signal already has URI '{}'".format(uri))
       nsignals = len(uri)
       if nsignals == 1:
         uri = uri[0]
@@ -506,7 +506,7 @@ class H5Recording(object):
         data=data, shape=shape, maxshape=maxshape, dtype=dtype,
         chunks=True, compression=compression)
     except Exception as msg:
-      raise RuntimeError("Cannot create signal dataset (%s)" % msg)
+      raise RuntimeError("Cannot create signal dataset ({})".format(msg))
 
     if nsignals == 1:
       dset.attrs['uri'] = uri.encode('utf-8')
@@ -544,8 +544,8 @@ class H5Recording(object):
     :param float period: The interval, in time units, between time points. Optional.
     :return: The `H5Clock` created.
     """
-      raise KeyError("A clock already has URI '%s'" % uri)
     if self._h5['uris'].attrs.get(uri):
+      raise KeyError("A clock already has URI '{}'".format(uri))
 
     if times is not None:
       times = np.asarray(times)
@@ -568,7 +568,7 @@ class H5Recording(object):
         data=times, shape=shape, maxshape=maxshape, dtype=dtype,
         chunks=True, compression=compression)
     except Exception as msg:
-      raise RuntimeError("Cannot create clock dataset (%s)" % msg)
+      raise RuntimeError("Cannot create clock dataset ({})".format(msg))
 
     dset.attrs['uri'] = uri.encode('utf-8')
     if units: dset.attrs['units'] = units.encode('utf-8')
@@ -597,13 +597,13 @@ class H5Recording(object):
     if len(data) == 0: return
     if self._iterable(uri):
       sig = self.get_signal(uri[0])
-         raise KeyError("Unknown signal set '%s'" % uri)
       if sig is None or list(sig.dataset.attrs['uri']) != [u.encode('utf-8') for u in uri]:
+         raise KeyError("Unknown signal set '{}'".format(uri))
       dset = sig.dataset
       nsignals = len(uri)
     else:
       sig = self.get_signal(uri)
-      if sig is None: raise KeyError("Unknown signal '%s'" % uri)
+      if sig is None: raise KeyError("Unknown signal '{}'".format(uri))
       dset = sig.dataset
       nsignals = 1
 
@@ -625,7 +625,7 @@ class H5Recording(object):
       else:                    # simple dataset
         dset[dpoints:] = data.reshape((npoints,) + dset.shape[1:])
     except Exception as msg:
-      raise RuntimeError("Cannot extend signal dataset '%s' (%s)" % (uri, msg))
+      raise RuntimeError("Cannot extend signal dataset '{}' ({})".format(uri, msg))
 
 
   def extend_clock(self, uri, times):
@@ -639,7 +639,7 @@ class H5Recording(object):
     """
     if len(times) == 0: return
     clock = self.get_clock(uri)
-    if clock is None: raise KeyError("Unknown clock '%s'" % uri)
+    if clock is None: raise KeyError("Unknown clock '{}'".format(uri))
     dset = clock.dataset
     if not isinstance(times, np.ndarray): times = np.array(times)
     if len(dset.shape) == 1: npoints = times.size
@@ -649,7 +649,7 @@ class H5Recording(object):
       dset.resize(dpoints + npoints, 0)
       dset[dpoints:] = times.reshape((npoints,) + dset.shape[1:])
     except Exception as msg:
-      raise RuntimeError("Cannot extend clock dataset '%s' (%s)" % (uri, msg))
+      raise RuntimeError("Cannot extend clock dataset '{}' ({})".format(uri, msg))
 
 
   def get_dataset_by_name(self, name):
@@ -729,7 +729,7 @@ class H5Recording(object):
     """
     uris = []
     for n in sorted(list(self._h5.get('/recording/signal'))):
-      sig = self.get_dataset_by_name('/recording/signal/%s' % n)
+      sig = self.get_dataset_by_name('/recording/signal/{}'.format(n))
       if sig:
         uri = sig.attrs.get('uri')
         if uri is None: pass
@@ -749,7 +749,7 @@ class H5Recording(object):
     """
     uris = []
     for n in sorted(list(self._h5.get('/recording/clock'))):
-      clk = self.get_dataset_by_name('/recording/clock/%s' % n)
+      clk = self.get_dataset_by_name('/recording/clock/{}'.format(n))
       if clk:
         uri = clk.attrs.get('uri')
         if uri is None: pass
