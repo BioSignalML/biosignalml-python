@@ -608,7 +608,7 @@ class Graph(rdflib.graph.Graph):
     #--------------------
       if   isinstance(v, rdflib.term.URIRef):  return Resource(v)
       elif isinstance(v, rdflib.term.Literal): return Literal(v)
-      elif isinstance(v, rdflib.term.BNode):   return BlankNode(v)
+      elif isinstance(v, rdflib.term.BNode):   return BlankNode(v)  ## skolemize ??
       else:                                    return v
 
   def query(self, sparql):

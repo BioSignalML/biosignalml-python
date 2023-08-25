@@ -117,6 +117,11 @@ class HDF5Signal(BSMLSignal):
       startpos = max(0, seg[0])
       length = min(len(self), seg[1]+1) - startpos
 
+## Conversion requires a graph with UOM expressions...
+#    if units is not None:
+#      try:
+#        ...(self.units, units)
+
     while length > 0:
       if maxpoints > length: maxpoints = length
       data = self._h5[startpos: startpos+maxpoints]
@@ -232,6 +237,10 @@ class HDF5Recording(BSMLRecording):
             signal.add_metadata(self.graph)
             signal.clock.add_metadata(self.graph)  ## We need to cache clocks in recording...
             self.add_signal(signal)
+
+
+          # if self.duration is None:
+          #   set duration to that of longest signal/clock
 
           if 'readonly' not in kwds:
             self._readonly = False    # File has been sucessfully opened

@@ -167,6 +167,10 @@ class H5Clock(object):
     self.dataset = dataset
     self._times = np.empty(0)
 
+    ## duration ???
+    # resolution is defined as measured in seconds
+    ## duration(secs) = times[length-1]*resolution
+
   @property
   def name(self):
   #--------------
@@ -215,7 +219,7 @@ class H5Clock(object):
     attrs = self.dataset.attrs
     if   attrs.get('period'): return t*float(attrs['period'])
     elif attrs.get('rate'):   return t/float(attrs['rate'])
-    else:                     return t
+    else:                     return t   ### * resolution
 
   def time(self, pos):
   #-------------------
@@ -446,6 +450,7 @@ class H5Recording(object):
     Only one of ``rate``, ``period``, or ``clock`` can be given.
 
     """
+    ## Not if readonly...
 
     if not self._iterable(uri) and not self._iterable(units):
       if self._h5['uris'].attrs.get(uri):
@@ -544,6 +549,8 @@ class H5Recording(object):
     :param float period: The interval, in time units, between time points. Optional.
     :return: The `H5Clock` created.
     """
+    ## Not if readonly...
+
     if self._h5['uris'].attrs.get(uri):
       raise KeyError("A clock already has URI '{}'".format(uri))
 
@@ -594,6 +601,8 @@ class H5Recording(object):
     If the dataset is compound (i.e. contains several signals) then the size of the
     supplied data must be a multiple of the number of signals.
     """
+    ## Not if readonly...
+
     if len(data) == 0: return
     if self._iterable(uri):
       sig = self.get_signal(uri[0])
@@ -637,6 +646,8 @@ class H5Recording(object):
     :param times: Time points with which to extend the clock.
     :type times: :class:`numpy.ndarray` or an iterable.
     """
+    ## Not if readonly...
+
     if len(times) == 0: return
     clock = self.get_clock(uri)
     if clock is None: raise KeyError("Unknown clock '{}'".format(uri))
@@ -768,6 +779,9 @@ class H5Recording(object):
 
     Metadata is encoded as UTF-8 when stored.
     """
+
+    ## Not if readonly...
+
     if self._h5.get('/metadata'): del self._h5['/metadata']
     md = self._h5.create_dataset('/metadata',
                                  data=metadata if isinstance(metadata, bytes) else metadata.encode('utf-8'))
