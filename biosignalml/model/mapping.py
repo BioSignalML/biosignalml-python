@@ -213,7 +213,7 @@ class Mapping(object):
   #-------------------------------------
     if node is None: return None
     elif node.is_resource(): v = Uri(node.uri)
-    elif node.is_blank(): v = node.blank
+    elif node.is_blank(): v = node.skolemize()
     elif node.is_literal():
       v = node.rstrip(None) # `node.value` is None for datatypes `rdflib` doesn't support
       if dtype: v = datatypes.get(dtype, str)(v)
@@ -235,7 +235,8 @@ class Mapping(object):
     """
     m = self.reversemap.get((metaclass, str(statement.predicate.uri)), None)
     if m is None: m = self.reversemap.get((None, str(statement.predicate.uri)), ReverseEntry(None, None, None, None))
-    return (statement.subject.uri, m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf), m.functional)
+    subject = statement.subject if not statement.subject.is_blank() else statement.subject.skolemize()
+    return (subject.uri, m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf), m.functional)
 
   def get_value_from_graph(self, resource, attr, graph):
   #-----------------------------------------------------
