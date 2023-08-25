@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xml:base="http://devel.biosignalml.org/test"
+   xmlns:ns1="http://purl.org/dc/terms/"
+   xmlns:ns2="http://purl.org/NET/c4dm/timeline.owl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+  <rdf:Description rdf:about="">
+    <ns1:format>application/x-bsml</ns1:format>
+    <ns2:timeline rdf:resource="/timeline"/>
+    <rdf:type rdf:resource="http://www.biosignalml.org/ontologies/2011/04/biosignalml#Recording"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="/timeline">
+    <rdf:type>http://purl.org/NET/c4dm/timeline.owl#RelativeTimeLine</rdf:type>
+  </rdf:Description>
+</rdf:RDF>
