@@ -134,7 +134,7 @@ class Signal(BSMLSignal):
     if units is not None: params['units'] = units
     for sd in self._repository.get_data(str(self.uri), **params):
       if sd.uri != str(self.uri):
-        raise StreamExeception("Received signal '%s' different from requested '%s'" % (sd.uri, self.uri))
+        raise StreamException("Received signal '%s' different from requested '%s'" % (sd.uri, self.uri))
       if sd.rate is not None: yield DataSegment(sd.start, UniformTimeSeries(sd.data, sd.rate))
       else:                   yield DataSegment(sd.start, TimeSeries(sd.data, sd.clock))
 
