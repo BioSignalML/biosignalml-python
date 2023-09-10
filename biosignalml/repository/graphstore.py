@@ -23,7 +23,8 @@ import json
 
 from .. import BSML
 
-from .. import model, rdf, utils
+from .. import rdf, utils
+from ..rdf import sparqlstore
 from ..model.mapping import PropertyMap
 from ..rdf import RDF, DCT, PRV, XSD
 
@@ -99,20 +100,18 @@ class GraphStore(object):
       '''graph <%(pgraph)s> { <%(graph)s> a <%(gtype)s> MINUS { [] prv:precededBy <%(graph)s> }}
          graph <%(graph)s> { [] a [] }''',
       params=dict(pgraph=self._provenance_uri, graph=graph_uri, gtype=self._graphtype),
-      prefixes=dict(bsml=BSML.prefix, prv=PRV.prefix))
-
+      prefixes=dict(bsml=BSML.BASE, prv=PRV.BASE))
 
   def get_provenance(self, graph_uri):
   #-----------------------------------
     ''' Return the provenance of a graph.'''
-    rdf = self._sparqlstore.construct('<%(uri)s> ?p ?o . ?cr ?cp ?co . ',
+    query = self._sparqlstore.construct('<%(uri)s> ?p ?o . ?cr ?cp ?co . ',
             '''graph <%(pgraph)s> { <%(uri)s> a <%(gtype)s> . <%(uri)s> ?p ?o .
                                     <%(uri)s> prv:createdBy ?cr . ?cr ?cp ?co .
                                     optional { ?ltr prv:precededBy <%(uri)s> } }''',
             params=dict(pgraph=self._provenance_uri, uri=graph_uri, gtype=self._graphtype),
-            prefixes=dict(prv=PRV.prefix), format=rdf.Format.RDFXML)
-    return DataItem.create_from_string(graph_uri, rdf, rdf.Format.RDFXML)
-
+            prefixes=dict(prv=PRV.BASE), format=rdf.Format.RDFXML)
+    return DataItem.create_from_string(graph_uri, query, rdf.Format.RDFXML)
 
   def get_resources(self, rtype, rvars='?r', condition='',
                                  group=None, prefixes=None, graph=None, order=None, resource=None):
@@ -138,12 +137,12 @@ class GraphStore(object):
     :return: A list of (graph_uri, resource_uri, optional_variable) tuples.
     :rtype: list[tuple(:class:`~biosignalml.rdf.Uri`, :class:`~biosignalml.rdf.Uri`)]
     """
-    pfxdict = dict(bsml=BSML.prefix, prv=PRV.prefix)
+    pfxdict = dict(bsml=BSML.BASE, prv=PRV.BASE)
     if prefixes: pfxdict.update(prefixes)
     varlist = [ var for var in rvars.split() if var[0] == '?' ]
     retvars = [ var[1:] for var in varlist ]
     if resource is None: resource = varlist[0]
-    gv = rdf.sparqlstore.get_result_value   ## Shorten code
+    gv = sparqlstore.get_result_value   ## Shorten code
     NOVALUE = { 'value': None }  # For optional result variables
     if order is None: order = ' '.join(varlist)
     if graph is None:
@@ -178,12 +177,12 @@ class GraphStore(object):
         '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
            graph ?g { <%(uri)s> a %(rtype)s }''',
         params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
-        prefixes=dict(prv=PRV.prefix))
+        prefixes=dict(prv=PRV.BASE))
     else:
       return self._sparqlstore.ask(
         '''graph <%(graph)s> { <%(uri)s> a %(rtype)s }''',
         params=dict(graph=graph_uri, uri=uri, rtype=rtype),
-        prefixes=dict(prv=PRV.prefix))
+        prefixes=dict(prv=PRV.BASE))
 
   def has_graph(self, uri):
   #------------------------
@@ -202,7 +201,7 @@ class GraphStore(object):
               '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
                  graph ?g { <%(uri)s> a <%(rtype)s> . ?s ?p ?o }''',
               params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
-              prefixes=dict(prv=PRV.prefix), format=rdf.Format.RDFXML)
+              prefixes=dict(prv=PRV.BASE), format=rdf.Format.RDFXML)
     else:
       text = self._sparqlstore.construct('?s ?p ?o',
               '<%(uri)s> a <%(rtype)s> . ?s ?p ?o',
@@ -219,7 +218,7 @@ class GraphStore(object):
               '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
                  graph ?g { <%(uri)s> a <%(rtype)s> ; ?p ?o }''',
               params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
-              prefixes=dict(prv=PRV.prefix), format=rdf.Format.RDFXML)
+              prefixes=dict(prv=PRV.BASE), format=rdf.Format.RDFXML)
     else:
       text = self._sparqlstore.construct('<%(uri)s> ?p ?o',
               '<%(uri)s> a <%(rtype)s> ; ?p ?o',
@@ -234,8 +233,8 @@ class GraphStore(object):
       '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
          graph ?g { <%(uri)s> a [] }''',
         params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri),
-        prefixes=dict(prv=PRV.prefix)):
-      return rdf.sparqlstore.get_result_value(r, 'g')
+        prefixes=dict(prv=PRV.BASE)):
+      return sparqlstore.get_result_value(r, 'g')
 
   def query(self, sparql, header=False):
   #-------------------------------------
@@ -263,7 +262,7 @@ class GraphStore(object):
       obj = '<%s>' % obj
     elif not isinstance(obj, rdf.Node):
       obj = '"%s"' % obj
-    return [ rdf.sparqlstore.get_result_value(r, 's')
+    return [ sparqlstore.get_result_value(r, 's')
       for r in self.select('?s', '?s <%(prop)s> %(obj)s',
         params = dict(prop=prop, obj=obj), graph = graph, order = '?s' if ordered else None) ]
 
@@ -272,7 +271,7 @@ class GraphStore(object):
     """
     Get objects of all statements that match a given subject/predicate.
     """
-    return [ rdf.sparqlstore.get_result_value(r, 'o')
+    return [ sparqlstore.get_result_value(r, 'o')
       for r in self.select('?o', '<%(subj)s> <%(prop)s> ?o',
         params = dict(subj=subj, prop=prop), graph = graph, order = '?s' if ordered else None) ]
 
@@ -344,8 +343,8 @@ class SparqlHead(object):
 class QueryResults(object):
 #==========================
 
-  def __init__(self, sparqlstore, sparql, header=False):
-  #-----------------------------------------------------
+  def __init__(self, sparqlstore: sparqlstore.SparqlStore, sparql, header=False):
+  #------------------------------------------------------------------------------
     self._base = None
     self._set_prefixes(sparql)
     self._header = header
@@ -390,7 +389,7 @@ class QueryResults(object):
       rows = self._results.get('results', {}).get('bindings', [ ])
       if self._header: yield cols
       for r in rows:
-        yield { c: rdf.sparqlstore.get_result_value(r, c) for c in cols }
+        yield { c: sparqlstore.get_result_value(r, c) for c in cols }
     else:
       yield self._results
 
@@ -398,6 +397,11 @@ class QueryResults(object):
 
 class GraphUpdate(GraphStore):
 #=============================
+
+  def __init__(self, base_uri, graphtype, sparqlstore: sparqlstore.SparqlUpdateStore):
+  #-----------------------------------------------------------------------------------
+    super().__init__( base_uri, graphtype, sparqlstore)
+    self._sparqlstore = sparqlstore
 
   def insert_triples(self, graph_uri, triples, prefixes=None):
   #-----------------------------------------------------------

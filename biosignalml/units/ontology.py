@@ -5,14 +5,26 @@ Provide access to the UOME List ontology.
 Generated from http://www.sbpax.org/uome/list.owl at Tue May 15 11:54:58 2012
 """
 
-from ..rdf import Uri, Resource, NS as Namespace
+#===============================================================================
+
+from rdflib import Namespace
+
+#===============================================================================
+
+from ..rdf import Uri, Resource as URIRef
 
 __all__ = [ 'UNITS' ]
 
+#===============================================================================
+
+def Resource(uri, label='', desc=''):
+  return URIRef(uri)
+
+#===============================================================================
 
 class UNITS(object):
-  uri = Uri("http://www.sbpax.org/uome/list.owl#")
-  NS = Namespace(str(uri))
+  BASE = "http://www.sbpax.org/uome/list.owl#"
+  NS = Namespace(BASE)
 
   Absorbance     = Resource(NS.Absorbance, label="A", desc="absorbance")
   '''absorbance (A)'''
@@ -691,10 +703,11 @@ class UNITS(object):
   Year           = Resource(NS.Year, label="a", desc="year")
   '''year (a)'''
 
+#===============================================================================
 
   EXTRA = Namespace("http://www.biosignalml.org/ontologies/examples/unit#")
 
-  Beat           = Resource(EXTRA.Beat, label="beat", desc="beat")
+  Beat = Resource(EXTRA.Beat, label="beat", desc="beat")
   '''beat (beat)'''
 
   BeatsPerMinute = Resource(EXTRA.BeatsPerMinute, label="bpm", desc="beats per minute")
@@ -724,8 +737,6 @@ class UNITS(object):
   Millibar = Resource(EXTRA.Millibar, label="mbar", desc="millibar")
   '''millibar'''
 
-
   AnnotationData = Resource(EXTRA.AnnotationData, label='annotation', desc='annotation')
 
-
-RESOURCES = { str(o.uri): o for o in UNITS.__dict__.values() if isinstance(o, Resource) }
+#===============================================================================

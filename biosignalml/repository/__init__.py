@@ -49,11 +49,11 @@ class RecordingGraph(rdf.Graph):
   #--------------------------------------------------------------
     if not loaded: super(RecordingGraph, self).__init__(uri)
     ## Set externally...
-    sparql = ['PREFIX bsml: <%s>' % BSML.prefix,
+    sparql = [f'PREFIX bsml: <{BSML.BASE}>',
               'select ?r where { ?r a bsml:Recording }'
              ]
     r = list(self.query('\n'.join(sparql)))
-    self._rec_uri = r[0][0].uri if r else None
+    self._rec_uri = str(r[0][0]) if r else None
     if rec_class is None:
       rec_class = biosignalml.formats.CLASSES.get(
                     str(self.get_object(uri, DCT.format)), Recording)
@@ -112,11 +112,11 @@ class RecordingGraph(rdf.Graph):
 
     :rtype: list of bsml:Signal URIs
     """
-    sparql = ['PREFIX bsml: <%s>' % BSML.prefix,
               'select distinct ?s where {',
               '  ?s a bsml:Signal ; bsml:recording <%s>' % self._rec_uri,
               '  }',
               'order by ?s',
+    sparql = [f'PREFIX bsml: <{BSML.BASE}>',
              ]
     return [ r[0] for r in self.query('\n'.join(sparql)) ]
 
@@ -140,9 +140,9 @@ class RecordingGraph(rdf.Graph):
     :param timetype: The class of temporal entity to find. Optional.
     :rtype: list of bsml:Event URIs
     """
-    sparql = ['PREFIX bsml: <%s>' % BSML.prefix,
               'select distinct ?e where {',
               '  ?e a bsml:Event ; bsml:recording <%s>' % self._rec_uri,
+    sparql = [f'PREFIX bsml: <{BSML.BASE}>',
              ]
     if eventtype is not None:
       sparql.append('. ?e bsml:eventType <%s>' % eventtype)
@@ -160,8 +160,8 @@ class RecordingGraph(rdf.Graph):
     :param counts: Optionally return a count of each type of event.
     :rtype: list of bsml:Event URIs if no counts, otherwise tuple(URI, count).
     """
-    sparql = ['PREFIX bsml: <%s>' % BSML.prefix,
               'select ?et (count(?et) as ?c) where {',
+    sparql = [f'PREFIX bsml: <{BSML.BASE}>',
 #              'select distinct ?et where {',
               '  ?e bsml:recording <%s>' % self._rec_uri,
               '. ?e bsml:eventType ?et',
@@ -210,7 +210,7 @@ class RecordingGraph(rdf.Graph):
 #                      { ?ann dct:subject [ a bsml:Segment ; dct:source <%(subj)s> ] }
 #                    }
 #                  minus { [] prv:precededBy ?ann }
-        prefixes = dict(bsml=BSML.prefix, dct=DCT.prefix, prv=PRV.prefix),
+        prefixes = dict(bsml=BSML.BASE, dct=DCT.BASE, prv=PRV.BASE),
         ) ]
 
   def get_annotations(self):
@@ -251,26 +251,26 @@ class RecordingGraph(rdf.Graph):
                        }
                      } order by ?ann""" % dict(
                                  subject=self._rec_uri,
-                                 bsml=BSML.prefix,
-                                 rdfs=RDFS.prefix,
-                                 dct=DCT.prefix,
-                                 prv=PRV.prefix,
-                                 tl=TL.prefix)
+                                 bsml=BSML.BASE,
+                                 rdfs=RDFS.BASE,
+                                 dct=DCT.BASE,
+                                 prv=PRV.BASE,
+                                 tl=TL.BASE)
 
     def ann_data(a, tags):
-      return [str(a[0].uri), str(a[1].uri), str(a[2]),
+      return [str(a[0]), str(a[1]), str(a[2]),
               a[3].value if a[3] else '',
-              tags, a[5].value, str(a[6].uri), str(a[7].uri), a[8].value,
-              None if a[9] in ['', None] else a[9].value, str(a[10].uri) ]
+              tags, a[5].value, str(a[6]), str(a[7]), a[8].value,
+              None if a[9] in ['', None] else a[9].value, str(a[10]) ]
     anns = [ ]
     tags = [ ]
     lastann = None
     for a in self.query(sparql):
       if lastann is not None:
-        if a[0].uri != lastann[0].uri:
+        if str(a[0]) != str(lastann[0]):
           anns.append(ann_data(lastann, tags))
           tags = [ ]
-      if a[4] is not None: tags.append(str(a[4].uri))
+      if a[4] is not None: tags.append(str(a[4]))
       lastann = a
     if lastann is not None: anns.append(ann_data(lastann, tags))
     anns.sort(key=operator.itemgetter(7, 1, 0))  # start, about, uri
@@ -370,7 +370,7 @@ class BSMLStore(GraphStore):
       if rec is not None:
         if signals:
           for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
-              params=dict(rec=rec.uri), prefixes=dict(bsml=BSML.prefix),
+              params={'rec': rec.uri}, prefixes={'bsml': BSML.BASE},
               graph=graph.uri, order='?s'):
 
             sig_uri = rdf.sparqlstore.get_result_value(r, 's')
@@ -415,7 +415,7 @@ class BSMLStore(GraphStore):
     return [ r[1]
       for r in self.get_resources(BSML.Signal, rvars='?r',
         condition='?r bsml:recording <%s>' % rec_uri,
-        prefixes = dict(bsml=BSML.prefix),
+        prefixes = {'bsml': BSML.BASE},
         graph = graph_uri
         ) ]
 
@@ -460,7 +460,7 @@ class BSMLStore(GraphStore):
       condition += ' . ?r bsml:time ?tm . ?tm a <%s>' % timetype
     return [ r[1]
       for r in self.get_resources(BSML.Event, rvars='?r', condition=condition,
-        prefixes=dict(bsml=BSML.prefix), graph=graph_uri)
+        prefixes={'bsml': BSML.BASE}, graph=graph_uri)
       ]
 
   ### Add a get_events() similar to get_annotations(), ideally be using
@@ -481,7 +481,7 @@ class BSMLStore(GraphStore):
       for r in self.get_resources(BSML.Event, rvars='?et (count(?et) as ?count)',
         condition = '?e bsml:recording <%s> . ?e bsml:eventType ?et' % rec_uri,
         group = '?et',
-        prefixes = dict(bsml=BSML.prefix),
+        prefixes = {'bsml': BSML.BASE},
         graph = graph_uri, resource='?e'
         ) ]
 
@@ -536,7 +536,7 @@ class BSMLStore(GraphStore):
 #                      { ?ann dct:subject [ a bsml:Segment ; dct:source <%(subj)s> ] }
 #                    }
 #                  minus { [] prv:precededBy ?ann }
-        prefixes = dict(bsml=BSML.prefix, dct=DCT.prefix, prv=PRV.prefix),
+        prefixes = dict(bsml=BSML.BASE, dct=DCT.BASE, prv=PRV.BASE),
         graph = graph_uri
         ) ]
 
@@ -577,7 +577,7 @@ class BSMLStore(GraphStore):
                            { ?tm a bsml:Instant ; tl:at ?start }
                          }
                        }''' % dict(subject=subject),
-        prefixes = dict(bsml=BSML.prefix, dct=DCT.prefix, prv=PRV.prefix, tl=TL.prefix),
+        prefixes = dict(bsml=BSML.BASE, dct=DCT.BASE, prv=PRV.BASE, tl=TL.BASE),
         graph = graph_uri,
 #       order = '?start',  ## Virtuoso doesn't correctly sort xsd:dayTimeDuration
         )
@@ -604,7 +604,7 @@ class BSMLStore(GraphStore):
                    rdf.sparqlstore.get_result_value(r, 'label')
                for r in self.select('?uri ?label',
                                     '?uri a bsml:SemanticTag . ?uri rdfs:label ?label',
-                                    prefixes=dict(bsml=BSML.prefix, rdfs=RDFS.prefix),
+                                    prefixes=dict(bsml=BSML.BASE, rdfs=RDFS.BASE),
                                     graph=SEMANTIC_TAGS) }
 
 
@@ -631,7 +631,7 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
     """
     self._sparqlstore.insert_triples(recording.graph.uri,
       [("bsml:deletedResource", "prv:precededBy", "<%s>" % uri)],
-      prefixes=dict(bsml=BSML.prefix, prv=PRV.prefix))
+      prefixes=dict(bsml=BSML.BASE, prv=PRV.BASE))
 
   def add_recording_graph(self, uri, graph_rdf, creator, format=Format.RDFXML):
   #---------------------------------------------------------------------------

@@ -24,7 +24,7 @@ Abstract BioSignalML objects.
 import logging
 
 from .. import rdf, utils
-from ..rdf import RDFS, DCT, XSD, PRV
+from ..rdf import PRV, DCT, RDF, RDFS, XSD
 
 from .ontology import BSML
 from .mapping import Mapping, PropertyMap
@@ -288,7 +288,7 @@ class AbstractObject(object):
     """
     Return metadata as a serialised RDF string.
     """
-    namespaces = { 'bsml': BSML.URI }
+    namespaces = { 'bsml': BSML.BASE }
     namespaces.update(rdf.NAMESPACES)
     if prefixes: namespaces.update(prefixes)
     return self.metadata_as_graph().serialise(base=base, format=format, prefixes=namespaces)

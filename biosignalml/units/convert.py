@@ -24,7 +24,7 @@ import pint.unit
 import logging
 
 from ..rdf import sparqlstore
-from ..rdf import NS, RDF, UOME
+from ..rdf import RDF, UOME
 
 __all__ = [ 'UnitConverter' ]
 

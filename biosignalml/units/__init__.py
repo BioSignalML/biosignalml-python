@@ -20,7 +20,6 @@
 
 import logging
 
-from ..rdf import Resource, NS
 
 from .ontology import UNITS
 

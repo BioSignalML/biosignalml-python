@@ -25,19 +25,20 @@ We use the RDFlib package from https://github.com/RDFLib/rdflib.
 
 '''
 
-__all__ = [ 'Format', 'NS', 'Uri', 'Node', 'Literal',
-            'BlankNode', 'Resource', 'QueryResults', 'Graph' ]
-
-import sys
+from typing import Iterable
 import uuid
 import logging
 
 import rdflib
-import rdflib.plugins.memory
-
-from .. import utils
 
 
+from .namespaces import *
+from .namespaces import NAMESPACES
+
+__all__ = [ 'Format', 'NAMESPACES', 'Uri', 'Node', 'Literal',
+            'BlankNode', 'Resource', 'QueryResults', 'Graph',
+            'DCT', 'OWL', 'PROV', 'RDF', 'PRV', 'RDFS', 'TIME', 'TL', 'UOME', 'XSD'
+          ]
 class RDFParseError(Exception):
 #==============================
   '''Errors when parsing RDF'''
@@ -122,50 +123,6 @@ class Uri(rdflib.term.Identifier):
     return Uri(nu)
 
 
-class NS(object):
-#================
-  """
-  Provide a Namespace class.
-
-  We can't wrap `rdflib.namespace.Namespace` because it sub-classes
-  `unicode` whose method names then restrict our names.
-  """
-  def __init__(self, base):
-  #------------------------
-    self._base = str(base)
-
-  def __getattr__(self, name):
-  #---------------------------
-    return Uri(self._base + (name if isinstance(name, str) else ''))
-
-  def __str__(self):
-  #----------------
-    return self._base
-
-  @property
-  def prefix(self):
-  #----------------
-    """Get the namespace's prefix."""
-    return self._base
-
-
-# Generic namespaces:
-NAMESPACES = {
-  'xsd':  'http://www.w3.org/2001/XMLSchema#',
-  'rdf':  'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-  'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
-  'owl':  'http://www.w3.org/2002/07/owl#',
-  'dct':  'http://purl.org/dc/terms/',
-  'time': 'http://www.w3.org/2006/time#',
-  'tl':   'http://purl.org/NET/c4dm/timeline.owl#',
-  'uome': 'http://www.sbpax.org/uome/list.owl#',
-  'prv':  'http://purl.org/net/provenance/ns#',
-  'prov': 'http://www.w3.org/ns/prov#',
-  }
-for prefix, name in NAMESPACES.items():
-  setattr(sys.modules[__name__], prefix.upper(), NS(name))
-
-
 Node = rdflib.term.Node
 #======================
 ''' A Node in a RDF Graph. '''
@@ -184,127 +141,30 @@ Node.is_literal = lambda self: isinstance(self, rdflib.term.Literal)
 #--------------
 
 
-class Literal(rdflib.term.Literal):
-#==================================
-  '''
-  Create a Literal node.
+Literal = rdflib.term.Literal
 
-  :param value: The value of the literal.
-  :param datatype: The literal's datatype.
-  :param language: The literal's language.
-  :type language: str
-  '''
-  def __new__(cls, value, datatype=None, language=None):
-  #-----------------------------------------------------
-    return rdflib.term.Literal.__new__(cls, value, datatype=datatype, lang=language)
+BlankNode = rdflib.term.BNode
 
-  @property
-  def value(self):
-  #---------------
-    if   str(self.datatype) == str(XSD.dayTimeDuration):
-      return utils.isoduration_to_seconds(str(self))
-    elif self._value is not None:
-      return self._value
-    else:
-      return str(self)
-
-  def as_string(self):
-  #-------------------
-    '''
-    Return the literal as a quoted string with language and datatype attributes.
-    '''
-    l = ['"""' + str(self.value) + '"""']
-    if   self.language: l.append('@' + self.language)
-    elif self.datatype: l.append('^^' + self.datatype)
-    return ''.join(l)
+Resource = rdflib.term.URIRef
 
 
-class BlankNode(rdflib.term.BNode):
-#==================================
-  '''
-  Create a Blank node.
-
-  :param blank: Blank self identifier.
-  :type blank: str
-  '''
-  def __new__(cls, blank=None):
-  #----------------------------
-    if blank is not None and blank.startswith('nodeID://'):
-      blank = str(blank[9:])    ## Tidy Virtuoso blank node identifiers
-    return rdflib.term.BNode.__new__(cls, value=blank)
-
-  def as_string(self):
-  #-------------------
-    return '_:%s' % str(self)
-
-
-class Resource(rdflib.term.URIRef):
-#==================================
-  '''
-  Create a Resource node.
-
-  :param uri: The URI of the resource.
-  '''
-  def __new__(cls, uri, **kwds):
-  #------------------------------
-    return rdflib.term.URIRef.__new__(cls, uri)
-
-  def __init__(self, uri, label='', desc=''):
-  #------------------------------------------
-    self._label = label
-    self._description = desc
-
-  def as_string(self):
-  #-------------------
-    return self.label if self.label else str(self)
-
-  @property
-  def label(self):
-  #---------------
-    return getattr(self, '_label', '')
-
-  @property
-  def description(self):
-  #---------------------
-    return getattr(self, '_description', '')
-
-  @classmethod
-  def uuid_urn(cls):
-  #-----------------
-    '''
-    Generate a URN resource in the UUID namespace.
-    '''
-    return cls('urn:uuid:%s' % uuid.uuid1())
-
-  @staticmethod
-  def is_uuid_urn(this):
-  #---------------------
-    '''
-    Check if a resource is a URN in the UUID namespace.
-
-    This is implemented as a static method so we can use it
-    to test generic resources.
-    '''
-    return (isinstance(this, rdflib.term.URIRef)
-        and str(this).startswith('urn:uuid:'))
-
-rdflib.term.URIRef.uri = property(lambda self: str(self))
-
-
-class Statement(list):
-#=====================
-  '''
+class Statement(tuple[Node, Node, Node]):
+#=========================================
+  """
   The main means of manipulating statements is by the `subject`, `predicate` and `object` properties.
-  '''
-  def __init__(self, s=None, p=None, o=None, **kwds):
-  #------------------------------------------------
-    if (s and not isinstance(s, rdflib.term.URIRef)
-          and not isinstance(s, rdflib.term.BNode)): s = Resource(s)
-    if p and not isinstance(p, rdflib.term.URIRef): p = Resource(p)
-    if (o and not isinstance(o, rdflib.term.URIRef)
-          and not isinstance(o, rdflib.term.BNode)
-          and not isinstance(o, rdflib.term.Literal)): o = Literal(o)
-    list.__init__(self, [s, p, o])
+  """
+  def __new__ (cls, s=None, p=None, o=None):
+  #-----------------------------------------
+    if (s is not None
+      and not isinstance(s, rdflib.term.URIRef)
+      and not isinstance(s, rdflib.term.BNode)): s = rdflib.term.URIRef(s)
+    if (p is not None
+      and not isinstance(p, rdflib.term.URIRef)): p = rdflib.term.URIRef(p)
+    if (o is not None
+      and not isinstance(o, rdflib.term.URIRef)
+      and not isinstance(o, rdflib.term.BNode)
+      and not isinstance(o, rdflib.term.Literal)): o = rdflib.term.Literal(o)
+    return super().__new__(cls, (s, p, o))
 
   @property
   def subject(self):
@@ -326,53 +186,19 @@ QueryResults = rdflib.query.Result
 #===========
 
 
-class IOMemory(rdflib.plugins.memory.IOMemory):
-#==============================================
-
-  def __obj2id(self, obj):        # Class name is IOMemory to ensure
-  #-----------------------        # private metod is overriden.
-    """encode object, storing it in the encoding map if necessary,
-       and return the integer key"""
-
-    if isinstance(obj, rdflib.term.BNode):
-      s = "_:%s" % str(obj)
-    elif isinstance(obj, rdflib.term.Literal):
-      v = ['"""' + str(obj.value) + '"""']
-      if   obj.language: v.append('@' + str(obj.language))
-      elif obj.datatype: v.append('^^' + str(obj.datatype))
-      s = "".join(v)
-    elif isinstance(obj, rdflib.term.URIRef):
-      s = "<%s>" % str(obj)
-    else:
-      s = obj
-    if s not in self.__obj2int:
-      id = rdflib.plugins.memory.randid()
-      while id in self.__int2obj:
-        id = rdflib.plugins.memory.randid()
-      self.__obj2int[s] = id
-      self.__int2obj[id] = obj
-      return id
-    return self.__obj2int[s]
-
-
-class Graph(rdflib.graph.Graph):
-#===============================
+class Graph(rdflib.Graph):
+#=========================
   '''
   We store graphs in memory.
   '''
   def __init__(self, uri=None):
   #----------------------------
-    super(Graph, self).__init__(store=IOMemory(), identifier=uri)
+    super(Graph, self).__init__(identifier=uri)
 
   @property
   def uri(self):
   #-------------
     return self.identifier
-
-  @uri.setter
-  def uri(self, value):
-  #--------------------
-    self.__identifier = value
 
   @classmethod
   def create_from_resource(cls, uri, format=Format.RDFXML, base=None):
@@ -451,11 +277,7 @@ class Graph(rdflib.graph.Graph):
       for prefix, uri in prefixes.items(): self.bind(prefix, uri)
     return self.serialize(format=Format.name(format), encoding='utf-8') ## BUG IN RDFLIB..., base=base)
 
-#  def __iter__(self):
-#  #------------------
-#    return self.as_stream(self._default_graph).__iter__()
-
-  def add_statements(self, statements):
+  def add_statements(self, statements: Iterable[Statement]):
   #------------------------------------
     '''
     Add statements to the graph.
@@ -475,7 +297,7 @@ class Graph(rdflib.graph.Graph):
     if graph is not None:
       for s in graph: self.add(s)
 
-  def contains(self, statement):
+  def contains(self, statement: Statement):
   #-----------------------------
     '''
     Test if a statement is in the graph.
@@ -495,7 +317,7 @@ class Graph(rdflib.graph.Graph):
     '''
     return self.contains(Statement(uri, RDF.type, rtype))
 
-  def get_statements(self, statement):
+  def get_statements(self, statement: Statement):
   #-----------------------------------
     '''
     Get all matching statements in the graph.
@@ -628,41 +450,24 @@ class Graph(rdflib.graph.Graph):
     return [ ]
 
 
-######################################################################################
-#
-# From: http://rdflib.readthedocs.org/en/4.1.0/intro_to_sparql.html
-#
-#   RDFLib lets you prepare queries before execution, this saves re-parsing and
-#   translating the query into SPARQL Algebra each time.
-#
-#   The method rdflib.plugins.sparql.prepareQuery() takes a query as a string and
-#   will return a rdflib.plugins.sparql.sparql.Query object. This can then be passed
-#   to the rdflib.graph.Graph.query() method.
-#
-#   The initBindings kwarg can be used to pass in a dict of initial bindings:
-#
-######################################################################################
-
-
 if __name__ == '__main__':
 #=========================
 
   graph_uri = 'http://devel.biosignalml.org/test'
   g = Graph(graph_uri)
-  statements = ([Resource('http://devel.biosignalml.org/test'),
-                   Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-                     Resource('http://www.biosignalml.org/ontologies/2011/04/biosignalml#Recording')],
-                [Resource('http://devel.biosignalml.org/test'),
-                   Resource('http://purl.org/NET/c4dm/timeline.owl#timeline'),
-                     Resource('http://devel.biosignalml.org/test/timeline')],
-                [Resource('http://devel.biosignalml.org/test/timeline'),
-                   Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-                     Literal('http://purl.org/NET/c4dm/timeline.owl#RelativeTimeLine')],
-                [Resource('http://devel.biosignalml.org/test'),
-                   Resource('http://purl.org/dc/terms/format'),
-                     Literal('application/x-bsml')],
+  statements = (Statement(Resource('http://devel.biosignalml.org/test'),
+                          Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+                          Resource('http://www.biosignalml.org/ontologies/2011/04/biosignalml#Recording')),
+                Statement(Resource('http://devel.biosignalml.org/test'),
+                          Resource('http://purl.org/NET/c4dm/timeline.owl#timeline'),
+                          Resource('http://devel.biosignalml.org/test/timeline')),
+                Statement(Resource('http://devel.biosignalml.org/test/timeline'),
+                          Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+                          Literal('http://purl.org/NET/c4dm/timeline.owl#RelativeTimeLine')),
+                Statement(Resource('http://devel.biosignalml.org/test'),
+                          Resource('http://purl.org/dc/terms/format'),
+                          Literal('application/x-bsml')),
                )
   g.add_statements(statements)
+  print(g.serialize(format="turtle")) ##, xml_base=graph_uri))
 
-#  for s in g: print s
-  print(g.serialize(format="turtle")) # , xml_base=graph_uri)

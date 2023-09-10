@@ -24,7 +24,7 @@ An abstract BioSignalML Recording.
 import logging
 from collections import OrderedDict
 
-from .. import rdf, utils
+from .. import utils
 from ..rdf import XSD, DCT, TL, PROV
 
 from .ontology import BSML
@@ -36,12 +36,14 @@ from .segment  import Segment
 
 __all__ = [ 'Recording' ]
 
+#===============================================================================
 
 def _get_timeline(tl):      # Stops a circular import
 #--------------------
   from biosignalml.data.time import RelativeTimeLine
   return RelativeTimeLine(tl)
 
+#===============================================================================
 
 class Recording(AbstractObject):
 #===============================
@@ -60,7 +62,7 @@ class Recording(AbstractObject):
 
   mapping = { 'format':        PropertyMap(DCT.format),
               'dataset':       PropertyMap(BSML.dataset),
-              'source':        PropertyMap(DCT.source, functional=False),
+              'source':        PropertyMap(DCT.source, multiple=True),
               'investigation': PropertyMap(DCT.subject),
               'investigator':  PropertyMap(DCT.creator),
               'starttime':     PropertyMap(DCT.created, XSD.dateTime,
@@ -80,6 +82,7 @@ class Recording(AbstractObject):
   SignalClass = Signal       #: The class of :class:`~.signal.Signal`\s in the Recording
   EventClass  = Event        #: The class of :class:`~.event.Event`\s in the Recording
 
+  duration: float
 
   def __init__(self, uri, **kwds):
   #-------------------------------
@@ -301,3 +304,5 @@ class Recording(AbstractObject):
     # Do we load events? There may be a lot of them...
     ## Or just find their URIs??
     return self
+
+#===============================================================================
