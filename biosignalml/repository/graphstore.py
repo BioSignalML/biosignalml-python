@@ -74,19 +74,19 @@ class GraphStore(object):
 
   :param base_uri: The URI of the store.
   :param graphtype: The class of graphs for we manage provenance for.
-  :param sparqlstore: The :class:`~biosignalml.rdf.sparqlstore.SparqlStore` in which RDF is stored.
+  :param sparql_store: The :class:`~biosignalml.rdf.sparqlstore.SparqlStore` in which RDF is stored.
   '''
-  def __init__(self, base_uri, graphtype, sparqlstore):
-  #----------------------------------------------------
+  def __init__(self, base_uri, graphtype, sparql_store: sparqlstore.SparqlStore):
+  #-----------------------------------------------------------------------------
     self.uri = rdf.Uri(base_uri)
     self._graphtype = graphtype
-    self._sparqlstore = sparqlstore
+    self._sparql_store = sparql_store
     self._provenance_uri = self.uri + PROVENANCE_PATH
 
   @property
   def store(self):
   #---------------
-    return self._sparqlstore
+    return self._sparql_store
 
   @property
   def provenance_uri(self):
@@ -96,7 +96,7 @@ class GraphStore(object):
   def has_provenance(self, graph_uri):
   #-----------------------------------
     ''' Check a URI is that of a graph for which we have current provenance.'''
-    return self._sparqlstore.ask(
+    return self._sparql_store.ask(
       '''graph <%(pgraph)s> { <%(graph)s> a <%(gtype)s> MINUS { [] prv:precededBy <%(graph)s> }}
          graph <%(graph)s> { [] a [] }''',
       params=dict(pgraph=self._provenance_uri, graph=graph_uri, gtype=self._graphtype),
@@ -105,7 +105,7 @@ class GraphStore(object):
   def get_provenance(self, graph_uri):
   #-----------------------------------
     ''' Return the provenance of a graph.'''
-    query = self._sparqlstore.construct('<%(uri)s> ?p ?o . ?cr ?cp ?co . ',
+    query = self._sparql_store.construct('<%(uri)s> ?p ?o . ?cr ?cp ?co . ',
             '''graph <%(pgraph)s> { <%(uri)s> a <%(gtype)s> . <%(uri)s> ?p ?o .
                                     <%(uri)s> prv:createdBy ?cr . ?cr ?cp ?co .
                                     optional { ?ltr prv:precededBy <%(uri)s> } }''',
@@ -173,13 +173,13 @@ class GraphStore(object):
     if rtype is None: rtype = '[]'
     else:             rtype = '<%s>' % rtype
     if graph_uri is None:
-      return self._sparqlstore.ask(
+      return self._sparql_store.ask(
         '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
            graph ?g { <%(uri)s> a %(rtype)s }''',
         params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
         prefixes=dict(prv=PRV.BASE))
     else:
-      return self._sparqlstore.ask(
+      return self._sparql_store.ask(
         '''graph <%(graph)s> { <%(uri)s> a %(rtype)s }''',
         params=dict(graph=graph_uri, uri=uri, rtype=rtype),
         prefixes=dict(prv=PRV.BASE))
@@ -189,7 +189,7 @@ class GraphStore(object):
     '''
     Is there a graph wuth the given URI?
     '''
-    return self._sparqlstore.ask('graph <%(pgraph)s> { <%(uri)s> a <%(gtype)s> }',
+    return self._sparql_store.ask('graph <%(pgraph)s> { <%(uri)s> a <%(gtype)s> }',
       params=dict(pgraph=self._provenance_uri, uri=uri, gtype=self._graphtype))
 
   def get_graph_with_resource(self, uri, rtype, graph_uri=None):
@@ -197,13 +197,13 @@ class GraphStore(object):
     if graph_uri is None:
       graph_uri = uri
       ### Following can give an error from Virtuoso...
-      text = self._sparqlstore.construct('?s ?p ?o',
+      text = self._sparql_store.construct('?s ?p ?o',
               '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
                  graph ?g { <%(uri)s> a <%(rtype)s> . ?s ?p ?o }''',
               params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
               prefixes=dict(prv=PRV.BASE), format=rdf.Format.TURTLE)
     else:
-      text = self._sparqlstore.construct('?s ?p ?o',
+      text = self._sparql_store.construct('?s ?p ?o',
               '<%(uri)s> a <%(rtype)s> . ?s ?p ?o',
               params=dict(uri=uri, rtype=rtype),
               graph=graph_uri, format=rdf.Format.TURTLE)
@@ -214,13 +214,13 @@ class GraphStore(object):
     if graph_uri is None:
       graph_uri = uri
       ### Following can give an error from Virtuoso...
-      text = self._sparqlstore.construct('<%(uri)s> ?p ?o',
+      text = self._sparql_store.construct('<%(uri)s> ?p ?o',
               '''graph <%(pgraph)s> { ?g a <%(gtype)s> MINUS { [] prv:precededBy ?g }}
                  graph ?g { <%(uri)s> a <%(rtype)s> ; ?p ?o }''',
               params=dict(pgraph=self._provenance_uri, gtype=self._graphtype, uri=uri, rtype=rtype),
               prefixes=dict(prv=PRV.BASE), format=rdf.Format.TURTLE)
     else:
-      text = self._sparqlstore.construct('<%(uri)s> ?p ?o',
+      text = self._sparql_store.construct('<%(uri)s> ?p ?o',
               '<%(uri)s> a <%(rtype)s> ; ?p ?o',
               params=dict(uri=uri, rtype=rtype),
               graph=graph_uri, format=rdf.Format.TURTLE)
@@ -238,19 +238,19 @@ class GraphStore(object):
 
   def query(self, sparql, header=False):
   #-------------------------------------
-    return QueryResults(self._sparqlstore, sparql, header)
+    return QueryResults(self._sparql_store, sparql, header)
 
   def construct(self, template, where=None, params=None, graph=None, format=rdf.Format.TURTLE, prefixes=None):
   #-------------------------------------------------------------------------------------------------------
-    return self._sparqlstore.construct(template, where, params, graph, format, prefixes)
+    return self._sparql_store.construct(template, where, params, graph, format, prefixes)
 
   def ask(self, query, graph):
   #---------------------------
-    return self._sparqlstore.ask(query, graph)
+    return self._sparql_store.ask(query, graph)
 
   def select(self, fields, where, **kwds):
   #---------------------------------------
-    return self._sparqlstore.select(fields, where, **kwds)
+    return self._sparql_store.select(fields, where, **kwds)
 
 
   def get_subjects(self, prop, obj, graph=None, ordered=False):
@@ -282,12 +282,12 @@ class GraphStore(object):
 
   def describe(self, uri, graph=None, format=rdf.Format.TURTLE):
   #---------------------------------------------------------
-    return self._sparqlstore.describe(uri, graph=graph, format=format)
+    return self._sparql_store.describe(uri, graph=graph, format=format)
 
-    """
+  """
     def description(uri, format):
     #----------------------------
-      return self._sparqlstore.construct('?s ?p ?o',
+      return self._sparql_store.construct('?s ?p ?o',
                              '?s ?p ?o FILTER (?s = <%(uri)s> || ?o = <%(uri)s>)',
                              params=dict(uri=uri), graph=graph, format=format)
 
@@ -343,14 +343,14 @@ class SparqlHead(object):
 class QueryResults(object):
 #==========================
 
-  def __init__(self, sparqlstore: sparqlstore.SparqlStore, sparql, header=False):
+  def __init__(self, sparql_store: sparqlstore.SparqlStore, sparql, header=False):
   #------------------------------------------------------------------------------
     self._base = None
     self._set_prefixes(sparql)
     self._header = header
     #logging.debug('SPARQL: %s', sparql)
     try:
-      self._results = json.loads(sparqlstore.query(sparql, rdf.Format.JSON))
+      self._results = json.loads(sparql_store.query(sparql, rdf.Format.JSON))
     except Exception as msg:
       self._results = { 'error': str(msg) }
 
@@ -398,14 +398,14 @@ class QueryResults(object):
 class GraphUpdate(GraphStore):
 #=============================
 
-  def __init__(self, base_uri, graphtype, sparqlstore: sparqlstore.SparqlUpdateStore):
-  #-----------------------------------------------------------------------------------
-    super().__init__( base_uri, graphtype, sparqlstore)
-    self._sparqlstore = sparqlstore
+  def __init__(self, base_uri, graphtype, sparql_store: sparqlstore.SparqlUpdateStore):
+  #------------------------------------------------------------------------------------
+    super().__init__( base_uri, graphtype, sparql_store)
+    self._sparql_store = sparql_store
 
   def insert_triples(self, graph_uri, triples, prefixes=None):
   #-----------------------------------------------------------
-    self._sparqlstore.insert_triples(graph_uri, triples, prefixes)
+    self._sparql_store.insert_triples(graph_uri, triples, prefixes)
 
   def replace_graph(self, uri, rdf, format=rdf.Format.TURTLE):
   #-------------------------------------------------------
@@ -417,7 +417,7 @@ class GraphUpdate(GraphStore):
     # add version statement to graph ??
     # What about actual recording file(s)? They should also be renamed...
 
-    self._sparqlstore.replace_graph(uri, rdf, format=format)
+    self._sparql_store.replace_graph(uri, rdf, format=format)
 
     #  Generate provenance....
     #for k, v in provenance.iter_items():
@@ -427,11 +427,11 @@ class GraphUpdate(GraphStore):
 
   def extend_graph(self, uri, rdf, format=rdf.Format.TURTLE):
   #---------------------------------------------------
-    self._sparqlstore.extend_graph(uri, rdf, format=format)
+    self._sparql_store.extend_graph(uri, rdf, format=format)
 
   def delete_graph(self, uri):
   #---------------------------
-    self._sparqlstore.delete_graph(uri)
+    self._sparql_store.delete_graph(uri)
     #self._provenance.delete_graph(uri)
     ## Should this set provenance...
 
@@ -464,6 +464,6 @@ class GraphUpdate(GraphStore):
             if m.to_rdf is not None: o = m.to_rdf(o)
             v = '"%s"' % str(o)
             if m.datatype is not None: v += "^^<%s>" % str(m.datatype)
-          self._sparqlstore.update_triples(graph_uri,
+          self._sparql_store.update_triples(graph_uri,
             [("<%s>" % str(s.uri), "<%s>" % str(m.property), v)])
           return
