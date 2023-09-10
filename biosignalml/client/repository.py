@@ -197,8 +197,8 @@ class RemoteRepository(BSMLUpdateStore):
   def get_metadata(self, uri):
   #---------------------------
     try:
-      graph = rdf.Graph.create_from_resource(self._md_uri + str(uri), rdf.Format.RDFXML)
       if uri: graph.uri = rdf.Uri(uri)
+      graph = rdf.Graph.create_from_resource(self._md_uri + str(uri), rdf.Format.TURTLE)
       return graph
     except Exception as msg:
       raise IOError("Cannot get RDF for '%s' (%s)" % (uri, msg))
@@ -217,11 +217,11 @@ class RemoteRepository(BSMLUpdateStore):
     elif response.status not in [200, 201]: raise IOError("%s: %s" % (response.status, content))
     return response.get('location')
 
-  def put_metadata(self, uri, metadata, format=rdf.Format.RDFXML):
+  def put_metadata(self, uri, metadata, format=rdf.Format.TURTLE):
   #---------------------------------------------------------------
     return self._send_metadata('PUT', uri, metadata, format)
 
-  def post_metadata(self, uri, metadata, format=rdf.Format.RDFXML):
+  def post_metadata(self, uri, metadata, format=rdf.Format.TURTLE):
   #----------------------------------------------------------------
     return self._send_metadata('POST', uri, metadata, format)
 

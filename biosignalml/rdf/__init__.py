@@ -201,7 +201,7 @@ class Graph(rdflib.Graph):
     return self.identifier
 
   @classmethod
-  def create_from_resource(cls, uri, format=Format.RDFXML, base=None):
+  def create_from_resource(cls, uri, format=Format.TURTLE, base=None):
   #-------------------------------------------------------------------
     """
     Create a new Graph from RDF statements in a resource.
@@ -216,7 +216,7 @@ class Graph(rdflib.Graph):
     return self
 
   @classmethod
-  def create_from_string(cls, uri, string, format=Format.RDFXML):
+  def create_from_string(cls, uri, string, format=Format.TURTLE):
   #--------------------------------------------------------------
     """
     Create a new Graph from RDF statements in a string.
@@ -236,7 +236,7 @@ class Graph(rdflib.Graph):
   #-----------------
     return str(self.uri)
 
-  def parse_resource(self, uri, format=Format.RDFXML, base=None):
+  def parse_resource(self, uri, format=Format.TURTLE, base=None):
   #--------------------------------------------------------------
     """
     Add statements to the graph from a resource.
@@ -247,7 +247,7 @@ class Graph(rdflib.Graph):
     """
     self.parse(source=uri, format=Format.name(format), publicID=base)
 
-  def parse_string(self, string, format=Format.RDFXML, base=None):
+  def parse_string(self, string, format=Format.TURTLE, base=None):
   #---------------------------------------------------------------
     """
     Add statements to the graph from a string.
@@ -259,7 +259,7 @@ class Graph(rdflib.Graph):
     """
     self.parse(data=string, format=Format.name(format), publicID=base)
 
-  def serialise(self, format=Format.RDFXML, base=None, prefixes={}):
+  def serialise(self, format=Format.TURTLE, base=None, prefixes={}):
   #-----------------------------------------------------------------
     '''
     Serialise the graph as a string of RDF statements.

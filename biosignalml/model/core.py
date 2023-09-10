@@ -283,7 +283,7 @@ class AbstractObject(object):
     self.save_metadata_to_graph(graph)
     return graph
 
-  def metadata_as_string(self, format=rdf.Format.RDFXML, base=None, prefixes=None):
+  def metadata_as_string(self, format=rdf.Format.TURTLE, base=None, prefixes=None):
   #-------------------------------------------------------------------------------
     """
     Return metadata as a serialised RDF string.
@@ -328,7 +328,7 @@ class AbstractObject(object):
     return self
 
   @classmethod
-  def create_from_string(cls, uri, string, format=rdf.Format.RDFXML, **kwds):
+  def create_from_string(cls, uri, string, format=rdf.Format.TURTLE, **kwds):
   #--------------------------------------------------------------------------
     """
     Create a new instance of a resource, setting attributes from RDF statements in a string.

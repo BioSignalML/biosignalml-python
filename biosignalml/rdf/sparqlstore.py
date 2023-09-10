@@ -111,7 +111,7 @@ class SparqlStore(object):
     return '\n'.join(['PREFIX %s: <%s>' % kv for kv in prefixes.items()] + ['']) if prefixes else ''
 
 
-  def query(self, sparql, format=rdf.Format.RDFXML, prefixes=None):
+  def query(self, sparql, format=rdf.Format.TURTLE, prefixes=None):
   #----------------------------------------------------------------
     """
     Perform a SPARQL query.
@@ -180,7 +180,7 @@ class SparqlStore(object):
                  rdf.Format.JSON, prefixes)
         ).get('results', {}).get('bindings', [])
 
-  def construct(self, template, where=None, params=None, graph=None, format=rdf.Format.RDFXML, prefixes=None):
+  def construct(self, template, where=None, params=None, graph=None, format=rdf.Format.TURTLE, prefixes=None):
   #-----------------------------------------------------------------------------------------------------------
     if where is None: where = template
     if params is None: params = {}
@@ -190,7 +190,7 @@ class SparqlStore(object):
                              where=where % params),
                       format, prefixes)
 
-  def describe(self, uri, graph=None, format=rdf.Format.RDFXML, prefixes=None):
+  def describe(self, uri, graph=None, format=rdf.Format.TURTLE, prefixes=None):
   #----------------------------------------------------------------------------
     if uri == '':
       if graph is None: return ''
@@ -289,7 +289,7 @@ class SparqlUpdateStore(SparqlStore):
     self.insert_triples(graph, triples, prefixes)  ###### DUPLICATES BECAUSE OF 4STORE BUG...
 
 
-  def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
+  def extend_graph(self, graph, statements, format=rdf.Format.TURTLE):
   #-------------------------------------------------------------------
     self.http_request(self.ENDPOINTS[1], 'POST',
                       body=urllib.parse.urlencode({'data': statements,
@@ -298,7 +298,7 @@ class SparqlUpdateStore(SparqlStore):
                                             }),
                       headers={'Content-type': 'application/x-www-form-urlencoded'})
 
-  def replace_graph(self, graph, statements, format=rdf.Format.RDFXML):
+  def replace_graph(self, graph, statements, format=rdf.Format.TURTLE):
   #--------------------------------------------------------------------
     self.http_request(self.ENDPOINTS[1] + "?%s=%s" % (self.GRAPH_PARAMETER, graph), 'PUT',
                       body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})

@@ -71,7 +71,7 @@ class RecordingGraph(rdf.Graph):
     return self
 
   @classmethod
-  def create_from_string(cls, uri, string, format=Format.RDFXML, rec_class=None):
+  def create_from_string(cls, uri, string, format=Format.TURTLE, rec_class=None):
   #------------------------------------------------------------------------------
     self = rdf.Graph.create_from_string(uri, string, format)
     self.__class__ = cls
@@ -618,8 +618,8 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
     """
     for abstractobject in abstractobjects:
       self._sparqlstore.extend_graph(recording.graph.uri,
-        abstractobject.metadata_as_string(format=Format.RDFXML),
-        format=Format.RDFXML)
+        abstractobject.metadata_as_string(format=Format.TURTLE),
+        format=Format.TURTLE)
 
   def remove_recording_resource(self, recording, uri):
   #---------------------------------------------------
@@ -633,7 +633,7 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
       [("bsml:deletedResource", "prv:precededBy", "<%s>" % uri)],
       prefixes=dict(bsml=BSML.BASE, prv=PRV.BASE))
 
-  def add_recording_graph(self, uri, graph_rdf, creator, format=Format.RDFXML):
+  def add_recording_graph(self, uri, graph_rdf, creator, format=Format.TURTLE):
   #---------------------------------------------------------------------------
     """
     Add RDF metadata describing a recording as a new named graph.
@@ -652,4 +652,6 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
     :param creator: Who or what is storing the recording.
     """
     return self.add_recording_graph(recording.uri,
-      recording.metadata_as_graph().serialise(Format.RDFXML), creator, Format.RDFXML)
+      recording.metadata_as_graph().serialise(Format.TURTLE), creator, Format.TURTLE)
+
+#===============================================================================
