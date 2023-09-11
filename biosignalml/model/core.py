@@ -87,9 +87,10 @@ class AbstractObject(object):
     '''Dictionary of property values with names not in :attr:`attributes` list.'''
     if metadata is not None:
       self.metadata.update(AbstractObject.set_attributes(self, **metadata))
-    self.uri = (uri     if isinstance(uri, rdf.Uri) or uri is None  # None ==> Blank node
-           else uri.uri if isinstance(uri, rdf.Node) and uri.is_resource()
-           else rdf.Uri(str(uri).strip()))
+    if isinstance(uri, rdf.Uri) or uri is None:  # None ==> Blank node
+      self.uri = uri
+    else:
+      self.uri = rdf.Uri(str(uri).strip())       # needs to be a URIRef in the graph
     self.node = rdf.BlankNode() if uri is None else rdf.Resource(self.uri)
     self.graph = None
 
@@ -263,7 +264,7 @@ class AbstractObject(object):
     Return a stream of RDF statements about ourselves.
     '''
     if self.metaclass:
-      yield rdf.Statement(self.node, rdf.RDF.type, self.metaclass)
+      yield rdf.Statement(self.node, RDF.type, self.metaclass)
       for s in self.rdfmap.statement_stream(self): yield s
 
   def save_metadata_to_graph(self, graph):
@@ -300,7 +301,8 @@ class AbstractObject(object):
     :param graph: A graph of RDF statements.
     :type graph: :class:`~biosignalml.rdf.Graph`
     """
-    if self.metaclass is not None and graph.contains(rdf.Statement(self.uri, rdf.RDF.type, self.metaclass)):
+    st = rdf.Statement(self.uri, RDF.type, self.metaclass)
+    if self.metaclass is not None and graph.contains(st):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
         for metaclass in [getattr(cls, 'metaclass', None)
                             for cls in self.__class__.__mro__ if cls != object]:

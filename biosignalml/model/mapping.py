@@ -212,7 +212,7 @@ class Mapping(object):
   def _makevalue(node, dtype, from_rdf):
   #-------------------------------------
     if node is None: return None
-    elif node.is_resource(): v = Uri(node.uri)
+    elif node.is_resource(): v = Uri(node)
     elif node.is_blank(): v = node.skolemize()
     elif node.is_literal():
       v = node.rstrip(None) # `node.value` is None for datatypes `rdflib` doesn't support
@@ -233,8 +233,8 @@ class Mapping(object):
       have multiple values.
 
     """
-    m = self.reversemap.get((metaclass, str(statement.predicate.uri)), None)
-    if m is None: m = self.reversemap.get((None, str(statement.predicate.uri)), ReverseEntry(None, None, None, None))
+    m = self.reversemap.get((metaclass, str(statement.predicate)), None)
+    if m is None: m = self.reversemap.get((None, str(statement.predicate)), ReverseEntry(None, None, None, None))
     subject = statement.subject if not statement.subject.is_blank() else statement.subject.skolemize()
     return (str(subject), m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf), m.multiple)
 
@@ -272,7 +272,7 @@ if __name__ == '__main__':
   r.save_metadata_to_graph(g)
 
   s = MyRecording.create_from_graph('http://example.org/uri1', g)
-  assert(r.metadata_as_string(rdf.Format.TURTLE) == s.metadata_as_string(rdf.Format.TURTLE))
+  assert(r.metadata_as_string() == s.metadata_as_string())
   s.comment='From graph'
 
   user = 'http://example.org/users/test-user'
