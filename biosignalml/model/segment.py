@@ -86,7 +86,7 @@ class Segment(AbstractObject):
     :rtype: :class:`Segment`
     '''
     from biosignalml.data.time import TemporalEntity  # Prevent a circular import
-    self = super(Segment, cls).create_from_graph(cls, uri, graph, **kwds)
+    self = super(Segment, cls).create_from_graph(uri, graph, **kwds)
     if self.time is not None:  ## Could add_metadata automatically do this for sub-elements??
                                ## PropertyMap would need to know class (TemporalEntity)
       self.time = TemporalEntity.create_from_graph(self.time, graph)
