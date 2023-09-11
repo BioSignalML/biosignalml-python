@@ -278,7 +278,7 @@ class RecordingGraph(rdf.Graph):
     for a in anns:
       ann = Annotation(a[0], about=a[1], comment=a[3], tags=a[4], created=a[5])
       if a[2] == str(BSML.Segment):
-        time = TemporalEntity.create(a[7], a[8], a[9], timeline=a[10])
+        time = TemporalEntity.create(a[7], isoduration_to_seconds(a[8]), isoduration_to_seconds(a[9]), timeline=a[10])
         ann.about = Segment(a[1], source=a[6], time=time)
       annotations.append(ann)
     return annotations
@@ -586,8 +586,8 @@ class BSMLStore(GraphStore):
     for a in anns:
       ann = Annotation(a[1], about=a[2], comment=a[4], created=a[6])
       if str(a[3]) == str(BSML.Segment):
-        time = TemporalEntity.create(a[8], float(a[9]),
-          duration=None if a[10] in ['', None] else float(a[10]),
+        time = TemporalEntity.create(a[8], isoduration_to_seconds(a[9]),
+          duration=None if a[10] in ['', None] else isoduration_to_seconds(a[10]),
           timeline=a[11])
         ann.about = Segment(a[2], source=a[7], time=time)
       annotations.append(ann)

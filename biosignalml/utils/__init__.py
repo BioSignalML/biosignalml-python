@@ -61,8 +61,8 @@ def isoformat_to_datetime(v):
     logging.error("Cannot convert datetime '%s': %s", v, msg)
     return None
 
-def seconds_to_isoduration(secs):
-#================================
+def seconds_to_isoduration(secs: float) -> str:
+#==============================================
   """
   Convert a duration to an ISO 8601 representation.
 
@@ -74,21 +74,25 @@ def seconds_to_isoduration(secs):
     timedelta(seconds=int(secs), microseconds=int(1000000*(float(secs) - int(secs)) ))
     ) if secs != 0.0 else "PT0S"  ## More meaningful than "P0D"
 
-def isoduration_to_seconds(d):
-#=============================
+def isoduration_to_seconds(td: str|timedelta) -> float:
+#======================================================
   """
   Convert an ISO duration to a number of seconds.
 
-  :param v: A string representing a duration, formatted as ISO 8601.
+  :param td: Either a string representing a duration, formatted as ISO 8601
+             or a ``timedelta`` instance.
   :return: The number of seconds.
   :rtype: float
   """
-  try:
-    td = isoduration.parse_duration(d)
-    return td.days*86400 + td.seconds + td.microseconds/1000000.0
-  except:
-    try: return float(d)    ## Virtuoso strips "PT" etc on import...
-    except: return 0
+  if isinstance(td, str):
+    try:
+      delta = isoduration.parse_duration(td)
+    except:
+      try: return float(td)    ## Virtuoso strips "PT" etc on import...
+      except: return 0
+  else:
+    delta = td
+  return delta.days*86400 + delta.seconds + delta.microseconds/1000000.0
 
 def utctime():
 #=============
