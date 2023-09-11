@@ -127,7 +127,7 @@ class RemoteRepository(BSMLUpdateStore):
   def _save_access(self, access):    # "token name expiry"
   #------------------------------
     f = self._get_token_file()
-    g = tempfile.NamedTemporaryFile(delete=True)
+    g = tempfile.NamedTemporaryFile('w', delete=True)
     existing = False
     uri = str(self.uri)
     for l in f:
