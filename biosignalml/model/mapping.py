@@ -255,6 +255,7 @@ if __name__ == '__main__':
 #=========================
 
   from biosignalml import Recording, Annotation
+  from biosignalml.data.time import Interval
   import biosignalml.rdf as rdf
 
   #logging.basicConfig(level=logging.DEBUG)
@@ -284,18 +285,20 @@ if __name__ == '__main__':
   t1 = 'http://example.org/onto#tag1'
   t2 = 'http://example.org/onto#tag2'
   t3 = 'http://example.org/onto#tag3'
-  a = Annotation.Note(a1, s.uri, user, 'A test recording...')
-  b = Annotation.Tag(a2, s.uri, user, t1)
-  c = Annotation(a3, s.uri, user, tags=[t2, t3], text='Multiple tags')
+  a = Annotation.Note(a1, s.uri, 'A test recording...')
+  b = Annotation.Tag(a2, s.uri, t1)
+  c = Annotation(a3, s.uri, tags=[t2, t3], text='Multiple tags')
 
-  #print(a.metadata_as_string(rdf.Format.TURTLE))
-  #print(b.metadata_as_string(rdf.Format.TURTLE))
-  #print(c.metadata_as_string(rdf.Format.TURTLE))
+  print(a.metadata_as_string())
+  print(b.metadata_as_string())
+  print(c.metadata_as_string())
 
   c.save_metadata_to_graph(g)
   d = Annotation.create_from_graph(a3, g)
-  assert(c.metadata_as_string(rdf.Format.TURTLE) == d.metadata_as_string(rdf.Format.TURTLE))
+  assert(c.metadata_as_string() == d.metadata_as_string())
 
   s.metadata['zz'] = [ a, b, c ]
-  print(s.metadata_as_string(rdf.Format.TURTLE))
+  print(s.metadata_as_string())
 
+  t = Interval('http://example.org/interval/1', 0.5, 0.3)
+  print(t.metadata_as_string())
