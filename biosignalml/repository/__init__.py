@@ -61,7 +61,7 @@ class RecordingGraph(rdf.Graph):
     r = list(self.query('\n'.join(sparql)))
     self._rec_uri = str(r[0][0]) if r else None
     if rec_class is None:
-      rec_class = biosignalml.formats.CLASSES.get(
+      rec_class = formats.CLASSES.get(
                     str(self.get_object(uri, DCT.format)), Recording)
     self._rec_class = rec_class
     self._sig_class = rec_class.SignalClass
@@ -360,7 +360,7 @@ class BSMLStore(GraphStore):
 
     if graph_uri is not None:
       if recording_class is None:
-        recording_class = biosignalml.formats.CLASSES.get(
+        recording_class = formats.CLASSES.get(
                             str(self.get_objects(rec_uri, DCT.format, graph=graph_uri)[0]),
                             Recording)
 
