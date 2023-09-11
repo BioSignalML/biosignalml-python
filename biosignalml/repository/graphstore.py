@@ -18,8 +18,9 @@
 #
 ######################################################
 
-import logging
+#import logging
 import json
+from typing import Any
 
 #===============================================================================
 
@@ -27,6 +28,7 @@ from .. import BSML
 
 from .. import rdf, utils
 from ..rdf import sparqlstore
+from ..model.core import AbstractObject
 from ..model.mapping import PropertyMap
 from ..rdf import RDF, DCT, PRV, XSD
 
@@ -38,14 +40,28 @@ PROVENANCE_PATH = '/provenance'     #: Relative to a graph store's URI
 
 #===============================================================================
 
-class DataItem(model.core.AbstractObject):
-#=========================================
+class DataCreation(AbstractObject):
+#==================================
+  metaclass = PRV.DataCreation
+  attributes = [ 'performedby', 'completed' ]
+  mapping = { 'performedby': PropertyMap(PRV.performedBy),
+              'completed':   PropertyMap(PRV.completedAt, XSD.dateTime,
+                                                 utils.datetime_to_isoformat,
+                                                 utils.isoformat_to_datetime) }
+
+#===============================================================================
+
+class DataItem(AbstractObject):
+#==============================
   metaclass = PRV.DataItem
   attributes = [ 'type', 'createdby', 'subject', 'precededby' ]
   mapping = { 'createdby':  PropertyMap(PRV.createdBy, subelement=True),
               'subject':    PropertyMap(DCT.subject),
               'precededby': PropertyMap(PRV.precededBy),
               'type':       PropertyMap(RDF.type) }
+
+  createdby: DataCreation
+  followedby: rdf.Resource
 
   @classmethod
   def create_from_graph(cls, uri, graph, **kwds):
@@ -61,15 +77,6 @@ class DataItem(model.core.AbstractObject):
       break
     return self
 
-
-class DataCreation(model.core.AbstractObject):
-#=============================================
-  metaclass = PRV.DataCreation
-  attributes = [ 'performedby', 'completed' ]
-  mapping = { 'performedby': PropertyMap(PRV.performedBy),
-              'completed':   PropertyMap(PRV.completedAt, XSD.dateTime,
-                                                 utils.datetime_to_isoformat,
-                                                 utils.isoformat_to_datetime) }
 #===============================================================================
 
 class GraphStore(object):
@@ -359,7 +366,7 @@ class QueryResults(object):
     try:
       self._results = json.loads(sparql_store.query(sparql, rdf.Format.JSON))
     except Exception as msg:
-      self._results = { 'error': str(msg) }
+      self._results: Any = { 'error': str(msg) }
 
   @property
   def base(self):
@@ -431,7 +438,6 @@ class GraphUpdate(GraphStore):
     #  self._provenance.add(self.uri, content-type, hexdigest, ...)
     #self._sparqlstore.insert(self._provenace, triples...)
 
-
   def extend_graph(self, uri, rdf, format=rdf.Format.TURTLE):
   #---------------------------------------------------
     self._sparql_store.extend_graph(uri, rdf, format=format)
@@ -462,11 +468,11 @@ class GraphUpdate(GraphStore):
     """
     o = getattr(s, p, None)
     ### Following should be done in Mapping class...
-    if o not in ['', None] and isinstance(s, model.core.AbstractObject):
-      mc = [ c.metaclass for c in s.__class__.__mro__ if c.__dict__.get('metaclass') ]
+    if o not in ['', None] and isinstance(s, AbstractObject):
+      mc = [ metaclass for c in s.__class__.__mro__ if (metaclass := c.__dict__.get('metaclass')) ]
       for k, m in s.rdfmap.mapping.items():
         if (k[0] is None or k[0] in mc) and k[1] == p:
-          if isinstance(o, model.core.AbstractObject): v = "<%s>" % str(o.uri)
+          if isinstance(o, AbstractObject): v = "<%s>" % str(o.uri)
           else:
             if m.to_rdf is not None: o = m.to_rdf(o)
             v = '"%s"' % str(o)

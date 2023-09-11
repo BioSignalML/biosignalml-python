@@ -22,14 +22,19 @@ A BioSignalML Signal.
 '''
 
 import logging
+from typing import TYPE_CHECKING
 
-from .. import utils
-from ..rdf import XSD, DCT
+from biosignalml.rdf import XSD, DCT
+import biosignalml.units as units
+import biosignalml.utils as utils
 
 from .ontology import BSML
 from .core     import AbstractObject
 from .mapping  import PropertyMap
 from .segment  import Segment
+
+if TYPE_CHECKING:
+  from .recording import Recording
 
 __all__ = [ 'Signal' ]
 
@@ -72,6 +77,11 @@ class Signal(AbstractObject):
                                           utils.seconds_to_isoduration,
                                           utils.isoduration_to_seconds),
             }
+
+  _duration: float
+  _period: float
+  _rate: float
+  recording: "Recording"
 
   def __init__(self, uri, units, **kwds):
   #--------------------------------------

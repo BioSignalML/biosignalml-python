@@ -53,7 +53,7 @@ class AbstractObject(object):
   of the class instance; other elements are stored in the :attr:`metadata` dictionary.
   """
 
-  metaclass = None
+  metaclass: rdf.Resource
   '''Class in BioSignalML Ontology as a :class:`~biosignalml.rdf.Resource`'''
 
   attributes = [ 'uri', 'label', 'comment', 'description', 'precededBy', 'creator', 'created' ]
@@ -69,7 +69,7 @@ class AbstractObject(object):
                                          from_rdf=utils.isoformat_to_datetime),
             }
 
-  rdfmap = None
+  rdfmap: Mapping
   '''The :class:`~biosignalml.model.mapping.Mapping` used to map between RDF properties and attributes.'''
 
   def __new__(cls, *args, **kwds):

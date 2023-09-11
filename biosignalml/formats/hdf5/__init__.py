@@ -24,11 +24,9 @@ import logging
 #===============================================================================
 
 from ... import rdf
-from ... import BSML
 from .. import BSMLRecording, BSMLSignal, MIMETYPES
 from ...data import DataSegment, UniformTimeSeries, TimeSeries, Clock, UniformClock
 from ...repository import RecordingGraph
-from ...units import UnitConverter
 
 from .h5recording import H5Recording
 
@@ -285,7 +283,7 @@ class HDF5Recording(BSMLRecording):
       self._h5.close()
       self._h5 = None
 
-  def new_signal(self, uri, units, id=None, **kwds):
+  def new_signal(self, uri, units, id=None, **kwds) -> HDF5Signal:
   #-------------------------------------------------
     """
     Create a new signal and add it to the recording.
@@ -295,7 +293,7 @@ class HDF5Recording(BSMLRecording):
     :rtype: :class:`HDF5Signal`
     :param kwds: Other :class:`~biosignalml.Signal` attributes to set.
     """
-    sig = BSMLRecording.new_signal(self, uri, units, id=id, **kwds)
+    sig: HDF5Signal = BSMLRecording.new_signal(self, uri, units, id=id, **kwds)
     ## Above uses SignalClass to create a HDF5Signal
     if self._h5:
       if sig.clock:

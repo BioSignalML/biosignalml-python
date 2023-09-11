@@ -183,7 +183,7 @@ class Recording(BSMLRecording):
     # then when server processes PUT for a new signal of BSML Recording
     # it will create an signal group in HDF5 container
     try:
-      sig = super(Recording, self).new_signal(uri, units, id=id, **kwds)
+      sig: Signal = super(Recording, self).new_signal(uri, units, id=id, **kwds)
       sig.set_repository(self._repository)
       ## This should spot duplicates
 

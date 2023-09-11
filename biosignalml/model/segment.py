@@ -19,12 +19,18 @@
 ######################################################
 
 import logging
+from typing import TYPE_CHECKING
+
+#===============================================================================
 
 from ..rdf import DCT
 
 from .ontology import BSML
 from .core     import AbstractObject
 from .mapping  import PropertyMap
+
+if TYPE_CHECKING:
+  from ..data.time import TemporalEntity
 
 __all__ = [ 'Segment' ]
 
@@ -57,6 +63,7 @@ class Segment(AbstractObject):
               'time':   PropertyMap(BSML.time, subelement=True),
             }
 
+  time: "TemporalEntity"
 
   def __init__(self, uri, source=None, time=None, **kwds):
   #-------------------------------------------------------

@@ -21,8 +21,9 @@ RelativeTimeLine, Instant and Interval objects.
 #
 ################################################################################
 
-from .. import model, rdf, utils
+from .. import rdf, utils
 from ..model import BSML
+from ..model.core import AbstractObject
 from ..model.mapping import PropertyMap
 from ..rdf import RDF, RDFS, DCT, XSD, TL
 
@@ -30,9 +31,8 @@ __all__ = [ 'Instant', 'Interval', 'RelativeTimeLine', 'TemporalEntity' ]
 
 #===============================================================================
 
-class RelativeTimeLine(model.core.AbstractObject):
-#=================================================
-
+class RelativeTimeLine(AbstractObject):
+#======================================
   '''
   An abstract BioSignalML TimeLine.
   '''
@@ -50,9 +50,8 @@ class RelativeTimeLine(model.core.AbstractObject):
 
 #===============================================================================
 
-
-class TemporalEntity(model.core.AbstractObject):
-#===============================================
+class TemporalEntity(AbstractObject):
+#====================================
   '''
   An abstract Temporal Entity.
 
@@ -73,7 +72,7 @@ class TemporalEntity(model.core.AbstractObject):
       return Interval(uri, start, duration=duration, end=end, **kwds)
 
   @classmethod
-  def create_from_graph(cls, uri, graph, **kwds):
+  def create_from_graph(cls, uri, graph, **kwds) -> 'Interval | Instant':
   #----------------------------------------------
     """
     We can't call the 'create_from_graph()' for the appropriate
@@ -109,6 +108,9 @@ class Interval(TemporalEntity):
               'duration': PropertyMap(TL.duration, XSD.dayTimeDuration,
                                       utils.seconds_to_isoduration,
                                       utils.isoduration_to_seconds) }
+  duration: float
+  start: float
+  timeline: RelativeTimeLine
 
   def __init__(self, uri, start, duration=None, timeline=None, end=None, **kwds):
   #------------------------------------------------------------------------------
@@ -152,6 +154,9 @@ class Instant(TemporalEntity):
   mapping = { 'start': PropertyMap(TL.at, XSD.dayTimeDuration,
                                    utils.seconds_to_isoduration,
                                    utils.isoduration_to_seconds) }
+  at: float
+  start: float
+  timeline: RelativeTimeLine
 
   def __init__(self, uri, when, timeline=None, **kwds):
   #----------------------------------------------------
