@@ -187,8 +187,6 @@ class UnitConverter(object):
 if __name__ == '__main__':
 #=========================
 
-  import sys
-
   logging.getLogger().setLevel(logging.DEBUG)
 
   store = UnitConverter(sparqlstore.Virtuoso('http://localhost:8890'))
