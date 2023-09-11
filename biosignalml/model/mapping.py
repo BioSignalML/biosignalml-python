@@ -77,17 +77,17 @@ class PropertyMap(object):
     statement to an attribute value.
   :param bool subelement: If True, AbstractObjects referenced by properties
     are recursively output when generating RDF statements.
-  :param bool functional: Set False if the property can have multiple values.
+  :param bool multiple: Set True if the property can have multiple values.
     Default is True.
   """
-  def __init__(self, property, datatype=None, to_rdf=None, from_rdf=None, subelement=False, functional=True):
+  def __init__(self, property, datatype=None, to_rdf=None, from_rdf=None, subelement=False, multiple=False):
   #---------------------------------------------------------------------------------------------------------
     self.property = property
     self.datatype = datatype
     self.to_rdf = to_rdf
     self.from_rdf = from_rdf
     self.subelement = subelement
-    self.functional = functional
+    self.multiple = multiple
 
   @staticmethod
   def get_uri(v):
@@ -98,7 +98,7 @@ class PropertyMap(object):
     return v.uri if hasattr(v, 'uri') else Uri(v)
 
 
-ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf, functional')
+ReverseEntry = namedtuple('ReverseEntry', 'attribute, datatype, from_rdf, multiple')
 #===========
 """
 A reverse mapping, from RDF to an attribute.
@@ -143,7 +143,7 @@ class Mapping(object):
     :type usermap: dict
     """
     for k, v in usermap.items(): self.mapping[(metaclass, k)] = v
-    self.reversemap = { (k[0], str(m.property)): ReverseEntry(k[1], m.datatype, m.from_rdf, m.functional)
+    self.reversemap = { (k[0], str(m.property)): ReverseEntry(k[1], m.datatype, m.from_rdf, m.multiple)
                           for k, m in self.mapping.items() }
 
   @staticmethod
@@ -227,16 +227,16 @@ class Mapping(object):
     in the reverse mapping table and use its properties to translate the value of the
     statement's object.
 
-    :rtype: tuple(Uri, attribute, value, functional) where the ``Uri`` is of the statement's
+    :rtype: tuple(Uri, attribute, value, multiple) where the ``Uri`` is of the statement's
       subject; ``attribute`` is a string with the Python name of an attribute; ``value`` is
-      the Python value for the attribute; and ``functional`` is True if the attribute can
-      only have a single value.
+      the Python value for the attribute; and ``multiple`` is True if the attribute can
+      have multiple values.
 
     """
     m = self.reversemap.get((metaclass, str(statement.predicate.uri)), None)
     if m is None: m = self.reversemap.get((None, str(statement.predicate.uri)), ReverseEntry(None, None, None, None))
     subject = statement.subject if not statement.subject.is_blank() else statement.subject.skolemize()
-    return (subject.uri, m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf), m.functional)
+    return (str(subject), m.attribute, self._makevalue(statement.object, m.datatype, m.from_rdf), m.multiple)
 
   def get_value_from_graph(self, resource, attr, graph):
   #-----------------------------------------------------
@@ -262,7 +262,7 @@ if __name__ == '__main__':
   class MyRecording(Recording):
   #----------------------------
     mapping = { 'xx': PropertyMap(rdf.DCT.subject),
-                'yy': PropertyMap('http://example.org/onto#subject'),
+                'yy': PropertyMap('http://example.org/onto#subject', multiple=True),
                 'zz': PropertyMap('http://example.org/onto#annotation'),
      }
 

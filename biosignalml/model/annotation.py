@@ -62,7 +62,7 @@ class Annotation(AbstractObject):
 
   mapping = { 'about':   PropertyMap(DCT.subject, to_rdf=PropertyMap.get_uri),
               'comment': PropertyMap(RDFS.comment),
-              'tags':    PropertyMap(BSML.tag, functional=False),
+              'tags':    PropertyMap(BSML.tag, multiple=True),
             }
 
   def __init__(self, uri, about=None, comment=None, tags=None, timestamp=True, **kwds):

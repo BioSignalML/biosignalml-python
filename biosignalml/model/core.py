@@ -129,13 +129,13 @@ class AbstractObject(object):
     except Exception:
       return v1 == v2
 
-  def _assign(self, attr, value, functional=True):
+  def _assign(self, attr, value, multiple=False):
   #-----------------------------------------------
     if attr in self.__dict__:
       v = getattr(self, attr, None)
       if v in [None, '']:
         setattr(self, attr, value)
-      elif functional:
+      elif not multiple:
         pass
       elif isinstance(v, set):
         v.add(value)
@@ -145,7 +145,7 @@ class AbstractObject(object):
         setattr(self, attr, set([v, value]))
     elif attr is not None:
       v = self.metadata.get(attr)
-      if functional or v in [None, '']:
+      if not multiple or v in [None, '']:
         self.metadata[attr] = value
       elif isinstance(v, set):
         v.add(value)
