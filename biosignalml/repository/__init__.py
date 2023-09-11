@@ -314,8 +314,8 @@ class BSMLStore(GraphStore):
   def has_signal_in_recording(self, sig, rec):
   #-------------------------------------------
     """ Check a URI refers to a Signal in a given Recording. """
-    g, r = get_graph_and_recording_uri(rec)
-    return g is not none and self.has_signal(sig, g)
+    g, _ = self.get_graph_and_recording_uri(rec)
+    return g is not None and self.has_signal(sig, g)
 
   def recording_uris(self):
   #------------------------
