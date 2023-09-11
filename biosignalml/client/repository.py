@@ -102,7 +102,7 @@ class RemoteRepository(BSMLUpdateStore):
   @staticmethod
   def _get_token_file():
   #---------------------
-    path = os.getenv('HOME') + '/.bsml'
+    path = os.getenv('HOME', '') + '/.bsml'
     try: os.makedirs(path)
     except OSError: pass
     try:
