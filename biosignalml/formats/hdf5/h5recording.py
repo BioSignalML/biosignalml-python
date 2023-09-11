@@ -457,6 +457,9 @@ class H5Recording(object):
     """
     ## Not if readonly...
 
+    if self._h5 is None:
+      return None
+
     if not self._iterable(uri) and not self._iterable(units):
       if self._h5['uris'].attrs.get(uri):
         raise KeyError("A signal already has URI '{}'".format(uri))
@@ -555,6 +558,9 @@ class H5Recording(object):
     """
     ## Not if readonly...
 
+    if self._h5 is None:
+      return None
+
     if self._h5['uris'].attrs.get(uri):
       raise KeyError("A clock already has URI '{}'".format(uri))
 
@@ -606,7 +612,9 @@ class H5Recording(object):
     """
     ## Not if readonly...
 
-    if len(data) == 0: return
+    if self._h5 is None or len(data) == 0:
+      return
+
     if self._iterable(uri):
       sig = self.get_signal(uri[0])
       if sig is None or list(sig.dataset.attrs['uri']) != [u for u in uri]:
@@ -674,9 +682,10 @@ class H5Recording(object):
     :param name: The name of the dataset.
     :return: A :class:`h5py.Dataset`.
     """
-    obj = self._h5.get(name)
-    if isinstance(obj, h5py.Dataset): return obj
-
+    if (self._h5 is not None
+     and (obj := self._h5.get(name)) is not None
+     and isinstance(obj, h5py.Dataset)):
+      return obj
 
   def get_dataset(self, uri):
   #--------------------------
@@ -690,9 +699,9 @@ class H5Recording(object):
     If the dataset is compound it will have several URI's, one for each
     constituent signal.
     """
-    ref = self._h5['uris'].attrs.get(uri)
-    if ref: return self._h5[ref]
-
+    if (self._h5 is not None
+     and (ref := self._h5['uris'].attrs.get(uri)) is not None):
+      return self._h5[ref]
 
   def get_clock(self, uri):
   #------------------------
@@ -739,6 +748,9 @@ class H5Recording(object):
 
     :rtype: list of :class:`H5Signal`
     """
+    if self._h5 is None:
+      return []
+
     uris = []
     for n in sorted(list(self._h5.get('/recording/signal'))):
       sig = self.get_dataset_by_name('/recording/signal/{}'.format(n))
@@ -758,6 +770,9 @@ class H5Recording(object):
 
     :rtype: list of :class:`H5Clock`
     """
+    if self._h5 is None:
+      return []
+
     uris = []
     for n in sorted(list(self._h5.get('/recording/clock'))):
       clk = self.get_dataset_by_name('/recording/clock/{}'.format(n))
@@ -780,6 +795,9 @@ class H5Recording(object):
     """
 
     ## Not if readonly...
+
+    if self._h5 is None:
+      return
 
     if self._h5.get('/metadata'): del self._h5['/metadata']
     md = self._h5.create_dataset('/metadata',
