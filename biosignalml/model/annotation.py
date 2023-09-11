@@ -65,6 +65,8 @@ class Annotation(AbstractObject):
               'tags':    PropertyMap(BSML.tag, multiple=True),
             }
 
+  about: Segment
+
   def __init__(self, uri, about=None, comment=None, tags=None, timestamp=True, **kwds):
   #------------------------------------------------------------------------------------
     created = kwds.pop('created', utils.utctime()) if timestamp else None
