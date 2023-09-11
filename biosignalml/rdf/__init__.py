@@ -295,7 +295,7 @@ class Graph(rdflib.Graph):
     '''
     Add statements to the graph.
 
-    :param statements: A sequence of :class:`Statement`\s to add.
+    :param statements: A sequence of :class:``Statement``\\s to add.
     :type statements: iterator
     '''
     for s in statements: self.add(s)
@@ -315,10 +315,10 @@ class Graph(rdflib.Graph):
     '''
     Test if a statement is in the graph.
 
-    :param statement: The statement to check. Some or all of the `subject`,
-      `predicate` or `object` attributes can be `None`, meaning they match any value.
+    :param statement: The statement to check. Some or all of the ``subject``,
+      ``predicate`` or ``object`` attributes can be ``None``, meaning they match any value.
     :type statement: :class:`Statement`
-    :return: True if the graph contains `statement`.
+    :return: True if the graph contains ``statement``.
     :rtype: bool
     '''
     return statement in self
@@ -335,24 +335,24 @@ class Graph(rdflib.Graph):
     '''
     Get all matching statements in the graph.
 
-    :param statement: The statement to find. Some or all of the `subject`,
-      `predicate` or `object` attributes can be `None`, meaning they match any value.
+    :param statement: The statement to find. Some or all of the ``subject``,
+      ``predicate`` or ``object`` attributes can be ``None``, meaning they match any value.
     :type statement: :class:`Statement`
-    :return: A sequence of :class:`Statement`\s.
+    :return: A sequence of :class:``Statement``\\s.
     '''
     for s in self.triples(statement): yield Statement(*s)
 
   def get_object(self, s, p):
   #--------------------------
     '''
-    Get the object of a (`subject`, `predicate`) pair. One or both of `subject`
-    and `predicate` may be `None`, meaning they match any value.
+    Get the object of a (``subject``, ``predicate``) pair. One or both of ``subject``
+    and ``predicate`` may be ``None``, meaning they match any value.
 
-    :param s: The `subject` of the statement.
-    :param p: The `predicate` of the statement.
-    :return: The `object` node if the statement (`subject`, `predicate`, `object`) is
-      in the graph, otherwise `None`.
-    :rtype: :class:`Node`
+    :param s: The ``subject`` of the statement.
+    :param p: The ``predicate`` of the statement.
+    :return: The ``object`` node if the statement (``subject``, ``predicate``, ``object``) is
+      in the graph, otherwise ``None``.
+    :rtype: :class:``Node``
     '''
     return tuple(self.get_objects(s, p))[0]
 
@@ -360,7 +360,7 @@ class Graph(rdflib.Graph):
   #----------------------------
     '''
     Get the object of a (`subject`, `predicate`) pair as a string if it is a
-    :class:`Literal`. One or both of `subject` and `predicate` may be `None`,
+    :class:`Literal`. One or both of `subject` and `predicate` may be ``None``,
     meaning they match any value.
 
     :param s: The `subject` of the statement to lookup.
@@ -412,8 +412,8 @@ class Graph(rdflib.Graph):
 
     :param s: The `subject` of the statement to lookup.
     :param p: The `predicate` of the statement to lookup.
-    :return: An iterator yielding a sequence of strings and non-Literal :class:`Node`\s
-       for `object`\s with (`subject`, `predicate`, `object`) statements in the graph.
+    :return: An iterator yielding a sequence of strings and non-Literal :class:``Node``s
+       for ``object``s with (`subject`, `predicate`, `object`) statements in the graph.
     :rtype: iterator
     '''
     for v in self.get_objects(s, p): yield v.as_string()
