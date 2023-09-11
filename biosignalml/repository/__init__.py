@@ -117,11 +117,11 @@ class RecordingGraph(rdf.Graph):
 
     :rtype: list of bsml:Signal URIs
     """
-              'select distinct ?s where {',
-              '  ?s a bsml:Signal ; bsml:recording <%s>' % self._rec_uri,
-              '  }',
-              'order by ?s',
     sparql = [f'PREFIX bsml: <{BSML.BASE}>',
+               'select distinct ?s where {',
+              f'  ?s a bsml:Signal ; bsml:recording <{self._rec_uri}>',
+               '  }',
+               'order by ?s',
              ]
     return [ r[0] for r in self.query('\n'.join(sparql)) ]
 
@@ -145,9 +145,9 @@ class RecordingGraph(rdf.Graph):
     :param timetype: The class of temporal entity to find. Optional.
     :rtype: list of bsml:Event URIs
     """
-              'select distinct ?e where {',
-              '  ?e a bsml:Event ; bsml:recording <%s>' % self._rec_uri,
     sparql = [f'PREFIX bsml: <{BSML.BASE}>',
+               'select distinct ?e where {',
+              f'  ?e a bsml:Event ; bsml:recording <{self._rec_uri}>',
              ]
     if eventtype is not None:
       sparql.append('. ?e bsml:eventType <%s>' % eventtype)
@@ -165,13 +165,13 @@ class RecordingGraph(rdf.Graph):
     :param counts: Optionally return a count of each type of event.
     :rtype: list of bsml:Event URIs if no counts, otherwise tuple(URI, count).
     """
-              'select ?et (count(?et) as ?c) where {',
     sparql = [f'PREFIX bsml: <{BSML.BASE}>',
+               'select ?et (count(?et) as ?c) where {',
 #              'select distinct ?et where {',
-              '  ?e bsml:recording <%s>' % self._rec_uri,
-              '. ?e bsml:eventType ?et',
-              '}',
-              'group by ?et',
+              f'  ?e bsml:recording <{self._rec_uri}>',
+               '. ?e bsml:eventType ?et',
+               '}',
+               'group by ?et',
              ]
     results = self.query('\n'.join(sparql))
     if counts: x = [ r for r in results ]

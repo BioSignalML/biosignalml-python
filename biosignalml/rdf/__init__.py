@@ -461,7 +461,7 @@ class Graph(rdflib.Graph):
     try:
       return self.QueryResult(super(Graph, self).query(sparql))
     except Exception as msg:
-      logging.error('Graph query: %s', msg)
+      logging.error(f'Graph query: `{sparql}`: {msg}')
     return [ ]
 
 #===============================================================================

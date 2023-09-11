@@ -133,11 +133,11 @@ class RemoteRepository(BSMLUpdateStore):
     for l in f:
       if uri == l.split()[0]:
         existing = True
-        g.write('%s %s\n' % (uri, access))
+        g.write(f'{uri} {access}\n')
       else:
         g.write(l)
     if not existing:
-      g.write('%s %s\n' % (uri, access))
+      g.write(f'{uri} {access}\n')
     g.flush()
     f.seek(0)
     f.truncate()
@@ -217,7 +217,7 @@ class RemoteRepository(BSMLUpdateStore):
       http = httplib2.Http(timeout=20)
       response, content = http.request(endpoint, body=metadata, method=method, headers=headers)
     except socket.error as msg:
-      raise IOError("Cannot connect to repository: %s" % endpoint)
+      raise IOError(f"Cannot connect to repository: {endpoint}: {msg}")
     if   response.status == 401: raise IOError("Unauthorised")
     elif response.status not in [200, 201]: raise IOError("%s: %s" % (response.status, content))
     return response.get('location')
