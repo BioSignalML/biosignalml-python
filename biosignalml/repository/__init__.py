@@ -369,12 +369,9 @@ class BSMLStore(GraphStore):
 
       rec = None
       if ((graph := self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)) is not None
-##    graph = self.get_graph(graph_uri, BSML.Recording)
-
       and (rec := recording_class.create_from_graph(rec_uri, graph, signals=False, **kwds)) is not None):
 
-      ## Why not add signals in Recording class creation??
-
+        ## Why not add signals in Recording class creation??
         if signals:
           for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
               params={'rec': rec.uri}, prefixes={'bsml': BSML.BASE},

@@ -195,7 +195,7 @@ class RemoteRepository(BSMLUpdateStore):
     body = {'action': 'Validate', 'token': token}
     remote = httplib2.Http()
     try:
-      response, access = remote.request(uri + '/frontend/login',
+      response, _ = remote.request(uri + '/frontend/login',
         method='POST', body=urllib.parse.urlencode(body),
         headers={'Content-type': 'application/x-www-form-urlencoded'})
     except Exception as msg:

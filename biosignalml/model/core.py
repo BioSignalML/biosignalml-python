@@ -307,8 +307,10 @@ class AbstractObject(object):
       for stmt in graph.get_statements(rdf.Statement(self.uri, None, None)):
         for metaclass in [getattr(cls, 'metaclass', None)
                             for cls in self.__class__.__mro__ if cls != object]:
-          s, attr, v, fn = self.rdfmap.metadata(metaclass, stmt)
-          #logging.debug("%s: %s = '%s'", self.uri, attr, v)  ###
+          _, attr, v, fn = self.rdfmap.metadata(metaclass, stmt)
+
+          logging.debug("%s: %s = '%s'", self.uri, attr, v)  ###
+
           if attr is not None:
             self._assign(attr, v, fn)
             break
