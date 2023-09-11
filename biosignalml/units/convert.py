@@ -23,7 +23,6 @@ import logging
 #===============================================================================
 
 import pint
-import pint.unit
 from rdflib import Namespace
 
 #===============================================================================
@@ -53,7 +52,6 @@ BASE_UNITS = { 'Metre':         '[length]',
                'Kelvin':        '[temperature]',
                'Dimensionless': '[dimensionless]',
              }
-
 
 def _strip_prefix(uri):
 #======================
@@ -96,8 +94,8 @@ class UnitStore(object):
     self._cache = { }
     self._registry = pint.UnitRegistry(None)   # Start with an empty registry
     for u, t in BASE_UNITS.items():        # and add the base units.
-      self._registry.define(pint.unit.UnitDefinition(u, None, (), pint.unit.ScaleConverter(1),
-                                                     reference=pint.unit.UnitsContainer({t: 1.0}),
+      self._registry.define(pint.UnitDefinition(u, None, (), pint.ScaleConverter(1),
+                                                     reference=pint.UnitsContainer({t: 1.0}),
                                                      is_base=True))
 
   def contains(self, uri):
@@ -136,7 +134,7 @@ class UnitStore(object):
       derivation = self.get_derivation(uri)
       if derivation is None:
         if name not in BASE_UNITS:
-          self._registry.define(pint.unit.UnitDefinition(name, None, (), pint.unit.ScaleConverter(1),  # Dimensionless
+          self._registry.define(pint.UnitDefinition(name, None, (), pint.ScaleConverter(1),  # Dimensionless
                                                          reference=self._registry.Quantity(None, None)))
         unit = self._registry[name]
       else:
@@ -152,7 +150,7 @@ class UnitStore(object):
         elif kind == str(UOME_CORE.QuotientExpression):
           unit = self.get_unit(derivation.unit1) / self.get_unit(derivation.unit2)
         elif kind == str(UOME_CORE.EquivalenzExpression):
-          self._registry.define(pint.unit.UnitDefinition(name, None, (), pint.unit.ScaleConverter(1),
+          self._registry.define(pint.UnitDefinition(name, None, (), pint.ScaleConverter(1),
                                                          reference=self.get_unit(derivation.unit1)))
           unit = self._registry[name]
         else:
