@@ -205,8 +205,8 @@ class RemoteRepository(BSMLUpdateStore):
   def get_metadata(self, uri):
   #---------------------------
     try:
-      if uri: graph.uri = rdf.Uri(uri)
       graph = rdf.Graph.create_from_resource(self._md_uri + str(uri), rdf.Format.TURTLE)
+###      if uri: graph.uri = rdf.Uri(uri)
       return graph
     except Exception as msg:
       raise IOError("Cannot get RDF for '%s' (%s)" % (uri, msg))
