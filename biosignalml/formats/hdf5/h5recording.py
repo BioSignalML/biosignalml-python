@@ -148,10 +148,10 @@ import numpy as np
 __all__ = [ 'H5Clock', 'H5Signal', 'H5Recording', 'IDENTIFIER' ]
 
 
-MAJOR      = b'1'
-MINOR      = b'0'
-VERSION    = MAJOR + b'.' + MINOR
-IDENTIFIER = b'BSML ' + VERSION
+MAJOR      = '1'
+MINOR      = '0'
+VERSION    = MAJOR + '.' + MINOR
+IDENTIFIER = 'BSML ' + VERSION
 
 
 COMPRESSION = 'szip'                          #: Szip gives best performance
@@ -188,7 +188,7 @@ class H5Clock(object):
   def uri(self):
   #-------------
     """The URI of the clock."""
-    return self.dataset.attrs['uri'].decode('utf-8')
+    return self.dataset.attrs['uri']
 
   @property
   def times(self):
@@ -208,7 +208,7 @@ class H5Clock(object):
   def units(self):
   #---------------
     """The physical units of the clock."""
-    return self.dataset.attrs.get('units').decode('utf-8')
+    return self.dataset.attrs.get('units')
 
   def __len__(self):
   #-----------------
@@ -261,14 +261,14 @@ class H5Signal(object):
   #-------------
     """The URI of the signal."""
     uri = self.dataset.attrs['uri']
-    return uri.decode('utf-8') if self.index is None else uri[self.index].decode('utf-8')
+    return uri if self.index is None else uri[self.index]
 
   @property
   def units(self):
   #---------------
     """The physical units of the signal's data."""
     units = self.dataset.attrs['units']
-    return units.decode('utf-8') if self.index is None else units[self.index].decode('utf-8')
+    return units if self.index is None else units[self.index]
 
   @property
   def rate(self):
@@ -292,7 +292,7 @@ class H5Signal(object):
     """The units signal timing is measured in."""
     attrs = self.dataset.attrs
     if attrs.get('clock'):
-      return self.dataset.file[attrs['clock']].attrs.get('units').decode('utf-8')
+      return self.dataset.file[attrs['clock']].attrs.get('units')
     else:
       return attrs.get('timeunits')
 
@@ -373,12 +373,12 @@ class H5Recording(object):
     try:
       v = h5.attrs['version']
       if v[0:5] != IDENTIFIER[0:5]: raise TypeError("Not a valid BSML file")
-      (m, n) = tuple([int(i) for i in v[5:].split(b'.')])
-      if m > int(MAJOR):
+      (major, _) = tuple([int(i) for i in v[5:].split('.')])
+      if major > int(MAJOR):
         raise ValueError("File '{}' not compatible with version {}".format(fname, VERSION))
     except Exception:
       raise ValueError("Invalid file format")
-    uri = h5['recording'].attrs['uri'].decode('utf-8')
+    uri = h5['recording'].attrs['uri']
     if not (h5.get('/uris')
         and h5.get('/recording/signal')
         and h5[h5['uris'].attrs.get(uri)] == h5[h5['recording'].ref]):
@@ -404,7 +404,7 @@ class H5Recording(object):
     h5.create_group('uris')
     h5.create_group('recording')
     h5.create_group('recording/signal')
-    h5['recording'].attrs['uri'] = uri.encode('utf-8')
+    h5['recording'].attrs['uri'] = uri
     h5['uris'].attrs[uri] = h5['recording'].ref
     return cls(uri, h5)
 
@@ -519,12 +519,12 @@ class H5Recording(object):
       raise RuntimeError("Cannot create signal dataset ({})".format(msg))
 
     if nsignals == 1:
-      dset.attrs['uri'] = uri.encode('utf-8')
-      if units is not None: dset.attrs['units'] = units.encode('utf-8')
+      dset.attrs['uri'] = uri
+      if units is not None: dset.attrs['units'] = units
       self._h5['uris'].attrs[uri] = dset.ref
     else:
-      dset.attrs.create('uri',   [u.encode('utf-8') for u in uri],   dtype=DTYPE_STRING)
-      dset.attrs.create('units', [u.encode('utf-8') for u in units], dtype=DTYPE_STRING)
+      dset.attrs.create('uri',   [u for u in uri],   dtype=DTYPE_STRING)
+      dset.attrs.create('units', [u for u in units], dtype=DTYPE_STRING)
       for u in uri: self._h5['uris'].attrs[u] = dset.ref
     if gain: dset.attrs['gain'] = gain
     if offset: dset.attrs['offset'] = offset
@@ -581,8 +581,8 @@ class H5Recording(object):
     except Exception as msg:
       raise RuntimeError("Cannot create clock dataset ({})".format(msg))
 
-    dset.attrs['uri'] = uri.encode('utf-8')
-    if units: dset.attrs['units'] = units.encode('utf-8')
+    dset.attrs['uri'] = uri
+    if units: dset.attrs['units'] = units
     if period and rate: raise RuntimeError("Cannot specify both 'rate' and 'period' for a clock")
     if rate: dset.attrs['rate'] = float(rate)
     if period: dset.attrs['period'] = float(period)
@@ -609,7 +609,7 @@ class H5Recording(object):
     if len(data) == 0: return
     if self._iterable(uri):
       sig = self.get_signal(uri[0])
-      if sig is None or list(sig.dataset.attrs['uri']) != [u.encode('utf-8') for u in uri]:
+      if sig is None or list(sig.dataset.attrs['uri']) != [u for u in uri]:
          raise KeyError("Unknown signal set '{}'".format(uri))
       dset = sig.dataset
       nsignals = len(uri)
@@ -725,7 +725,7 @@ class H5Recording(object):
       uris = dset.attrs['uri']
       if isinstance(uris, np.ndarray):
         try:
-          return H5Signal(dset, [u.decode('utf-8') for u in uris].index(uri))
+          return H5Signal(dset, list(uris).index(uri))
         except ValueError:
           pass
       else:
@@ -746,9 +746,9 @@ class H5Recording(object):
         uri = sig.attrs.get('uri')
         if uri is None: pass
         elif isinstance(uri, np.ndarray):
-          uris.extend([u.decode('utf-8') for u in uri])
+          uris.extend(uri)
         else:
-          uris.append(uri.decode('utf-8'))
+          uris.append(uri)
     return [ self.get_signal(u) for u in uris ]
 
   def clocks(self):
@@ -764,7 +764,7 @@ class H5Recording(object):
       if clk:
         uri = clk.attrs.get('uri')
         if uri is None: pass
-        else: uris.append(uri.decode('utf-8'))
+        else: uris.append(uri)
     return [ self.get_clock(u) for u in uris ]
 
   def store_metadata(self, metadata, mimetype):
@@ -783,8 +783,8 @@ class H5Recording(object):
 
     if self._h5.get('/metadata'): del self._h5['/metadata']
     md = self._h5.create_dataset('/metadata',
-                                 data=metadata if isinstance(metadata, bytes) else metadata.encode('utf-8'))
-    md.attrs['mimetype'] = mimetype.encode('utf-8')
+                                 data=metadata if isinstance(metadata, bytes) else metadata)
+    md.attrs['mimetype'] = mimetype
     ## Error if new_metadata???
     ## Store as new_metadata then delete metadata and rename
 
@@ -797,9 +797,9 @@ class H5Recording(object):
              (None, None) if the recording has no '/metadata' dataset.
     :rtype: tuple(str, str)
     """
-    if self._h5.get('/metadata'):
+    if self._h5 is not None and self._h5.get('/metadata'):
       md = self._h5['/metadata']
-      return (md[()].decode('utf-8'), md.attrs.get('mimetype').decode('utf-8'))
+      return (md[()], md.attrs.get('mimetype'))
     else:
       return (None, None)
     ## Error if no metadata???

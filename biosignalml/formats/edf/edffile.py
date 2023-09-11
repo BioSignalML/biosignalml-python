@@ -400,7 +400,7 @@ class EDFFile(object):
       for n in self.annotation_signals:
         # An 'EDF Annotations' signal may contain multiple TALs.
         self._file.seek(self._hdrsize + recno*self._recsize + self._offsets[n])
-        data = self._file.read(2*self.nsamples[n]).decode('utf-8') # Annotation is Unicode string   
+        data = self._file.read(2*self.nsamples[n]) # Annotation is Unicode string
         if data[-1] != '\x00': self._error("TAL doesn't end with NUL")
         else:
           for TAL in data.rstrip('\x00').split('\x00'):
