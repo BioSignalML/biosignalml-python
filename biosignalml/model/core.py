@@ -153,7 +153,7 @@ class AbstractObject(object):
         v.add(value)
       elif isinstance(v, list):
         v.append(value)
-      elif not self._equal_values(v != value):
+      elif not self._equal_values(v, value):
         self.metadata[attr] = set([v, value])
 
   def initialise(self, **kwds):
