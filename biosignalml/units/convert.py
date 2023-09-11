@@ -18,16 +18,21 @@
 #
 ######################################################
 
+import logging
+
+#===============================================================================
+
 import pint
 import pint.unit
 
-import logging
+#===============================================================================
 
 from ..rdf import sparqlstore
 from ..rdf import RDF, UOME
 
 __all__ = [ 'UnitConverter' ]
 
+#===============================================================================
 
 UOME_CORE = NS('http://www.sbpax.org/uome/core.owl#')
 
@@ -55,6 +60,7 @@ def _strip_prefix(uri):
     if uri.startswith(p): return(uri[len(p):])
   raise ValueError("'%s' doesn't have a standard unit prefix" % uri)
 
+#===============================================================================
 
 class UnitTerm(object):
 #======================
@@ -153,6 +159,7 @@ class UnitStore(object):
       self._cache[uri] = unit
     return unit
 
+#===============================================================================
 
 class UnitConverter(object):
 #===========================
@@ -175,6 +182,7 @@ class UnitConverter(object):
     else:
       raise TypeError("Cannot convert between %s and %s" % (from_units, to_units))
 
+#===============================================================================
 
 if __name__ == '__main__':
 #=========================
@@ -228,7 +236,6 @@ if __name__ == '__main__':
 
 """
 
-
 Radian = [] = rad
 _UNIT_REGISTRY.add_unit('Radian',   u.Quantity(None, None))
 
@@ -251,3 +258,4 @@ count = []
 
 
 """
+#===============================================================================

@@ -18,20 +18,24 @@
 #
 ######################################################
 
-import os
-import math
 from datetime import datetime, timedelta
+import logging
+import os
+
+#===============================================================================
 
 from isodate  import isoduration
 import dateutil.parser
 from dateutil.tz import tzutc
 
+#===============================================================================
 
 __all__ = [ 'datetime_to_isoformat', 'isoformat_to_datetime', 'seconds_to_isoduration',
             'isoduration_to_seconds', 'utctime', 'utctime_as_string', 'expired', 'chop',
             'trimdecimal', 'maketime', 'nbspescape', 'xmlescape', 'xml', 'num',
             'file_uri', 'hexdump', 'unescape' ]
 
+#===============================================================================
 
 def datetime_to_isoformat(dt):
 #=============================
@@ -123,6 +127,7 @@ def expired(when):
   """
   return (when and utctime() > when)
 
+#===============================================================================
 
 def chop(s, n):
 #=============
@@ -141,6 +146,7 @@ def maketime(secs):
 #=================
   return trimdecimal(timedelta(seconds=secs))
 
+#===============================================================================
 
 def nbspescape(s):
 #================
@@ -180,11 +186,13 @@ def num(n):
     except ValueError: n = 0
   return n
 
+#===============================================================================
 
 def file_uri(f):
 #===============
   return f if f[0:5] in ['file:', 'http:'] else 'file://' + os.path.abspath(f)
 
+#===============================================================================
 
 def hexdump(s, prompt='', offset=0):
 #==================================
@@ -220,6 +228,8 @@ def hexdump(s, prompt='', offset=0):
     if l > 0: h.append('\n' + offset*' ')
   return ''.join(h)
 
+#===============================================================================
+
 #############################################################
 ##
 ## From http://effbot.org/zone/re-sub.htm#unescape-html
@@ -252,6 +262,7 @@ def unescape(text):
 ##
 #############################################################
 
+#===============================================================================
 
 
 if __name__ == '__main__':
@@ -259,3 +270,5 @@ if __name__ == '__main__':
   print(utctime())
   print(utctime_as_string())
   print(hexdump('123\x01\x41B1234567890abcdefghijklmnopqrstuvwxyz'))
+
+#===============================================================================

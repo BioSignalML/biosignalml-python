@@ -33,6 +33,7 @@ from .segment  import Segment
 
 __all__ = [ 'Signal' ]
 
+#===============================================================================
 
 class Signal(AbstractObject):
 #============================
@@ -132,3 +133,5 @@ class Signal(AbstractObject):
     """
     return self.recording.add_resource(
              Segment(uri, self, self.recording.interval(at, duration, end), **kwds))
+
+#===============================================================================

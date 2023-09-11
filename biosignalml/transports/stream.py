@@ -56,6 +56,8 @@ are specific to each block type, and are described with the :class:`BlockType` c
 
 VERSION = 1    #: Initial version of Block Stream protocol.
 
+#===============================================================================
+
 import logging
 import hashlib
 import queue
@@ -66,13 +68,14 @@ except ImportError:
 
 import numpy as np
 
+#===============================================================================
 
 __all__ = [ 'BlockParser', 'BlockStream', 'BlockType', 'Checksum', 'Error',
             'ErrorBlock', 'SignalData', 'SignalDataBlock',
             'SignalDataStream', 'StreamBlock', 'TestBlock', 'StreamException',
             'VERSION' ]
 
-
+#===============================================================================
 
 class BlockType(object):
 #=======================
@@ -323,6 +326,7 @@ class StreamBlock(object):
     b.extend('\n')
     return b
 
+#===============================================================================
 
 class ErrorBlock(StreamBlock):
 #=============================
@@ -336,6 +340,7 @@ class ErrorBlock(StreamBlock):
     header['type'] = errblock.type
     StreamBlock.__init__(self, 0, BlockType.ERROR, header, bytearray(msg))
 
+#===============================================================================
 
 class SignalDataBlock(StreamBlock):
 #==================================
@@ -385,6 +390,7 @@ class SignalDataBlock(StreamBlock):
         data = np.reshape(np.frombuffer(self.content[datastart:], dtype=dt), (count, dims))
     return SignalData(uri, start, data, rate=rate, clock=clock, dtype=dtype, ctype=ctype)
 
+#===============================================================================
 
 class BlockParser(object):
 #=========================
@@ -584,6 +590,7 @@ class BlockParser(object):
         self._receiver(StreamBlock(0, BlockType.ERROR, getattr(self, '_header', None), bytearray(Error.text(self._error))))
         self._state = BlockParser._RESET
 
+#===============================================================================
 
 class SignalData(object):
 #========================
@@ -659,6 +666,7 @@ class SignalData(object):
     content.extend(self._convert(self.data, self.dtype))
     return SignalDataBlock(0, header, content)
 
+#===============================================================================
 
 class BlockStream(object):
 #=========================
@@ -689,6 +697,7 @@ class BlockStream(object):
         raise StreamException(block.content)
       yield block
 
+#===============================================================================
 
 class SignalDataStream(BlockStream):
 #===================================
@@ -743,6 +752,7 @@ class SignalDataStream(BlockStream):
     if units is not None:    header['units'] = str(units)
     self._request = StreamBlock(0, BlockType.DATA_REQ, header, '')
 
+#===============================================================================
 
 class TestBlock(StreamBlock):
 #============================
@@ -752,6 +762,7 @@ class TestBlock(StreamBlock):
     logging.debug("TEST: %s %f - %f", uri, start, duration)
     return None
 
+#===============================================================================
 
 if __name__ == '__main__':
 #-------------------------
@@ -765,10 +776,11 @@ if __name__ == '__main__':
   print(sd.streamblock())
   print(sd.streamblock().signaldata())
 
-
   print(nd)
   testQ = queue.Queue()
   bp = BlockParser(testQ.put, Checksum.STRICT)
   bp.process(nd.streamblock().bytes(Checksum.STRICT))
 
   print(testQ.get(True, 10).signaldata())
+
+#===============================================================================

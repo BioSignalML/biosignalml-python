@@ -78,6 +78,8 @@ import logging
 import urllib.parse
 import numpy as np
 
+#===============================================================================
+
 import biosignalml
 import biosignalml.rdf as rdf
 
@@ -89,11 +91,13 @@ from biosignalml.transports import WebStreamReader, WebStreamWriter, StreamExcep
 from biosignalml.transports.stream import BlockType, SignalData
 from biosignalml.repository import RecordingGraph
 
-from . import repository
+#===============================================================================
 
+from . import repository
 
 __all__ = [ 'Repository', 'Recording', 'Signal' ]
 
+#===============================================================================
 
 class Signal(BSMLSignal):
 #========================
@@ -148,6 +152,7 @@ class Signal(BSMLSignal):
     elif self.rate:
       return self._repository.put_data(str(self.uri), UniformTimeSeries(timeseries, self.rate), dtype=dtype)
 
+#===============================================================================
 
 class Recording(BSMLRecording):
 #==============================
@@ -193,7 +198,7 @@ class Recording(BSMLRecording):
     if metadata is None: metadata = self.metadata_as_string()
     self._repository.post_metadata(self.uri, metadata, format)
 
-
+#===============================================================================
 
 class Repository(repository.RemoteRepository):
 #=============================================
@@ -287,6 +292,7 @@ class Repository(repository.RemoteRepository):
     finally:
       if stream: stream.close()
 
+#===============================================================================
 
 if __name__ == "__main__":
 #=========================

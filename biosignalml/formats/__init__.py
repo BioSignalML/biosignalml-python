@@ -22,7 +22,7 @@
 Read and write physical Recordings and Signals.
 """
 
-import os
+#===============================================================================
 
 import biosignalml
 from biosignalml import BSML
@@ -31,6 +31,7 @@ import biosignalml.model.mapping as mapping
 
 __all__ = [ 'BSMLSignal', 'BSMLRecording', 'MIMETYPES' ]
 
+#===============================================================================
 
 def _not_implemented(instance, method):
 #======================================
@@ -39,6 +40,7 @@ def _not_implemented(instance, method):
   """
   raise NotImplementedError('%s.%s()' % (instance.__class__.__name__, method))
 
+#===============================================================================
 
 class BSMLSignal(biosignalml.Signal):
 #====================================
@@ -113,6 +115,7 @@ class BSMLSignal(biosignalml.Signal):
     """
     _not_implemented(self, 'time')
 
+#===============================================================================
 
 class BSMLRecording(biosignalml.Recording):
 #==========================================
@@ -181,6 +184,7 @@ class BSMLRecording(biosignalml.Recording):
     """
     pass
 
+#===============================================================================
 
 class MIMETYPES(object):
 #=======================
@@ -190,7 +194,7 @@ class MIMETYPES(object):
   RAW  = 'application/x-bsml+raw'
   WFDB = 'application/x-bsml+wfdb'
 
-
+#===============================================================================
 
 CLASSES = { }
 #============
@@ -220,3 +224,5 @@ except ImportError:
   pass
 
 ##from sdf  import SDFRecording
+
+#===============================================================================

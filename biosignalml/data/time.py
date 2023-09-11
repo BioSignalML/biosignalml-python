@@ -1,7 +1,7 @@
 '''
 RelativeTimeLine, Instant and Interval objects.
 '''
-######################################################
+################################################################################
 #
 #  BioSignalML Management in Python
 #
@@ -19,8 +19,7 @@ RelativeTimeLine, Instant and Interval objects.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-######################################################
-
+################################################################################
 
 from .. import model, rdf, utils
 from ..model import BSML
@@ -29,6 +28,7 @@ from ..rdf import RDF, RDFS, DCT, XSD, TL
 
 __all__ = [ 'Instant', 'Interval', 'RelativeTimeLine', 'TemporalEntity' ]
 
+#===============================================================================
 
 class RelativeTimeLine(model.core.AbstractObject):
 #=================================================
@@ -48,6 +48,7 @@ class RelativeTimeLine(model.core.AbstractObject):
     if duration in [0, None] and end is None: return self.instant(start)
     else:                                     return Interval(self.make_uri(), start, duration, self, end)
 
+#===============================================================================
 
 
 class TemporalEntity(model.core.AbstractObject):
@@ -88,6 +89,7 @@ class TemporalEntity(model.core.AbstractObject):
       self.graph = graph
     return self
 
+#===============================================================================
 
 class Interval(TemporalEntity):
 #==============================
@@ -137,6 +139,7 @@ class Interval(TemporalEntity):
   #-----------------
     return 'Interval: %g for %g' % (self.start, self.duration)
 
+#===============================================================================
 
 class Instant(TemporalEntity):
 #=============================
@@ -168,3 +171,5 @@ class Instant(TemporalEntity):
   def __str__(self):
   #-----------------
     return 'Instant: %g' % self.start
+
+#===============================================================================

@@ -290,6 +290,7 @@ class WFDBRecording(BSMLRecording):
         else:         yield [v[i] for i in range(*self._offsets[n])]
 
 
+#===============================================================================
 
 if __name__ == '__main__':
 #=========================

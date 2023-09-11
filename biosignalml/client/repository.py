@@ -23,9 +23,13 @@ import tempfile
 import socket
 import logging
 
+#===============================================================================
+
 import urllib.request, urllib.parse, urllib.error
 import httplib2
 httplib2.RETRIES = 1
+
+#===============================================================================
 
 import biosignalml.rdf as rdf
 from biosignalml.rdf.sparqlstore import SparqlUpdateStore
@@ -33,6 +37,7 @@ from biosignalml.repository import BSMLUpdateStore
 
 __all__ = [ 'RemoteSparqlStore', 'RemoteRepository' ]
 
+#===============================================================================
 
 class RemoteSparqlStore(SparqlUpdateStore):
 #==========================================
@@ -52,6 +57,7 @@ class RemoteSparqlStore(SparqlUpdateStore):
     if self._token is not None: headers['Cookie'] = 'access=%s' % self._token
     return self._request(endpoint, method, body, headers)
 
+#===============================================================================
 
 class RemoteRepository(BSMLUpdateStore):
 #=======================================
@@ -193,7 +199,6 @@ class RemoteRepository(BSMLUpdateStore):
       raise IOError(msg)
     return (response.status == 200)
 
-
   def get_metadata(self, uri):
   #---------------------------
     try:
@@ -240,3 +245,4 @@ if __name__ == "__main__":
 
   for d in repo.get_data(sig_uri):
     print(d)
+#===============================================================================

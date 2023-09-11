@@ -18,7 +18,6 @@
 #
 ######################################################
 
-
 import random
 import numpy as np
 import math
@@ -27,6 +26,7 @@ import logging
 
 __all__ = [ 'RateConverter', 'ConvertError' ]
 
+#===============================================================================
 
 SINC_BEST_QUALITY   = 0
 SINC_MEDIUM_QUALITY = 1
@@ -34,10 +34,12 @@ SINC_FASTEST        = 2
 ZERO_ORDER_HOLD     = 3
 LINEAR              = 4
 
+#===============================================================================
 
 class _SRC_STATE(C.Structure):
   pass
 
+#===============================================================================
 
 class _SRC_DATA(C.Structure):
   _fields_ = [ ('data_in',           C.POINTER(C.c_float)),
@@ -49,6 +51,8 @@ class _SRC_DATA(C.Structure):
                ('end_of_input',      C.c_int),
                ('src_ratio',         C.c_double),
              ]
+
+#===============================================================================
 
 try:
   _srclib = C.CDLL('libsamplerate.dylib')
@@ -82,11 +86,13 @@ src_delete.argtypes = [C.POINTER(_SRC_STATE)]
 
 MAX_OUTPUT_FRAMES = 50000       #: For each yielded data block
 
+#===============================================================================
 
 class ConvertError(Exception):
 #============================#
   pass
 
+#===============================================================================
 
 class RateConverter(object):
 #===========================
@@ -139,7 +145,7 @@ class RateConverter(object):
       if outframes > 0:
         yield output[:self._channels*outframes].reshape(outshape)
 
-
+#===============================================================================
 
 if __name__ == "__main__":
 #========================#
@@ -156,3 +162,5 @@ if __name__ == "__main__":
     print(len(o))
 
   del resampler
+
+#===============================================================================

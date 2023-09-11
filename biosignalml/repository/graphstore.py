@@ -21,6 +21,8 @@
 import logging
 import json
 
+#===============================================================================
+
 from .. import BSML
 
 from .. import rdf, utils
@@ -30,9 +32,11 @@ from ..rdf import RDF, DCT, PRV, XSD
 
 __all__ = [ 'GraphStore', 'GraphUpdate' ]
 
+#===============================================================================
 
 PROVENANCE_PATH = '/provenance'     #: Relative to a graph store's URI
 
+#===============================================================================
 
 class DataItem(model.core.AbstractObject):
 #=========================================
@@ -66,6 +70,7 @@ class DataCreation(model.core.AbstractObject):
               'completed':   PropertyMap(PRV.completedAt, XSD.dateTime,
                                                  utils.datetime_to_isoformat,
                                                  utils.isoformat_to_datetime) }
+#===============================================================================
 
 class GraphStore(object):
 #========================
@@ -321,6 +326,7 @@ class GraphStore(object):
     return Closure(rdftext, self.uri, rdf.Format.RDFXML, self).serialise(format, base = self.uri + '/')  # Need '/' for Tabulator...
     """
 
+#===============================================================================
 
 class SparqlHead(object):
 #========================
@@ -339,6 +345,7 @@ class SparqlHead(object):
   #-----------------
     return SparqlHead.head.parseString(sparql)
 
+#===============================================================================
 
 class QueryResults(object):
 #==========================
@@ -393,7 +400,7 @@ class QueryResults(object):
     else:
       yield self._results
 
-
+#===============================================================================
 
 class GraphUpdate(GraphStore):
 #=============================
@@ -467,3 +474,5 @@ class GraphUpdate(GraphStore):
           self._sparql_store.update_triples(graph_uri,
             [("<%s>" % str(s.uri), "<%s>" % str(m.property), v)])
           return
+
+#===============================================================================

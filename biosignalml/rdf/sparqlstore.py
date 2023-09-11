@@ -23,14 +23,19 @@ import json
 import socket
 import logging
 
+#===============================================================================
+
 import httplib2
 httplib2.RETRIES = 1
+
+#===============================================================================
 
 import biosignalml.rdf as rdf
 
 __all__ = [ 'get_result_value', 'SparqlStore', 'SparqlUpdateStore',
             'FourStore', 'Virtuoso', 'StoreException' ]
 
+#===============================================================================
 
 def get_result_value(result, column):
 #====================================
@@ -61,11 +66,13 @@ def get_result_value(result, column):
     ## Extend...
   return value
 
+#===============================================================================
 
 class StoreException(Exception):
 #===============================
   pass
 
+#===============================================================================
 
 class SparqlStore(object):
 #=========================
@@ -201,6 +208,7 @@ class SparqlStore(object):
       "{ <%(uri)s> ?op ?o . optional { ?o a ?ot } } union { ?s ?sp <%(uri)s> . optional { ?s a ?st } }",
       params=dict(uri=uri), graph=graph, format=format, prefixes=prefixes)
 
+#===============================================================================
 
 class SparqlUpdateStore(SparqlStore):
 #====================================
@@ -227,7 +235,6 @@ class SparqlUpdateStore(SparqlStore):
     except Exception as msg:
       logging.debug('SPARQL: %s, %s', msg, self.map_prefixes(prefixes) + prefixes)
       raise
-
 
   def insert_triples(self, graph, triples, prefixes=None):
   #-------------------------------------------------------
@@ -278,7 +285,7 @@ class SparqlUpdateStore(SparqlStore):
     if len(triples) == 0: return
     last = (None, None)
     ##logging.debug('UPDATE: %s', triples)
-    for s, p, o in sorted(triples):
+    for s, p, _ in sorted(triples):
       if (s, p) != last:
 #        sparql = ('delete { graph <%(g)s> { %(s)s %(p)s ?o } } where { %(s)s %(p)s ?o }'
         sparql = ('delete from graph <%(g)s> { %(s)s %(p)s ?o } from <%(g)s> where { %(s)s %(p)s ?o }'
@@ -307,6 +314,7 @@ class SparqlUpdateStore(SparqlStore):
   #-----------------------------
     self.http_request(self.ENDPOINTS[1] + "?%s=%s" % (self.GRAPH_PARAMETER, graph), 'DELETE')
 
+#===============================================================================
 
 class Virtuoso(SparqlUpdateStore):
 #=================================
@@ -350,6 +358,7 @@ class Virtuoso(SparqlUpdateStore):
                       body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
 
 
+#===============================================================================
 
 class FourStore(SparqlUpdateStore):
 #==================================
@@ -373,7 +382,7 @@ class FourStore(SparqlUpdateStore):
         dct:description text:index text:stem .
         cnt:chars       text:index text:stem .""")
 
-
+#===============================================================================
 
 if __name__ == '__main__':
 #=========================
@@ -418,3 +427,5 @@ if __name__ == '__main__':
   print("\nDELETE")
   store.delete_graph(graph)
   query(store, graph)
+
+#===============================================================================

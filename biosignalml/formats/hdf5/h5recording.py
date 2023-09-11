@@ -133,11 +133,17 @@ matrix 'time' values,
 
 """
 
+#===============================================================================
+
 from functools import reduce
 import urllib.request, urllib.parse, urllib.error
 
+#===============================================================================
+
 import h5py
 import numpy as np
+
+#===============================================================================
 
 __all__ = [ 'H5Clock', 'H5Signal', 'H5Recording', 'IDENTIFIER' ]
 
@@ -153,6 +159,7 @@ COMPRESSION = 'gzip'                          #: Szip gives best performance
 
 DTYPE_STRING = h5py.special_dtype(vlen=str)   #: Store strings as variable length.
 
+#===============================================================================
 
 class H5Clock(object):
 #=====================
@@ -225,6 +232,7 @@ class H5Clock(object):
   #-------------------
     return self[pos]
 
+#===============================================================================
 
 class H5Signal(object):
 #======================
@@ -325,6 +333,7 @@ class H5Signal(object):
     else:
       return i * self.period
 
+#===============================================================================
 
 class H5Recording(object):
 #=========================
@@ -343,7 +352,6 @@ class H5Recording(object):
   def __del__(self):
   #-----------------
     self.close()
-
 
   @classmethod
   def open(cls, fname, readonly=False, **kwds):
@@ -377,7 +385,6 @@ class H5Recording(object):
       raise TypeError("'{}' is not a BioSignalML file".format(fname))
     return cls(uri, h5)
 
-
   @classmethod
   def create(cls, uri, fname, replace=False, **kwds):
   #--------------------------------------------------
@@ -401,7 +408,6 @@ class H5Recording(object):
     h5['uris'].attrs[uri] = h5['recording'].ref
     return cls(uri, h5)
 
-
   def close(self):
   #---------------
     """
@@ -410,7 +416,6 @@ class H5Recording(object):
     if self._h5:
       self._h5.close()
       self._h5 = None
-
 
   @staticmethod
   def _iterable(s):
@@ -529,7 +534,6 @@ class H5Recording(object):
     if timeunits: dset.attrs['timeunits'] = timeunits
     return H5Signal(dset, None)
 
-
   def create_clock(self, uri, units=None, shape=None, times=None, dtype=None,
                                                                   rate=None, period=None,
                                                                   compression=COMPRESSION):
@@ -587,7 +591,6 @@ class H5Recording(object):
     self._clocks[uri] = clk
     return clk
 
-
   def extend_signal(self, uri, data):
   #----------------------------------
     """
@@ -636,7 +639,6 @@ class H5Recording(object):
     except Exception as msg:
       raise RuntimeError("Cannot extend signal dataset '{}' ({})".format(uri, msg))
 
-
   def extend_clock(self, uri, times):
   #----------------------------------
     """
@@ -648,7 +650,9 @@ class H5Recording(object):
     """
     ## Not if readonly...
 
-    if len(times) == 0: return
+    if len(times) == 0:
+      return
+
     clock = self.get_clock(uri)
     if clock is None: raise KeyError("Unknown clock '{}'".format(uri))
     dset = clock.dataset
@@ -661,7 +665,6 @@ class H5Recording(object):
       dset[dpoints:] = times.reshape((npoints,) + dset.shape[1:])
     except Exception as msg:
       raise RuntimeError("Cannot extend clock dataset '{}' ({})".format(uri, msg))
-
 
   def get_dataset_by_name(self, name):
   #-----------------------------------
@@ -708,7 +711,6 @@ class H5Recording(object):
       self._clocks[uri] = clk
       return clk
 
-
   def get_signal(self, uri):
   #------------------------
     """
@@ -730,7 +732,6 @@ class H5Recording(object):
         return H5Signal(dset, None)
       raise KeyError("Cannot locate correct dataset for '{}'".format(uri))
 
-
   def signals(self):
   #-----------------
     """
@@ -750,7 +751,6 @@ class H5Recording(object):
           uris.append(uri.decode('utf-8'))
     return [ self.get_signal(u) for u in uris ]
 
-
   def clocks(self):
   #----------------
     """
@@ -766,7 +766,6 @@ class H5Recording(object):
         if uri is None: pass
         else: uris.append(uri.decode('utf-8'))
     return [ self.get_clock(u) for u in uris ]
-
 
   def store_metadata(self, metadata, mimetype):
   #--------------------------------------------
@@ -806,6 +805,8 @@ class H5Recording(object):
     ## Error if no metadata???
     ## Error if new_metadata???
 
+#===============================================================================
+
 if __name__ == '__main__':
 #=========================
 
@@ -835,7 +836,6 @@ if __name__ == '__main__':
 
   g.close()
 
-
 """
 Scalar signal:
   [ 1, 2, 1, 2, 3, 2, ... ]
@@ -864,3 +864,4 @@ Compound dataset with 5 2-d signals:
   shape    = (5,    3, 2)
   maxshape = (5, None, 2)
 """
+#===============================================================================

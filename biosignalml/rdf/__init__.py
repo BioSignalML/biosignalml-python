@@ -29,8 +29,11 @@ from typing import Iterable
 import uuid
 import logging
 
+#===============================================================================
+
 import rdflib
 
+#===============================================================================
 
 from .namespaces import *
 from .namespaces import NAMESPACES
@@ -39,11 +42,15 @@ __all__ = [ 'Format', 'NAMESPACES', 'Uri', 'Node', 'Literal',
             'BlankNode', 'Resource', 'QueryResults', 'Graph',
             'DCT', 'OWL', 'PROV', 'RDF', 'PRV', 'RDFS', 'TIME', 'TL', 'UOME', 'XSD'
           ]
+
+#===============================================================================
+
 class RDFParseError(Exception):
 #==============================
   '''Errors when parsing RDF'''
   pass
 
+#===============================================================================
 
 class Format(object):
 #====================
@@ -81,6 +88,7 @@ class Format(object):
              'json':   Format.JSON,
            }.get(name, Format.RDFXML)
 
+#===============================================================================
 
 class Uri(rdflib.term.Identifier):
 #=================================
@@ -122,6 +130,7 @@ class Uri(rdflib.term.Identifier):
     else: nu = '%s/%s' % (u, suffix)
     return Uri(nu)
 
+#===============================================================================
 
 Node = rdflib.term.Node
 #======================
@@ -140,6 +149,7 @@ Node.is_blank = lambda self: isinstance(self, rdflib.term.BNode)
 Node.is_literal = lambda self: isinstance(self, rdflib.term.Literal)
 #--------------
 
+#===============================================================================
 
 Literal = rdflib.term.Literal
 
@@ -147,6 +157,7 @@ BlankNode = rdflib.term.BNode
 
 Resource = rdflib.term.URIRef
 
+#===============================================================================
 
 class Statement(tuple[Node, Node, Node]):
 #=========================================
@@ -181,10 +192,12 @@ class Statement(tuple[Node, Node, Node]):
   #----------------
     return self[2]
 
+#===============================================================================
 
 QueryResults = rdflib.query.Result
 #===========
 
+#===============================================================================
 
 class Graph(rdflib.Graph):
 #=========================
@@ -414,6 +427,8 @@ class Graph(rdflib.Graph):
     self.remove(Statement(s, p, None))
     self.add(Statement(s, p, o))
 
+#===============================================================================
+
   class QueryResult(object):
   #=========================
 
@@ -449,10 +464,10 @@ class Graph(rdflib.Graph):
       logging.error('Graph query: %s', msg)
     return [ ]
 
+#===============================================================================
 
 if __name__ == '__main__':
 #=========================
-
   graph_uri = 'http://devel.biosignalml.org/test'
   g = Graph(graph_uri)
   statements = (Statement(Resource('http://devel.biosignalml.org/test'),
@@ -471,3 +486,4 @@ if __name__ == '__main__':
   g.add_statements(statements)
   print(g.serialize(format="turtle")) ##, xml_base=graph_uri))
 
+#===============================================================================

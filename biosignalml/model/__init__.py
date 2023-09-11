@@ -31,6 +31,7 @@ from .event      import Event
 from .segment    import Segment
 from .annotation import Annotation
 
+#===============================================================================
 
 def makelabel(label, suffix):
 #============================
@@ -43,6 +44,7 @@ def makelabel(label, suffix):
   """
   return label + '_' + suffix
 
+#===============================================================================
 
 if __name__ == '__main__':
 #=========================
@@ -109,4 +111,5 @@ if __name__ == '__main__':
 #  print(ev1.metadata_as_string(rdf.Format.TURTLE))
   ev2 = check(ev1)
 
+#===============================================================================
 

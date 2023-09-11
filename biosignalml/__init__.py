@@ -23,7 +23,11 @@ Top-level components of the BioSignalML Model.
 
 """
 
+#===============================================================================
+
 __version__ = '0.7.0a'
 
 
 from .model import BSML, Recording, Event, Annotation, Segment, Signal
+
+#===============================================================================

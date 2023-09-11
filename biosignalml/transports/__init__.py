@@ -27,12 +27,17 @@ import logging
 import queue
 from time import sleep
 
+#===============================================================================
+
 import ws4py.client.threadedclient
+
+#===============================================================================
 
 from .stream import Checksum, BlockParser, SignalDataStream, StreamException
 
 __all__ = [ 'StreamClient', 'WebStreamReader', 'WebStreamWriter', 'StreamException' ]
 
+#===============================================================================
 
 class StreamClient(ws4py.client.threadedclient.WebSocketClient):
 #================================================================
@@ -109,6 +114,7 @@ class StreamClient(ws4py.client.threadedclient.WebSocketClient):
   #---------------------
     return self._th.join(*args)
 
+#===============================================================================
 
 class WebStreamReader(SignalDataStream):
 #=======================================
@@ -153,6 +159,7 @@ class WebStreamReader(SignalDataStream):
   #---------------------
     self._ws.join(*args)
 
+#===============================================================================
 
 class WebStreamWriter(object):
 #=============================
@@ -186,6 +193,7 @@ class WebStreamWriter(object):
       logging.error("STREAM ERROR: %s:", block.content)
       raise StreamException(block.content)
 
+#===============================================================================
 
 if __name__ == '__main__':
 #=========================
@@ -201,3 +209,5 @@ if __name__ == '__main__':
   for d in WebStreamReader(sys.argv[1], sys.argv[2], start=float(sys.argv[3]),
                                                      duration=float(sys.argv[4]) ):
     print(d)
+
+#===============================================================================

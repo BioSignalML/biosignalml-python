@@ -20,6 +20,8 @@
 
 import logging
 
+#===============================================================================
+
 from .. import utils
 from ..rdf import RDFS, DCT
 
@@ -30,6 +32,7 @@ from .segment  import Segment
 
 __all__ = [ 'Annotation' ]
 
+#===============================================================================
 
 class Annotation(AbstractObject):
 #================================
@@ -104,3 +107,5 @@ class Annotation(AbstractObject):
     """The time, if any, associated with the resource that is annotated."""
     if isinstance(self.about, Segment):
       return self.about.time
+
+#===============================================================================

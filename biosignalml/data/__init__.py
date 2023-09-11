@@ -22,6 +22,8 @@ import math
 import logging
 import numpy as np
 
+#===============================================================================
+
 from biosignalml.model import BSML
 from biosignalml.model.core import AbstractObject
 from biosignalml.model.mapping import PropertyMap
@@ -30,11 +32,13 @@ from biosignalml.rdf import XSD
 
 __all__ = [ 'DataError', 'Clock', 'DataSegment', 'TimeSeries', 'UniformClock', 'UniformTimeSeries' ]
 
+#===============================================================================
 
 class DataError(Exception):
 #==========================
   pass
 
+#===============================================================================
 
 class Clock(AbstractObject):
 #===========================
@@ -110,6 +114,7 @@ class Clock(AbstractObject):
     elif self.rate:       self.times = np.append(self.times, times*self.rate)
     else:                 self.times = np.append(self.times, times)
 
+#===============================================================================
 
 class UniformClock(Clock):
 #=========================
@@ -155,6 +160,7 @@ class UniformClock(Clock):
     """
     raise DataError('Can not extend a UniformClock')
 
+#===============================================================================
 
 class TimeSeries(object):
 #========================
@@ -248,6 +254,7 @@ class TimeSeries(object):
     return TimeSeries(np.concatenate((self.data, series.data)),
                       np.concatenate((self.times, series.times)))
 
+#===============================================================================
 
 class UniformTimeSeries(TimeSeries):
 #===================================
@@ -295,6 +302,7 @@ class UniformTimeSeries(TimeSeries):
       raise TypeError('Sample rates are different')
     return UniformTimeSeries(np.concatenate((self.data, series.data)), self.rate)
 
+#===============================================================================
 
 class DataSegment(object):
 #=========================
@@ -360,6 +368,7 @@ class DataSegment(object):
     else:
       return self._timeseries.points
 
+#===============================================================================
 
 if __name__ == '__main__':
 #-------------------------
@@ -409,3 +418,5 @@ if __name__ == '__main__':
 #  import pylab
 #  pylab.plot(j.times, j.data)
 #  pylab.show()
+
+#===============================================================================

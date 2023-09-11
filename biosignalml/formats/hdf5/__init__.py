@@ -21,6 +21,8 @@
 import math
 import logging
 
+#===============================================================================
+
 from ... import rdf
 from ... import BSML
 from .. import BSMLRecording, BSMLSignal, MIMETYPES
@@ -32,6 +34,7 @@ from .h5recording import H5Recording
 
 __all__ = [ 'HDF5Signal', 'HDF5Recording' ]
 
+#===============================================================================
 
 class HDF5Signal(BSMLSignal):
 #============================
@@ -195,6 +198,7 @@ class HDF5Signal(BSMLSignal):
     """
     return self._h5.time(n)
 
+#===============================================================================
 
 class HDF5Recording(BSMLRecording):
 #==================================
@@ -237,7 +241,6 @@ class HDF5Recording(BSMLRecording):
             signal.add_metadata(self.graph)
             signal.clock.add_metadata(self.graph)  ## We need to cache clocks in recording...
             self.add_signal(signal)
-
 
           # if self.duration is None:
           #   set duration to that of longest signal/clock
@@ -330,7 +333,6 @@ class HDF5Recording(BSMLRecording):
     else:
       raise TypeError("No metadata in BioSignalML file")
 
-
   def initialise(self, **kwds):
   #----------------------------
     """
@@ -349,3 +351,5 @@ class HDF5Recording(BSMLRecording):
       if kwds.pop('create_signals', False): kwds['create'] = True
       for s in self.signals():
         HDF5Signal.initialise_class(s, **kwds)
+
+#===============================================================================

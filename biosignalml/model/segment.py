@@ -28,6 +28,7 @@ from .mapping  import PropertyMap
 
 __all__ = [ 'Segment' ]
 
+#===============================================================================
 
 class Segment(AbstractObject):
 #=============================
@@ -83,3 +84,5 @@ class Segment(AbstractObject):
                                ## PropertyMap would need to know class (TemporalEntity)
       self.time = TemporalEntity.create_from_graph(self.time, graph)
     return self
+
+#===============================================================================

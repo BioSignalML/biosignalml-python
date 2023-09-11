@@ -18,11 +18,11 @@
 #
 ######################################################
 
-
-
 import os
 import logging
 import math
+
+#===============================================================================
 
 import biosignalml
 from biosignalml import BSML
@@ -32,6 +32,7 @@ from biosignalml.model.mapping import PropertyMap
 from biosignalml.rdf import XSD
 import biosignalml.units as units
 
+#===============================================================================
 
 from .edffile import PATIENTFIELDS, RECORDINGFIELDS
 from .edffile import EDF, EDFFile, InvalidSignalId
@@ -39,6 +40,7 @@ from .edffile import EDF, EDFFile, InvalidSignalId
 
 __all__ = [ 'EDFSignal', 'EDFRecording' ]
 
+#===============================================================================
 
 class EDFSignal(BSMLSignal):
 #===========================
@@ -158,7 +160,7 @@ class EDFSignal(BSMLSignal):
       startpos += sigdata.length
       length -= sigdata.length
 
-
+#===============================================================================
 
 class EDFRecording(BSMLRecording):
 #=================================
@@ -224,6 +226,7 @@ class EDFRecording(BSMLRecording):
     # Now found common errors...
     self.comment = '\n'.join(self._edffile.errors)
 
+#===============================================================================
 
 if __name__ == '__main__':
 #=========================
@@ -256,3 +259,5 @@ if __name__ == '__main__':
   print(edf.metadata_as_string())
 
   edf.close()
+
+#===============================================================================

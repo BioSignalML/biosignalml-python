@@ -27,6 +27,8 @@ import logging
 from datetime import datetime
 from collections import namedtuple
 
+#===============================================================================
+
 __all__ = [ 'EDFFile', 'FormatError', 'InvalidSignalId' ]
 
 
@@ -36,6 +38,7 @@ class FormatError(Exception):
 class InvalidSignalId(Exception):
   pass
 
+#===============================================================================
 
 nonprinting = re.compile(r'[^ -~]')
 
@@ -77,6 +80,7 @@ RECORDINGFIELDS = [ 'recording_date',
                     'recording_equipment',
                   ]
 
+#===============================================================================
 
 RecordData = namedtuple('RecordData', 'channel, starttime, rate, data')
 '''A tuple containg data from an EDF record.'''
@@ -87,6 +91,7 @@ SignalData = namedtuple('SignalData', 'startpos, length, data')
 Scaling = namedtuple('Scaling', 'scale, offset')
 '''A tuple for scaling.'''
 
+#===============================================================================
 
 class EDF(object):
 #=================
@@ -97,6 +102,7 @@ class EDF(object):
   EDFplusC = 2      # EDF+, contiguous data records
   EDFplusD = 3      # EDF+, discontinuous data records
 
+#===============================================================================
 
 class TimeStampedAnnotation(object):
 #===================================
@@ -122,6 +128,7 @@ class TimeStampedAnnotation(object):
   #-----------------
     return "[%f:%f]: %s" % (self.onset, self.duration, str(self.annotations))
 
+#===============================================================================
 
 class EDFFile(object):
 #=====================
@@ -309,7 +316,6 @@ class EDFFile(object):
     if nonprinting.search(data): raise FormatError("Non printing characters in output")
     return data
 
-
   def _set_edfplus_fields(self, names, data):
   #------------------------------------------
     for n, f in enumerate(names):
@@ -331,7 +337,6 @@ class EDFFile(object):
       self._set_edfplus_fields(RECORDINGFIELDS, fields[1:])
     ## self.recording = ' '.join(fields[5:])  ????
 
-
   def _get_edfplus_fields(self, names):
   #------------------------------------
     data = [ 'Startdate' ]
@@ -347,7 +352,6 @@ class EDFFile(object):
   def _encode_recording(self):
   #---------------------------
     self.recording = self._get_edfplus_fields(RECORDINGFIELDS)
-
 
   def _checkheader(self):
   #----------------------
@@ -509,6 +513,7 @@ class EDFFile(object):
     raw = self.raw_signal(signum, posn, length)
     return SignalData(raw.startpos, raw.length, self.scaling[signum].scale*raw.data + self.scaling[signum].offset)
 
+#===============================================================================
 
 """
 
@@ -550,5 +555,6 @@ and   the   physical  dimension  of  Y  was  "uV  ",  then  the
 prefiltering  field  should  contain:  sign*LN[sign*(uV )/(0.01
 )]/(0.002 ).
 
-
 """
+
+#===============================================================================

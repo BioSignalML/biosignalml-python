@@ -23,6 +23,8 @@ Abstract BioSignalML objects.
 
 import logging
 
+#===============================================================================
+
 from .. import rdf, utils
 from ..rdf import PRV, DCT, RDF, RDFS, XSD
 
@@ -31,6 +33,7 @@ from .mapping import Mapping, PropertyMap
 
 __all__ = [ 'AbstractObject' ]
 
+#===============================================================================
 
 class AbstractObject(object):
 #============================
@@ -77,7 +80,6 @@ class AbstractObject(object):
         if c.__dict__.get('mapping'): rdfmap.update(c.metaclass, c.mapping)
       cls.rdfmap = rdfmap
     return object.__new__(cls)
-
 
   def __init__(self, uri, metadata=None, **kwds):
   #----------------------------------------------
@@ -152,7 +154,6 @@ class AbstractObject(object):
       elif not self._equal_values(v != value):
         self.metadata[attr] = set([v, value])
 
-
   def initialise(self, **kwds):
   #----------------------------
     pass
@@ -209,7 +210,6 @@ class AbstractObject(object):
     return { attr: value for attr, value in values.items()
       if not (value is None or attr in attribs or attr[0] == '_') }
 
-
   def set_metadata(self, metadata=None, **kwds):
   #----------------------------------------------
     """
@@ -225,7 +225,6 @@ class AbstractObject(object):
     if metadata is not None:
       self.metadata.update(AbstractObject.set_attributes(self, **metadata))
     self.metadata.update(AbstractObject.set_attributes(self, **kwds))
-
 
   def get_attributes(self):
   #------------------------
@@ -348,3 +347,5 @@ class AbstractObject(object):
     '''
     v = self.rdfmap.get_value_from_graph(self.uri, attr, graph)
     if v: self._assign(attr, v)
+
+#===============================================================================

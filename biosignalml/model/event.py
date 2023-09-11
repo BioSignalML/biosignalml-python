@@ -23,6 +23,8 @@ A BioSignalML Event.
 
 import logging
 
+#===============================================================================
+
 from .. import utils
 
 from .ontology import BSML
@@ -31,6 +33,7 @@ from .mapping  import PropertyMap
 
 __all__ = [ 'Event' ]
 
+#===============================================================================
 
 class Event(AbstractObject):
 #===========================
@@ -66,3 +69,4 @@ class Event(AbstractObject):
       self.time = TemporalEntity.create_from_graph(self.time, graph)
     return self
 
+#===============================================================================

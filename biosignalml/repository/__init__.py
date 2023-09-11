@@ -26,19 +26,24 @@ BSML Store description...
 import logging
 import operator
 
+#===============================================================================
+
 from .. import formats, rdf
 from .. import BSML, Recording, Signal, Event, Annotation, Segment
 from ..data.time import TemporalEntity
 from ..rdf import RDFS, DCT, PRV, TL, Format
+from ..utils import isoduration_to_seconds
 
 from .graphstore import GraphStore, GraphUpdate
 
 __all__ = [ 'RecordingGraph', 'BSMLStore', 'BSMLUpdateStore' ]
 
+#===============================================================================
 
 '''Graph holding bsml:SemanticTag resources.'''
 SEMANTIC_TAGS = 'http://ontologies.biosignalml.org/semantic-tags'
 
+#===============================================================================
 
 class RecordingGraph(rdf.Graph):
 #===============================
@@ -283,6 +288,7 @@ class RecordingGraph(rdf.Graph):
       annotations.append(ann)
     return annotations
 
+#===============================================================================
 
 class BSMLStore(GraphStore):
 #===========================
@@ -382,7 +388,6 @@ class BSMLStore(GraphStore):
         rec.initialise(open_dataset=open_dataset)    ## This will open files...
       return rec
 
-
   def get_signal(self, uri, graph_uri=None, signal_class=None, **kwds):
   #--------------------------------------------------------------------
     """
@@ -418,7 +423,6 @@ class BSMLStore(GraphStore):
         prefixes = {'bsml': BSML.BASE},
         graph = graph_uri
         ) ]
-
 
   def get_event(self, uri, graph_uri=None):
   #-----------------------------------------
@@ -607,6 +611,7 @@ class BSMLStore(GraphStore):
                                     prefixes=dict(bsml=BSML.BASE, rdfs=RDFS.BASE),
                                     graph=SEMANTIC_TAGS) }
 
+#===============================================================================
 
 class BSMLUpdateStore(BSMLStore, GraphUpdate):
 #=============================================
