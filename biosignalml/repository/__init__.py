@@ -32,6 +32,7 @@ from .. import formats, rdf
 from .. import BSML, Recording, Signal, Event, Annotation, Segment
 from ..data.time import TemporalEntity
 from ..rdf import RDFS, DCT, PRV, TL, Format
+from ..rdf import sparqlstore
 from ..utils import isoduration_to_seconds
 
 from .graphstore import GraphStore, GraphUpdate
@@ -296,9 +297,9 @@ class BSMLStore(GraphStore):
   An RDF repository containing BioSignalML metadata.
   """
 
-  def __init__(self, base_uri, sparqlstore):
-  #-----------------------------------------
-    GraphStore.__init__(self, base_uri, BSML.RecordingGraph, sparqlstore)
+  def __init__(self, base_uri, sparql_store):
+  #------------------------------------------
+    GraphStore.__init__(self, base_uri, BSML.RecordingGraph, sparql_store)
 
   def has_recording(self, uri):
   #----------------------------
@@ -378,12 +379,9 @@ class BSMLStore(GraphStore):
           for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
               params={'rec': rec.uri}, prefixes={'bsml': BSML.BASE},
               graph=graph.uri, order='?s'):
-
-            sig_uri = rdf.sparqlstore.get_result_value(r, 's')
-
+            sig_uri = sparqlstore.get_result_value(r, 's')
             sig_graph = self.get_resource_as_graph(sig_uri, BSML.Signal, rec.graph.uri)
             rec.add_signal(rec.SignalClass.create_from_graph(sig_uri, sig_graph, units=None))
-
 
         rec.initialise(open_dataset=open_dataset)    ## This will open files...
       return rec
@@ -606,8 +604,8 @@ class BSMLStore(GraphStore):
 
     :return: Dictionary of { uri: label }.
     """
-    return { str(rdf.sparqlstore.get_result_value(r, 'uri')):
-                   rdf.sparqlstore.get_result_value(r, 'label')
+    return { str(sparqlstore.get_result_value(r, 'uri')):
+                   sparqlstore.get_result_value(r, 'label')
                for r in self.select('?uri ?label',
                                     '?uri a bsml:SemanticTag . ?uri rdfs:label ?label',
                                     prefixes=dict(bsml=BSML.BASE, rdfs=RDFS.BASE),
@@ -624,7 +622,7 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
     Add abstractobjects to a recording's graph.
     """
     for abstractobject in abstractobjects:
-      self._sparqlstore.extend_graph(recording.graph.uri,
+      self._sparql_store.extend_graph(recording.graph.uri,
         abstractobject.metadata_as_string(format=Format.TURTLE),
         format=Format.TURTLE)
 
@@ -636,7 +634,7 @@ class BSMLUpdateStore(BSMLStore, GraphUpdate):
     This is done by asserting the resource precedes `bsml:deletedResource`,
     so provenance aware queries will then return an empty result set.
     """
-    self._sparqlstore.insert_triples(recording.graph.uri,
+    self._sparql_store.insert_triples(recording.graph.uri,
       [("bsml:deletedResource", "prv:precededBy", "<%s>" % uri)],
       prefixes=dict(bsml=BSML.BASE, prv=PRV.BASE))
 
