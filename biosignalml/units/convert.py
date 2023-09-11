@@ -24,6 +24,7 @@ import logging
 
 import pint
 import pint.unit
+from rdflib import Namespace
 
 #===============================================================================
 
@@ -34,12 +35,12 @@ __all__ = [ 'UnitConverter' ]
 
 #===============================================================================
 
-UOME_CORE = NS('http://www.sbpax.org/uome/core.owl#')
+UOME_CORE = Namespace('http://www.sbpax.org/uome/core.owl#')
 
 '''Graph holding http://www.sbpax.org/uome/core.owl#UnitOfMeasurement resources.'''
 UNITS_GRAPH = "http://ontologies.biosignalml.org/units"
 
-UNIT_PREFIXES = [ UOME.prefix,
+UNIT_PREFIXES = [ UOME.BASE,
                   "http://www.biosignalml.org/ontologies/examples/unit#"
                 ]
 
