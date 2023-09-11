@@ -74,8 +74,8 @@ class WFDBSignal(BSMLSignal):
     self.initialise(rec)
 
 
-  def initialise(self):
-  #--------------------
+  def initialise(self, rec):
+  #-------------------------
     signum = self.index
     self._record = rec
     self._signum = signum
