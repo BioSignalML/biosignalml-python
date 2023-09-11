@@ -312,3 +312,14 @@ if __name__ == "__main__":
   sig = repo.get_signal(sig_uri)
   for d in sig.read(dtype='f4'):
     print(d)
+
+
+  sig_uri = rec_uri + '/signal/0'
+
+  for d in repo.get_data(rec_uri):
+    print(d)
+
+  for d in repo.get_data(sig_uri):
+    print(d)
+
+#===============================================================================
