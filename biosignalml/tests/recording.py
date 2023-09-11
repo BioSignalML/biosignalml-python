@@ -23,6 +23,6 @@ if __name__ == '__main__':
 
   rec = Recording.create_from_graph(uri, graph, signals=False)
 
-  print rec.duration
+  print(rec.duration)
 
 #===============================================================================
