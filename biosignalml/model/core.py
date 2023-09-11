@@ -77,7 +77,8 @@ class AbstractObject(object):
     if cls.__dict__.get('rdfmap') is None:
       rdfmap = Mapping()
       for c in reversed(cls.__mro__):
-        if c.__dict__.get('mapping'): rdfmap.update(c.metaclass, c.mapping)
+        if (mapping := c.__dict__.get('mapping')):
+          rdfmap.update(c.__dict__.get('metaclass'), mapping)
       cls.rdfmap = rdfmap
     return object.__new__(cls)
 

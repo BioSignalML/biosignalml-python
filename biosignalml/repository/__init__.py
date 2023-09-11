@@ -366,14 +366,14 @@ class BSMLStore(GraphStore):
       ## If graph is entire named graph of recording then
       ## create_from_graph will add signals...
 
-      graph = self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)
+      rec = None
+      if ((graph := self.get_resource_as_graph(rec_uri, BSML.Recording, graph_uri)) is not None
 ##    graph = self.get_graph(graph_uri, BSML.Recording)
 
-      rec = recording_class.create_from_graph(rec_uri, graph, signals=False, **kwds)
+      and (rec := recording_class.create_from_graph(rec_uri, graph, signals=False, **kwds)) is not None):
 
       ## Why not add signals in Recording class creation??
 
-      if rec is not None:
         if signals:
           for r in self.select('?s', '?s a bsml:Signal . ?s bsml:recording <%(rec)s>',
               params={'rec': rec.uri}, prefixes={'bsml': BSML.BASE},
@@ -436,6 +436,7 @@ class BSMLStore(GraphStore):
     # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Event, graph_uri)
+    if graph is None: return None
 
 ##### Put into Event.load_from_graph()   ????
     for tm in graph.get_objects(uri, BSML.time):  ## This could be improved...
@@ -502,6 +503,7 @@ class BSMLStore(GraphStore):
     # The following line works around a Virtuoso problem
     if graph_uri is None: graph_uri = self.get_graph_and_recording_uri(uri)[0]
     graph = self.get_resource_as_graph(uri, BSML.Annotation, graph_uri)
+    if graph is None: return None
 
 ##### Put into Annotation/Segment.load_from_graph()   ????
     for sg in graph.get_objects(uri, DCT.subject):  ## This could be improved...

@@ -54,7 +54,10 @@ class RemoteSparqlStore(SparqlUpdateStore):
 
   def http_request(self, endpoint, method, body=None, headers=None):
   #-----------------------------------------------------------------
-    if self._token is not None: headers['Cookie'] = 'access=%s' % self._token
+    if self._token is not None:
+      if headers is None:
+        headers = {}
+      headers['Cookie'] = 'access=%s' % self._token
     return self._request(endpoint, method, body, headers)
 
 #===============================================================================
