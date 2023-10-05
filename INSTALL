@@ -68,14 +68,6 @@ Then:
       pint (0.1.3-djb)
 
 
-
-## For stream re-sampling...
-libsamplerate (0.1.8) http://www.mega-nerd.com/SRC/download.html
-
->>  brew install libsamplerate
-
-
-
 Utilities:
 ----------
 

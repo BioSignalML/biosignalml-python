@@ -16,6 +16,7 @@ pint = "^0.22"
 numpy = "^1.25.2"
 h5py = "^3.9.0"
 simplejson = "^3.19.1"
+samplerate2 = "^0.0.2"
 
 [build-system]
 requires = ["poetry_core>=1.0.0"]
