@@ -350,7 +350,7 @@ class Virtuoso(SparqlUpdateStore):
   @staticmethod
   def _error_text(response, content):
   #----------------------------------
-    return content.split('\n')[0].split(':')[-1].strip()
+    return f'{response.reason} ({response.status}):' + content.decode().split('\n')[0].split(':')[-1].strip()
 
   def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
