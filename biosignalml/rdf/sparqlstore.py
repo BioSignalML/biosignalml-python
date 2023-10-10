@@ -296,7 +296,7 @@ class SparqlUpdateStore(SparqlStore):
     self.insert_triples(graph, triples, prefixes)  ###### DUPLICATES BECAUSE OF 4STORE BUG...
 
 
-  def extend_graph(self, graph, statements, format=rdf.Format.TURTLE):
+  def extend_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #-------------------------------------------------------------------
     self.http_request(self.ENDPOINTS[1], 'POST',
                       body=urllib.parse.urlencode({'data': statements,
@@ -305,7 +305,7 @@ class SparqlUpdateStore(SparqlStore):
                                             }),
                       headers={'Content-type': 'application/x-www-form-urlencoded'})
 
-  def replace_graph(self, graph, statements, format=rdf.Format.TURTLE):
+  def replace_graph(self, graph, statements, format=rdf.Format.RDFXML):
   #--------------------------------------------------------------------
     self.http_request(self.ENDPOINTS[1] + "?%s=%s" % (self.GRAPH_PARAMETER, graph), 'PUT',
                       body=statements, headers={'Content-Type': rdf.Format.mimetype(format)})
@@ -409,11 +409,24 @@ if __name__ == '__main__':
 
   graph = "http://devel.biosignalml.org/test/graph"
 
-  store = Virtuoso("http://localhost:8890")
+  store = Virtuoso("http://virtuoso:8890")
 
+  ttl1 = '''
+@prefix res: <http://www.w3.org/2005/sparql-results#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+_:_ a res:ResultSet .
+_:_ res:resultVariable "s" , "p" , "o" .
+@prefix ns0:  <http://devel.biosignalml.org/provenance/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ns2:  <http://purl.org/net/provenance/ns#> .
+_:_ res:solution [
+      res:binding [ res:variable "s" ; res:value ns0:example ] ;
+      res:binding [ res:variable "p" ; res:value rdf:type ] ;
+      res:binding [ res:variable "o" ; res:value ns2:DataItem1 ] ] .
+  '''
 
   print("RDF1 PUT")
-  store.replace_graph(graph, rdf1)
+  store.replace_graph(graph, ttl1, format=rdf.Format.TURTLE)
   query(store, graph)
 
   print("\nRDF2 POST")
