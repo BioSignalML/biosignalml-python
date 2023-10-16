@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "biosignalml"
-version = "0.7.1-a.1"
+version = "0.7.1-a.2"
 description = ""
 authors = ["David Brooks <d.brooks@auckland.ac.nz>"]
 
