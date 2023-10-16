@@ -404,7 +404,7 @@ class H5Recording(object):
     h5.create_group('uris')
     h5.create_group('recording')
     h5.create_group('recording/signal')
-    h5['recording'].attrs['uri'] = uri
+    h5['recording'].attrs['uri'] = str(uri)
     h5['uris'].attrs[uri] = h5['recording'].ref
     return cls(uri, h5)
 
@@ -522,8 +522,8 @@ class H5Recording(object):
       raise RuntimeError("Cannot create signal dataset ({})".format(msg))
 
     if nsignals == 1:
-      dset.attrs['uri'] = uri
-      if units is not None: dset.attrs['units'] = units
+      dset.attrs['uri'] = str(uri)
+      if units is not None: dset.attrs['units'] = str(units)
       self._h5['uris'].attrs[uri] = dset.ref
     else:
       dset.attrs.create('uri',   [u for u in uri],   dtype=DTYPE_STRING)
@@ -587,8 +587,8 @@ class H5Recording(object):
     except Exception as msg:
       raise RuntimeError("Cannot create clock dataset ({})".format(msg))
 
-    dset.attrs['uri'] = uri
-    if units: dset.attrs['units'] = units
+    dset.attrs['uri'] = str(uri)
+    if units: dset.attrs['units'] = str(units)
     if period and rate: raise RuntimeError("Cannot specify both 'rate' and 'period' for a clock")
     if rate: dset.attrs['rate'] = float(rate)
     if period: dset.attrs['period'] = float(period)
@@ -617,7 +617,7 @@ class H5Recording(object):
 
     if self._iterable(uri):
       sig = self.get_signal(uri[0])
-      if sig is None or list(sig.dataset.attrs['uri']) != [u for u in uri]:
+      if sig is None or list(sig.dataset.attrs['uri']) != [str(u) for u in uri]:
          raise KeyError("Unknown signal set '{}'".format(uri))
       dset = sig.dataset
       nsignals = len(uri)
