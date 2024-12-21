@@ -11,34 +11,34 @@
     border: 0 ;
     margin: 0 ;
     min-width: 0 ;
-    }
+  }
 
   a {
     color: #00f ;
     text-decoration: underline ;
-    }
+  }
 
   div.bodywrapper {
     border: 0 ;
     margin: 0 ;
-    }
+  }
 
   tt.descname {
     font-size: 1em ;
-    }
+  }
 
   a tt {
     color: #000 ;
-    }
+  }
 
   pre {
     font-size: 8pt ;
-    }
+  }
 
   .related, .sphinxsidebar, .viewcode-link {
     display: none ;
-    }
   }
+}
 
 
 body {
