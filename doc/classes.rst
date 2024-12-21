@@ -49,7 +49,6 @@ Classes
                          biosignalml.rdf.Graph
                          biosignalml.rdf.Literal
                          biosignalml.rdf.Node
-                         biosignalml.rdf.NS
                          biosignalml.rdf.QueryResults
                          biosignalml.rdf.Resource
                          biosignalml.rdf.sparqlstore.FourStore
